@@ -13,6 +13,7 @@ from qgis.PyQt.QtWidgets import QAction
 from .extlibs.qgiscommons2.settings import readSettings
 from .extlibs.qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
 from .extlibs.qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu
+from .ui.geocatbridgedialog import GeocatBridgeDialog
         
 
 class Geocatbridge:
@@ -33,7 +34,7 @@ class Geocatbridge:
         iconPublish = QIcon(os.path.join(os.path.dirname(__file__), "icons", "publish_button.png"))
         self.actionPublish = QAction(iconPublish, "Publish", self.iface.mainWindow())
         self.actionPublish.setObjectName("startPublish")
-        self.actionPublish.triggered.connect(self.PublishClicked)
+        self.actionPublish.triggered.connect(self.publishClicked)
         self.iface.addPluginToWebMenu("GeoCatBridge", self.actionPublish)
         
 
@@ -49,6 +50,7 @@ class Geocatbridge:
         
 
     
-    def PublishClicked(self):
-        pass
+    def publishClicked(self):
+        dialog = GeocatBridgeDialog()
+        dialog.exec_()
         
