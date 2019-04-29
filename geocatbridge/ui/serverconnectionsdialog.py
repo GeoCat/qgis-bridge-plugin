@@ -8,23 +8,28 @@ class ServerConnectionsDialog(BASE, WIDGET):
 
     def __init__(self, parent=None):
         super(GeocatBridgeDialog, self).__init__(parent)
+        self.currentServer = None
         self.setupUi(self)
         
-        self.buttonNew.clicked.connect(self.buttonNewClicked)
+        self.addMenuToButtonNew()
         self.buttonRemove.clicked.connect(self.buttonRemoveClicked)
         self.populateServers()
 
         
-    def buttonNewClicked(self):
+    def addMenuToButtonNew(self):
+        menu = QMenu()
+        menu.addAction("GeoServer", self.addGeoserver)
+        menu.addAction("MapServer", self.addMapserver)
+        menu.addAction("GeoCat Live", self.addGeocatLive)
+        menu.addAction("GeoNetwork", self.addGeonetwork)
+        menu.addAction("CSW", self.addCSW)
+        menu.addAction("PostGIS", self.addPostGis)
+
+    def buttonRemoveClicked(self):
         pass
 
-    def buttonNewClicked(self):
-        pass
-
-    def populateLayers(self):
-        servers = allServers
-    	layers = QgsProject.instance().mapLayers().values()
-    	self.tableWidget.setRowCount(len(layers))
+    def populateServers(self):
+        servers = allServers()    	
     	for i, layer in enumerate(layers):
     		item = QListWidgetItem()
     		item.setCheckState(Qt.Unchecked)
@@ -33,21 +38,6 @@ class ServerConnectionsDialog(BASE, WIDGET):
     		self.tableWidget.setItem(i, 2, QTableWidgetItem("X" if isMetadataOnServer(layer) else ""))
     		self.tableWidget.setItem(i, 3, QTableWidgetItem("X" if isDataOnServer(layer) else ""))
 
-    def populateComboBoxes(self):
-    	self.populateComboCatalogue()
-    	self.populateComboMapServer()
-
-    def populateComboMapServer(self):
-    	self.comboMapServer.clear()
-    	self.comboMapServer.addItems(geodataServers().keys())
-
-   	def populateComboCatalogue(self):
-    	self.comboCatalogue.clear()
-    	self.comboCatalogue.addItems(metadataServers().keys())
-
-    def layerClicked(self):
-    	layers = list(QgsProject.instance().mapLayers().values())
-    	layer = layers[self.tableWidget.currentRow()]
 
 
 

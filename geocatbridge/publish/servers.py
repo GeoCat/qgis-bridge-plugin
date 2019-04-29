@@ -1,7 +1,12 @@
+from .servers import *
+
+_geodataServers = []
+_metadataServers = []
+_dbServers = []
+
+def geodataServers():
 
 
-_mapServers = {}
-_metadataServers = {}
 
 
 
