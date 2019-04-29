@@ -1,25 +1,32 @@
 import os
 from qgis.PyQt import uic
-from geocatbridge.publish.servers import geodataServers, metadataServers
+from geocatbridge.publish.servers import allServers
  
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatbridgedialog.ui'))
+WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'serverconnectionsdialog.ui'))
 
-class GeocatBridgeDialog(BASE, WIDGET):
+class ServerConnectionsDialog(BASE, WIDGET):
 
     def __init__(self, parent=None):
         super(GeocatBridgeDialog, self).__init__(parent)
         self.setupUi(self)
-        self.populateComboBoxes()
-        self.populateLayers()
-        self.tableWidget.clicked.connect(self.layerClicked)
-        self.comboMapServer.currentItemChanged.connect(self.populateComboMapServer)
-        self.comboCatalogue.currentItemChanged.connect(self.populateComboCatalogue)
+        
+        self.buttonNew.clicked.connect(self.buttonNewClicked)
+        self.buttonRemove.clicked.connect(self.buttonRemoveClicked)
+        self.populateServers()
+
+        
+    def buttonNewClicked(self):
+        pass
+
+    def buttonNewClicked(self):
+        pass
 
     def populateLayers(self):
+        servers = allServers
     	layers = QgsProject.instance().mapLayers().values()
     	self.tableWidget.setRowCount(len(layers))
     	for i, layer in enumerate(layers):
-    		item = QTableWidgetItem()
+    		item = QListWidgetItem()
     		item.setCheckState(Qt.Unchecked)
     		self.tableWidget.setItem(i, 0, item)
     		self.tableWidget.setItem(i, 1, QTableWidgetItem(layer.name()))
