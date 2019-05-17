@@ -16,7 +16,7 @@ from .extlibs.qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu
 from .ui.geocatbridgedialog import GeocatBridgeDialog
         
 
-class Geocatbridge:
+class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
         

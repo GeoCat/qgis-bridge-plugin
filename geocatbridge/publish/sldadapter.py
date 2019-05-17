@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-#
-# (c) 2016 Boundless, http://boundlessgeo.com
-# This code is licensed under the GPL 2.0 license.
-#
-'''
-methods to convert the SLD produced by GeoServer (1.0) to the SLD produced by QGIS (1.1), and also the other way round.
-This is a quick and dirty solution until both programs support the same specification
-'''
-
 from builtins import hex
 from builtins import str
 from builtins import range
@@ -17,13 +7,8 @@ from qgis.PyQt.QtXml import *
 from qgiscommons2.settings import pluginSetting
 from qgis.core import *
 import math
-
-
-SIZE_FACTOR = 4
-# use this factor (4) in case SLD UOM is NO correctly supported by QGIS
-SIZE_FACTOR_IF_NO_UOM = 4 
-# use this factor (1) in case SLD UOM is correctly supported by QGIS
-SIZE_FACTOR_IF_UOM = 1
+import zipfile
+from qgiscommons2.files import tempFilenameInTempFolder
 
 RASTER_SLD_TEMPLATE = ('<?xml version="1.0" encoding="UTF-8"?>'
                     '<sld:StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.''net/gml" version="1.0.0">'
@@ -45,22 +30,9 @@ RASTER_SLD_TEMPLATE = ('<?xml version="1.0" encoding="UTF-8"?>'
                     '</sld:NamedLayer>'
                     '</sld:StyledLayerDescriptor>')
 
-def setScaleFactor():
-    """Manage size scale factor basing if QGIS is able to manage or not SLD unit parameter (uom).
-    """
-    global SIZE_FACTOR
-    if pluginSetting("SldUomManaging"):
-        SIZE_FACTOR = SIZE_FACTOR_IF_UOM
-    else:
-        SIZE_FACTOR = SIZE_FACTOR_IF_NO_UOM
-        if pluginSetting("SldScaleFactor"):
-            SIZE_FACTOR = pluginSetting("SldScaleFactor")
-
 def adaptQgsToGs(sld, layer):
     if layer.type() != QgsMapLayer.VectorLayer:
         return sld, []
-    
-    setScaleFactor()
 
     sld = sld.replace("se:SvgParameter","CssParameter")
     sld = sld.replace("1.1.","1.0.")
@@ -186,12 +158,22 @@ def adaptGsToQgs(sld):
         sld = sld.replace(w, newwidth)
     return sld
 
-def getGsCompatibleSld(layer):
+def getCompatibleSld(layer):
     sld = getStyleAsSld(layer)
     if sld is not None:
         return adaptQgsToGs(sld, layer)
     else:
         return None, None
+
+def getCompatibleSldAsZip(layer):    
+    filename = tempFilenameInTempFolder(layer.name() + ".zip")
+    z = zipfile.ZipFile(filename, "w")
+    sld, icons = getGsCompatibleSld(layer)
+    for icon in icons:
+        z.write(icon, os.path.basename(icon))
+    z.writestr(layer.name() + ".txt", sld)
+    z.close()
+    return filename
 
 def getStyleAsSld(layer):
     if layer.type() == layer.VectorLayer:
