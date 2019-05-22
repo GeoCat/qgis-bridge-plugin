@@ -3,7 +3,7 @@ from qgiscommons2.files import tempFilenameInTempFolder
 from .exporter import exportLayer
 from .sldadapter import getCompatibleSldAsZip, getStyleAsSld
 
-def publishLayerToCatalogUsingPostgis(connection, catalog, layer):
+def publishLayerToCatalogUsingPostgis(connection, catalog, layer, fields):
     pk = "id"
     geom = "geom"
     providerName = "postgres"
@@ -16,9 +16,12 @@ def publishLayerToCatalogUsingPostgis(connection, catalog, layer):
     options['overwrite'] = True
     if singleGeom:
         options['forceSinglePartGeometryType'] = True
-    ret, errMsg = QgsVectorLayerExporter.exporterLayer(layer, uri.uri(), providerName, layer.crs(), False, options)
-    if ret != 0:
-        raise Exception(errMsg)
+    exporter = QgsVectorLayerExporter(uri.uri(), providerName, fields, layer.geometryType(), layer.crs(), True, options)
+    for feature in layer.getFeatures():
+    	exporter.addFeature(feature)
+    exporter.flushBuffer()
+    if exporter.errorCount():
+    	raise Exception(exporter.errorMessage())
     zipfile = getCompatibleSldAsZip(layer)
     catalog.publish_vector_layer_from_postgis(connection.host, str(connection.port), connection.dbname, 
     											connection.schema, layer.name(), connection.user, 
@@ -35,8 +38,12 @@ def publishLayerToCatalogWithDirectUpload(catalog, layer):
 		catalog.publish_raster_layer(filename, sld, layer.name(), layer.name())
 
 
-
-
-
+def publishMetadata(catalog, layer, metadata):
+    if isinstance(catalog, GeoNetworkCatalog):
+        metadatamef = createMetadataMefFile(layer, metadata)
+        catalog.publish_metadata(metadatamef)
+    elif isinstance(catalog, CSWCatalog):
+        metadataxml = createMetadataXmlFile(layer, metadata)
+        catalog.publish_metadata(metadataxml)
 
 
