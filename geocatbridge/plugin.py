@@ -25,26 +25,26 @@ class GeocatBridge:
 
     def initGui(self):
         
-        addSettingsMenu("geocatbridge")
+        addSettingsMenu("GeoCatBridge")
         
-        addHelpMenu("geocatbridge")
+        addHelpMenu("GeoCatBridge")
         
-        addAboutMenu("geocatbridge")
+        addAboutMenu("GeoCatBridge")
         
         iconPublish = QIcon(os.path.join(os.path.dirname(__file__), "icons", "publish_button.png"))
         self.actionPublish = QAction(iconPublish, "Publish", self.iface.mainWindow())
         self.actionPublish.setObjectName("startPublish")
         self.actionPublish.triggered.connect(self.publishClicked)
-        self.iface.addPluginToWebMenu("GeoCatBridge", self.actionPublish)
+        self.iface.addPluginToMenu("GeoCatBridge", self.actionPublish)
         
 
     def unload(self):
         
-        removeSettingsMenu("geocatbridge")
+        removeSettingsMenu("GeoCatBridge")
         
-        removeHelpMenu("geocatbridge")
+        removeHelpMenu("GeoCatBridge")
         
-        removeAboveMenu("geocatbridge")
+        removeAboveMenu("GeoCatBridge")
                 
         self.iface.removePluginFromWebMenu("GeoCatBridge", self.actionPublish)
         

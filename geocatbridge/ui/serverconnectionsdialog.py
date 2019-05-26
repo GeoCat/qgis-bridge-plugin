@@ -1,7 +1,7 @@
 import os
 from qgis.PyQt import uic
 from geocatbridge.publish.servers import *
- from qgis.PyQt.QtWidgets import QVBoxLayout, QSizePolicy
+from qgis.PyQt.QtWidgets import QVBoxLayout, QSizePolicy
 from qgis.gui import QgsMessageBar
 from qgis.core import Qgis
 
@@ -92,8 +92,8 @@ class ServerConnectionsDialog(BASE, WIDGET):
 
     def populateServers(self):
         self.listServers.clear()
-        servers = allServers()    	
-    	for server in servers:
+        servers = allServers()      
+        for server in servers:
             self.listServers.addItem(server.name)
 
     def addGeoserver(self):
@@ -104,9 +104,9 @@ class ServerConnectionsDialog(BASE, WIDGET):
             item = self.listServers.addItem(server.name)
             self.listServers.setCurrentItem(item)        
 
-    def setCurrentServer(server)
+    def setCurrentServer(server):
         self.currentServer = server
-        is server is None:
+        if server is None:
             self.stackedWidget.setCurrentWidget(self.widgetEmpty)
         elif isinstance(server, GeoserverServer):
             self.stackedWidget.setCurrentWidget(self.widgetGeoserver)

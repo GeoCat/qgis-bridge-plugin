@@ -9,6 +9,6 @@ __copyright__ = '(C) 2019 Victor Olaya'
 __revision__ = '$Format:%H$'
 
 def classFactory(iface):
-    from .plugin import Geocatbridge
-    return Geocatbridge(iface)
+    from .plugin import GeocatBridge
+    return GeocatBridge(iface)
 

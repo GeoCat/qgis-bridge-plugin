@@ -1,3 +1,2 @@
 qgiscommons
-gsconfig
 git+ssh://git@eos.geocat.net:bridge/geocatbridgecommons.git

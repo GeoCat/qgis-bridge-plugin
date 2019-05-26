@@ -2,6 +2,10 @@ import os
 from qgis.PyQt import uic
 from geocatbridge.publish.servers import geodataServers, metadataServers
 from geocatbridge.ui.serverconnectionsdialog import ServerConnectionsDialog
+from qgis.core import *
+from qgis.PyQt.QtWidgets import *
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatbridgedialog.ui'))
 
@@ -25,8 +29,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.btnPublish.clicked.connect(self.publish)
         self.btnClose.clicked.connect(self.close)
 
-
-    def currentCellChanged(self,int currentRow, currentColumn, previousRow, previousColumn):
+    def currentCellChanged(self,currentRow, currentColumn, previousRow, previousColumn):
         layers = self.publishableLayers()
         if self.currentRow == currentRow:
             return
@@ -37,6 +40,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
 
 
     def populateLayerMetadata(self, layer):
+        pass
 
 
     def populateLayerFields(self, layer):
@@ -74,41 +78,47 @@ class GeocatBridgeDialog(BASE, WIDGET):
 
     def populateLayers(self):
         self.tableLayers.clear()
-    	layers = self.publishableLayers()
-    	self.tableLayers.setRowCount(len(layers))
-    	for i, layer in enumerate(layers):
-    		item = QtableLayersItem()
-    		item.setCheckState(Qt.Unchecked)
-    		self.tableLayers.setItem(i, 0, item)
-    		self.tableLayers.setItem(i, 1, QtableLayersItem(layer.name()))
+        layers = self.publishableLayers()
+        self.tableLayers.setRowCount(len(layers))
+        for i, layer in enumerate(layers):
+            item = QTableWidgetItem()
+            item.setCheckState(Qt.Unchecked)
+            self.tableLayers.setItem(i, 0, item)
+            self.tableLayers.setItem(i, 1, QTableWidgetItem(layer.name()))
             self.isMetadataPublished[layer.name()] = self.isMetadataOnServer(layer)
-    		self.tableLayers.setItem(i, 2, QtableLayersItem("X" if self.isMetadataPublished[layer.name()] else ""))
+            self.tableLayers.setItem(i, 2, QTableWidgetItem("X" if self.isMetadataPublished[layer.name()] else ""))
             self.isDataPublished[layer.name()] = self.isDataOnServer(layer)
-    		self.tableLayers.setItem(i, 3, QtableLayersItem("X" if self.isDataPublished[layer.name()] else ""))
+            self.tableLayers.setItem(i, 3, QTableWidgetItem("X" if self.isDataPublished[layer.name()] else ""))
 
     def populateComboBoxes(self):
-    	self.populateComboCatalogue()
-    	self.populateComboMapServer()
+        self.populateComboCatalogue()
+        self.populateComboMapServer()
 
     def populateComboMapServer(self):
-    	self.comboMapServer.clear()
-    	self.comboMapServer.addItems(geodataServers().keys())
+        self.comboMapServer.clear()
+        self.comboMapServer.addItems(geodataServers().keys())
 
-   	def populateComboCatalogue(self):
-    	self.comboCatalogue.clear()
-    	self.comboCatalogue.addItems(metadataServers().keys())
+    def populateComboCatalogue(self):
+        self.comboCatalogue.clear()
+        self.comboCatalogue.addItems(metadataServers().keys())
 
     def layerClicked(self):
-    	layers = list(QgsProject.instance().mapLayers().values())
-    	layer = layers[self.tableLayers.currentRow()]
+        layers = list(QgsProject.instance().mapLayers().values())
+        layer = layers[self.tableLayers.currentRow()]
 
     def isMetadataOnServer(self, layer):
-        catalog = metadataServers()[self.comboCatalogue.currentText()].catalog()
-        return catalog.metadata_exists(layer.name())
+        try:
+            catalog = metadataServers()[self.comboCatalogue.currentText()].catalog()
+            return catalog.metadata_exists(layer.name())
+        except KeyError:
+            return False
 
     def isDataOnServer(self, layer):
-        catalog = geodataServers()[self.comboMapServer.currentText()].catalog()
-        return catalog.layer_exists(layer.name())
+        try:
+            catalog = geodataServers()[self.comboMapServer.currentText()].catalog()
+            return catalog.layer_exists(layer.name())
+        except KeyError:
+            return False
 
     def defineConnectionsData(self):
         current = self.comboMapServer.currentText()

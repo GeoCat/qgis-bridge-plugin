@@ -231,12 +231,13 @@
             </widget>
            </item>
            <item row="4" column="1">
-            <widget class="QComboBox" name="comboGeoserverWorkspace"/>
+            <widget class="QLineEdit" name="txtGeoserverWorkspace"/>
            </item>
           </layout>
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="widgetEmpty"/>
        <widget class="QWidget" name="widgetMetadataCatalogue">
         <layout class="QHBoxLayout" name="horizontalLayout_9">
          <item>

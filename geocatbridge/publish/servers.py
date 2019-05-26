@@ -10,10 +10,10 @@ def addServer(server):
     _servers[server.name] = server
 
 def geodataServers():
-    return {name, server for name, server in _servers.items() if isinstance(server.catalog(), GeodataCatalog)}
+    return {name: server for name, server in _servers.items() if isinstance(server.catalog(), GeodataCatalog)}
 
 def metadataServers():
-    return {name, server for name, server in _servers.items() if isinstance(server.catalog(), MetadataCatalog)}
+    return {name: server for name, server in _servers.items() if isinstance(server.catalog(), MetadataCatalog)}
 
 class GeodataServer():
     
@@ -43,14 +43,14 @@ class GeoserverServer():
             if self.storage == self.UPLOAD_DATA:
                 filename = exportLayer(layer, fields)
                 style = getCompatibleSldAsZip(layer)
-                self.catalog().publish_vector_layer_from_file(self, filename, layer.name(), style, layer.name()):
+                self.catalog().publish_vector_layer_from_file(self, filename, layer.name(), style, layer.name())
             else:
                 #TODO
                 pass
         elif layer.type() == layer.RasterLayer:
             filename = exportLayer(layer, fields)
-                style = getCompatibleSldAsZip(layer)
-                self.catalog().publish_raster_layer_file(self, filename, layer.name(), style, layer.name()):
+            style = getCompatibleSldAsZip(layer)
+            self.catalog().publish_raster_layer_file(self, filename, layer.name(), style, layer.name())
 
 
 
