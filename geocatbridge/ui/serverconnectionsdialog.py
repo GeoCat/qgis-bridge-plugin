@@ -61,11 +61,9 @@ class ServerConnectionsDialog(BASE, WIDGET):
             return False
         else:
             if self.currentServer is not None:
-                print(self.currentServer.name)
                 removeServer(self.currentServer)
                 item = self.listServers.findItems(self.currentServer.name, Qt.MatchExactly)[0]
                 item.setText(server.name)
-            print (server.name)
             addServer(server)
             return True
         

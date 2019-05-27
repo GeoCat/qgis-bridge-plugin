@@ -75,7 +75,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         item = self.tableLayers.itemAt(pos)
         if item is None:
             return
-        row = self.row(item)
+        row = self.tableLayers.row(item)
         name = self.tableLayers.item(row, 1).text()
         menu = QMenu()
         menu.addAction("View metadata", lambda: self.viewMetadata(name))
