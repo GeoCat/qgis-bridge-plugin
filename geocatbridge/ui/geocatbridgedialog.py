@@ -3,9 +3,11 @@ from qgis.PyQt import uic
 from geocatbridge.publish.servers import geodataServers, metadataServers
 from geocatbridge.ui.serverconnectionsdialog import ServerConnectionsDialog
 from qgis.core import *
+from qgis.gui import *
 from qgis.PyQt.QtWidgets import *
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
+from qgis.utils import iface
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatbridgedialog.ui'))
 
@@ -17,19 +19,32 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.isDataPublished = {}
         self.currentRow = None
         self.setupUi(self)
+
+        self.bar = QgsMessageBar()
+        self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.layout().insertWidget(0, self.bar)
+
         self.populateComboBoxes()
         self.populateLayers()
         self.tableLayers.clicked.connect(self.layerClicked)
         self.tableLayers.customContextMenuRequested.connect(self.showContextMenu)
         self.tableLayers.currentCellChanged.connect(self.currentCellChanged)
-        self.comboMapServer.currentItemChanged.connect(self.populateLayers)
-        self.comboCatalogue.currentItemChanged.connect(self.populateLayers)
+        self.comboMapServer.currentIndexChanged.connect(self.populateLayers)
+        self.comboCatalogue.currentIndexChanged.connect(self.populateLayers)
         self.btnDefineConnectionsData.clicked.connect(self.defineConnectionsData)
         self.btnDefineConnectionsMetadata.clicked.connect(self.defineConnectionsMetadata)
         self.btnPublish.clicked.connect(self.publish)
         self.btnClose.clicked.connect(self.close)
+        self.labelSelect.linkActivated.connect(self.selectLabelClicked)
 
-    def currentCellChanged(self,currentRow, currentColumn, previousRow, previousColumn):
+    def selectLabelClicked(self, url):
+        state = Qt.Unchecked if url == "none" else Qt.Checked
+        for i in range (self.tableLayers.rowCount()):
+            item = self.tableLayers.item(i, 0)
+            item.setCheckState(state)
+
+
+    def currentCellChanged(self, currentRow, currentColumn, previousRow, previousColumn):
         layers = self.publishableLayers()
         if self.currentRow == currentRow:
             return
@@ -49,10 +64,10 @@ class GeocatBridgeDialog(BASE, WIDGET):
             fields = layer.fields()
             self.tableFields.setRowCount(len(fields))
             for i, field in enumerate(fields):
-                item = QtableLayersItem()
+                item = QTableWidgetItem()
                 item.setCheckState(Qt.Checked)
                 self.tableFields.setItem(i, 0, item)
-                self.tableFields.setItem(i, 1, QtableLayersItem(field.name()))             
+                self.tableFields.setItem(i, 1, QTableWidgetItem(field.name()))             
         else:
             self.tabLayerInfo.setTabEnabled(1, False)
 
@@ -77,18 +92,25 @@ class GeocatBridgeDialog(BASE, WIDGET):
         return layers
 
     def populateLayers(self):
-        self.tableLayers.clear()
+        self.tableLayers.setRowCount(0)
         layers = self.publishableLayers()
         self.tableLayers.setRowCount(len(layers))
         for i, layer in enumerate(layers):
             item = QTableWidgetItem()
             item.setCheckState(Qt.Unchecked)
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableLayers.setItem(i, 0, item)
-            self.tableLayers.setItem(i, 1, QTableWidgetItem(layer.name()))
+            item = QTableWidgetItem(layer.name())
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.tableLayers.setItem(i, 1, item)
             self.isMetadataPublished[layer.name()] = self.isMetadataOnServer(layer)
-            self.tableLayers.setItem(i, 2, QTableWidgetItem("X" if self.isMetadataPublished[layer.name()] else ""))
-            self.isDataPublished[layer.name()] = self.isDataOnServer(layer)
-            self.tableLayers.setItem(i, 3, QTableWidgetItem("X" if self.isDataPublished[layer.name()] else ""))
+            item = QTableWidgetItem("X" if self.isMetadataPublished[layer.name()] else "")
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.tableLayers.setItem(i, 2, item)
+            self.isDataPublished[layer.name()] = self.isDataOnServer(layer)            
+            item = QTableWidgetItem("X" if self.isDataPublished[layer.name()] else "")
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.tableLayers.setItem(i, 3, item)
 
     def populateComboBoxes(self):
         self.populateComboCatalogue()
@@ -112,6 +134,8 @@ class GeocatBridgeDialog(BASE, WIDGET):
             return catalog.metadata_exists(layer.name())
         except KeyError:
             return False
+        except:
+            self.bar.pushMessage("Error", "Could not connect to selected metadata server", level=Qgis.Warning, duration=5)
 
     def isDataOnServer(self, layer):
         try:
@@ -119,6 +143,9 @@ class GeocatBridgeDialog(BASE, WIDGET):
             return catalog.layer_exists(layer.name())
         except KeyError:
             return False
+        except:
+            self.bar.pushMessage("Error", "Could not connect to selected data server", level=Qgis.Warning, duration=5)
+
 
     def defineConnectionsData(self):
         current = self.comboMapServer.currentText()
@@ -135,7 +162,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
             self.comboCatalogue.setCurrentText(current)            
 
     def openConnectionsDialog(self):
-        dlg = ServerConnectionsDialog()
+        dlg = ServerConnectionsDialog(iface.mainWindow())
         dlg.exec_()
 
     def unpublishData(self, name):

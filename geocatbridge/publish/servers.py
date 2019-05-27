@@ -1,13 +1,41 @@
+import json
 from .sldadapter import getCompatibleSldAsZip
 from .exporter import exportLayer
+from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
+from qgiscommons2.settings import pluginSetting, setPluginSetting
+from geocatbridgecommons.geoserver import GeoServerCatalog
+from geocatbridgecommons.server import GeodataCatalog, MetadataCatalog
+
+SERVERS_SETTING = "BridgeServers"
 
 _servers = {}
+
+try:
+    storedServers = json.loads(pluginSetting(SERVERS_SETTING))
+    for serverDef in storedServers:
+        s = _serverFromDefinition(serverDef)
+        _servers[s.name] = s
+except KeyError:
+    pass
+
+def _serverFromDefinition(defn):
+    return globals()[defn[0]](*defn[1])
+
+def _updateStoredServers():
+    servList = [(s.__class__.__name__, s.__dict__) for s in _servers.values()]
+    print (servList)
+    # setPluginSetting(SERVERS_SETTING, json.dumps(servList))
 
 def allServers():
     return _servers
 
 def addServer(server):
     _servers[server.name] = server
+    _updateStoredServers()
+
+def removeServer(server):
+    del _servers[server.name]
+    _updateStoredServers()
 
 def geodataServers():
     return {name: server for name, server in _servers.items() if isinstance(server.catalog(), GeodataCatalog)}
@@ -15,9 +43,10 @@ def geodataServers():
 def metadataServers():
     return {name: server for name, server in _servers.items() if isinstance(server.catalog(), MetadataCatalog)}
 
+
 class GeodataServer():
     
-    def unpubishData(self, layer):
+    def unpublishData(self, layer):
         self.catalog().delete_layer(layer.name())
         self.catalog().delete_style(layer.name())    
 
@@ -32,11 +61,11 @@ class GeoserverServer():
         self.authid = authid
         self.storage = storage
         self.workspace = workspace
-        self.datastore = datastore        
+        self.datastore = datastore
 
     def catalog(self):
         nam = NetworkAccessManager(self.authid, debug=False)
-        return GeoServerCatalog(url, nam, self.workspace)
+        return GeoServerCatalog(self.url, nam, self.workspace)
 
     def publishLayer(self, layer, fields):
         if layer.type() == layer.VectorLayer:
@@ -54,5 +83,17 @@ class GeoserverServer():
 
 
 
-    
+class MapserverServer(): 
+    pass
 
+class GeocatLiveServer(): 
+    pass
+
+class GeonetworkServer(): 
+    pass
+
+class PostgisServer(): 
+    pass
+
+class CswServer(): 
+    pass

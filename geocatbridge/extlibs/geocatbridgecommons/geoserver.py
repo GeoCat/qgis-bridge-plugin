@@ -1,4 +1,4 @@
-from . import GeodataCatalog
+from .server import GeodataCatalog
 from geoserver.catalog import Catalog
 from geoserver.catalog import ConflictingDataError
 
@@ -21,7 +21,7 @@ class GSConfigCatalogUsingNetworkAccessManager(Catalog):
 
 class GeoServerCatalog(GeodataCatalog):
 
-    def __init__(service_url, network_access_manager, workspace):
+    def __init__(self, service_url, network_access_manager, workspace):
         self.workspace = workspace
         self.gscatalog = GSConfigCatalogUsingNetworkAccessManager(service_url, network_access_manager)
 
@@ -38,7 +38,7 @@ class GeoServerCatalog(GeodataCatalog):
             }
             self.gscatalog.create_featurestore(name, path, self.workspace, True)
             self._set_layer_style(layername, stylename)
-        elif filename.lower().endswith(".gpkg")
+        elif filename.lower().endswith(".gpkg"):
             json = { "dataStore": {
                         "name": layername,
                         "connectionParameters": {

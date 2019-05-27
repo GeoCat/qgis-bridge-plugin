@@ -19,9 +19,12 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="labelSelect">
          <property name="text">
-          <string>Select: &lt;a href=&quot;all&quot;&gt;All&lt;/a&gt; | &lt;a href=&quot;nonel&quot;&gt;None&lt;/a&gt;</string>
+          <string>Select: &lt;a href=&quot;all&quot;&gt;All&lt;/a&gt; | &lt;a href=&quot;none&quot;&gt;None&lt;/a&gt;</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::TextBrowserInteraction</set>
          </property>
         </widget>
        </item>
@@ -57,7 +60,7 @@
      <item>
       <widget class="QTabWidget" name="tabLayerInfo">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabMetadata">
         <attribute name="title">
@@ -151,7 +154,7 @@
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QPushButton" name="btnDefineConnections">
+      <widget class="QPushButton" name="btnDefineConnectionsData">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -171,10 +174,24 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="comboCatalogue"/>
+      <widget class="QComboBox" name="comboCatalogue">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QComboBox" name="comboMapServer"/>
+      <widget class="QComboBox" name="comboMapServer">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
      <item row="0" column="0">
       <widget class="QCheckBox" name="chkPublishToMapServer">
@@ -184,7 +201,7 @@
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QPushButton" name="btnDefineConnections2">
+      <widget class="QPushButton" name="btnDefineConnectionsMetadata">
        <property name="text">
         <string>...</string>
        </property>
@@ -194,6 +211,9 @@
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>

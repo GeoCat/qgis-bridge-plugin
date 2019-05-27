@@ -51,6 +51,6 @@ class GeocatBridge:
 
     
     def publishClicked(self):
-        dialog = GeocatBridgeDialog()
+        dialog = GeocatBridgeDialog(self.iface.mainWindow())
         dialog.exec_()
         
