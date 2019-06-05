@@ -20,6 +20,7 @@ class ServerConnectionsDialog(BASE, WIDGET):
         self.addAuthWidgets()
         self.buttonRemove.clicked.connect(self.buttonRemoveClicked)
         self.populateServers()
+        self.populatePostgisCombo()
         self.listServers.currentItemChanged.connect(self.currentServerChanged)
         self.bar = QgsMessageBar()
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
@@ -27,13 +28,19 @@ class ServerConnectionsDialog(BASE, WIDGET):
         self.setCurrentServer(None)
         self.buttonBox.accepted.connect(self.accepted)
         self.buttonBox.rejected.connect(self.close)
+        self.radioUploadData.toggled.connect(self.datastoreChanged)
+
+    def datastoreChanged(self, checked):
+        self.comboDatastore.setEnabled(checked)
+        self.btnNewDatastore.setEnabled(checked)
 
     def currentServerChanged(self, new, old):
         if new is None:
             self.setCurrentServer(new)
             return
         else:
-            server = geodataServers()[new.text()]
+            name = self.listServers.itemWidget(new).serverName()
+            server = allServers()[name]
             if self.currentServer is not None and new is not None:
                 if server.name == self.currentServer.name:
                     return
@@ -51,7 +58,7 @@ class ServerConnectionsDialog(BASE, WIDGET):
         elif w == self.widgetGeoserver:
             server = self.createGeoserverServer()
         elif w == self.widgetPostgis:
-            pass
+            server = self.createPostgisServer()
         elif w == self.widgetMetadata:
             pass
         elif w == self.widgetGeocatLive:
@@ -61,12 +68,18 @@ class ServerConnectionsDialog(BASE, WIDGET):
             return False
         else:
             if self.currentServer is not None:
-                removeServer(self.currentServer)
-                item = self.listServers.findItems(self.currentServer.name, Qt.MatchExactly)[0]
-                item.setText(server.name)
+                removeServer(self.currentServer.name)
+                item = self.itemFromServerName(self.currentServer.name)
+                self.listServers.itemWidget(item).setServerName(server.name)
             addServer(server)
             return True
         
+    def itemFromServerName(self, name):
+        for i in range(self.listServers.count()):
+            item = self.listServers.item(i)
+            if name == self.listServers.itemWidget(item).serverName():
+                return item
+
     def createGeoserverServer(self):
         ##TODO check validity of name and values        
         name = self.txtGeoserverName.text()
@@ -75,8 +88,24 @@ class ServerConnectionsDialog(BASE, WIDGET):
         url = self.txtGeoserverUrl.text()
         authid = self.geoserverAuth.configId()
         datastore = self.comboDatastore.currentText()
-        storage = GeoserverServer.UPLOAD_DATA if self.radioUploadData.isChecked() else self.STORE_IN_POSTGIS
-        server = GeoserverServer(name, url, authid, storage, workspace, datastore)
+        if self.radioUploadData.isChecked():
+            storage = GeoserverServer.UPLOAD_DATA
+            postgisdb = None
+        else:
+            storage = self.STORE_IN_POSTGIS
+            postgisdb = self.comboDatastore.currentText()
+        server = GeoserverServer(name, url, authid, storage, workspace, datastore, postgisdb)
+        return server
+
+    def createPostgisServer(self):
+        ##TODO check validity of name and values        
+        name = self.txtPostgisName.text()
+        host = self.txtPostgisServerAddress.text()
+        port = self.txtPostgisPort.text()
+        schema = self.txtPostgisSchema.text()
+        database = self.txtPostgisDatabase.text()
+        authid = self.geoserverAuth.configId()
+        server = PostgisServer(name, authid, host, port, schema, database)
         return server
 
     def addAuthWidgets(self):
@@ -84,59 +113,60 @@ class ServerConnectionsDialog(BASE, WIDGET):
         vlayout = QHBoxLayout()
         vlayout.addWidget(self.geoserverAuth)
         self.geoserverAuthWidget.setLayout(vlayout)
+        self.geoserverAuthWidget.setFixedHeight(1.5 * self.txtGeoserverUrl.height())
+        self.postgisAuth = QgsAuthConfigSelect()
+        vlayout = QHBoxLayout()
+        vlayout.addWidget(self.postgisAuth)
+        self.postgisAuthWidget.setLayout(vlayout)
+        self.postgisAuthWidget.setFixedHeight(1.5 * self.txtGeoserverUrl.height())
         ##
 
     def addMenuToButtonNew(self):
         menu = QMenu()
-        menu.addAction("GeoServer", self.addGeoserver)
-        menu.addAction("MapServer", self.addMapserver)
-        menu.addAction("GeoCat Live", self.addGeocatLive)
-        menu.addAction("GeoNetwork", self.addGeonetwork)
-        menu.addAction("CSW", self.addCSW)
-        menu.addAction("PostGIS", self.addPostGis)
+        menu.addAction("GeoServer", lambda: self._addServer("GeoServer", GeoserverServer))
+        menu.addAction("MapServer", lambda: self._addServer("MapServer", MapserverServer))
+        menu.addAction("GeoCat Live", lambda: self._addServer("GeoCat Live", GeocatLiveServer))
+        menu.addAction("GeoNetwork", lambda: self._addServer("GeoNetwork", GeonetworkServer))
+        menu.addAction("CSW", lambda: self._addServer("CSW", CswServer))
+        menu.addAction("PostGIS", lambda: self._addServer("PostGIS", PostgisServer))
         self.buttonNew.setMenu(menu)
 
     def buttonRemoveClicked(self):
         item = self.listServers.currentItem()
-        name = item.text()
+        name = self.listServers.itemWidget(item).serverName()
         removeServer(name)
-        self.listServers.takeItem(self.listServers.currentRow)
+        self.listServers.takeItem(self.listServers.currentRow())
         self.listServers.setCurrentItem(None)        
 
     def populateServers(self):
         self.listServers.clear()
-        servers = allServers().keys()      
+        servers = allServers().values()      
         for server in servers:
-            self.listServers.addItem(server)
+            self.addServerItem(server)
+            
+    def addServerItem(self, server):
+        widget = ServerItemWidget(server)
+        item = QListWidgetItem(self.listServers)
+        item.setSizeHint(widget.sizeHint())
+        self.listServers.addItem(item)
+        self.listServers.setItemWidget(item, widget)
+        return item
 
-    def addGeoserver(self):
+    def _addServer(self, name, clazz):
         if self.saveCurrentServer():                    
-            name = self.getNewName("Geoserver")
-            server = GeoserverServer(name)            
+            name = self.getNewName(name)
+            server = clazz(name)            
             addServer(server)
-            item = self.listServers.addItem(server.name)
+            item = self.addServerItem(server)
             self.listServers.setCurrentItem(item)
-            self.setCurrentServer(server)       
+            self.setCurrentServer(server) 
 
-    def addMapserver(self):
-        if self.saveCurrentServer():
-            pass
-
-    def addGeocatLive(self):
-        if self.saveCurrentServer():
-            pass
-
-    def addGeonetwork(self):
-        if self.saveCurrentServer():
-            pass
-
-    def addCSW(self):
-        if self.saveCurrentServer():
-            pass
-
-    def addPostGis(self):
-        if self.saveCurrentServer():
-            pass
+    def populatePostgisCombo(self):
+        self.comboDatastore.clear()
+        servers = allServers().values()
+        for s in servers:
+            if isinstance(s, PostgisServer):
+                self.comboDatastore.addItem(s.name)
 
     def setCurrentServer(self, server):
         self.currentServer = server
@@ -146,16 +176,24 @@ class ServerConnectionsDialog(BASE, WIDGET):
             self.stackedWidget.setCurrentWidget(self.widgetGeoserver)
             self.txtGeoserverName.setText(server.name)
             self.txtGeoserverUrl.setText(server.url)
-            self.txtGeoserverWorkspace.setText(server.workspace)
-            self.radioUploadData.setChecked(server.storage == server.UPLOAD_DATA)
-            self.radioStoreInPostgis.setChecked(server.storage == server.STORE_IN_POSTGIS)
+            self.txtGeoserverWorkspace.setText(server.workspace)            
             self.geoserverAuth.setConfigId(server.authid)
+            self.populatePostgisCombo()
+            if server.postgisdb is not None:
+                self.comboDatastore.setCurrentText(server.postgisdb)
+            self.radioUploadData.setChecked(server.storage == server.UPLOAD_DATA)
+            self.radioStoreInPostgis.setChecked(server.storage == server.STORE_IN_POSTGIS)                
         elif isinstance(server, MapserverServer):
             pass
             #TODO
         elif isinstance(server, PostgisServer):
-            pass
-            #TODO
+            self.stackedWidget.setCurrentWidget(self.widgetPostgis)
+            self.txtPostgisName.setText(server.name)
+            self.txtPostgisDatabase.setText(server.database)
+            self.txtPostgisPort.setText(server.port)
+            self.txtPostgisServerAddress.setText(server.host)
+            self.txtPostgisSchema.setText(server.schema)            
+            self.postgisAuth.setConfigId(server.authid)
         elif isinstance(server, GeonetworkServer):
             pass
             #TODO
@@ -197,3 +235,27 @@ class ServerConnectionsDialog(BASE, WIDGET):
                 evt.ignore()
         else:
             evt.accept()
+
+class ServerItemWidget (QWidget):
+    def __init__ (self, server, parent = None):
+        super(ServerItemWidget, self).__init__(parent)
+        self.server = server
+        self.layout = QHBoxLayout()
+        self.label = QLabel()
+        self.label.setText(server.name)
+        self.iconLabel = QLabel()
+        self.iconLabel.setPixmap(QPixmap(self.iconPath(server)))
+        self.iconLabel.setFixedWidth(50)
+        self.layout.addWidget(self.iconLabel)
+        self.layout.addWidget(self.label)
+        self.setLayout(self.layout)
+        
+    def iconPath(self, server):
+        return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", 
+                        "%s_black.png" % self.server.__class__.__name__.lower()[:-6])
+
+    def setServerName(self, name):
+        self.label.setText(name)
+
+    def serverName(self):
+        return self.label.text()

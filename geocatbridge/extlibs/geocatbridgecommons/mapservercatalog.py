@@ -1,4 +1,4 @@
-from . import GeodataCatalog
+from .catalog import GeodataCatalog
 
 class MapServerCatalog(GeodataCatalog):
 

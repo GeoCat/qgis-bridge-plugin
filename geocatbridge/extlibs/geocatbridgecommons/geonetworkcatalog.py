@@ -1,4 +1,4 @@
-from .server import MetadataCatalog
+from .catalog import MetadataCatalog
 
 class RequestsTokenNetworkAccessManager()
     def __init__(self, username, password, login_url):

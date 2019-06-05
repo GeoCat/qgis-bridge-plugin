@@ -1,17 +1,16 @@
 [general]
 name=GeoCatBridge
-description=[description]
-about=[about]
+description=Plugin to interact with publish data and metadata to different catalogs
 category=Plugins
 qgisMinimumVersion=3.0
 version=0.1
 
-author=[author]
+author=GeoCat
 email=volayaf@gmail.com
 
 icon=icons/qgis.png
 
-tags=[tags]
+tags=GeoServer, MapServer, GeoNetwork, GeoCat
 
 homepage=
 tracker=https://github.com/volaya/qgis-geocatbridge-plugin/issues

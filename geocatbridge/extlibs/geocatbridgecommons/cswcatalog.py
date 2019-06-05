@@ -1,4 +1,4 @@
-from .server import MetadataCatalog
+from .catalog import MetadataCatalog
 
 class CSWCatalog(MetadataCatalog):
 

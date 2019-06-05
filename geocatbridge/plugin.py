@@ -9,19 +9,32 @@ import webbrowser
 
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsMessageLog, Qgis
 
+from .extlibs.geocatbridgecommons import setLogger
 from .extlibs.qgiscommons2.settings import readSettings
 from .extlibs.qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
 from .extlibs.qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu
 from .ui.geocatbridgedialog import GeocatBridgeDialog
-        
+from .publish.servers import readServers
 
 class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
         
         readSettings()
+        readServers()
         
+        class QgisLogger():
+            def logInfo(text):
+                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
+            def logWarning(text):
+                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Warning)
+            def logError(text):
+                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Critical)
+
+        logger = QgisLogger()
+        setLogger(logger)
 
     def initGui(self):
         

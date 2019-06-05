@@ -29,7 +29,7 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="widgetGeocatLive">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -141,9 +141,6 @@
            <item row="1" column="2">
             <widget class="QLineEdit" name="txtGeoserverUrl"/>
            </item>
-           <item row="0" column="2">
-            <widget class="QLineEdit" name="txtGeoserverName"/>
-           </item>
            <item row="0" column="0">
             <widget class="QLabel" name="label_3">
              <property name="text">
@@ -151,19 +148,31 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_7">
+           <item row="0" column="2">
+            <widget class="QLineEdit" name="txtGeoserverName"/>
+           </item>
+           <item row="4" column="2">
+            <widget class="QLineEdit" name="txtGeoserverWorkspace"/>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_16">
              <property name="text">
-              <string>Datastore</string>
+              <string>Workspace</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Data</string>
+           <item row="9" column="0">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
              </property>
-            </widget>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item row="6" column="2">
             <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -179,35 +188,26 @@
              </item>
             </layout>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_16">
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_7">
              <property name="text">
-              <string>Workspace</string>
+              <string>Datastore</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="2">
-            <widget class="QLineEdit" name="txtGeoserverWorkspace"/>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Data</string>
+             </property>
+            </widget>
            </item>
-           <item row="9" column="2">
+           <item row="8" column="2">
             <widget class="QPushButton" name="btnConnectGeoserver">
              <property name="text">
               <string>Connect</string>
              </property>
             </widget>
-           </item>
-           <item row="8" column="0">
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
            </item>
           </layout>
          </item>
@@ -313,16 +313,23 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QLineEdit" name="textPostgisName"/>
+          <widget class="QLineEdit" name="txtPostgisName"/>
          </item>
          <item row="1" column="2">
           <widget class="QLineEdit" name="txtPostgisServerAddress"/>
          </item>
          <item row="4" column="2">
-          <widget class="QLineEdit" name="textPostgisPort"/>
+          <widget class="QLineEdit" name="txtPostgisPort"/>
          </item>
          <item row="2" column="2">
-          <widget class="QWidget" name="postgisAuthWidget" native="true"/>
+          <widget class="QWidget" name="postgisAuthWidget" native="true">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>100</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item row="4" column="0">
           <widget class="QLabel" name="label_10">
@@ -355,7 +362,7 @@
           </spacer>
          </item>
          <item row="7" column="2">
-          <widget class="QToolButton" name="btnConnectPostgis">
+          <widget class="QPushButton" name="btnConnectPostgis">
            <property name="text">
             <string>Connect</string>
            </property>
