@@ -31,8 +31,8 @@ class ServerConnectionsDialog(BASE, WIDGET):
         self.radioUploadData.toggled.connect(self.datastoreChanged)
 
     def datastoreChanged(self, checked):
-        self.comboDatastore.setEnabled(checked)
-        self.btnNewDatastore.setEnabled(checked)
+        self.comboDatastore.setEnabled(not checked)
+        self.btnNewDatastore.setEnabled(not checked)
 
     def currentServerChanged(self, new, old):
         if new is None:

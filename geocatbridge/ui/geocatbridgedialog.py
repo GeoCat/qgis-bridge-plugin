@@ -4,6 +4,7 @@ from geocatbridge.publish.servers import geodataServers, metadataServers
 from geocatbridge.ui.serverconnectionsdialog import ServerConnectionsDialog
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
+from geocatbridgecommons import log
 from qgis.core import *
 from qgis.gui import *
 from qgis.PyQt.QtWidgets import *
@@ -42,6 +43,17 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.layout().insertWidget(0, self.bar)
 
+        class QgisLogger():
+            def logInfo(self, text):
+                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
+            def logWarning(self, text):
+                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Warning)
+            def logError(self, text):
+                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Critical)
+
+        logger = QgisLogger()
+        log.setLogger(logger)
+
         self.populateComboBoxes()
         self.populateLayers()
         self.tableLayers.clicked.connect(self.layerClicked)
@@ -68,6 +80,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         if self.tableLayers.rowCount():
             self.currentCellChanged(0, 0, None, None)
 
+
     def selectLabelClicked(self, url):
         state = Qt.Unchecked if url == "none" else Qt.Checked
         for i in range (self.tableLayers.rowCount()):
@@ -85,7 +98,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.currentLayer = layer
         self.populateLayerMetadata()
         self.populateLayerFields()
-        if layer.type != layer.VectorLayer:
+        if layer.type() != layer.VectorLayer:
             self.tabLayerInfo.setCurrentWidget(self.tabMetadata)
 
     def populateLayerMetadata(self):
@@ -216,6 +229,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
             self.labelErrorMetadataServer.setText("")
             return False
         except:
+            raise
             self.labelErrorMetadataServer.setText(ERROR_ICON)
 
     def isDataOnServer(self, layer):
@@ -227,6 +241,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
             self.labelErrorGeodataServer.setText("")
             return False
         except:
+            raise
             self.labelErrorGeodataServer.setText(ERROR_ICON)
 
     def saveMetadataToLayer(self):

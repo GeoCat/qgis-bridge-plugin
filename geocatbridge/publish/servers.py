@@ -108,8 +108,18 @@ class MapserverServer():
 class GeocatLiveServer(): 
     pass
 
-class GeonetworkServer(): 
-    pass
+class GeonetworkServer():
+
+    def __init__(self, name, url="", authid="", profile=""):
+        self.name = name
+        self.url = url
+        self.authid = authid
+        self.profile = profile
+        self.isMetadataCatalog = True
+        self.isDataCatalog = False
+
+    def publishLayerMetadata(self, layer):
+        pass
 
 class PostgisServer(): 
     

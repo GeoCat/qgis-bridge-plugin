@@ -1,4 +1,4 @@
 class SilentFeedbackReporter():
 
-    def setProgress(progress):
+    def setProgress(self, progress):
         pass

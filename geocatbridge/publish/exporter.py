@@ -1,6 +1,6 @@
-from qgis.core import QgsVectorLayerExporter, QgsRasterFileWriter
+from qgis.core import QgsVectorFileWriter, QgsRasterFileWriter
 from qgiscommons2.files import tempFilenameInTempFolder
-from geocatbridgecommons import logInfo, logWarning, logError
+from geocatbridgecommons import log
 
 def exportLayer(layer, fields=None):
     filename = layer.source()
@@ -11,10 +11,10 @@ def exportLayer(layer, fields=None):
             attrs = [i for i, f in enumerate(layer.fields()) if f.name() in fields]
             output = tempFilenameInTempFolder(destFilename + ".gpkg")
             QgsVectorFileWriter.writeAsVectorFormat(layer, output, "UTF-8", attributes=attrs)
+            log.logInfo("Layer %s exported to %s" % (destFilename, output))
             return output
-            logInfo("Layer %s exported to %s" % (destFilename, output))
         else:
-            logInfo("No need to export layer %s stored at %s" % (destFilename, filename))
+            log.logInfo("No need to export layer %s stored at %s" % (destFilename, filename))
             return filename
     else:
         if (not filename.lower().endswith("tif")):        
@@ -23,10 +23,10 @@ def exportLayer(layer, fields=None):
             writer.setOutputFormat("GTiff");
             writer.writeRaster(layer.pipe(), layer.width(), layer.height(), layer.extent(), layer.crs())
             del writer
-            logInfo("Layer %s exported to %s" % (destFilename, output))
+            log.logInfo("Layer %s exported to %s" % (destFilename, output))
             return output
         else:
-            logInfo("No need to export layer %s stored at %s" % (destFilename, filename))
+            log.logInfo("No need to export layer %s stored at %s" % (destFilename, filename))
             return filename
 
 

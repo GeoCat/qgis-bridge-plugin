@@ -9,7 +9,7 @@ from qgis.core import *
 import math
 import zipfile
 from qgiscommons2.files import tempFilenameInTempFolder
-from geocatbridgecommons import logInfo, logWarning, logError
+from geocatbridgecommons import log
 
 RASTER_SLD_TEMPLATE = ('<?xml version="1.0" encoding="UTF-8"?>'
                     '<sld:StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:sld="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.''net/gml" version="1.0.0">'
@@ -169,12 +169,12 @@ def getCompatibleSld(layer):
 def getCompatibleSldAsZip(layer):    
     filename = tempFilenameInTempFolder(layer.name() + ".zip")
     z = zipfile.ZipFile(filename, "w")
-    sld, icons = getGsCompatibleSld(layer)
+    sld, icons = getCompatibleSld(layer)
     for icon in icons:
         z.write(icon, os.path.basename(icon))
     z.writestr(layer.name() + ".txt", sld)
     z.close()
-    logInfo("Style for layer %s exported as zip file to %s" % (layer.name(), filename))
+    log.logInfo("Style for layer %s exported as zip file to %s" % (layer.name(), filename))
     return filename
 
 def getStyleAsSld(layer):

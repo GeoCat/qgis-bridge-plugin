@@ -1,7 +1,7 @@
 from .catalog import GeodataCatalog
 from geoserver.catalog import Catalog
 from geoserver.catalog import ConflictingDataError
-from .__init__ import logInfo, logWarning, logError
+from . import log
 from .feedback import SilentFeedbackReporter
 
 class GSConfigCatalogUsingNetworkAccessManager(Catalog):
@@ -16,7 +16,9 @@ class GSConfigCatalogUsingNetworkAccessManager(Catalog):
         self.password = ''        
 
     def http_request(self, url, data=None, method='get', headers = {}):
-        return self.nam.request(url, method, data, headers)
+        log.logInfo("Making '%s' request to '%s'" % (method, url))
+        resp, content = self.nam.request(url, method, data, headers)
+        return resp
 
     def setup_connection(self):
         pass
@@ -29,7 +31,7 @@ class GeoServerCatalog(GeodataCatalog):
         self.gscatalog = GSConfigCatalogUsingNetworkAccessManager(service_url, network_access_manager)
 
     def publish_vector_layer_from_file(self, filename, layername, style, stylename, feedback = None):
-        logInfo("Publishing layer from file: %s" % filename)
+        log.logInfo("Publishing layer from file: %s" % filename)
         feedback = feedback or SilentFeedbackReporter
         self._ensureWorkspaceExists()
         self.publish_style(stylename, zipfile = style)
@@ -62,7 +64,7 @@ class GeoServerCatalog(GeodataCatalog):
             if ftype.name != name:
                 ftype.dirty["name"] = name
             self.gscatalog.save(ftype)
-            logInfo("Feature type correctly created from GPKG file '%s'" % filename)
+            log.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
             self._set_layer_style(layername, stylename)
 
     def publish_vector_layer_from_postgis(self, host, port, database, schema, table, 
@@ -100,14 +102,14 @@ class GeoServerCatalog(GeodataCatalog):
         self._ensureWorkspaceExists()
         if sld:
             self.gscatalog.create_style(name, sld, True)
-            logInfo("Style %s corectly created from SLD file '%s'" % (name, sld))
+            log.logInfo("Style %s corectly created from SLD file '%s'" % (name, sld))
         elif zipfile:
             headers = {'Content-type': 'application/zip'}
             url = self.service_url + "/workspaces/%s/styles" % self.workspace
             with open(zipfile, "rb") as f:
                 data = f.read()
                 self.gscatalog.nam.http_request(url, data=data, method="put", headers=headers)
-            logInfo("Style %s corectly created from Zip file '%s'" % (name, zipfile))
+            log.logInfo("Style %s corectly created from Zip file '%s'" % (name, zipfile))
         else:
             raise ValueError("A style definition must be provided, whether using a zipfile path or a SLD string")
 
@@ -138,12 +140,12 @@ class GeoServerCatalog(GeodataCatalog):
         layer = self._get_layer(name)
         layer.default_style = self.gscatalog.get_styles(stylename, self.workspace)[0]
         self.gscatalog.save(layer)
-        logInfo("Style %s correctly assigned to layer %s" % (stylename, layername))
+        log.logInfo("Style %s correctly assigned to layer %s" % (stylename, layername))
 
     def _ensureWorkspaceExists(self):
         ws  = self.gscatalog.get_workspaces(self.workspace)
         if not ws:
-            logInfo("Workspace %s does not exist. Creating it." % self.workspace)
+            log.logInfo("Workspace %s does not exist. Creating it." % self.workspace)
             self.gscatalog.create_workspace(self.workspace, url)
 
 

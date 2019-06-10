@@ -11,7 +11,7 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsMessageLog, Qgis
 
-from .extlibs.geocatbridgecommons import setLogger
+from .extlibs.geocatbridgecommons import log
 from .extlibs.qgiscommons2.settings import readSettings
 from .extlibs.qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
 from .extlibs.qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu
@@ -26,15 +26,15 @@ class GeocatBridge:
         readServers()
         
         class QgisLogger():
-            def logInfo(text):
+            def logInfo(self, text):
                 QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
-            def logWarning(text):
+            def logWarning(self, text):
                 QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Warning)
-            def logError(text):
+            def logError(self, text):
                 QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Critical)
 
         logger = QgisLogger()
-        setLogger(logger)
+        log.setLogger(logger)
 
     def initGui(self):
         
@@ -57,7 +57,7 @@ class GeocatBridge:
         
         removeHelpMenu("GeoCatBridge")
         
-        removeAboveMenu("GeoCatBridge")
+        removeAboutMenu("GeoCatBridge")
                 
         self.iface.removePluginFromWebMenu("GeoCatBridge", self.actionPublish)
         
