@@ -172,7 +172,7 @@ def getCompatibleSldAsZip(layer):
     sld, icons = getCompatibleSld(layer)
     for icon in icons:
         z.write(icon, os.path.basename(icon))
-    z.writestr(layer.name() + ".txt", sld)
+    z.writestr(layer.name() + ".sld", sld)
     z.close()
     log.logInfo("Style for layer %s exported as zip file to %s" % (layer.name(), filename))
     return filename

@@ -14,11 +14,12 @@ _servers = {}
 def readServers():
     global _servers
     try:
-        storedServers = json.loads(QSettings().value(SERVERS_SETTING))
-        print(storedServers)
-        for serverDef in storedServers:
-            s = _serverFromDefinition(serverDef)
-            _servers[s.name] = s
+        value = QSettings().value(SERVERS_SETTING)
+        if value is not None:
+            storedServers = json.loads(value)            
+            for serverDef in storedServers:
+                s = _serverFromDefinition(serverDef)
+                _servers[s.name] = s
     except KeyError:
         pass
 
@@ -85,20 +86,20 @@ class GeoserverServer(GeodataServer):
             if self.storage == self.UPLOAD_DATA:
                 filename = exportLayer(layer, fields)
                 style = getCompatibleSldAsZip(layer)
-                self.catalog().publish_vector_layer_from_file(self, filename, layer.name(), style, layer.name())
+                self.catalog().publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), style, layer.name())
             else:
                 self.postgisdb.importLayer(layer, fields)
                 authConfig = QgsAuthMethodConfig()                
                 QgsApplication.authManager().loadAuthenticationConfig(self.authid, authConfig, True)
                 username = authConfig.config('username')
                 passwd = authConfig.config('password')
-                self.catalog().publish_vector_layer_from_postgis(self, postgisdb.host, postgisdb.port, 
+                self.catalog().publish_vector_layer_from_postgis(postgisdb.host, postgisdb.port, 
                                         postgisdb.database, postgisdb.schema, layer.name(), username, passwd, 
                                         layer.crs().authid(), layer.name(), style, layer.name())
         elif layer.type() == layer.RasterLayer:
             filename = exportLayer(layer, fields)
             style = getCompatibleSldAsZip(layer)
-            self.catalog().publish_raster_layer_file(self, filename, layer.name(), style, layer.name())
+            self.catalog().publish_raster_layer_file(filename, layer.name(), style, layer.name())
 
 
 
@@ -109,6 +110,10 @@ class GeocatLiveServer():
     pass
 
 class GeonetworkServer():
+
+    PROFILE_DEFAULT = 0
+    PROFILE_INSPIRE = 1
+    PROFILE_DUTCH = 2
 
     def __init__(self, name, url="", authid="", profile=""):
         self.name = name

@@ -30,9 +30,23 @@ class ServerConnectionsDialog(BASE, WIDGET):
         self.buttonBox.rejected.connect(self.close)
         self.radioUploadData.toggled.connect(self.datastoreChanged)
 
+        self.txtCswName.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtGeoserverName.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtPostgisName.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtGeoserverUrl.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtCswUrl.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtPostgisServerAddress.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtPostgisPort.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtPostgisSchema.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtPostgisDatabase.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtGeoserverWorkspace.textChanged.connect(self._setCurrentServerHasChanges)
+        self.comboMetadataProfile.currentIndexChanged.connect(self._setCurrentServerHasChanges)
+        self.comboDatastore.currentIndexChanged.connect(self._setCurrentServerHasChanges)
+
     def datastoreChanged(self, checked):
         self.comboDatastore.setEnabled(not checked)
-        self.btnNewDatastore.setEnabled(not checked)
+        #self.btnNewDatastore.setEnabled(not checked)
+        self._setCurrentServerHasChanges()
 
     def currentServerChanged(self, new, old):
         if new is None:
@@ -44,11 +58,23 @@ class ServerConnectionsDialog(BASE, WIDGET):
             if self.currentServer is not None and new is not None:
                 if server.name == self.currentServer.name:
                     return
-            if not self.saveCurrentServer():
-                self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
-                self.listServers.setCurrentItem(old)
-                return
-            self.setCurrentServer(server)
+            if self.currentServerHasChanges:
+                res = QMessageBox.question(self, "Servers", "Do you want to save changes to the current server?",
+                                QMessageBox.Cancel | QMessageBox.No | QMessageBox.Yes,
+                                QMessageBox.Yes)        
+                if res == QMessageBox.Yes:
+                    if not self.saveCurrentServer():
+                        self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
+                        self.listServers.setCurrentItem(old)
+                    else:
+                        self.setCurrentServer(server)
+                elif res == QMessageBox.Cancel:
+                    print(self.listServers.itemWidget(old).serverName())
+                    self.listServers.setCurrentItem(old)
+                else:
+                    self.setCurrentServer(server)
+            else:
+                self.setCurrentServer(server)
                     
     def saveCurrentServer(self):
         w = self.stackedWidget.currentWidget()
@@ -108,17 +134,31 @@ class ServerConnectionsDialog(BASE, WIDGET):
         server = PostgisServer(name, authid, host, port, schema, database)
         return server
 
+    def createGeonetworkServer(self):
+        ##TODO check validity of name and values        
+        name = self.txtCswName.text()        
+        authid = self.cswAuth.configId()
+        url = self.txtCswUrl.text()
+        profile = self.comboMetadataProfile.currentIndex()
+        server = GeonetworkServer(name, url, authid, profile)
+        return server
+
     def addAuthWidgets(self):
         self.geoserverAuth = QgsAuthConfigSelect()
         vlayout = QHBoxLayout()
         vlayout.addWidget(self.geoserverAuth)
         self.geoserverAuthWidget.setLayout(vlayout)
-        self.geoserverAuthWidget.setFixedHeight(1.5 * self.txtGeoserverUrl.height())
+        self.geoserverAuthWidget.setFixedHeight(2 * self.txtGeoserverUrl.height())
         self.postgisAuth = QgsAuthConfigSelect()
         vlayout = QHBoxLayout()
         vlayout.addWidget(self.postgisAuth)
         self.postgisAuthWidget.setLayout(vlayout)
-        self.postgisAuthWidget.setFixedHeight(1.5 * self.txtGeoserverUrl.height())
+        self.postgisAuthWidget.setFixedHeight(2 * self.txtGeoserverUrl.height())
+        self.cswAuth = QgsAuthConfigSelect()
+        vlayout = QHBoxLayout()
+        vlayout.addWidget(self.cswAuth)
+        self.cswAuthWidget.setLayout(vlayout)
+        self.cswAuthWidget.setFixedHeight(2 * self.txtGeoserverUrl.height())
         ##
 
     def addMenuToButtonNew(self):
@@ -168,6 +208,9 @@ class ServerConnectionsDialog(BASE, WIDGET):
             if isinstance(s, PostgisServer):
                 self.comboDatastore.addItem(s.name)
 
+    def _setCurrentServerHasChanges(self):
+        self.currentServerHasChanges = True
+
     def setCurrentServer(self, server):
         self.currentServer = server
         if server is None:
@@ -203,6 +246,7 @@ class ServerConnectionsDialog(BASE, WIDGET):
         elif isinstance(server, CswServer):
             pass
             #TODO
+        self.currentServerHasChanges = False
 
     def getNewName(self, name):
         servers = list(allServers().keys())
@@ -214,9 +258,6 @@ class ServerConnectionsDialog(BASE, WIDGET):
             else:
                 i += 1
 
-    def hasChanges(self):
-        return False
-
     def accepted(self):
         if self.saveCurrentServer():
             self.close()
@@ -224,7 +265,7 @@ class ServerConnectionsDialog(BASE, WIDGET):
             self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)    
 
     def onClose(self, evt):
-        if self.hasChanges():
+        if self.currentServerHasChanges:
             res = QMessageBox.question(self, "Servers", "Do you want to close without saving the current changes?",
                                 QMessageBox.Cancel | QMessageBox.No | QMessageBox.Yes,
                                 QMessageBox.Yes)

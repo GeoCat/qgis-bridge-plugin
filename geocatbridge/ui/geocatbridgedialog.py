@@ -1,6 +1,6 @@
 import os
 from qgis.PyQt import uic
-from geocatbridge.publish.servers import geodataServers, metadataServers
+from geocatbridge.publish.servers import geodataServers, metadataServers, GeonetworkServer
 from geocatbridge.ui.serverconnectionsdialog import ServerConnectionsDialog
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
@@ -60,7 +60,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.tableLayers.customContextMenuRequested.connect(self.showContextMenu)
         self.tableLayers.currentCellChanged.connect(self.currentCellChanged)
         self.comboGeodataServer.currentIndexChanged.connect(self.populateLayers)
-        self.comboMetadataServer.currentIndexChanged.connect(self.populateLayers)
+        self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
         self.btnDefineConnectionsData.clicked.connect(self.defineConnectionsData)
         self.btnDefineConnectionsMetadata.clicked.connect(self.defineConnectionsMetadata)
         self.btnPublish.clicked.connect(self.publish)
@@ -80,7 +80,24 @@ class GeocatBridgeDialog(BASE, WIDGET):
         if self.tableLayers.rowCount():
             self.currentCellChanged(0, 0, None, None)
 
+        self.metadataServerChanged()
 
+    def metadataServerChanged(self):
+        self.populateLayers()
+        try:
+            profile = metadataServers()[self.comboMetadataServer.currentText()]
+        except KeyError:
+            profile = GeonetworkServer.PROFILE_DEFAULT
+        if profile == GeonetworkServer.PROFILE_DEFAULT:
+            if self.tabWidgetMetadata.count() == 3:
+                self.tabWidgetMetadata.removeTab(1)
+                self.tabWidgetMetadata.removeTab(1)
+        else:
+            if self.tabWidgetMetadata.count() == 1:
+                self.tabWidgetMetadata.addTab(self.tabInspire)
+                self.tabWidgetMetadata.addTab(self.tabTemporal)
+            self.comboStatus.setVisible(profile == GeonetworkServer.PROFILE_DUTCH)
+        
     def selectLabelClicked(self, url):
         state = Qt.Unchecked if url == "none" else Qt.Checked
         for i in range (self.tableLayers.rowCount()):
@@ -182,7 +199,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         for i, layer in enumerate(layers):
             fields = [f.name() for f in layer.fields()]
             self.fieldsToPublish[layer] = {f:True for f in fields}
-            self.metadata[layer] = layer.metadata().clone()
+            self.metadata[layer] = layer.metadata().clone()            
             item = QTableWidgetItem()
             item.setCheckState(Qt.Unchecked)
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
@@ -195,7 +212,8 @@ class GeocatBridgeDialog(BASE, WIDGET):
             item.setIcon(PUBLISHED_ICON if self.isMetadataPublished[layer.name()] else QIcon())
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableLayers.setItem(i, 2, item)
-            self.isDataPublished[layer.name()] = self.isDataOnServer(layer)            
+            self.isDataPublished[layer.name()] = self.isDataOnServer(layer)
+            item = QTableWidgetItem()          
             item.setIcon(PUBLISHED_ICON if self.isDataPublished[layer.name()] else QIcon())
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableLayers.setItem(i, 3, item)
@@ -229,7 +247,6 @@ class GeocatBridgeDialog(BASE, WIDGET):
             self.labelErrorMetadataServer.setText("")
             return False
         except:
-            raise
             self.labelErrorMetadataServer.setText(ERROR_ICON)
 
     def isDataOnServer(self, layer):
@@ -241,11 +258,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
             self.labelErrorGeodataServer.setText("")
             return False
         except:
-            raise
             self.labelErrorGeodataServer.setText(ERROR_ICON)
-
-    def saveMetadataToLayer(self):
-        pass
 
     def openMetadataEditor(self, tab):
         metadata = self.metadata[self.currentLayer].clone()
@@ -352,8 +365,8 @@ class GeocatBridgeDialog(BASE, WIDGET):
                         if layer.type() == layer.VectorLayer:
                             fields = [name for name, publish in self.fieldsToPublish[layer].items() if publish]                            
                         geodataServer.publishLayer(layer, fields)
-                if metadataCatalog is not None:
-                    metadataCatalog.publishLayerMetadata(layer)
+                if metadataServer is not None:
+                    metadataServer.publishLayerMetadata(layer)
 
         self.bar.clearWidgets()
 
