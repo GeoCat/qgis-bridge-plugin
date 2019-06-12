@@ -6,6 +6,7 @@ from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtCore import *
 from qgis.gui import *
 from qgis.core import *
+from qgiscommons2.gui import execute
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'serverconnectionsdialog.ui'))
 
@@ -26,9 +27,11 @@ class ServerConnectionsDialog(BASE, WIDGET):
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.layout().insertWidget(0, self.bar)
         self.setCurrentServer(None)
-        self.buttonBox.accepted.connect(self.accepted)
+        self.buttonBox.accepted.connect(self.saveButtonClicked)
         self.buttonBox.rejected.connect(self.close)
         self.radioUploadData.toggled.connect(self.datastoreChanged)
+        self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
+        self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
 
         self.txtCswName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeoserverName.textChanged.connect(self._setCurrentServerHasChanges)
@@ -76,6 +79,26 @@ class ServerConnectionsDialog(BASE, WIDGET):
             else:
                 self.setCurrentServer(server)
                     
+    def testConnectionPostgis(self):
+        server = self.createPostgisServer()
+        if server is None:
+            self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
+        else:
+            if execute(server.testConnection):
+                self.bar.pushMessage("Success", "Connection succesfully established with server", level=Qgis.Success, duration=5)
+            else:
+                self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)
+
+    def testConnectionGeoserver(self):
+        server = self.createGeoserverServer()
+        if server is None:
+            self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
+        else:
+            if execute(server.testConnection):
+                self.bar.pushMessage("Success", "Connection succesfully established with server", level=Qgis.Success, duration=5)
+            else:
+                self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)
+
     def saveCurrentServer(self):
         w = self.stackedWidget.currentWidget()
         server = None
@@ -130,7 +153,7 @@ class ServerConnectionsDialog(BASE, WIDGET):
         port = self.txtPostgisPort.text()
         schema = self.txtPostgisSchema.text()
         database = self.txtPostgisDatabase.text()
-        authid = self.geoserverAuth.configId()
+        authid = self.postgisAuth.configId()
         server = PostgisServer(name, authid, host, port, schema, database)
         return server
 
@@ -258,9 +281,9 @@ class ServerConnectionsDialog(BASE, WIDGET):
             else:
                 i += 1
 
-    def accepted(self):
+    def saveButtonClicked(self):
         if self.saveCurrentServer():
-            self.close()
+            self.currentServerHasChanges = False
         else:
             self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)    
 

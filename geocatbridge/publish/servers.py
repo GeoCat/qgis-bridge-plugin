@@ -1,11 +1,12 @@
 import json
+import psycopg2
 from .sldadapter import getCompatibleSldAsZip
 from .exporter import exportLayer
 from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
 from qgis.PyQt.QtCore import QSettings
 from geocatbridgecommons.geoservercatalog import GeoServerCatalog
 from geocatbridgecommons.catalog import GeodataCatalog, MetadataCatalog
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import QgsMessageLog, Qgis, QgsVectorLayerExporter, QgsAuthMethodConfig, QgsApplication, QgsFeatureSink
 
 SERVERS_SETTING = "geocatbridge/BridgeServers"
 
@@ -29,7 +30,7 @@ def _serverFromDefinition(defn):
 def _updateStoredServers():
     servList = []
     for s in _servers.values():
-        d = {k:v for k,v in s.__dict__.items() if k not in ["isDataCatalog", "isMetadataCatalog"]}
+        d = {k:v for k,v in s.__dict__.items() if not k.startswith("_")}
         servList.append((s.__class__.__name__, d))    
     QSettings().setValue(SERVERS_SETTING, json.dumps(servList))
 
@@ -45,10 +46,10 @@ def removeServer(name):
     _updateStoredServers()
 
 def geodataServers():
-    return {name: server for name, server in _servers.items() if server.isDataCatalog}
+    return {name: server for name, server in _servers.items() if server._isDataCatalog}
 
 def metadataServers():
-    return {name: server for name, server in _servers.items() if server.isMetadataCatalog}
+    return {name: server for name, server in _servers.items() if server._isMetadataCatalog}
 
 
 class GeodataServer():
@@ -70,8 +71,8 @@ class GeoserverServer(GeodataServer):
         self.workspace = workspace
         self.datastore = datastore
         self.postgisdb = postgisdb
-        self.isMetadataCatalog = False
-        self.isDataCatalog = True
+        self._isMetadataCatalog = False
+        self._isDataCatalog = True
 
     def catalog(self):
         nam = NetworkAccessManager(self.authid, debug=False)
@@ -88,18 +89,22 @@ class GeoserverServer(GeodataServer):
                 style = getCompatibleSldAsZip(layer)
                 self.catalog().publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), style, layer.name())
             else:
-                self.postgisdb.importLayer(layer, fields)
-                authConfig = QgsAuthMethodConfig()                
-                QgsApplication.authManager().loadAuthenticationConfig(self.authid, authConfig, True)
-                username = authConfig.config('username')
-                passwd = authConfig.config('password')
+                self.postgisdb.importLayer(layer, fields)                
                 self.catalog().publish_vector_layer_from_postgis(postgisdb.host, postgisdb.port, 
-                                        postgisdb.database, postgisdb.schema, layer.name(), username, passwd, 
-                                        layer.crs().authid(), layer.name(), style, layer.name())
+                                        postgisdb.database, postgisdb.schema, layer.name(), 
+                                        postgisdb._username, postgisdb._password, layer.crs().authid(), 
+                                        layer.name(), style, layer.name())
         elif layer.type() == layer.RasterLayer:
             filename = exportLayer(layer, fields)
             style = getCompatibleSldAsZip(layer)
             self.catalog().publish_raster_layer_file(filename, layer.name(), style, layer.name())
+
+    def testConnection(self):
+        try:
+            self.catalog().gscatalog.gsversion()
+            return True
+        except:
+            return False
 
 
 
@@ -120,8 +125,8 @@ class GeonetworkServer():
         self.url = url
         self.authid = authid
         self.profile = profile
-        self.isMetadataCatalog = True
-        self.isDataCatalog = False
+        self._isMetadataCatalog = True
+        self._isDataCatalog = False
 
     def publishLayerMetadata(self, layer):
         pass
@@ -135,11 +140,45 @@ class PostgisServer():
         self.schema = schema
         self.database = database
         self.authid = authid
-        self.isMetadataCatalog = False
-        self.isDataCatalog = False
+        self._isMetadataCatalog = False
+        self._isDataCatalog = False
+        authConfig = QgsAuthMethodConfig()                
+        QgsApplication.authManager().loadAuthenticationConfig(self.authid, authConfig, True)
+        self._username = authConfig.config('username')
+        self._password = authConfig.config('password')
 
     def importLayer(self, layer, fields):
-        pass
+        uri = "dbname='%s' host=%s port=%s user='%s' password='%s' table=\"%s\".\"%s\" (geom) sql=" % (self.database, 
+                    self.host, self.port, self._username, self.password, self.schema, layer.name())
+        
+        exporter = QgsVectorLayerExporter(uri, "postgres", fields,
+                                          layer.wkbType(), layer.sourceCrs(), True)
+
+        if exporter.errorCode() != QgsVectorLayerExporter.NoError:
+            raise Exception('Error importing to PostGIS: {0}').format(exporter.errorMessage())
+
+        features = source.getFeatures()
+        for f in features:
+            if not exporter.addFeature(f, QgsFeatureSink.FastInsert):
+                raise Exception('Error importing to PostGIS: {0}').format(exporter.errorMessage())
+        exporter.flushBuffer()
+        if exporter.errorCode() != QgsVectorLayerExporter.NoError:
+            raise Exception('Error importing to PostGIS: {0}').format(exporter.errorMessage())
+
+    def testConnection(self):
+        con = None
+        try:
+            print(self._username, self._password)
+            con = psycopg2.connect(dbname=self.database, user=self._username, password=self._password, host=self.host, port=self.port)
+            cur = con.cursor()
+            cur.execute('SELECT version()')
+            cur.fetchone()[0]
+            return True
+        except:
+            return False
+        finally:
+            if con:
+                con.close()
 
 class CswServer(): 
     pass
