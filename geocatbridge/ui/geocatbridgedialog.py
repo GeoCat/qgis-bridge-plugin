@@ -22,7 +22,7 @@ VALIDATE_ICON = QIcon(iconPath("validation.png"))
 PREVIEW_ICON = QIcon(iconPath("preview.png"))
 SAVE_ICON = QIcon(iconPath("save.png"))
 
-IDENTIFICATION, CATEGORIES, KEYWORDS, ACCESS = range(4)
+IDENTIFICATION, CATEGORIES, KEYWORDS, ACCESS, EXTENT, CONTACT = range(6)
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatbridgedialog.ui'))
 
@@ -56,7 +56,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
 
         self.populateComboBoxes()
         self.populateLayers()
-        self.tableLayers.clicked.connect(self.layerClicked)
+        self.tableLayers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tableLayers.customContextMenuRequested.connect(self.showContextMenu)
         self.tableLayers.currentCellChanged.connect(self.currentCellChanged)
         self.comboGeodataServer.currentIndexChanged.connect(self.populateLayers)
@@ -76,6 +76,8 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.btnAccessConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
         self.btnIsoTopic.clicked.connect(lambda: self.openMetadataEditor(CATEGORIES))
         self.btnKeywords.clicked.connect(lambda: self.openMetadataEditor(KEYWORDS))
+        self.btnDataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
+        self.btnMetadataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
 
         if self.tableLayers.rowCount():
             self.currentCellChanged(0, 0, None, None)
@@ -147,10 +149,13 @@ class GeocatBridgeDialog(BASE, WIDGET):
             self.tableFields.setRowCount(len(fields))
             for i, field in enumerate(fields):
                 item = QTableWidgetItem()
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable)
                 check = Qt.Checked if self.fieldsToPublish[self.currentLayer][field] else Qt.Unchecked
                 item.setCheckState(check)
                 self.tableFields.setItem(i, 0, item)
-                self.tableFields.setItem(i, 1, QTableWidgetItem(field))
+                item = QTableWidgetItem(field)
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+                self.tableFields.setItem(i, 1, item)
         else:
             self.tabLayerInfo.setTabEnabled(1, False)
 
@@ -174,6 +179,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
 
     def showContextMenu(self, pos):
         item = self.tableLayers.itemAt(pos)
+        print(item)
         if item is None:
             return
         row = self.tableLayers.row(item)
@@ -185,7 +191,9 @@ class GeocatBridgeDialog(BASE, WIDGET):
             menu.addAction("Unpublish data", lambda: self.unpublishData(name))
         if self.isMetadataPublished[name]:    
             menu.addAction("Unpublish metadata", lambda: self.unpublishMetadata(name))
-        menu.popup(self.tableLayers.viewport().mapToGlobal(pos))
+        print(menu)
+        print(self.tableLayers.mapToGlobal(pos))
+        menu.exec_(self.tableLayers.mapToGlobal(pos))
 
     def publishableLayers(self):
         layers = [layer for layer in QgsProject.instance().mapLayers().values() 
@@ -233,10 +241,6 @@ class GeocatBridgeDialog(BASE, WIDGET):
     def populatecomboMetadataServer(self):
         self.comboMetadataServer.clear()
         self.comboMetadataServer.addItems(metadataServers().keys())
-
-    def layerClicked(self):
-        layers = list(QgsProject.instance().mapLayers().values())
-        layer = layers[self.tableLayers.currentRow()]
 
     def isMetadataOnServer(self, layer):
         try:

@@ -5,10 +5,9 @@ from geocatbridgecommons import log
 def exportLayer(layer, fields=None):
     filename = layer.source()
     destFilename = layer.name()
-    if layer.type() == layer.VectorLayer:
-        fields = fields or layer.fields()        
+    if layer.type() == layer.VectorLayer:            
         if not filename.lower().endswith("gpkg") or layer.fields().count() != len(fields):
-            attrs = [i for i, f in enumerate(layer.fields()) if f.name() in fields]
+            attrs = [i for i, f in enumerate(layer.fields()) if fields is None or f.name() in fields]
             output = tempFilenameInTempFolder(destFilename + ".gpkg")
             QgsVectorFileWriter.writeAsVectorFormat(layer, output, "UTF-8", attributes=attrs)
             log.logInfo("Layer %s exported to %s" % (destFilename, output))

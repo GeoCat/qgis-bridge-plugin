@@ -141,7 +141,7 @@ class ServerConnectionsDialog(BASE, WIDGET):
             storage = GeoserverServer.UPLOAD_DATA
             postgisdb = None
         else:
-            storage = self.STORE_IN_POSTGIS
+            storage = GeoserverServer.STORE_IN_POSTGIS
             postgisdb = self.comboDatastore.currentText()
         server = GeoserverServer(name, url, authid, storage, workspace, datastore, postgisdb)
         return server

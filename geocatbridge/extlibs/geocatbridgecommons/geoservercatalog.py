@@ -131,7 +131,7 @@ class GeoServerCatalog(GeodataCatalog):
         return len(self.gscatalog.get_styles(stylename, self.workspace)) > 0
 
     def delete_style(self, name):
-        style = self.gscatalog.get_styles(stylename, self.workspace)[0]
+        style = self.gscatalog.get_styles(name, self.workspace)[0]
         self.gscatalog.delete(style)
 
     def layer_exists(self, name):
