@@ -35,6 +35,7 @@ class GeoServerCatalog(GeodataCatalog):
         log.logInfo("Publishing layer from file: %s" % filename)
         feedback = feedback or SilentFeedbackReporter()
         self._ensureWorkspaceExists()
+        self._deleteLayerIfItExists(layername)
         self.publish_style(stylename, zipfile = style)
         if filename.lower().endswith(".shp"):
             basename, extension = os.path.splitext(filename)
@@ -46,16 +47,7 @@ class GeoServerCatalog(GeodataCatalog):
             }
             self.gscatalog.create_featurestore(name, path, self.workspace, True)
             self._set_layer_style(layername, stylename)
-        elif filename.lower().endswith(".gpkg"):
-            layer = self._get_layer(layername)
-            if layer:
-                self.gscatalog.delete(layer)
-            stores = self.gscatalog.get_stores(layername, self.workspace)
-            if stores:
-                store = stores[0]
-                for res in store.get_resources():
-                    self.gscatalog.delete(res)
-                self.gscatalog.delete(store)
+        elif filename.lower().endswith(".gpkg"):            
             json = { "dataStore": {
                         "name": layername,
                         "connectionParameters": {
@@ -81,12 +73,13 @@ class GeoServerCatalog(GeodataCatalog):
                                         feedback = None):
         feedback = feedback or SilentFeedbackReporter()
         self._ensureWorkspaceExists()
+        self._deleteLayerIfItExists(layername)
         self.publish_style(stylename, zipfile = style)
-        store = self.gscatalog.create_datastore(name, self.workspace)
-        store.connection_parameters.update(host=host, port=str(port), database=database, user=user, 
+        store = self.gscatalog.create_datastore(layername, self.workspace)
+        store.connection_parameters.update(host=host, port=str(port), database=database, user=username, 
                                             schema=schema, passwd=passwd, dbtype="postgis")
         self.gscatalog.save(store)        
-        ftype = self.catalog.publish_featuretype(table, store, crsauthid, native_name=layername)        
+        ftype = self.gscatalog.publish_featuretype(table, store, crsauthid, native_name=layername)        
         if ftype.name != layername:
             ftype.dirty["name"] = layername
         self.gscatalog.save(ftype)
@@ -163,6 +156,16 @@ class GeoServerCatalog(GeodataCatalog):
             self.gscatalog.create_workspace(self.workspace, "http://%s.geocat.net" % self.workspace) #TODO change URL
 
 
+    def _deleteLayerIfItExists(self, name):
+        layer = self._get_layer(name)
+        if layer:
+            self.gscatalog.delete(layer)
+        stores = self.gscatalog.get_stores(name, self.workspace)
+        if stores:
+            store = stores[0]
+            for res in store.get_resources():
+                self.gscatalog.delete(res)
+            self.gscatalog.delete(store)
 
 
 

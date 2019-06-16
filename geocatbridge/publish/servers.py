@@ -83,10 +83,11 @@ class GeoserverServer(GeodataServer):
         self.catalog().publishStyle(layer.name(), zipfile = style)
         
     def publishLayer(self, layer, fields):        
+        style = getCompatibleSldAsZip(layer)
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
                 filename = exportLayer(layer, fields)
-                style = getCompatibleSldAsZip(layer)
+                
                 self.catalog().publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), style, layer.name())
             else:
                 try:
@@ -94,13 +95,12 @@ class GeoserverServer(GeodataServer):
                 except KeyError:
                     raise Exception("Cannot find the selected PostGIS database")
                 db.importLayer(layer, fields)                
-                self.catalog().publish_vector_layer_from_postgis(postgisdb.host, postgisdb.port, 
-                                        postgisdb.database, postgisdb.schema, layer.name(), 
-                                        postgisdb._username, postgisdb._password, layer.crs().authid(), 
+                self.catalog().publish_vector_layer_from_postgis(db.host, db.port, 
+                                        db.database, db.schema, layer.name(), 
+                                        db._username, db._password, layer.crs().authid(), 
                                         layer.name(), style, layer.name())
         elif layer.type() == layer.RasterLayer:
-            filename = exportLayer(layer, fields)
-            style = getCompatibleSldAsZip(layer)
+            filename = exportLayer(layer, fields)            
             self.catalog().publish_raster_layer_file(filename, layer.name(), style, layer.name())
 
     def testConnection(self):

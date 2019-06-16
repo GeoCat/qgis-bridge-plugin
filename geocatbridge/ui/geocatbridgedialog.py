@@ -1,4 +1,5 @@
 import os
+import traceback
 from qgis.PyQt import uic
 from geocatbridge.publish.servers import geodataServers, metadataServers, GeonetworkServer
 from geocatbridge.ui.serverconnectionsdialog import ServerConnectionsDialog
@@ -11,6 +12,7 @@ from qgis.PyQt.QtWidgets import *
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
 from qgis.utils import iface
+from qgiscommons2.gui import execute
 
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
@@ -294,12 +296,12 @@ class GeocatBridgeDialog(BASE, WIDGET):
         catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog()
         catalog.delete_layer(name)
         catalog.delete_style(name)
-        self.updateLayerRow(name, False)
+        self.updateLayerIsDataPublished(name, False)
 
     def unpublishMetadata(self, name):
         catalog = metadataServers()[self.comboMetadataServer.currentText()].catalog()
         catalog.delete_metadata(name)
-        self.updateLayerRow(name, False)
+        self.updateLayerIsMetadataPublished(name, False)
 
     def updateLayerIsMetadataPublished(self, name, value):
         self.isMetadataPublished[name] = value
@@ -307,7 +309,6 @@ class GeocatBridgeDialog(BASE, WIDGET):
             item = self.tableLayers.item(i, 1)
             if item.text() == name:
                 item.setIcon(PUBLISHED_ICON if value else QIcon())
-
 
     def updateLayerIsDataPublished(self, name, value):
         self.isDataPublished[name] = value
@@ -330,11 +331,21 @@ class GeocatBridgeDialog(BASE, WIDGET):
         pass        
 
     def publish(self):
+        try:
+            execute(self._publish)
+            self.bar.clearWidgets()
+            dialog = PublishReportDialog(self)
+            dialog.exec_()
+        except:
+            self.bar.pushMessage("Error while publishing", "See QGIS log for details", level=Qgis.Warning, duration=5)
+            QgsMessageLog.logMessage(traceback.format_exc(), 'GeoCat Bridge', level=Qgis.Critical)
+
+    def _publish(self):
         if self.chkPublishToGeodataServer.checkState() == Qt.Checked:
             try:
                 geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
             except KeyError:                
-                self.bar.pushMessage("Error", "No map server has been defined", level=Qgis.Warning, duration=5)              
+                self.bar.pushMessage("Error", "No map server has been defined", level=Qgis.Warning, duration=5)
                 return
         else:
             geodataServer = None
@@ -358,8 +369,8 @@ class GeocatBridgeDialog(BASE, WIDGET):
         for i in range(self.tableLayers.rowCount()):
             progress.setValue(i)
             item = self.tableLayers.item(i, 0)
-            if item.checkState() == Qt.Checked:
-                name = self.tableLayers.item(i, 1).text()
+            if item.checkState() == Qt.Checked:                
+                name = self.tableLayers.item(i, 1).text()                
                 layer = self.layerFromName(name)
                 if geodataServer is not None:
                     if self.chkOnlySymbology.checkState() == Qt.Checked:
@@ -369,13 +380,10 @@ class GeocatBridgeDialog(BASE, WIDGET):
                         if layer.type() == layer.VectorLayer:
                             fields = [name for name, publish in self.fieldsToPublish[layer].items() if publish]                            
                         geodataServer.publishLayer(layer, fields)
+                        self.updateLayerIsDataPublished(name, True)
                 if metadataServer is not None:
                     metadataServer.publishLayerMetadata(layer)
-
-        self.bar.clearWidgets()
-
-        dialog = PublishReportDialog(self)
-        dialog.exec_()
+                    self.updateLayerIsMetadataPublished(name, True)        
 
     def layerFromName(self, name):
         layers = self.publishableLayers()
