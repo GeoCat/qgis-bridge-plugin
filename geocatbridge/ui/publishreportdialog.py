@@ -11,8 +11,9 @@ WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishre
 
 class PublishReportDialog(BASE, WIDGET):
 
-    def __init__(self, geocatdialog):
+    def __init__(self, geocatdialog, results):
         super(PublishReportDialog, self).__init__(geocatdialog)
+        self.results = results
         self.setupUi(self)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         if geocatdialog.chkPublishToGeodataServer.checkState() == Qt.Checked:
@@ -27,7 +28,30 @@ class PublishReportDialog(BASE, WIDGET):
             self.labelUrlMetadataServer.setText("----")
         self.labelPublishMapData.setText("ON" if geocatdialog.chkPublishToGeodataServer.checkState() == Qt.Checked else "OFF")
         self.labelPublishMetadata.setText("ON" if geocatdialog.chkPublishToMetadataServer.checkState() == Qt.Checked else "OFF")
-        for i in range(geocatdialog.tableLayers.rowCount()):
-            item = geocatdialog.tableLayers.item(i, 0)
-            if item.checkState() == Qt.Checked:
-                name = geocatdialog.tableLayers.item(i, 1).text()
+        for i, name in enumerate(results.keys()):
+            warnings, errors = results[name]
+            item = QTableWidgetItem(name)
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.tableWidget.setItem(i, 0, item)
+            item = QTableWidgetItem("Yes") #TODO
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.tableWidget.setItem(i, 1, item)
+            item = QTableWidgetItem("Yes") #TODO
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.tableWidget.setItem(i, 2, item)
+            txt = "warnings(%i), errors(%i)" % (len(warnings), len(errors))
+            widget = QWidget()
+            button = QPushButton()
+            button.setText(txt)
+            button.clicked.connect(lambda: self.openDetails(name))
+            layout = QHBoxLayout(widget)
+            layout.addWidget(button)
+            layout.setAlignment(Qt.AlignCenter);
+            layout.setContentsMargins(0, 0, 0, 0)
+            widget.setLayout(layout)
+            self.tableWidget.setCellWidget(i, 4, widget)
+
+    def openDetails(self, name):
+        pass
+
+

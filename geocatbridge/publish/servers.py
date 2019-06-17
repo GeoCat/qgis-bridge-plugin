@@ -102,6 +102,7 @@ class GeoserverServer(GeodataServer):
             filename = exportLayer(layer, fields)            
             self.catalog().publish_raster_layer_file(filename, layer.name(), style, layer.name())
 
+
     def testConnection(self):
         try:
             self.catalog().gscatalog.gsversion()
