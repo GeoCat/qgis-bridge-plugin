@@ -6,6 +6,7 @@ from geocatbridge.ui.serverconnectionsdialog import ServerConnectionsDialog
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 from geocatbridgecommons import log
+from geocatbridgecommons import feedback
 from qgis.core import *
 from qgis.gui import *
 from qgis.PyQt.QtWidgets import *
@@ -39,8 +40,10 @@ class GeocatBridgeDialog(BASE, WIDGET):
 
         self.fieldsToPublish = {}
         self.metadata = {}
-        self.setupUi(self)
+        execute(self._setupUi)
 
+    def _setupUi(self):
+        self.setupUi(self)    
         self.bar = QgsMessageBar()
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.layout().insertWidget(0, self.bar)
@@ -74,6 +77,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.btnValidate.setIcon(VALIDATE_ICON)
         self.btnPreview.setIcon(PREVIEW_ICON)
         self.btnSave.setIcon(SAVE_ICON)
+        self.btnValidate.clicked.connect(self.validateMetadata)
         self.btnUseConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
         self.btnAccessConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
         self.btnIsoTopic.clicked.connect(lambda: self.openMetadataEditor(CATEGORIES))
@@ -232,8 +236,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.populatecomboMetadataServer()
         self.populatecomboGeodataServer()
         self.comboLanguage.clear()
-        w = QgsMetadataWidget()
-        for lang in w.parseLanguages():
+        for lang in QgsMetadataWidget.parseLanguages():
             self.comboLanguage.addItem(lang)
 
     def populatecomboGeodataServer(self):
@@ -265,6 +268,19 @@ class GeocatBridgeDialog(BASE, WIDGET):
             return False
         except:
             self.labelErrorGeodataServer.setText(ERROR_ICON)
+
+    def validateMetadata(self):
+        self.storeMetadata()
+        validator = QgsNativeMetadataValidator()
+        result, errors = validator.validate(self.metadata[self.currentLayer])
+        if result:
+            txt = "No validation errors"
+        else:
+            txt = "The following issues were found:<br>" + "<br>".join(["<b>%s</b>:%s" % (err.section, err.note) for err in errors])
+        dlg = QgsMessageOutput.createMessageOutput()
+        dlg.setTitle("Metadata validation")
+        dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
+        dlg.showMessage()
 
     def openMetadataEditor(self, tab):
         metadata = self.metadata[self.currentLayer].clone()
@@ -306,14 +322,14 @@ class GeocatBridgeDialog(BASE, WIDGET):
     def updateLayerIsMetadataPublished(self, name, value):
         self.isMetadataPublished[name] = value
         for i in range(self.tableLayers.rowCount()):
-            item = self.tableLayers.item(i, 1)
+            item = self.tableLayers.item(i, 2)
             if item.text() == name:
                 item.setIcon(PUBLISHED_ICON if value else QIcon())
 
     def updateLayerIsDataPublished(self, name, value):
         self.isDataPublished[name] = value
         for i in range(self.tableLayers.rowCount()):
-            item = self.tableLayers.item(i, 1)
+            item = self.tableLayers.item(i, 3)
             if item.text() == name:
                 item.setIcon(PUBLISHED_ICON if value else QIcon())
 
@@ -332,10 +348,11 @@ class GeocatBridgeDialog(BASE, WIDGET):
 
     def publish(self):
         try:
-            execute(self._publish)
-            self.bar.clearWidgets()
-            dialog = PublishReportDialog(self)
-            dialog.exec_()
+            ret = execute(self._publish)
+            if ret:
+                self.bar.clearWidgets()
+                dialog = PublishReportDialog(self)
+                dialog.exec_()
         except:
             self.bar.pushMessage("Error while publishing", "See QGIS log for details", level=Qgis.Warning, duration=5)
             QgsMessageLog.logMessage(traceback.format_exc(), 'GeoCat Bridge', level=Qgis.Critical)
@@ -346,7 +363,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
                 geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
             except KeyError:                
                 self.bar.pushMessage("Error", "No map server has been defined", level=Qgis.Warning, duration=5)
-                return
+                return False
         else:
             geodataServer = None
 
@@ -355,7 +372,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
                 metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
             except KeyError:  
                 self.bar.pushMessage("Error", "No metadata catalogue has been defined", level=Qgis.Warning, duration=5)              
-                return
+                return False
         else:
             metadataServer = None 
 
@@ -366,8 +383,19 @@ class GeocatBridgeDialog(BASE, WIDGET):
         progressMessageBar.layout().addWidget(progress)
         self.bar.pushWidget(progressMessageBar, Qgis.Info)
 
+        class QgisProgress():
+            def setProgress(self, v):
+                progress.setValue(v)
+                QApplication.processEvents()
+            def setText(self, text):                
+                progressMessageBar.setText(text)
+                QApplication.processEvents()
+
+        qgisprogress = QgisProgress()
+        feedback.setFeedbackIndicator(qgisprogress)
+
         for i in range(self.tableLayers.rowCount()):
-            progress.setValue(i)
+            progress.setValue(i)            
             item = self.tableLayers.item(i, 0)
             if item.checkState() == Qt.Checked:                
                 name = self.tableLayers.item(i, 1).text()                
@@ -383,7 +411,8 @@ class GeocatBridgeDialog(BASE, WIDGET):
                         self.updateLayerIsDataPublished(name, True)
                 if metadataServer is not None:
                     metadataServer.publishLayerMetadata(layer)
-                    self.updateLayerIsMetadataPublished(name, True)        
+                    self.updateLayerIsMetadataPublished(name, True)    
+        return True    
 
     def layerFromName(self, name):
         layers = self.publishableLayers()

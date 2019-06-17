@@ -87,7 +87,6 @@ class GeoserverServer(GeodataServer):
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
                 filename = exportLayer(layer, fields)
-                
                 self.catalog().publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), style, layer.name())
             else:
                 try:

@@ -14,7 +14,6 @@ _logger = SilentLogger()
 def setLogger(logger):
 	global _logger
 	_logger = logger
-	print (_logger)
 
 def logInfo(text):
 	_logger.logInfo(text)

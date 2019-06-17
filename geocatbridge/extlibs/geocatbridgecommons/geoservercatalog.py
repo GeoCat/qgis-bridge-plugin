@@ -2,7 +2,7 @@ from .catalog import GeodataCatalog
 from geoserver.catalog import Catalog
 from geoserver.catalog import ConflictingDataError
 from . import log
-from .feedback import SilentFeedbackReporter
+from . import feedback
 import json as jsonmodule
 
 class GSConfigCatalogUsingNetworkAccessManager(Catalog):
@@ -31,12 +31,12 @@ class GeoServerCatalog(GeodataCatalog):
         self.workspace = workspace
         self.gscatalog = GSConfigCatalogUsingNetworkAccessManager(service_url, network_access_manager)
 
-    def publish_vector_layer_from_file(self, filename, layername, crsauthid, style, stylename, feedback = None):
+    def publish_vector_layer_from_file(self, filename, layername, crsauthid, style, stylename):
         log.logInfo("Publishing layer from file: %s" % filename)
-        feedback = feedback or SilentFeedbackReporter()
         self._ensureWorkspaceExists()
         self._deleteLayerIfItExists(layername)
         self.publish_style(stylename, zipfile = style)
+        feedback.setText("Publishing data for layer %s" % layername)
         if filename.lower().endswith(".shp"):
             basename, extension = os.path.splitext(filename)
             path = {
@@ -69,12 +69,12 @@ class GeoServerCatalog(GeodataCatalog):
             self._set_layer_style(layername, stylename)
 
     def publish_vector_layer_from_postgis(self, host, port, database, schema, table, 
-                                        username, passwd, crsauthid, layername, style, stylename,
-                                        feedback = None):
-        feedback = feedback or SilentFeedbackReporter()
+                                        username, passwd, crsauthid, layername, style, stylename):
+
         self._ensureWorkspaceExists()
         self._deleteLayerIfItExists(layername)
         self.publish_style(stylename, zipfile = style)
+        feedback.setText("Publishing data for layer %s" % layername)        
         store = self.gscatalog.create_datastore(layername, self.workspace)
         store.connection_parameters.update(host=host, port=str(port), database=database, user=username, 
                                             schema=schema, passwd=passwd, dbtype="postgis")
@@ -85,8 +85,8 @@ class GeoServerCatalog(GeodataCatalog):
         self.gscatalog.save(ftype)
         self._set_layer_style(layername, stylename)
 
-    def publish_raster_layer(self, filename, style, layername, stylename, feedback = None):
-        feedback = feedback or SilentFeedbackReporter()
+    def publish_raster_layer(self, filename, style, layername, stylename):
+        feedback.setText("Publishing data for layer %s" % layername)
         self._ensureWorkspaceExists()
         self.publish_style(stylename, sld = style)
         self.gscatalog.create_coveragestore(layername, filename, self.workspace, True)
@@ -99,8 +99,8 @@ class GeoServerCatalog(GeodataCatalog):
             layergroup = self.gscatalog.get_layergroups(groupname)[0]
             layergroup.dirty.update(layers = layernames, styles = names)
 
-    def publish_style(self, name, sld=None, zipfile=None, feedback = None):
-        feedback = feedback or SilentFeedbackReporter()
+    def publish_style(self, name, sld=None, zipfile=None):
+        feedback.setText("Publishing style for layer %s" % name)
         self._ensureWorkspaceExists()
         styleExists = bool(self.gscatalog.get_styles(names=name, workspaces=self.workspace))
         if sld:
