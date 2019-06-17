@@ -158,7 +158,6 @@ class PostgisServer():
         for f in layer.fields():
             if fields is None or f.name() in fields:
                 qgsfields.append(f)
-        print (uri)
         exporter = QgsVectorLayerExporter(uri, "postgres", qgsfields,
                                           layer.wkbType(), layer.sourceCrs(), True)
 
@@ -176,7 +175,6 @@ class PostgisServer():
     def testConnection(self):
         con = None
         try:
-            print(self._username, self._password)
             con = psycopg2.connect(dbname=self.database, user=self._username, password=self._password, host=self.host, port=self.port)
             cur = con.cursor()
             cur.execute('SELECT version()')

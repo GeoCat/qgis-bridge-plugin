@@ -185,7 +185,6 @@ class GeocatBridgeDialog(BASE, WIDGET):
 
     def showContextMenu(self, pos):
         item = self.tableLayers.itemAt(pos)
-        print(item)
         if item is None:
             return
         row = self.tableLayers.row(item)
@@ -197,8 +196,6 @@ class GeocatBridgeDialog(BASE, WIDGET):
             menu.addAction("Unpublish data", lambda: self.unpublishData(name))
         if self.isMetadataPublished[name]:    
             menu.addAction("Unpublish metadata", lambda: self.unpublishMetadata(name))
-        print(menu)
-        print(self.tableLayers.mapToGlobal(pos))
         menu.exec_(self.tableLayers.mapToGlobal(pos))
 
     def publishableLayers(self):
@@ -322,15 +319,17 @@ class GeocatBridgeDialog(BASE, WIDGET):
     def updateLayerIsMetadataPublished(self, name, value):
         self.isMetadataPublished[name] = value
         for i in range(self.tableLayers.rowCount()):
-            item = self.tableLayers.item(i, 2)
-            if item.text() == name:
+            nameItem = self.tableLayers.item(i, 1)
+            if nameItem.text() == name:
+                item = self.tableLayers.item(i, 2)
                 item.setIcon(PUBLISHED_ICON if value else QIcon())
 
-    def updateLayerIsDataPublished(self, name, value):
+    def updateLayerIsDataPublished(self, name, value):        
         self.isDataPublished[name] = value
         for i in range(self.tableLayers.rowCount()):
-            item = self.tableLayers.item(i, 3)
-            if item.text() == name:
+            nameItem = self.tableLayers.item(i, 1)            
+            if nameItem.text() == name:
+                item = self.tableLayers.item(i, 3)
                 item.setIcon(PUBLISHED_ICON if value else QIcon())
 
     def unpublishAll(self):
@@ -393,6 +392,9 @@ class GeocatBridgeDialog(BASE, WIDGET):
 
         qgisprogress = QgisProgress()
         feedback.setFeedbackIndicator(qgisprogress)
+
+        self.storeMetadata()
+        self.storeFieldsToPublish()
 
         for i in range(self.tableLayers.rowCount()):
             progress.setValue(i)            
