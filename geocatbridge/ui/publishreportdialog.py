@@ -28,6 +28,7 @@ class PublishReportDialog(BASE, WIDGET):
             self.labelUrlMetadataServer.setText("----")
         self.labelPublishMapData.setText("ON" if geocatdialog.chkPublishToGeodataServer.checkState() == Qt.Checked else "OFF")
         self.labelPublishMetadata.setText("ON" if geocatdialog.chkPublishToMetadataServer.checkState() == Qt.Checked else "OFF")
+        self.tableWidget.setRowCount(len(results))
         for i, name in enumerate(results.keys()):
             warnings, errors = results[name]
             item = QTableWidgetItem(name)
@@ -39,6 +40,9 @@ class PublishReportDialog(BASE, WIDGET):
             item = QTableWidgetItem("Yes") #TODO
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 2, item)
+            item = QTableWidgetItem("Yes") #TODO
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.tableWidget.setItem(i, 3, item)
             txt = "warnings(%i), errors(%i)" % (len(warnings), len(errors))
             widget = QWidget()
             button = QPushButton()
@@ -52,6 +56,13 @@ class PublishReportDialog(BASE, WIDGET):
             self.tableWidget.setCellWidget(i, 4, widget)
 
     def openDetails(self, name):
-        pass
+        warnings, errors = self.results[name]
+        w = "<br>".join(warnings)
+        e = "<br>".join(errors)
+        txt = "<b>Warnings:</b><br>%s<br><b>Errors:</b><br>%s" % (w, e)
+        dlg = QgsMessageOutput.createMessageOutput()
+        dlg.setTitle("Layer details")
+        dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
+        dlg.showMessage()
 
 

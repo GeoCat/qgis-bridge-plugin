@@ -31,8 +31,8 @@ WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatbri
 
 class QgisLogger():
     def __init__(self):
-        self.warnings = {}
-        self.errors = {}
+        self.warnings = []
+        self.errors = []
 
     def logInfo(self, text):
         QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
@@ -105,7 +105,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
     def metadataServerChanged(self):
         self.populateLayers()
         try:
-            profile = metadataServers()[self.comboMetadataServer.currentText()]
+            profile = metadataServers()[self.comboMetadataServer.currentText()].profile
         except KeyError:
             profile = GeonetworkServer.PROFILE_DEFAULT
         if profile == GeonetworkServer.PROFILE_DEFAULT:
@@ -114,8 +114,9 @@ class GeocatBridgeDialog(BASE, WIDGET):
                 self.tabWidgetMetadata.removeTab(1)
         else:
             if self.tabWidgetMetadata.count() == 1:
-                self.tabWidgetMetadata.addTab(self.tabInspire)
-                self.tabWidgetMetadata.addTab(self.tabTemporal)
+                title = "Dutch geography" if profile == GeonetworkServer.PROFILE_DUTCH else "INSPIRE"
+                self.tabWidgetMetadata.addTab(self.tabInspire, title)
+                self.tabWidgetMetadata.addTab(self.tabTemporal, "Temporal")
             self.comboStatus.setVisible(profile == GeonetworkServer.PROFILE_DUTCH)
         
     def selectLabelClicked(self, url):
@@ -201,13 +202,15 @@ class GeocatBridgeDialog(BASE, WIDGET):
             return
         row = self.tableLayers.row(item)
         name = self.tableLayers.item(row, 1).text()
-        menu = QMenu()
-        menu.addAction("View metadata", lambda: self.viewMetadata(name))
+        menu = QMenu()        
         if self.isDataPublished[name]:
             menu.addAction("View WMS layer", lambda: self.viewWms(name))
             menu.addAction("Unpublish data", lambda: self.unpublishData(name))
-        if self.isMetadataPublished[name]:    
+        if self.isMetadataPublished[name]:
+            menu.addAction("View metadata", lambda: self.viewMetadata(name))  
             menu.addAction("Unpublish metadata", lambda: self.unpublishMetadata(name))
+        if any(self.isDataPublished.values()):
+            menu.addAction("View all WMS layers", self.viewAllWms)
         menu.exec_(self.tableLayers.mapToGlobal(pos))
 
     def publishableLayers(self):
@@ -352,7 +355,27 @@ class GeocatBridgeDialog(BASE, WIDGET):
                 self.unpublishMetadata(name)            
 
     def viewWms(self, name):
-        pass
+        catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog()
+        layer = self.layerFromName(name)
+        names = [layer.name()]        
+        bbox = layer.extent()
+        sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])
+        catalog.open_wms(names, sbbox, layer.crs().authid())
+
+    def viewAllWms(self):
+        catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog()
+        layers = self.publishableLayers()
+        bbox = QgsRectangle()
+        canvasCrs = iface.mapCanvas().mapSettings().destinationCrs()
+        names = []
+        for layer in layers:
+            if self.isDataPublished[layer.name()]:
+                names.append(layer.name())                
+                xform = QgsCoordinateTransform(layer.crs(), canvasCrs, QgsProject.instance())
+                extent = xform.transform(layer.extent())
+                bbox.combineExtentWith(extent)
+        sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])
+        catalog.open_wms(names, sbbox, canvasCrs.authid())
 
     def viewMetadata(self, name):
         pass        

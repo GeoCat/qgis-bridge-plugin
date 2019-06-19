@@ -1,3 +1,4 @@
+import webbrowser
 from .catalog import GeodataCatalog
 from geoserver.catalog import Catalog
 from geoserver.catalog import ConflictingDataError
@@ -134,6 +135,14 @@ class GeoServerCatalog(GeodataCatalog):
         layer = self._get_layer(name)
         self.gscatalog.delete(layer, recurse = True, purge = True)
     
+
+    def open_wms(self, names, bbox, srs):
+        baseurl = "/".join(self.service_url.split("/")[:-1])
+        names = ",".join(["%s:%s" % (self.workspace, name) for name in names])
+        print (names)
+        url = ("%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s&format=application/openlayers&bbox=%s&srs=%s&width=800&height=600" 
+                    % (baseurl, self.workspace, names, bbox, srs))
+        webbrowser.open_new_tab(url)
 
     ##########
 

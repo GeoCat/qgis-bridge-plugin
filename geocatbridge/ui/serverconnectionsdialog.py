@@ -108,8 +108,8 @@ class ServerConnectionsDialog(BASE, WIDGET):
             server = self.createGeoserverServer()
         elif w == self.widgetPostgis:
             server = self.createPostgisServer()
-        elif w == self.widgetMetadata:
-            pass
+        elif w == self.widgetMetadataCatalog:
+            server = self.createGeonetworkServer()
         elif w == self.widgetGeocatLive:
             pass
 
@@ -260,15 +260,15 @@ class ServerConnectionsDialog(BASE, WIDGET):
             self.txtPostgisServerAddress.setText(server.host)
             self.txtPostgisSchema.setText(server.schema)            
             self.postgisAuth.setConfigId(server.authid)
-        elif isinstance(server, GeonetworkServer):
-            pass
-            #TODO
+        elif isinstance(server, (GeonetworkServer, CswServer)):
+            self.stackedWidget.setCurrentWidget(self.widgetMetadataCatalog)
+            self.txtCswName.setText(server.name)
+            self.txtCswUrl.setText(server.url)            
+            self.cswAuth.setConfigId(server.authid)
+            self.comboMetadataProfile.setCurrentIndex(server.profile)
         elif isinstance(server, GeocatLiveServer):
             pass
-            #TODO
-        elif isinstance(server, CswServer):
-            pass
-            #TODO
+            #TODO        
         self.currentServerHasChanges = False
 
     def getNewName(self, name):

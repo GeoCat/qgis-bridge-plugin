@@ -29,7 +29,7 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="widgetGeocatLive">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -207,7 +207,7 @@
         </layout>
        </widget>
        <widget class="QWidget" name="widgetEmpty"/>
-       <widget class="QWidget" name="widgetMetadataCatalogue">
+       <widget class="QWidget" name="widgetMetadataCatalog">
         <layout class="QHBoxLayout" name="horizontalLayout_9">
          <item>
           <layout class="QGridLayout" name="gridLayout_4">

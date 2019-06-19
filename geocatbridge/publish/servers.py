@@ -102,14 +102,12 @@ class GeoserverServer(GeodataServer):
             filename = exportLayer(layer, fields)            
             self.catalog().publish_raster_layer_file(filename, layer.name(), style, layer.name())
 
-
     def testConnection(self):
         try:
             self.catalog().gscatalog.gsversion()
             return True
         except:
             return False
-
 
 
 class MapserverServer(): 
@@ -124,7 +122,7 @@ class GeonetworkServer():
     PROFILE_INSPIRE = 1
     PROFILE_DUTCH = 2
 
-    def __init__(self, name, url="", authid="", profile=""):
+    def __init__(self, name, url="", authid="", profile=0):
         self.name = name
         self.url = url
         self.authid = authid
