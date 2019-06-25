@@ -60,30 +60,10 @@
         </layout>
        </item>
        <item>
-        <widget class="QTableWidget" name="tableLayers">
+        <widget class="QListWidget" name="listLayers">
          <property name="contextMenuPolicy">
           <enum>Qt::CustomContextMenu</enum>
          </property>
-         <column>
-          <property name="text">
-           <string>Publish</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Name</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Metadata</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Data</string>
-          </property>
-         </column>
         </widget>
        </item>
       </layout>

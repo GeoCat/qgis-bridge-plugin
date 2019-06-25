@@ -73,9 +73,24 @@ class PublishWidget(BASE, WIDGET):
 
         self.populateComboBoxes()
         self.populateLayers()
-        self.tableLayers.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tableLayers.customContextMenuRequested.connect(self.showContextMenu)
-        self.tableLayers.currentCellChanged.connect(self.currentCellChanged)
+        self.listLayers.setStyleSheet("QListWidget{\n"
+            "    background-color: rgb(69, 69, 69, 220);\n"
+            "    outline: 0;\n"
+            "}\n"
+            "QListWidget::item {\n"
+            "    color: white;\n"
+            "    padding: 3px;\n"
+            "}\n"
+            "QListWidget::item::selected {\n"
+            "    color: black;\n"
+            "    background-color:palette(Window);\n"
+            "    padding-right: 0px;\n"
+            "}")
+        self.listLayers.setFrameShape(QFrame.Box)
+        self.listLayers.setLineWidth(0)
+        self.listLayers.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.listLayers.customContextMenuRequested.connect(self.showContextMenu)
+        self.listLayers.currentRowChanged.connect(self.currentRowChanged)
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
         self.btnPublish.clicked.connect(self.publish)
@@ -94,10 +109,10 @@ class PublishWidget(BASE, WIDGET):
         self.btnDataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
         self.btnMetadataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
 
-        if self.tableLayers.rowCount():
-            self.currentCellChanged(0, 0, None, None)
-
-        self.tableLayers.verticalHeader().setVisible(False)
+        if self.listLayers.count():
+            item = self.listLayers.item(0)
+            self.listLayers.setCurrentItem(item)
+            self.currentRowChanged(0)
 
         self.metadataServerChanged()
         self.selectLabelClicked("all")
@@ -125,11 +140,11 @@ class PublishWidget(BASE, WIDGET):
         
     def selectLabelClicked(self, url):
         state = Qt.Unchecked if url == "none" else Qt.Checked
-        for i in range (self.tableLayers.rowCount()):
-            item = self.tableLayers.item(i, 0)
-            item.setCheckState(state)
+        for i in range (self.listLayers.count()):
+            item = self.listLayers.item(i)
+            widget = self.listLayers.itemWidget(item).setCheckState(state)
 
-    def currentCellChanged(self, currentRow, currentColumn, previousRow, previousColumn):
+    def currentRowChanged(self, currentRow):
         if self.currentRow == currentRow:
             return
         self.currentRow = currentRow
@@ -202,11 +217,11 @@ class PublishWidget(BASE, WIDGET):
                 self.fieldsToPublish[self.currentLayer] = fieldsToPublish
 
     def showContextMenu(self, pos):
-        item = self.tableLayers.itemAt(pos)
+        item = self.listLayers.itemAt(pos)
         if item is None:
             return
-        row = self.tableLayers.row(item)
-        name = self.tableLayers.item(row, 1).text()
+        row = self.listLayers.row(item)
+        name = self.listLayers.itemWidget(item).name()
         menu = QMenu()        
         if self.isDataPublished[name]:
             menu.addAction("View WMS layer", lambda: self.viewWms(name))
@@ -216,7 +231,7 @@ class PublishWidget(BASE, WIDGET):
             menu.addAction("Unpublish metadata", lambda: self.unpublishMetadata(name))
         if any(self.isDataPublished.values()):
             menu.addAction("View all WMS layers", self.viewAllWms)
-        menu.exec_(self.tableLayers.mapToGlobal(pos))
+        menu.exec_(self.listLayers.mapToGlobal(pos))
 
     def publishableLayers(self):
         layers = [layer for layer in QgsProject.instance().mapLayers().values() 
@@ -224,29 +239,22 @@ class PublishWidget(BASE, WIDGET):
         return layers
 
     def populateLayers(self):
-        self.tableLayers.setRowCount(0)
         layers = self.publishableLayers()
-        self.tableLayers.setRowCount(len(layers))
         for i, layer in enumerate(layers):
             fields = [f.name() for f in layer.fields()]
             self.fieldsToPublish[layer] = {f:True for f in fields}
-            self.metadata[layer] = layer.metadata().clone()            
-            item = QTableWidgetItem()
-            item.setCheckState(Qt.Unchecked)
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-            self.tableLayers.setItem(i, 0, item)
-            item = QTableWidgetItem(layer.name())
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-            self.tableLayers.setItem(i, 1, item)
-            item = QTableWidgetItem()
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-            self.tableLayers.setItem(i, 2, item)
-            item = QTableWidgetItem()          
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-            self.tableLayers.setItem(i, 3, item)
-
+            self.metadata[layer] = layer.metadata().clone()
+            self.addLayerListItem(layer)
         self.updateLayersPublicationStatus()
 
+    def addLayerListItem(self, layer):
+        widget = LayerItemWidget(layer)
+        item = QListWidgetItem(self.listLayers)
+        item.setSizeHint(widget.sizeHint())
+        self.listLayers.addItem(item)
+        self.listLayers.setItemWidget(item, widget)
+        return item
+        
     def populateComboBoxes(self):
         self.populatecomboMetadataServer()
         self.populatecomboGeodataServer()
@@ -341,31 +349,35 @@ class PublishWidget(BASE, WIDGET):
 
     def updateLayerIsMetadataPublished(self, name, value):
         self.isMetadataPublished[name] = value
-        for i in range(self.tableLayers.rowCount()):
-            nameItem = self.tableLayers.item(i, 1)
-            if nameItem.text() == name:
-                item = self.tableLayers.item(i, 2)
-                item.setIcon(PUBLISHED_ICON if value else QIcon())
+        for i in range(self.listLayers.count()):
+            item = self.listLayers.item(i)
+            widget = self.listLayers.itemWidget(item)
+            if widget.name() == name:
+                server = metadataServers()[self.comboMetadataServer.currentText()] if value else None
+                widget.setMetadataPublished(server)
 
-    def updateLayerIsDataPublished(self, name, value):        
+    def updateLayerIsDataPublished(self, name, value):
         self.isDataPublished[name] = value
-        for i in range(self.tableLayers.rowCount()):
-            nameItem = self.tableLayers.item(i, 1)            
-            if nameItem.text() == name:
-                item = self.tableLayers.item(i, 3)
-                item.setIcon(PUBLISHED_ICON if value else QIcon())
+        for i in range(self.listLayers.count()):
+            item = self.listLayers.item(i)
+            widget = self.listLayers.itemWidget(item)
+            if widget.name() == name:
+                server = geodataServers()[self.comboGeodataServer.currentText()] if value else None
+                widget.setDataPublished(server)
 
     def updateLayersPublicationStatus(self, data=True, metadata=True):
-        for i in range(self.tableLayers.rowCount()):
-            name = self.tableLayers.item(i, 1).text()           
+        for i in range(self.listLayers.count()):
+            item = self.listLayers.item(i)
+            widget = self.listLayers.itemWidget(item)
+            name = widget.name()
             if data:
                 self.isDataPublished[name] = self.isDataOnServer(name)
-                item = self.tableLayers.item(i, 3)
-                item.setIcon(PUBLISHED_ICON if self.isDataPublished[name] else QIcon())
+                server = geodataServers()[self.comboGeodataServer.currentText()] if self.isDataPublished[name] else None
+                widget.setDataPublished(server)
             if metadata:
                 self.isMetadataPublished[name] = self.isMetadataOnServer(name)
-                item = self.tableLayers.item(i, 2)
-                item.setIcon(PUBLISHED_ICON if self.isMetadataPublished[name] else QIcon())
+                server = metadataServers()[self.comboMetadataServer.currentText()] if self.isMetadataPublished[name] else None
+                widget.setMetadataPublished(server)
 
     def unpublishAll(self):
         for name in self.isDataPublished:
@@ -432,7 +444,7 @@ class PublishWidget(BASE, WIDGET):
 
         progressMessageBar = self.bar.createMessage("Publishing layers")
         progress = QProgressBar()
-        progress.setMaximum(self.tableLayers.rowCount())
+        progress.setMaximum(self.listLayers.count())
         progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
         progressMessageBar.layout().addWidget(progress)
         self.bar.pushWidget(progressMessageBar, Qgis.Info)
@@ -461,13 +473,14 @@ class PublishWidget(BASE, WIDGET):
         allowWithoutMetadata = ALLOW #pluginSetting("allowWithoutMetadata")
 
         results = {}
-        for i in range(self.tableLayers.rowCount()):
-            progress.setValue(i)            
-            item = self.tableLayers.item(i, 0)
-            if item.checkState() == Qt.Checked:
+        for i in range(self.listLayers.count()):
+            progress.setValue(i)
+            item = self.listLayers.item(i)
+            widget = self.listLayers.itemWidget(item)
+            if widget.checked():
                 try:
                     self.logger.reset()              
-                    name = self.tableLayers.item(i, 1).text()                
+                    name = widget.name()              
                     layer = self.layerFromName(name)
                     validates, _ = validator.validate(layer.metadata())
                     validates = True
@@ -500,3 +513,41 @@ class PublishWidget(BASE, WIDGET):
         for layer in layers:
             if layer.name() == name:
                 return layer
+
+
+class LayerItemWidget(QWidget):
+    def __init__ (self, layer, parent = None):
+        super(LayerItemWidget, self).__init__(parent)
+        self.layer = layer
+        self.layout = QHBoxLayout()
+        self.check = QCheckBox()
+        self.check.setText(layer.name())
+        self.labelMetadata = QLabel()
+        #self.labelMetadata.setPixmap(QPixmap(self.iconPath(server)))
+        self.labelMetadata.setFixedWidth(50)
+        self.labelData = QLabel()
+        #self.labelMetadata.setPixmap(QPixmap(self.iconPath(server)))
+        self.labelData.setFixedWidth(50)
+        self.layout.addWidget(self.check)
+        self.layout.addWidget(self.labelData)
+        self.layout.addWidget(self.labelMetadata)
+        self.setLayout(self.layout)
+        
+    def name(self):
+        return self.layer.name()
+
+    def iconPath(self, server):
+        return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", 
+                        "%s.png" % server.__class__.__name__.lower()[:-6])
+
+    def setMetadataPublished(self, server):
+        self.labelMetadata.setPixmap(QPixmap(self.iconPath(server)))
+
+    def setDataPublished(self, server):
+        self.labelData.setPixmap(QPixmap(self.iconPath(server)))
+
+    def checked(self):
+        return self.check.isChecked()
+
+    def setCheckState(self, state):
+        self.check.setCheckState(state)

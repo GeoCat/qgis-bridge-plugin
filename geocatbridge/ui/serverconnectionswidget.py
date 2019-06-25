@@ -302,7 +302,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         else:
             evt.accept()
 
-class ServerItemWidget (QWidget):
+class ServerItemWidget(QWidget):
     def __init__ (self, server, parent = None):
         super(ServerItemWidget, self).__init__(parent)
         self.server = server
