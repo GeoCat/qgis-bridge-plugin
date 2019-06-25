@@ -2,7 +2,6 @@ import os
 import traceback
 from qgis.PyQt import uic
 from geocatbridge.publish.servers import geodataServers, metadataServers, GeonetworkServer
-from geocatbridge.ui.serverconnectionsdialog import ServerConnectionsDialog
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 from geocatbridgecommons import log
@@ -14,6 +13,7 @@ from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
 from qgis.utils import iface
 from qgiscommons2.gui import execute
+from qgiscommons2.settings import pluginSetting
 
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
@@ -27,7 +27,7 @@ SAVE_ICON = QIcon(iconPath("save.png"))
 
 IDENTIFICATION, CATEGORIES, KEYWORDS, ACCESS, EXTENT, CONTACT = range(6)
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatbridgedialog.ui'))
+WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatbridgewidget.ui'))
 
 class QgisLogger():
     def __init__(self):
@@ -46,13 +46,13 @@ class QgisLogger():
         self.errors.append(text)
 
     def reset(self):
-        self.warnings = {}
-        self.errors = {}
+        self.warnings = []
+        self.errors = []
 
-class GeocatBridgeDialog(BASE, WIDGET):
+class GeocatBridgeWidget(BASE, WIDGET):
 
-    def __init__(self, parent=None):
-        super(GeocatBridgeDialog, self).__init__(parent)
+    def __init__(self):
+        super(GeocatBridgeWidget, self).__init__()
         self.isMetadataPublished = {}
         self.isDataPublished = {}
         self.currentRow = None
@@ -76,12 +76,9 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.tableLayers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tableLayers.customContextMenuRequested.connect(self.showContextMenu)
         self.tableLayers.currentCellChanged.connect(self.currentCellChanged)
-        self.comboGeodataServer.currentIndexChanged.connect(self.populateLayers)
+        self.comboGeodataServer.currentIndexChanged.connect(self.updateLayersPublicationStatus)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
-        self.btnDefineConnectionsData.clicked.connect(self.defineConnectionsData)
-        self.btnDefineConnectionsMetadata.clicked.connect(self.defineConnectionsMetadata)
         self.btnPublish.clicked.connect(self.publish)
-        self.btnClose.clicked.connect(self.close)
         self.btnOpenQgisMetadataEditor.clicked.connect(self.openMetadataEditor)
         self.labelSelect.linkActivated.connect(self.selectLabelClicked)
         self.btnRemoveAll.clicked.connect(self.unpublishAll)
@@ -100,7 +97,10 @@ class GeocatBridgeDialog(BASE, WIDGET):
         if self.tableLayers.rowCount():
             self.currentCellChanged(0, 0, None, None)
 
+        self.tableLayers.verticalHeader().setVisible(False)
+
         self.metadataServerChanged()
+        self.selectLabelClicked("all")
 
     def metadataServerChanged(self):
         self.populateLayers()
@@ -184,6 +184,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
             metadata.setTitle(self.txtMetadataTitle.text())
             metadata.setAbstract(self.txtAbstract.toPlainText())
             metadata.setLanguage(self.comboLanguage.currentText())
+            self.currentLayer.setMetadata(metadata)
 
     def storeFieldsToPublish(self):
         if self.currentLayer is not None:
@@ -233,16 +234,14 @@ class GeocatBridgeDialog(BASE, WIDGET):
             item = QTableWidgetItem(layer.name())
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableLayers.setItem(i, 1, item)
-            self.isMetadataPublished[layer.name()] = self.isMetadataOnServer(layer)
             item = QTableWidgetItem()
-            item.setIcon(PUBLISHED_ICON if self.isMetadataPublished[layer.name()] else QIcon())
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableLayers.setItem(i, 2, item)
-            self.isDataPublished[layer.name()] = self.isDataOnServer(layer)
             item = QTableWidgetItem()          
-            item.setIcon(PUBLISHED_ICON if self.isDataPublished[layer.name()] else QIcon())
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableLayers.setItem(i, 3, item)
+
+        self.updateLayersPublicationStatus()
 
     def populateComboBoxes(self):
         self.populatecomboMetadataServer()
@@ -253,33 +252,52 @@ class GeocatBridgeDialog(BASE, WIDGET):
 
     def populatecomboGeodataServer(self):
         self.comboGeodataServer.clear()
+        self.comboGeodataServer.addItem("Do not publish data")
         self.comboGeodataServer.addItems(geodataServers().keys())
 
     def populatecomboMetadataServer(self):
         self.comboMetadataServer.clear()
+        self.comboMetadataServer.addItem("Do not publish metadata")
         self.comboMetadataServer.addItems(metadataServers().keys())
+
+    def updateServers(self):
+        self.comboGeodataServer.currentIndexChanged.disconnect(self.updateLayersPublicationStatus)
+        self.comboMetadataServer.currentIndexChanged.disconnect(self.metadataServerChanged)
+        self.populatecomboMetadataServer()
+        current = self.comboGeodataServer.currentText()
+        self.populatecomboGeodataServer()
+        if current in geodataServers().keys():
+            self.comboGeodataServer.setCurrentText(current)
+        current = self.comboMetadataServer.currentText()
+        self.populatecomboMetadataServer()
+        if current in metadataServers().keys():
+            self.comboMetadataServer.setCurrentText(current)
+        self.updateLayersPublicationStatus()
+        self.comboGeodataServer.currentIndexChanged.connect(self.updateLayersPublicationStatus)
+        self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
 
     def isMetadataOnServer(self, layer):
         try:
             catalog = metadataServers()[self.comboMetadataServer.currentText()].catalog()
-            self.labelErrorMetadataServer.setText("")
-            return catalog.metadata_exists(layer.name())
+            self.comboMetadataServer.setStyleSheet("QComboBox {}")
+            return catalog.metadata_exists(layer)
         except KeyError:
-            self.labelErrorMetadataServer.setText("")
+            self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
             return False
         except:
-            self.labelErrorMetadataServer.setText(ERROR_ICON)
+            self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
+
 
     def isDataOnServer(self, layer):
         try:
             catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog()
-            self.labelErrorGeodataServer.setText("")
-            return catalog.layer_exists(layer.name())
+            self.comboGeodataServer.setStyleSheet("QComboBox {}")
+            return catalog.layer_exists(layer)
         except KeyError:
-            self.labelErrorGeodataServer.setText("")
+            self.comboGeodataServer.setStyleSheet("QComboBox {}")
             return False
         except:
-            self.labelErrorGeodataServer.setText(ERROR_ICON)
+            self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def validateMetadata(self):
         self.storeMetadata()
@@ -300,21 +318,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         w.exec_()
         if w.metadata is not None:
             self.metadata[self.currentLayer] = w.metadata
-            self.populateLayerMetadata()
-
-    def defineConnectionsData(self):
-        current = self.comboGeodataServer.currentText()
-        self.openConnectionsDialog()
-        self.populatecomboGeodataServer()
-        if current in geodataServers().keys():
-            self.comboGeodataServer.setCurrentText(current)
-
-    def defineConnectionsMetadata(self):
-        current = self.comboGeodataServer.currentText()
-        self.openConnectionsDialog()
-        self.populatecomboMetadataServer()
-        if current in metadataServers().keys():
-            self.comboMetadataServer.setCurrentText(current)            
+            self.populateLayerMetadata()          
 
     def openConnectionsDialog(self):
         dlg = ServerConnectionsDialog(iface.mainWindow())
@@ -346,6 +350,16 @@ class GeocatBridgeDialog(BASE, WIDGET):
             if nameItem.text() == name:
                 item = self.tableLayers.item(i, 3)
                 item.setIcon(PUBLISHED_ICON if value else QIcon())
+
+    def updateLayersPublicationStatus(self):
+        for i in range(self.tableLayers.rowCount()):
+            name = self.tableLayers.item(i, 1).text()           
+            self.isDataPublished[name] = self.isDataOnServer(name)
+            item = self.tableLayers.item(i, 3)
+            item.setIcon(PUBLISHED_ICON if self.isDataPublished[name] else QIcon())
+            self.isMetadataPublished[name] = self.isMetadataOnServer(name)
+            item = self.tableLayers.item(i, 2)
+            item.setIcon(PUBLISHED_ICON if self.isMetadataPublished[name] else QIcon())
 
     def unpublishAll(self):
         for name in self.isDataPublished:
@@ -392,7 +406,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
             QgsMessageLog.logMessage(traceback.format_exc(), 'GeoCat Bridge', level=Qgis.Critical)
 
     def _publish(self):
-        if self.chkPublishToGeodataServer.checkState() == Qt.Checked:
+        if self.comboGeodataServer.currentIndex() != 0:
             try:
                 geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
             except KeyError:                
@@ -401,7 +415,7 @@ class GeocatBridgeDialog(BASE, WIDGET):
         else:
             geodataServer = None
 
-        if self.chkPublishToMetadataServer.checkState() == Qt.Checked:
+        if self.comboMetadataServer.currentIndex() != 0:
             try:
                 metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
             except KeyError:  
@@ -431,31 +445,49 @@ class GeocatBridgeDialog(BASE, WIDGET):
         self.storeMetadata()
         self.storeFieldsToPublish()
 
+        self.storeMetadata()
+        validator = QgsNativeMetadataValidator()        
+            
+        DONOTALLOW = 0
+        ALLOW = 1
+        ALLOWONLYDATA = 2
+        
+        allowWithoutMetadata = ALLOW #pluginSetting("allowWithoutMetadata")
+
         results = {}
         for i in range(self.tableLayers.rowCount()):
-            try:
-                progress.setValue(i)            
-                item = self.tableLayers.item(i, 0)
-                if item.checkState() == Qt.Checked:
+            progress.setValue(i)            
+            item = self.tableLayers.item(i, 0)
+            if item.checkState() == Qt.Checked:
+                try:
                     self.logger.reset()              
                     name = self.tableLayers.item(i, 1).text()                
                     layer = self.layerFromName(name)
+                    validates, _ = validator.validate(layer.metadata())
+                    validates = True
                     if geodataServer is not None:
                         if self.chkOnlySymbology.checkState() == Qt.Checked:
                             geodataServer.publishStyle(layer)
                         else:
-                            fields = None
-                            if layer.type() == layer.VectorLayer:
-                                fields = [name for name, publish in self.fieldsToPublish[layer].items() if publish]                            
-                            geodataServer.publishLayer(layer, fields)
-                            self.updateLayerIsDataPublished(name, True)
+                            if validates or allowWithoutMetadata in [ALLOW, ALLOWONLYDATA]:
+                                fields = None
+                                if layer.type() == layer.VectorLayer:
+                                    fields = [name for name, publish in self.fieldsToPublish[layer].items() if publish]                            
+                                geodataServer.publishLayer(layer, fields)
+                                self.updateLayerIsDataPublished(name, True)
+                            else:
+                                self.logger.logError("Layer '%s' has invalid metadata. Layer was not published" % layer.name())
                     if metadataServer is not None:
-                        metadataServer.publishLayerMetadata(layer)
-                        self.updateLayerIsMetadataPublished(name, True)
-                    results[name] = (self.logger.warnings, self.logger.errors)
-            except:
-                self.logger.logError(traceback.format_exc())
-        return results    
+                        if validates or allowWithoutMetadata == ALLOW:
+                            metadataServer.publishLayerMetadata(layer)
+                            self.updateLayerIsMetadataPublished(name, True)
+                        else:
+                            self.logger.logError("Layer '%s' has invalid metadata. Metadata was not published" % layer.name())
+                except:
+                    self.logger.logError(traceback.format_exc())
+                results[name] = (self.logger.warnings, self.logger.errors)
+
+        return results
 
     def layerFromName(self, name):
         layers = self.publishableLayers()

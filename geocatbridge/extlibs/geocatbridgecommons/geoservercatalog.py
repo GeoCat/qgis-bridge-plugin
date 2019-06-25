@@ -1,3 +1,4 @@
+import os
 import webbrowser
 from .catalog import GeodataCatalog
 from geoserver.catalog import Catalog
@@ -15,7 +16,7 @@ class GSConfigCatalogUsingNetworkAccessManager(Catalog):
         self._version = None
         self.nam = network_access_manager
         self.username = ''
-        self.password = ''        
+        self.password = ''
 
     def http_request(self, url, data=None, method='get', headers = {}):
         log.logInfo("Making '%s' request to '%s'" % (method, url))
@@ -46,26 +47,12 @@ class GeoServerCatalog(GeodataCatalog):
                 'dbf': basename + '.dbf',
                 'prj': basename + '.prj'
             }
-            self.gscatalog.create_featurestore(name, path, self.workspace, True)
+            self.gscatalog.create_featurestore(layername, path, self.workspace, True)
             self._set_layer_style(layername, stylename)
-        elif filename.lower().endswith(".gpkg"):            
-            json = { "dataStore": {
-                        "name": layername,
-                        "connectionParameters": {
-                            "entry": [
-                                {"@key":"database","$":"file://" + filename},
-                                {"@key":"dbtype","$":"geopkg"}
-                                ]
-                            }
-                        }
-                    }
-            headers = {'Content-type': 'application/json'}
-
+        elif filename.lower().endswith(".gpkg"):
             with open(filename, "rb") as f:
                 url = "%s/workspaces/%s/datastores/%s/file.gpkg?update=overwrite" % (self.service_url, self.workspace, layername)
-                data = bytes(jsonmodule.dumps(json), "utf-8")
-                #self.gscatalog.http_request(url, data=data, method="post", headers=headers)
-                self.gscatalog.http_request(url, data=f.read(), method="put")            
+                self.nam.request(url, "put", f.read())            
             log.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
             self._set_layer_style(layername, stylename)
 
@@ -116,30 +103,34 @@ class GeoServerCatalog(GeodataCatalog):
                 url = self.service_url + "/workspaces/%s/styles" % self.workspace
                 method = "post"
             with open(zipfile, "rb") as f:
-                self.gscatalog.http_request(url, data=f.read(), method=method, headers=headers)
+                self.nam.request(url, method, f.read(), headers)
             log.logInfo("Style %s correctly created from Zip file '%s'" % (name, zipfile))
         else:
             raise ValueError("A style definition must be provided, whether using a zipfile path or a SLD string")
 
     def style_exists(self, name):
-        return len(self.gscatalog.get_styles(stylename, self.workspace)) > 0
+        return len(self.gscatalog.get_styles(name, self.workspace)) > 0
 
     def delete_style(self, name):
         style = self.gscatalog.get_styles(name, self.workspace)[0]
         self.gscatalog.delete(style)
 
     def layer_exists(self, name):
+        '''
+        url = self.service_url + "/workspaces/%s/layers.json" % (self.workspace)
+        layers = json.loads(self.nam.request(url, "get", f.read()))
+        names = [lay["name"] for layer in layers["layers"]["layer"]]
+        return name in names
+        '''
         return self._get_layer(name) is not None
 
     def delete_layer(self, name):
         layer = self._get_layer(name)
         self.gscatalog.delete(layer, recurse = True, purge = True)
     
-
     def open_wms(self, names, bbox, srs):
         baseurl = "/".join(self.service_url.split("/")[:-1])
         names = ",".join(["%s:%s" % (self.workspace, name) for name in names])
-        print (names)
         url = ("%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s&format=application/openlayers&bbox=%s&srs=%s&width=800&height=600" 
                     % (baseurl, self.workspace, names, bbox, srs))
         webbrowser.open_new_tab(url)
@@ -149,12 +140,14 @@ class GeoServerCatalog(GeodataCatalog):
     def _get_layer(self, name):
         fullname = self.workspace + ":" + name
         for layer in self.gscatalog.get_layers():
-            if layer.name == fullname:
+            if layer.name.lower() == fullname.lower():
                 return layer
 
     def _set_layer_style(self, layername, stylename):
+        self.gscatalog._cache.clear() #We are doing stuff on the geoserver rest api without using gsconfig, so cache might be outdated
         layer = self._get_layer(layername)
-        layer.default_style = self.gscatalog.get_styles(stylename, self.workspace)[0]
+        default = self.gscatalog.get_styles(stylename, self.workspace)[0]
+        layer.default_style = default
         self.gscatalog.save(layer)
         log.logInfo("Style %s correctly assigned to layer %s" % (stylename, layername))
 
@@ -169,15 +162,15 @@ class GeoServerCatalog(GeodataCatalog):
         layer = self._get_layer(name)
         if layer:
             self.gscatalog.delete(layer)
-        stores = self.gscatalog.get_stores(name, self.workspace)
-        if stores:
-            store = stores[0]
-            for res in store.get_resources():
-                self.gscatalog.delete(res)
-            self.gscatalog.delete(store)
-
-
-
-
-
+        try:
+            stores = self.gscatalog.get_stores(name, self.workspace)
+            if stores:
+                store = stores[0]
+                for res in store.get_resources():
+                    self.gscatalog.delete(res)
+                self.gscatalog.delete(store)
+        except:
+            pass 
+            '''We swallow possible errors while deleting the underlying datastore.
+            That shouldn't be a problem, since later we are going to upload using overwrite mode'''
 

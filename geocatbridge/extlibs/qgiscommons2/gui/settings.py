@@ -31,6 +31,7 @@ except:
 from qgis.utils import iface
 
 from qgiscommons2.settings import *
+from qgiscommons2 import settings 
 from qgiscommons2.utils import _callerName, _callerPath
 from qgiscommons2.gui.authconfigselect import AuthConfigSelectDialog
 
@@ -79,7 +80,10 @@ def openSettingsDialog(namespace):
 class ConfigDialog(QDialog):
 
     def __init__(self, namespace):
+        print(namespace)
         self.settings = pluginSettings(namespace)
+        print (settings.PluginSettings._settings)
+        print (self.settings)
         self.namespace = namespace
         QDialog.__init__(self, iface.mainWindow())
         self.setupUi()

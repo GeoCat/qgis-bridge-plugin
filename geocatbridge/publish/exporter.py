@@ -1,3 +1,4 @@
+import os
 from qgis.core import QgsVectorFileWriter, QgsRasterFileWriter
 from qgiscommons2.files import tempFilenameInTempFolder
 from geocatbridgecommons import log
@@ -5,8 +6,8 @@ from geocatbridgecommons import log
 def exportLayer(layer, fields=None):
     filename = layer.source()
     destFilename = layer.name()
-    if layer.type() == layer.VectorLayer:            
-        if os.path.splitext(filename.lower()) not in [".shp", ".gpkg"] or layer.fields().count() != len(fields):
+    if layer.type() == layer.VectorLayer:
+        if os.path.splitext(filename.lower())[1] not in [".shp", ".gpkg"] or layer.fields().count() != len(fields):
             attrs = [i for i, f in enumerate(layer.fields()) if fields is None or f.name() in fields]
             output = tempFilenameInTempFolder(destFilename + ".gpkg")
             QgsVectorFileWriter.writeAsVectorFormat(layer, output, "UTF-8", attributes=attrs)

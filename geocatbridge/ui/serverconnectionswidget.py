@@ -8,12 +8,12 @@ from qgis.gui import *
 from qgis.core import *
 from qgiscommons2.gui import execute
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'serverconnectionsdialog.ui'))
+WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'serverconnectionswidget.ui'))
 
-class ServerConnectionsDialog(BASE, WIDGET):
+class ServerConnectionsWidget(BASE, WIDGET):
 
-    def __init__(self, parent=None):
-        super(ServerConnectionsDialog, self).__init__(parent)
+    def __init__(self):
+        super(ServerConnectionsWidget, self).__init__()
         self.currentServer = None
         self.setupUi(self)
         
@@ -27,8 +27,7 @@ class ServerConnectionsDialog(BASE, WIDGET):
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.layout().insertWidget(0, self.bar)
         self.setCurrentServer(None)
-        self.buttonBox.accepted.connect(self.saveButtonClicked)
-        self.buttonBox.rejected.connect(self.close)
+        self.buttonSave.clicked.connect(self.saveButtonClicked)
         self.radioUploadData.toggled.connect(self.datastoreChanged)
         self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
         self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)

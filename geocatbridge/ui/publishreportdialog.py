@@ -1,4 +1,5 @@
 import os
+from functools import partial
 from qgis.PyQt import uic
 from qgis.core import *
 from qgis.gui import *
@@ -11,43 +12,56 @@ WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishre
 
 class PublishReportDialog(BASE, WIDGET):
 
-    def __init__(self, geocatdialog, results):
-        super(PublishReportDialog, self).__init__(geocatdialog)
+    def __init__(self, publishWidget, results):
+        super(PublishReportDialog, self).__init__(publishWidget)
         self.results = results
         self.setupUi(self)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        if geocatdialog.chkPublishToGeodataServer.checkState() == Qt.Checked:
-            url = geodataServers()[geocatdialog.comboGeodataServer.currentText()].catalog().service_url
+        if publishWidget.comboGeodataServer.currentIndex() != 0:
+            url = geodataServers()[publishWidget.comboGeodataServer.currentText()].catalog().service_url
             self.labelUrlMapServer.setText('<a href="%s">%s</a>' % (url, url))
         else:
             self.labelUrlMapServer.setText("----")
-        if geocatdialog.chkPublishToMetadataServer.checkState() == Qt.Checked:            
-            url = metadataServers()[geocatdialog.comboMetadataServer.currentText()].catalog().service_url
+        if publishWidget.comboMetadataServer.currentIndex() != 0:            
+            url = metadataServers()[publishWidget.comboMetadataServer.currentText()].catalog().service_url
             self.labelUrlMetadataServer.setText('<a href="%s">%s</a>' % (url, url))
         else:
             self.labelUrlMetadataServer.setText("----")
-        self.labelPublishMapData.setText("ON" if geocatdialog.chkPublishToGeodataServer.checkState() == Qt.Checked else "OFF")
-        self.labelPublishMetadata.setText("ON" if geocatdialog.chkPublishToMetadataServer.checkState() == Qt.Checked else "OFF")
+        self.labelPublishMapData.setText("ON" if publishWidget.comboGeodataServer.currentIndex() != 0 else "OFF")
+        self.labelPublishMetadata.setText("ON" if publishWidget.comboMetadataServer.currentIndex() != 0 == Qt.Checked else "OFF")
         self.tableWidget.setRowCount(len(results))
         for i, name in enumerate(results.keys()):
             warnings, errors = results[name]
             item = QTableWidgetItem(name)
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 0, item)
-            item = QTableWidgetItem("Yes") #TODO
+            if publishWidget.comboGeodataServer.currentIndex() != 0:
+                catalog = geodataServers()[publishWidget.comboGeodataServer.currentText()].catalog()
+                dataPublished = catalog.layer_exists(name)
+                stylePublished = catalog.style_exists(name)
+            else:
+                dataPublished = False
+                stylePublished = False
+            item = QTableWidgetItem("Yes" if dataPublished else "No")
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 1, item)
-            item = QTableWidgetItem("Yes") #TODO
+            item = QTableWidgetItem("Yes" if stylePublished else "No")
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 2, item)
-            item = QTableWidgetItem("Yes") #TODO
+            if publishWidget.comboMetadataServer.currentIndex() != 0:          
+                catalog = metadataServers()[publishWidget.comboMetadataServer.currentText()].catalog()
+                #TODO
+                metadataPublished = True
+            else:
+                metadataPublished = False
+            item = QTableWidgetItem("Yes" if metadataPublished else "No")
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 3, item)
             txt = "warnings(%i), errors(%i)" % (len(warnings), len(errors))
             widget = QWidget()
             button = QPushButton()
             button.setText(txt)
-            button.clicked.connect(lambda: self.openDetails(name))
+            button.clicked.connect(partial(self.openDetails, name))
             layout = QHBoxLayout(widget)
             layout.addWidget(button)
             layout.setAlignment(Qt.AlignCenter);

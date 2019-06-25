@@ -58,7 +58,7 @@ def pluginSetting(name, namespace=None, typ=None):
     corresponding plugin namespace
     '''
     def _find_in_cache(name, key):
-        for setting in _settings[namespace]:
+        for setting in PluginSettings._settings[namespace]:
             if setting["name"] == name:
                 return setting[key]
         return None
@@ -89,11 +89,13 @@ def pluginSetting(name, namespace=None, typ=None):
 
 def pluginSettings(namespace=None):
     namespace = namespace or _callerName().split(".")[0]
-    return _settings.get(namespace, {})
+    return PluginSettings._settings.get(namespace, {})
 
-_settings = {}
+class PluginSettings(object):
+    _settings = {}
+
+
 def readSettings(settings_path=None):
-    global _settings
     '''
     Reads the settings corresponding to the plugin from where the method is called.
     This function has to be called in the __init__ method of the plugin class.
@@ -143,6 +145,5 @@ def readSettings(settings_path=None):
     namespace = _callerName().split(".")[0]
     settings_path = settings_path or os.path.join(os.path.dirname(_callerPath()), "settings.json")
     with open(settings_path) as f:
-        _settings[namespace] = json.load(f)
-
+        PluginSettings._settings[namespace] = json.load(f)
 

@@ -15,14 +15,13 @@ from .extlibs.geocatbridgecommons import log
 from .extlibs.qgiscommons2.settings import readSettings
 from .extlibs.qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
 from .extlibs.qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu
-from .ui.geocatbridgedialog import GeocatBridgeDialog
+from .ui.bridgedialog import BridgeDialog
 from .publish.servers import readServers
 
 class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
-        
-        readSettings()
+
         readServers()
         
         class QgisLogger():
@@ -37,6 +36,8 @@ class GeocatBridge:
         log.setLogger(logger)
 
     def initGui(self):
+
+        readSettings()
         
         addSettingsMenu("GeoCatBridge")
         
@@ -64,6 +65,7 @@ class GeocatBridge:
 
     
     def publishClicked(self):
-        dialog = GeocatBridgeDialog(self.iface.mainWindow())
+        readSettings()
+        dialog = BridgeDialog(self.iface.mainWindow())
         dialog.exec_()
         
