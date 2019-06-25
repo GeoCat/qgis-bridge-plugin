@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1023</width>
+    <width>1100</width>
     <height>672</height>
    </rect>
   </property>
@@ -31,12 +31,8 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>-1</number>
      </property>
-     <widget class="QWidget" name="pagePublish">
-      <layout class="QVBoxLayout" name="verticalLayout_2"/>
-     </widget>
-     <widget class="QWidget" name="pageServers"/>
     </widget>
    </item>
   </layout>

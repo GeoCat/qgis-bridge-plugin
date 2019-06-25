@@ -27,7 +27,7 @@ SAVE_ICON = QIcon(iconPath("save.png"))
 
 IDENTIFICATION, CATEGORIES, KEYWORDS, ACCESS, EXTENT, CONTACT = range(6)
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatbridgewidget.ui'))
+WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishwidget.ui'))
 
 class QgisLogger():
     def __init__(self):
@@ -49,10 +49,10 @@ class QgisLogger():
         self.warnings = []
         self.errors = []
 
-class GeocatBridgeWidget(BASE, WIDGET):
+class PublishWidget(BASE, WIDGET):
 
     def __init__(self):
-        super(GeocatBridgeWidget, self).__init__()
+        super(PublishWidget, self).__init__()
         self.isMetadataPublished = {}
         self.isDataPublished = {}
         self.currentRow = None
@@ -76,7 +76,7 @@ class GeocatBridgeWidget(BASE, WIDGET):
         self.tableLayers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tableLayers.customContextMenuRequested.connect(self.showContextMenu)
         self.tableLayers.currentCellChanged.connect(self.currentCellChanged)
-        self.comboGeodataServer.currentIndexChanged.connect(self.updateLayersPublicationStatus)
+        self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
         self.btnPublish.clicked.connect(self.publish)
         self.btnOpenQgisMetadataEditor.clicked.connect(self.openMetadataEditor)
@@ -102,8 +102,12 @@ class GeocatBridgeWidget(BASE, WIDGET):
         self.metadataServerChanged()
         self.selectLabelClicked("all")
 
+
+    def geodataServerChanged(self):
+        self.updateLayersPublicationStatus(True, False)
+
     def metadataServerChanged(self):
-        self.populateLayers()
+        self.updateLayersPublicationStatus(False, True)
         try:
             profile = metadataServers()[self.comboMetadataServer.currentText()].profile
         except KeyError:
@@ -261,7 +265,8 @@ class GeocatBridgeWidget(BASE, WIDGET):
         self.comboMetadataServer.addItems(metadataServers().keys())
 
     def updateServers(self):
-        self.comboGeodataServer.currentIndexChanged.disconnect(self.updateLayersPublicationStatus)
+        #TODO: do not call updateLayersPublicationStatus if not really needed
+        self.comboGeodataServer.currentIndexChanged.disconnect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.disconnect(self.metadataServerChanged)
         self.populatecomboMetadataServer()
         current = self.comboGeodataServer.currentText()
@@ -273,7 +278,7 @@ class GeocatBridgeWidget(BASE, WIDGET):
         if current in metadataServers().keys():
             self.comboMetadataServer.setCurrentText(current)
         self.updateLayersPublicationStatus()
-        self.comboGeodataServer.currentIndexChanged.connect(self.updateLayersPublicationStatus)
+        self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
 
     def isMetadataOnServer(self, layer):
@@ -282,11 +287,10 @@ class GeocatBridgeWidget(BASE, WIDGET):
             self.comboMetadataServer.setStyleSheet("QComboBox {}")
             return catalog.metadata_exists(layer)
         except KeyError:
-            self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
+            self.comboMetadataServer.setStyleSheet("QComboBox {}")
             return False
         except:
             self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
-
 
     def isDataOnServer(self, layer):
         try:
@@ -351,15 +355,17 @@ class GeocatBridgeWidget(BASE, WIDGET):
                 item = self.tableLayers.item(i, 3)
                 item.setIcon(PUBLISHED_ICON if value else QIcon())
 
-    def updateLayersPublicationStatus(self):
+    def updateLayersPublicationStatus(self, data=True, metadata=True):
         for i in range(self.tableLayers.rowCount()):
             name = self.tableLayers.item(i, 1).text()           
-            self.isDataPublished[name] = self.isDataOnServer(name)
-            item = self.tableLayers.item(i, 3)
-            item.setIcon(PUBLISHED_ICON if self.isDataPublished[name] else QIcon())
-            self.isMetadataPublished[name] = self.isMetadataOnServer(name)
-            item = self.tableLayers.item(i, 2)
-            item.setIcon(PUBLISHED_ICON if self.isMetadataPublished[name] else QIcon())
+            if data:
+                self.isDataPublished[name] = self.isDataOnServer(name)
+                item = self.tableLayers.item(i, 3)
+                item.setIcon(PUBLISHED_ICON if self.isDataPublished[name] else QIcon())
+            if metadata:
+                self.isMetadataPublished[name] = self.isMetadataOnServer(name)
+                item = self.tableLayers.item(i, 2)
+                item.setIcon(PUBLISHED_ICON if self.isMetadataPublished[name] else QIcon())
 
     def unpublishAll(self):
         for name in self.isDataPublished:

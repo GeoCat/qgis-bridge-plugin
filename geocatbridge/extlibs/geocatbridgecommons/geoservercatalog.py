@@ -52,13 +52,19 @@ class GeoServerCatalog(GeodataCatalog):
         elif filename.lower().endswith(".gpkg"):
             with open(filename, "rb") as f:
                 url = "%s/workspaces/%s/datastores/%s/file.gpkg?update=overwrite" % (self.service_url, self.workspace, layername)
-                self.nam.request(url, "put", f.read())            
+                self.nam.request(url, "put", f.read())
+            '''
+            storeName = os.path.splitext(os.path.basename(filename))[0]
+            print(storeName)
+            layer = self._get_layer(storeName)
+            layer.title = layername
+            self.gscatalog.save(layer) 
+            '''     
             log.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
             self._set_layer_style(layername, stylename)
 
     def publish_vector_layer_from_postgis(self, host, port, database, schema, table, 
                                         username, passwd, crsauthid, layername, style, stylename):
-
         self._ensureWorkspaceExists()
         self._deleteLayerIfItExists(layername)
         self.publish_style(stylename, zipfile = style)

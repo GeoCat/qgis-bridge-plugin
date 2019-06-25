@@ -5,7 +5,7 @@ from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtCore import *
 from qgis.gui import *
 from qgis.core import *
-from .geocatbridgewidget import GeocatBridgeWidget
+from .publishwidget import PublishWidget
 from .serverconnectionswidget import ServerConnectionsWidget
 
 def iconPath(icon):
@@ -18,7 +18,7 @@ class BridgeDialog(BASE, WIDGET):
     def __init__(self, parent=None):
         super(BridgeDialog, self).__init__(parent)
         self.setupUi(self)
-        self.publishWidget = GeocatBridgeWidget()
+        self.publishWidget = PublishWidget()
         self.serversWidget = ServerConnectionsWidget()
         self.stackedWidget.addWidget(self.publishWidget)
         self.stackedWidget.addWidget(self.serversWidget)
