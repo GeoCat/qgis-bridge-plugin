@@ -73,21 +73,6 @@ class PublishWidget(BASE, WIDGET):
 
         self.populateComboBoxes()
         self.populateLayers()
-        self.listLayers.setStyleSheet("QListWidget{\n"
-            "    background-color: rgb(69, 69, 69, 220);\n"
-            "    outline: 0;\n"
-            "}\n"
-            "QListWidget::item {\n"
-            "    color: white;\n"
-            "    padding: 3px;\n"
-            "}\n"
-            "QListWidget::item::selected {\n"
-            "    color: black;\n"
-            "    background-color:palette(Window);\n"
-            "    padding-right: 0px;\n"
-            "}")
-        self.listLayers.setFrameShape(QFrame.Box)
-        self.listLayers.setLineWidth(0)
         self.listLayers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.listLayers.customContextMenuRequested.connect(self.showContextMenu)
         self.listLayers.currentRowChanged.connect(self.currentRowChanged)

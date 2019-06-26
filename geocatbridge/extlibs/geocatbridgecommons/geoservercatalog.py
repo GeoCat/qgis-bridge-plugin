@@ -5,7 +5,7 @@ from geoserver.catalog import Catalog
 from geoserver.catalog import ConflictingDataError
 from . import log
 from . import feedback
-import json as jsonmodule
+import json
 
 class GSConfigCatalogUsingNetworkAccessManager(Catalog):
 
@@ -53,6 +53,9 @@ class GeoServerCatalog(GeodataCatalog):
             with open(filename, "rb") as f:
                 url = "%s/workspaces/%s/datastores/%s/file.gpkg?update=overwrite" % (self.service_url, self.workspace, layername)
                 self.nam.request(url, "put", f.read())
+            storeName = os.path.splitext(os.path.basename(filename))[0]
+            url = "%s/workspaces/%s/layers/%s.json" % (self.service_url, self.workspace, storeName)
+            self.nam.request(url, "put", json.dumps({"name": layername}))
             '''
             storeName = os.path.splitext(os.path.basename(filename))[0]
             print(storeName)
