@@ -217,6 +217,7 @@ def _pointPatternFillSymbolizer(sl, opacity):
     root = _baseFillSymbolizer(sl, opacity)
     subsymbol = sl.subSymbol().symbolLayer(0)
     size = symbolProperty(subsymbol, "size", QgsSymbolLayer.PropertySize)    
+    print(type(subsymbol))
     if isinstance(subsymbol, QgsSimpleMarkerSymbolLayer):
         marker = _markGraphic(subsymbol, opacity)
     elif isinstance(sl, QgsSvgMarkerSymbolLayer):
@@ -225,7 +226,7 @@ def _pointPatternFillSymbolizer(sl, opacity):
         marker = None # TODO
 
     fill = _addSubElement(root, "fill")
-    graphicFill = _addSubElement(root, "GraphicFill")
+    graphicFill = _addSubElement(fill, "GraphicFill")
     graphic = _addSubElement(graphicFill, "Graphic")    
     if marker is not None:
         graphic.append(marker)
