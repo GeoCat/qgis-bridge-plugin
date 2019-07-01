@@ -31,6 +31,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.radioUploadData.toggled.connect(self.datastoreChanged)
         self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
         self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
+        self.btnConnectGeocatLive.clicked.connect(self.testConnectionGeocatLive)
 
         self.txtCswName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeoserverName.textChanged.connect(self._setCurrentServerHasChanges)
@@ -98,6 +99,16 @@ class ServerConnectionsWidget(BASE, WIDGET):
             else:
                 self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)
 
+    def testConnectionGeocatLive(self):
+        server = self.createGeoserverServer()
+        if server is None:
+            self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
+        else:
+            if execute(server.testConnection):
+                self.bar.pushMessage("Success", "Connection succesfully established with server", level=Qgis.Success, duration=5)
+            else:
+                self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)
+
     def saveCurrentServer(self):
         w = self.stackedWidget.currentWidget()
         server = None
@@ -110,8 +121,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         elif w == self.widgetMetadataCatalog:
             server = self.createGeonetworkServer()
         elif w == self.widgetGeocatLive:
-            pass
-
+            server = self.createGeocatLiveServer()
         if server is None:
             return False
         else:
@@ -165,6 +175,22 @@ class ServerConnectionsWidget(BASE, WIDGET):
         server = GeonetworkServer(name, url, authid, profile)
         return server
 
+    def createGeonetworkServer(self):
+        ##TODO check validity of name and values        
+        name = self.txtCswName.text()        
+        authid = self.cswAuth.configId()
+        url = self.txtCswUrl.text()
+        profile = self.comboMetadataProfile.currentIndex()
+        server = GeonetworkServer(name, url, authid, profile)
+        return server
+
+    def createGeocatLiveServer(self):
+        name = self.txtGeocatLiveName.text()        
+        geoserverAuthid = self.geocatLiveGeoserverAuth.configId()
+        geonetworkAuthid = self.geocatLiveGeonetworkAuth.configId()
+        userid = self.txtGeocatLiveIdentifier.text()        
+        server = GeocatLiveServer(name, userid, geoserverAuthid, geonetworkAuthid)
+
     def addAuthWidgets(self):
         self.geoserverAuth = QgsAuthConfigSelect()
         layout = QHBoxLayout()
@@ -184,7 +210,18 @@ class ServerConnectionsWidget(BASE, WIDGET):
         layout.addWidget(self.cswAuth)
         self.cswAuthWidget.setLayout(layout)
         self.cswAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-        ##
+        self.geocatLiveGeoserverAuth = QgsAuthConfigSelect()
+        layout = QHBoxLayout()
+        layout.setMargin(0)
+        layout.addWidget(self.geocatLiveGeoserverAuth)
+        self.geocatLiveGeoserverAuthWidget.setLayout(layout)
+        self.geocatLiveGeoserverAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
+        self.geocatLiveGeonetworkAuth = QgsAuthConfigSelect()
+        layout = QHBoxLayout()
+        layout.setMargin(0)
+        layout.addWidget(self.geocatLiveGeonetworkAuth)
+        self.geocatLiveGeonetworkAuthWidget.setLayout(layout)
+        self.geocatLiveGeonetworkAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
 
     def addMenuToButtonNew(self):
         menu = QMenu()
@@ -269,8 +306,12 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.cswAuth.setConfigId(server.authid)
             self.comboMetadataProfile.setCurrentIndex(server.profile)
         elif isinstance(server, GeocatLiveServer):
-            pass
-            #TODO        
+            self.stackedWidget.setCurrentWidget(self.widgetGeocatLive)
+            self.txtGeocatLiveName.setText(server.name)
+            self.txtGeocatLiveIdentifier.setText(server.userid)          
+            self.geocatLiveGeoserverAuth.setConfigId(server.geoserverAuthid)
+            self.geocatLiveGeonetworkAuth.setConfigId(server.geonetworkAuthid)
+
         self.currentServerHasChanges = False
 
     def getNewName(self, name):

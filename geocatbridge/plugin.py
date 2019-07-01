@@ -60,7 +60,7 @@ class GeocatBridge:
         
         removeAboutMenu("GeoCatBridge")
                 
-        self.iface.removePluginFromWebMenu("GeoCatBridge", self.actionPublish)
+        self.iface.removePluginMenu("GeoCatBridge", self.actionPublish)
         
 
     

@@ -41,51 +41,18 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="widgetGeocatLive">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="txtGeocatLiveName"/>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="txtInstanceIdentifier"/>
-           </item>
            <item row="0" column="0">
             <widget class="QLabel" name="nameLabel">
              <property name="text">
               <string>Name</string>
              </property>
             </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="instanceIdentifierLabel">
-             <property name="text">
-              <string>Instance identifier</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>GeoNetwork credentials</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>GeoServer credentials</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QWidget" name="GeocatLiveGeoserverAuthWidget" native="true"/>
-           </item>
-           <item row="6" column="1">
-            <widget class="QWidget" name="GeocatLiveGeonetworkAuthWidget" native="true"/>
            </item>
            <item row="7" column="0">
             <spacer name="verticalSpacer">
@@ -99,6 +66,46 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>GeoNetwork credentials</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="instanceIdentifierLabel">
+             <property name="text">
+              <string>Instance identifier</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>GeoServer credentials</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="txtGeocatLiveIdentifier"/>
+           </item>
+           <item row="2" column="2">
+            <widget class="QPushButton" name="btnConnectGeocatLive">
+             <property name="text">
+              <string>Connect</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" colspan="2">
+            <widget class="QLineEdit" name="txtGeocatLiveName"/>
+           </item>
+           <item row="4" column="1" colspan="2">
+            <widget class="QWidget" name="geocatLiveGeoserverAuthWidget" native="true"/>
+           </item>
+           <item row="6" column="1" colspan="2">
+            <widget class="QWidget" name="geocatLiveGeonetworkAuthWidget" native="true"/>
            </item>
           </layout>
          </item>
