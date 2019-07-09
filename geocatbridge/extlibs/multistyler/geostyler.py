@@ -153,7 +153,7 @@ def _svgMarkerSymbolizer(sl, opacity):
             "rotate": rotation
             } 
 
-def _fillSymbolizer(sl, opacity)
+def _fillSymbolizer(sl, opacity):
     if props["style"] == "no":
         fillAlpha = 0                
     else:
