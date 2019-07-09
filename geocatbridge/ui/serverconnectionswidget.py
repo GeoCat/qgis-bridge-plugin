@@ -37,12 +37,14 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.txtGeoserverName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeoserverUrl.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtGeocatLiveName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtCswUrl.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisServerAddress.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisPort.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisSchema.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisDatabase.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeoserverWorkspace.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtGeocatLiveIdentifier.textChanged.connect(self._setCurrentServerHasChanges)
         self.comboMetadataProfile.currentIndexChanged.connect(self._setCurrentServerHasChanges)
         self.comboDatastore.currentIndexChanged.connect(self._setCurrentServerHasChanges)
 
@@ -100,7 +102,8 @@ class ServerConnectionsWidget(BASE, WIDGET):
                 self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)
 
     def testConnectionGeocatLive(self):
-        server = self.createGeoserverServer()
+        server = self.createGeocatLiveServer()
+        print(server)
         if server is None:
             self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
         else:
@@ -190,6 +193,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         geonetworkAuthid = self.geocatLiveGeonetworkAuth.configId()
         userid = self.txtGeocatLiveIdentifier.text()        
         server = GeocatLiveServer(name, userid, geoserverAuthid, geonetworkAuthid)
+        return server
 
     def addAuthWidgets(self):
         self.geoserverAuth = QgsAuthConfigSelect()

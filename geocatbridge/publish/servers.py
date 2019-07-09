@@ -105,7 +105,7 @@ class GeoserverServer(GeodataServer):
 
     def testConnection(self):
         try:
-            self.catalog.gscatalog.gsversion()
+            self._catalog.gscatalog.gsversion()
             return True
         except:
             return False
@@ -115,6 +115,9 @@ class MapserverServer():
     pass
 
 class GeocatLiveServer(): 
+
+    BASE_URL = "https://artemis.geocat.net/geocat-live/api/1.0/order/"
+
     def __init__(self, name, userid="", geoserverAuthid="", geonetworkAuthid=""):
         self.name = name
         self.userid = userid
@@ -128,13 +131,21 @@ class GeocatLiveServer():
         self._metadataCatalog = None
 
     def _getUrls(self):
-        pass
+        url = "%s/%s" % (self.BASE_URL, self.userid)
+        nam = NetworkAccessManager(None, debug=False)
+        response, content = nam.request(url, "get")
+        res = json.loads(content)
+        for serv in res["services"]:
+            if serv["application"] == "geoserver":
+                self._geoserverUrl = serv["url"]
+            if serv["application"] == "geonetwork":
+                self._geonetworkUrl = serv["url"]
 
     @property
     def dataCatalog(self):
         if self._geoserverUrl is None:
             self._getUrls()
-        if self.dataCatalog is None:
+        if self._dataCatalog is None:
             geoserverNam = NetworkAccessManager(self.geoserverAuthid, debug=False)
             self._dataCatalog = GeoServerCatalog(self._geoserverUrl, geoserverNam, "geocatlive") #TODO:workspace
         return self._dataCatalog
@@ -162,6 +173,7 @@ class GeocatLiveServer():
             self._getUrls()
             return True
         except:
+            raise
             return False        
 
 class GeonetworkServer():
@@ -177,9 +189,19 @@ class GeonetworkServer():
         self.profile = profile
         self._isMetadataCatalog = True
         self._isDataCatalog = False
+        nam = NetworkAccessManager(self.authid, debug=False)
+        self._catalog = GeoNetworkCatalog(self.url, nam)
 
     def publishLayerMetadata(self, layer):
-        pass
+        #TODO create MEF
+        self._catalog.publish_metadata(mefFile)
+
+    def testConnection(self):
+        try:
+            self._catalog.me()
+            return True
+        except:
+            return False
 
 class PostgisServer(): 
     

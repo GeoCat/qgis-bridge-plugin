@@ -19,11 +19,16 @@ class RequestsTokenNetworkAccessManager()
 
 class GeoNetworkCatalog(MetadataCatalog):
 
-	def metadata_exists(self, name):
-		pass
+	def metadata_exists(self, uuid):
+		try:
+            self.get_metadata(uuid)
+            return True
+        else:
+            return False
 
-	def get_metadata(self, name):
-		pass
+	def get_metadata(self, uuid):
+		url = self.service_url + "/api/0.1/records/" + uuid
+        return self.http_request(url)
 
 	def publish_metadata(self, metadata):
 		headers = {"accept": "application/json"}
@@ -32,10 +37,14 @@ class GeoNetworkCatalog(MetadataCatalog):
             data = f.read()
 			self.request(url, "post", data, header)
 
-	def delete_metadata(self, name):
+	def delete_metadata(self, uuid):
 		#TODO: bucket??
-		url = self.service_url + "/api/0.1/records?uuids=%s&withBackup=true" % name
-		self.request(url, "delete")
+		url = self.service_url + "/api/0.1/records?uuids=%s&withBackup=true" % uuid
+		self.http_request(url, method="delete")
+
+    def me(self):
+        url = self.service_url + "/api/0.1/me"
+        return self.http_request(url)
 
 
 
