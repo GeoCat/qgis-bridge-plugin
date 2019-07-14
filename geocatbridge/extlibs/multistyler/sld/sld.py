@@ -5,35 +5,7 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 from geocatbridgecommons import log
 import zipfile
-from qgiscommons2.files import tempFilenameInTempFolder
-from .geostyler2 import layerAsGeostyler, unaryOps, binaryOps
 
-_usedIcons = []
-
-def layerStyleAsSld(layer):
-    geostyler, icons = layerAsGeostyler(layer)
-    xml = processLayer(geostyler)
-    sld = ElementTree.tostring(xml, encoding='utf8', method='xml').decode()
-    return sld
-
-def saveLayerStyleAsSld(layer, filename):
-    sld = layerStyleAsSld(layer)   
-    dom = minidom.parseString(sld)
-    with open(filename, "w") as f:
-        f.write(dom.toprettyxml())
-
-def saveLayerStyleAsZip(layer):
-    geostyler, icons = layerAsGeostyler(layer)
-    filename = tempFilenameInTempFolder(layer.name() + ".zip")
-    z = zipfile.ZipFile(filename, "w")
-    xml = processLayer(geostyler)
-    sld = ElementTree.tostring(xml, encoding='utf8', method='xml').decode()
-    for icon in icons:
-        z.write(icon, os.path.basename(icon))
-    z.writestr(layer.name() + ".sld", sld)
-    z.close()
-    log.logInfo("Style for layer %s exported as zip file to %s" % (layer.name(), filename))
-    return filename
 
 def processLayer(geostyler):
     attribs = {
@@ -115,12 +87,15 @@ def _createSymbolizer(sl):
 
 def _symbolProperty(sl, name):
     if name in sl:        
-        v = convertExpression(sl[name])
-        if isinstance(v, Element) and v.tag == "ogc:Literal":
-            v = v.text
-        return v
+        _processProperty(sl[name])        
     else:
         return None
+
+def _processProperty(value):
+    v = convertExpression(sl[name])
+    if isinstance(v, Element) and v.tag == "ogc:Literal":
+        v = v.text
+    return v
     
 def _addValueToElement(element, value):
     if value is not None:  
@@ -158,36 +133,55 @@ def _textSymbolizer(sl):
     _addCssParameter(fontElem, "font-size", size)
     fillElem = _addSubElement(root, "Fill")
     _addCssParameter(fontElem, "fill", color)
+
+    if "offset" in sl or "anchor" in sl:
+        placement = _addSubElement(root, "LabelPlacement")        
+        if "anchor" in sl:
+            anchor = sl["anchor"]
+            #######
+        if "offset" in sl:
+            displacement = _addSubElement(placement, "Displacement")
+            offset = sl["offset"]
+            offsetx = _processProperty(offset[0])
+            offsety = _processProperty(offset[1])            
+            _addSubElement(displacement, "DisplacementX", offsetx)
+            _addSubElement(displacement, "DisplacementY", offsety)
+
     return root
 
-def _lineSymbolizer(sl):
+def _lineSymbolizer(sl, graphicStrokeLayer = 0):
     opacity = _symbolProperty(sl, "opacity")
     color =  sl.get("color", None)
     graphicStroke =  sl.get("graphicStroke", None)
     width = _symbolProperty(sl, "width")
-    #lineWidthUnits = props["line_width_unit"]
     dasharray = _symbolProperty(sl, "dasharray")
     cap = _symbolProperty(sl, "cap")
     join = _symbolProperty(sl, "join")
     offset = _symbolProperty(sl, "offset")
 
     root = Element("LineSymbolizer")
+    symbolizers = [root]
     stroke = _addSubElement(root, "Stroke")
     if graphicStroke is not None:
         graphicStrokeElement = _addSubElement(stroke, "GraphicStroke")
-        graphic = _graphicFromSymbolizer(graphicStroke[0]) #TODO use all graphics
+        graphic = _graphicFromSymbolizer(graphicStroke[graphicStrokeLayer])
         graphicStrokeElement.append(graphic[0])
         interval = sl.get("graphicStrokeInterval")
-        size = graphicStroke[0].get("size")
+        dashOffset = sl.get("graphicStrokeOffset")
+        size = graphicStroke[graphicStrokeLayer].get("size")
         _addCssParameter(stroke, "stroke-dasharray", "%s %s" % (str(size), str(interval)))
+        _addCssParameter(stroke, "stroke-dashoffset", dashOffset)
+        if graphicStrokeLayer == 0 and len(graphicStroke) > 1:
+            for i in range(1, len(graphicStroke)):
+                symbolizers.extend(_lineSymbolizer(sl, i))
     if color is not None:                
         _addCssParameter(stroke, "stroke", color)
         _addCssParameter(stroke, "stroke-width", width)
         _addCssParameter(stroke, "stroke-opacity", opacity)
         _addCssParameter(stroke, "stroke-linejoin", join)
         _addCssParameter(stroke, "stroke-linecap", cap)    
-    if dasharray is not None:
-        _addCssParameter(stroke, "stroke-dasharray", dasharray)
+        if dasharray is not None:
+            _addCssParameter(stroke, "stroke-dasharray", dasharray)
     if offset is not None:
         _addSubElement(root, "PerpendicularOffset", offset)
     return root
@@ -287,8 +281,9 @@ def _graphicFromSymbolizer(sl):
     symbolizer = _createSymbolizer(sl)
     return [graph for graph in symbolizer.iter("Graphic")]
         
-def _fillSymbolizer(sl):
+def _fillSymbolizer(sl, graphicFillLayer = 0):
     root = _baseFillSymbolizer(sl)
+    symbolizers = [root]
     opacity = _symbolProperty(sl, "opacity")
     color =  sl.get("color", None)
     graphicFill =  sl.get("graphicFill", None)
@@ -296,9 +291,12 @@ def _fillSymbolizer(sl):
         margin = _symbolProperty(sl, "graphicFillMarginX")
         fill = _addSubElement(root, "Fill")
         graphicFillElement = _addSubElement(fill, "GraphicFill")        
-        graphic = _graphicFromSymbolizer(graphicFill[0]) #TODO use all graphics
+        graphic = _graphicFromSymbolizer(graphicFill[graphicFillLayer])
         graphicFillElement.append(graphic[0])
         _addVendorOption(root, "graphic-margin", margin)
+        if graphicFillLayer == 0 and len(graphicFill) > 1:
+            for i in range(1, len(graphicFill)):
+                symbolizers.extend(_fillSymbolizer(sl, i))
     if color is not None:                
         fill = _addSubElement(root, "Fill")
         _addCssParameter(fill, "fill", color)
@@ -318,13 +316,24 @@ def _fillSymbolizer(sl):
         if outlineDasharray is not None:
             _addCssParameter(stroke, "stroke-dasharray", " ".join(str(v) for v in outlineDasharray))
 
-    return root
+    return symbolizers
 
 #######################
 
-operators = ["PropertyName"]
-operators.extend([v for v in unaryOps if v is not None])
-operators.extend([v for v in binaryOps if v is not None])
+operators = ["PropertyName", 
+     "Or", 
+    "And", 
+     "PropertyIsEqualTo", 
+     "PropertyIsNotEqualTo", 
+     "PropertyIsLessThanOrEqualTo", 
+     "PropertyIsGreaterThanEqualTo", 
+     "PropertyIsLessThan", 
+     "PropertyIsGreater", 
+     "Add", 
+      "Sub", 
+      "Mul", 
+      "Div", 
+      "Not"]
 
 def convertExpression(exp):
     if exp is None:

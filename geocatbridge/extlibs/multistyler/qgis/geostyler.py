@@ -1,23 +1,20 @@
 import os
 from qgis.core import *
 import json
-#from geocatbridgecommons import log
 import zipfile
 from qgiscommons2.files import tempFilenameInTempFolder
+from multistyler.qgis.expressions import walkExpression, UnsupportedExpressionException
 
 _usedIcons = []
-
+_warnings = []
 
 def layerAsGeostyler(layer):
     global _usedIcons
     _usedIcons = []
+    global _warnings
+    _warnings = []
     geostyler = processLayer(layer)
-    return geostyler, _usedIcons 
-
-def saveLayerStyleAsGeostyler(layer, filename):
-    s = json.dumps(processLayer(layer), indent=4, sort_keys=True)
-    with open(filename, "w") as f:
-        f.write(s)
+    return geostyler, _usedIcons, _warnings
 
 def processLayer(layer):
     if layer.type() == layer.VectorLayer:
@@ -29,7 +26,39 @@ def processLayer(layer):
             pass #show error
         for rule in renderer.rootRule().children():
             rules.append(processRule(rule))
+        labeling = processLabeling(layer)
+        if labelingSymbolizer is not None:
+            rules.append(labelingSymbolizer)
         return  {"name": layer.name(), "rules": rules}
+
+quadOffset = ["top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"]
+
+def processLabeling(layer):
+    labeling = layer.labeling()
+    if not isinstance(labeling, QgsVectorLayerSimpleLabeling):
+        warnings.append("Unsupported labeling class: '%s'" % str(labeling))
+        return None
+    symbolizer = {"Kind": "Text"}
+    settings = labeling.settings()
+    textFormat = settings.format()    
+    size = _labelingProperty(settings, textFormat, "size", QgsPalLayerSetings.Size)
+    color = _toHexColor(textFormat.color())
+    font = textFormat.font().family()
+    buff = textFormat.buffer()
+    if buff.enabled():
+        pass
+    anchor = quadOffset[settings.quadOffset]
+    offsetX = _labelingProperty(settings, None, "xOffset")
+    offsetY = _labelingProperty(settings, None, "yOffset")
+    exp = settings.getLabelExpression()
+    label = walkExpression(exp.rootNode())
+    symbolizer.extend({"color": color,
+                        "offset": [offsetX, offsetY],
+                        "font": font,
+                        "anchor": anchor,
+                        "label": label,
+                        "size": size})
+    return {"symbolizers", symbolizer}
 
 def processRule(rule):
     symbolizers = _createSymbolizers(rule.symbol().clone())
@@ -56,7 +85,8 @@ def processExpression(expstr):
             return walkExpression(exp.rootNode())
         else:
             return None
-    except:
+    except UnsupportedExpressionException as e:
+        _warnings.append(str(e))
         return None
 
 def _cast(v):
@@ -73,28 +103,40 @@ MM2PIXEL = 3.7795275591
 def _handleUnits(value, units):
     if str(value) in ["0", "0.0"]:
         return 1 #hairline width
-    if units == "MM":        
-        return ["Mul", MM2PIXEL, value]        
+    if units == "MM":
+        if isinstance(value, list):
+            return ["Mul", MM2PIXEL, value]
+        else:
+            return float(value) * MM2PIXEL
     elif units == "RenderMetersInMapUnits":
         if isinstance(value, list):
-            print ("Cannot render in map units when using a data-defined size value: '%s'" % str(value))
+            _warning.append("Cannot render in map units when using a data-defined size value: '%s'" % str(value))
             return value
         else:
             return str(value) + "m"
     elif units == "Pixel":
         return value
     else:
-        print("Unsupported units: '%s'" % units)
+        _warning.append("Unsupported units: '%s'" % units)
         return value
 
+def _labelingProperty(settings, obj, name, propertyConstant=-1):
+    ddProps = settings.dataDefinedProperties()
+    if propertyConstant in ddProps.propertyKeys():
+        v = processExpression(ddProps.property(propertyConstant).asExpression()) or ""        
+    else:
+        v = getattr(obj or settings, name)
 
-def _symbolProperty(symbolLayer, name, propertyConstant=-1, units=None):
+    return _cast(v)
+
+def _symbolProperty(symbolLayer, name, propertyConstant=-1):
     ddProps = symbolLayer.dataDefinedProperties()
     if propertyConstant in ddProps.propertyKeys():
         v = processExpression(ddProps.property(propertyConstant).asExpression()) or ""        
     else:
         v = symbolLayer.properties()[name]
-
+    
+    units = symbolLayer.properties().get(name + "_unit")
     if units is not None:
         v = _handleUnits(v, units)
     return _cast(v)
@@ -130,7 +172,7 @@ def _createSymbolizer(sl, opacity):
     elif isinstance(sl, QgsSimpleFillSymbolLayer):
         symbolizer = _simpleFillSymbolizer(sl, opacity)
     elif isinstance(sl, QgsPointPatternFillSymbolLayer):
-        symbolizer = _pointPatternFillSymbolizer(sl, opacity)
+        symbolizer = _pointPatternFillSymbolizer(sl, opacity)       
     elif isinstance(sl, QgsSvgMarkerSymbolLayer):
         symbolizer = _svgMarkerSymbolizer(sl, opacity)
     elif isinstance(sl, QgsRasterMarkerSymbolLayer):
@@ -141,7 +183,7 @@ def _createSymbolizer(sl, opacity):
         symbolizer = _fontMarkerSymbolizer(sl, opacity)
 
     if symbolizer is None:
-        print("Symbol layer type not supported: '%s'" % type(sl))
+        _warning.append("Symbol layer type not supported: '%s'" % type(sl))
     return symbolizer
 
 
@@ -161,14 +203,12 @@ def _fontMarkerSymbolizer(sl, opacity):
 def _lineSymbolizer(sl, opacity):
     props = sl.properties()
     color = _toHexColor(props["line_color"])
-    lineWidthUnits = props["line_width_unit"]
-    width = _symbolProperty(sl, "line_width", QgsSymbolLayer.PropertyStrokeWidth, lineWidthUnits)    
+    width = _symbolProperty(sl, "line_width", QgsSymbolLayer.PropertyStrokeWidth)    
     lineStyle = _symbolProperty(sl, "line_style", QgsSymbolLayer.PropertyStrokeStyle)
     cap = _symbolProperty(sl, "capstyle", QgsSymbolLayer.PropertyCapStyle)
     cap = "butt" if cap == "flat" else cap
     join = _symbolProperty(sl, "joinstyle", QgsSymbolLayer.PropertyJoinStyle)
-    offset = sl.offset()
-
+    offset = _symbolProperty(sl, "offset", QgsSymbolLayer.PropertyOffset)    
     symbolizer = {"kind": "Line",
                     "color": color,
                     "opacity": opacity,
@@ -182,8 +222,10 @@ def _lineSymbolizer(sl, opacity):
     return symbolizer
 
 def _markerLineSymbolizer(sl, opacity):
+    offset = _symbolProperty(sl, "offset", QgsSymbolLayer.PropertyOffset) 
     symbolizer = {"kind": "Line",                
-                    "opacity": opacity}
+                    "opacity": opacity,
+                    "perpendicularOffset": offset}
     subSymbolizers = []
     for subsl in sl.subSymbol().symbolLayers():       
         subSymbolizer = _createSymbolizer(subsl, 1)
@@ -191,8 +233,10 @@ def _markerLineSymbolizer(sl, opacity):
             subSymbolizers.append(subSymbolizer)
     if subSymbolizers:
         interval = _symbolProperty(sl, "interval", QgsSymbolLayer.PropertyInterval)
+        offsetAlong = _symbolProperty(sl, "offset_along_line", QgsSymbolLayer.PropertyOffsetAlongLine)
         symbolizer["graphicStroke"] = subSymbolizers
-        symbolizer["graphicStrokeInterval"] = interval        
+        symbolizer["graphicStrokeInterval"] = interval
+        symbolizer["graphicStrokeOffset"] = offsetAlong
 
     return symbolizer    
 
@@ -236,7 +280,8 @@ def _basePointSimbolizer(sl, opacity):
         } 
 
     if x or y:
-        symbolizer["geometry"] = processExpression("translate(%s,%s)" % (str(x), str(y)))
+        exp = "translate($geometry, %s,%s)" % (str(x), str(y))        
+        symbolizer["geometry"] = processExpression(exp)
 
     return symbolizer
 
@@ -257,12 +302,10 @@ wknReplacements = {"regular_star":"star",
 
 def _markGraphic(sl):
     props = sl.properties()
-    units = props["size_unit"] 
-    size = _symbolProperty(sl, "size", QgsSymbolLayer.PropertySize, units)
+    size = _symbolProperty(sl, "size", QgsSymbolLayer.PropertySize)
     color = _toHexColor(props["color"])
     outlineColor = _toHexColor(props["outline_color"])
-    units = props["outline_width_unit"] 
-    outlineWidth = _symbolProperty(sl, "outline_width", QgsSymbolLayer.PropertyStrokeWidth, units)    
+    outlineWidth = _symbolProperty(sl, "outline_width", QgsSymbolLayer.PropertyStrokeWidth)    
     try:
         path = sl.path()
         name = "file://" + os.path.basename(path)
@@ -302,8 +345,7 @@ def _iconGraphic(sl, color=None):
     global _usedIcons
     _usedIcons.append(sl.path())
     path = os.path.basename(sl.path())
-    units = props["size_unit"] 
-    size = _symbolProperty(sl, "size", QgsSymbolLayer.PropertySize, units)
+    size = _symbolProperty(sl, "size", QgsSymbolLayer.PropertySize)
     return {"kind": "Icon",
             "color": color,
             "image": path,
@@ -356,9 +398,7 @@ def _simpleFillSymbolizer(sl, opacity):
     outlineColor =  _toHexColor(props["outline_color"])
     outlineStyle = _symbolProperty(sl, "outline_style", QgsSymbolLayer.PropertyStrokeStyle)
     if outlineStyle != "no":
-        units = props["outline_width_unit"] 
-        outlineWidth = _symbolProperty(sl, "outline_width", QgsSymbolLayer.PropertyStrokeWidth, units)
-        borderWidthUnits = props["outline_width_unit"]
+        outlineWidth = _symbolProperty(sl, "outline_width", QgsSymbolLayer.PropertyStrokeWidth)
         symbolizer.update({"outlineColor": outlineColor,
                             "outlineWidth": outlineWidth})
     if outlineStyle not in ["solid", "no"]:
@@ -370,107 +410,5 @@ def _simpleFillSymbolizer(sl, opacity):
 
     return symbolizer
 
-#######################Expressions#################
-
-binaryOps = [
-     "Or",
-    "And",
-     "PropertyIsEqualTo",
-     "PropertyIsNotEqualTo",
-     "PropertyIsLessThanOrEqualTo",
-     "PropertyIsGreaterThanEqualTo",
-     "PropertyIsLessThan",
-     "PropertyIsGreater",
-     None, None, None, None, None, None, None,
-     "Add",
-      "Sub",
-      "Mul",
-      "Div",
-      None, None, None, None]
-
-unaryOps = ["Not", None]
-
-functions = {"radians": "toRadians",
-             "degrees": "toDegrees",
-             "floor": "floor",
-             "area": "area",
-             "buffer": "buffer",
-             "centroid": "centroid",
-             "if": "if_then_else",
-             "bounds": "envelope",
-             "distance": "distance",
-             "convex_hull": "convexHull",
-             "end_point": "endPoint",
-             "start_point": "startPoint",
-             "x": "getX",
-             "x": "getY",
-             "concat": "Concatenate",
-             "substr": "strSubstr",
-             "lower": "strToLower",
-             "upper": "strToUpper",
-             "replace": "strReplace",
-             "exterior_ring": "exteriorRing"} #TODO
-
-def walkExpression(node):
-    if node.nodeType() == QgsExpressionNode.ntBinaryOperator:
-        exp = handleBinary(node)
-    elif node.nodeType() == QgsExpressionNode.ntUnaryOperator:
-        exp = handleUnary(node)
-    #elif node.nodeType() == QgsExpressionNode.ntInOperator:
-        #filt = handle_in(node)
-    elif node.nodeType() == QgsExpressionNode.ntFunction:
-        exp = handleFunction(node)
-    elif node.nodeType() == QgsExpressionNode.ntLiteral:
-        exp = handleLiteral(node)
-    elif node.nodeType() == QgsExpressionNode.ntColumnRef:
-        exp = handleColumnRef(node)
-    #elif node.nodeType() == QgsExpression.ntCondition:
-    #    filt = handle_condition(nod)
-    return exp
-
-def handleBinary(node):
-    op = node.op()
-    retOp = binary_ops[op]
-    left = node.opLeft()
-    right = node.opRight()
-    retLeft = walkExpression(left)
-    retRight = walkExpression(right)
-    return [retOp, retLeft, retRight]
-
-def handleUnary(node):
-    op = node.op()
-    operand = node.operand()
-    retOp = unary_ops[op]
-    retOperand = walkExpression(operand)
-    return [retOp, retOperand]
-
-def handleLiteral(node):
-    val = node.value()
-    quote = ""
-    if isinstance(val, basestring):
-        quote = "'"
-        val = val.replace("\n", "\\n")
-    elif val is None:
-        val = "null"
-    return val
-
-def handleColumnRef(node):
-    return ["PropertyName", node.name()]
-
-def handleFunction(node):
-    fnIndex = node.fnIndex()
-    func = QgsExpression.Functions()[fnIndex].name()
-    if func == "$geometry":
-        return ["PropertyName", "geom"]
-    elif func in functions:        
-        elems = [functions[func]]
-        args = node.args()
-        if args is not None:
-            args = args.list()
-            for arg in args:
-                elems.append(walkExpression(arg))
-        return elems
-    else:
-        print("Unsupported function in expression: '%s'" % func)    
-        return "1"    
+   
 
