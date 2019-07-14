@@ -32,6 +32,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
         self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
         self.btnConnectGeocatLive.clicked.connect(self.testConnectionGeocatLive)
+        self.btnConnectCsw.clicked.connect(self.testConnectionCsw)
 
         self.txtCswName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeoserverName.textChanged.connect(self._setCurrentServerHasChanges)
@@ -81,36 +82,31 @@ class ServerConnectionsWidget(BASE, WIDGET):
             else:
                 self.setCurrentServer(server)
                     
+
+    def _testConnection(self, server):
+        if server is None:
+            self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
+        else:
+            if execute(server.testConnection):
+                self.bar.pushMessage("Success", "Connection succesfully established with server", level=Qgis.Success, duration=5)
+            else:
+                self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)                    
+    
     def testConnectionPostgis(self):
         server = self.createPostgisServer()
-        if server is None:
-            self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
-        else:
-            if execute(server.testConnection):
-                self.bar.pushMessage("Success", "Connection succesfully established with server", level=Qgis.Success, duration=5)
-            else:
-                self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)
-
+        self._testConnection(server)
+        
     def testConnectionGeoserver(self):
         server = self.createGeoserverServer()
-        if server is None:
-            self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
-        else:
-            if execute(server.testConnection):
-                self.bar.pushMessage("Success", "Connection succesfully established with server", level=Qgis.Success, duration=5)
-            else:
-                self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)
+        self._testConnection(server)
 
     def testConnectionGeocatLive(self):
-        server = self.createGeocatLiveServer()
-        print(server)
-        if server is None:
-            self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
-        else:
-            if execute(server.testConnection):
-                self.bar.pushMessage("Success", "Connection succesfully established with server", level=Qgis.Success, duration=5)
-            else:
-                self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)
+        server = self.createGeocatLiveServer()        
+        self._testConnection(server)
+
+    def testConnectionCsw(self):
+        server = self.createGeonetworkServer()
+        self._testConnection(server)
 
     def saveCurrentServer(self):
         w = self.stackedWidget.currentWidget()
@@ -124,7 +120,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         elif w == self.widgetMetadataCatalog:
             server = self.createGeonetworkServer()
         elif w == self.widgetGeocatLive:
-            server = self.createGeocatLiveServer()
+            server = self.createGeocatLiveServer()            
         if server is None:
             return False
         else:

@@ -18,7 +18,7 @@ class Catalog():
         self.nam = network_access_manager
 
     def http_request(self, url, data=None, method='get', headers = {}):
-        resp, content = self.nam.request(url, method, data, headers)
+        resp = self.nam.request(url, method, data, headers)
         return resp
 
 class GeodataCatalog(Catalog):

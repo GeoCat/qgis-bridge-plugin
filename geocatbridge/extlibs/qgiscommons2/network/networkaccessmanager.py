@@ -258,7 +258,7 @@ class NetworkAccessManager(object):
             else:
                 raise self.exception_class(self.http_call_result.reason)
 
-        return (self.http_call_result, self.http_call_result.content)
+        return self.http_call_result
 
     def downloadProgress(self, bytesReceived, bytesTotal):
         """Keep track of the download progress"""
@@ -279,8 +279,8 @@ class NetworkAccessManager(object):
         self.http_call_result.status = httpStatus
         self.http_call_result.status_message = httpStatusMessage
         for k, v in self.reply.rawHeaderPairs():
-            self.http_call_result.headers[str(k)] = str(v)
-            self.http_call_result.headers[str(k).lower()] = str(v)
+            self.http_call_result.headers[str(k.data(), encoding='utf-8')] = str(v.data(), encoding='utf-8')
+            self.http_call_result.headers[str(k.data(), encoding='utf-8').lower()] = str(v.data(), encoding='utf-8')
 
         if err != QNetworkReply.NoError:
             # handle error

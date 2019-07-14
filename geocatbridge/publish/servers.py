@@ -1,10 +1,14 @@
 import json
 import psycopg2
-from .sldadapter import getCompatibleSldAsZip
+import requests
+from requests.auth import HTTPBasicAuth
 from .exporter import exportLayer
 from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
+from qgiscommons2.files import tempFilenameInTempFolder
+from multistyler.qgis import saveLayerStyleAsZippedSld
 from qgis.PyQt.QtCore import QSettings
 from geocatbridgecommons.geoservercatalog import GeoServerCatalog
+from geocatbridgecommons.geonetworkcatalog import GeoNetworkCatalog
 from geocatbridgecommons.catalog import GeodataCatalog, MetadataCatalog
 from qgis.core import QgsMessageLog, Qgis, QgsVectorLayerExporter, QgsAuthMethodConfig, QgsApplication, QgsFeatureSink, QgsFields
 
@@ -84,7 +88,10 @@ class GeoserverServer(GeodataServer):
         self.catalog.publishStyle(layer.name(), zipfile = style)
         
     def publishLayer(self, layer, fields):        
-        style = getCompatibleSldAsZip(layer)
+        filename = tempFilenameInTempFolder(layer.name() + ".zip")
+        warnings = saveLayerStyleAsZippedSld(layer)
+        for w in warnings:
+            QgsMessageLog.logMessage(w, 'GeoCat Bridge', level=Qgis.Warning)
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
                 filename = exportLayer(layer, fields)
@@ -137,7 +144,7 @@ class GeocatLiveServer():
         res = json.loads(content)
         for serv in res["services"]:
             if serv["application"] == "geoserver":
-                self._geoserverUrl = serv["url"]
+                self._geoserverUrl = serv["url"] + "/rest"
             if serv["application"] == "geonetwork":
                 self._geonetworkUrl = serv["url"]
 
@@ -173,8 +180,28 @@ class GeocatLiveServer():
             self._getUrls()
             return True
         except:
-            raise
             return False        
+
+class TokenNetworkAccessManager():
+    def __init__(self, url, username, password):        
+        self.url = url.strip("/")
+        self.token = None
+        self.session = requests.Session()
+        self.session.auth = HTTPBasicAuth(username, password)
+    
+    def request(self, url, method, data=None, headers={}):
+        if self.token is None:
+            self.getToken()        
+        method = getattr(self.session, method.lower())
+        resp = method(url, headers=headers, data=data)
+        resp.raise_for_status()
+        return resp
+
+    def getToken(self):                
+        xmlInfoUrl = self.url + '/xml.info'
+        self.session.post(xmlInfoUrl)
+        self.token = self.session.cookies.get('XSRF-TOKEN')
+        self.session.headers.update({"X-XSRF-TOKEN" : self.session.cookies.get('XSRF-TOKEN')})
 
 class GeonetworkServer():
 
@@ -189,10 +216,16 @@ class GeonetworkServer():
         self.profile = profile
         self._isMetadataCatalog = True
         self._isDataCatalog = False
-        nam = NetworkAccessManager(self.authid, debug=False)
+        authConfig = QgsAuthMethodConfig()
+        QgsApplication.authManager().loadAuthenticationConfig(self.authid, authConfig, True)
+        username = authConfig.config('username')
+        password = authConfig.config('password')        
+        nam = TokenNetworkAccessManager(self.url, username, password)
         self._catalog = GeoNetworkCatalog(self.url, nam)
 
     def publishLayerMetadata(self, layer):
+        uuid = layer.metadata().id()
+
         #TODO create MEF
         self._catalog.publish_metadata(mefFile)
 

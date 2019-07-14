@@ -52,10 +52,10 @@ class GeoServerCatalog(GeodataCatalog):
         elif filename.lower().endswith(".gpkg"):
             with open(filename, "rb") as f:
                 url = "%s/workspaces/%s/datastores/%s/file.gpkg?update=overwrite" % (self.service_url, self.workspace, layername)
-                self.nam.request(url, "put", f.read())
+                self.http_request(url, f.read(), "put",)
             storeName = os.path.splitext(os.path.basename(filename))[0]
             url = "%s/workspaces/%s/layers/%s.json" % (self.service_url, self.workspace, storeName)
-            self.nam.request(url, "put", json.dumps({"name": layername}))
+            self.http_request(url, json.dumps({"name": layername}), "put")
             '''
             storeName = os.path.splitext(os.path.basename(filename))[0]
             print(storeName)
@@ -112,7 +112,7 @@ class GeoServerCatalog(GeodataCatalog):
                 url = self.service_url + "/workspaces/%s/styles" % self.workspace
                 method = "post"
             with open(zipfile, "rb") as f:
-                self.nam.request(url, method, f.read(), headers)
+                self.http_request(url, f.read(), method, headers)
             log.logInfo("Style %s correctly created from Zip file '%s'" % (name, zipfile))
         else:
             raise ValueError("A style definition must be provided, whether using a zipfile path or a SLD string")
