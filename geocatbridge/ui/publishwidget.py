@@ -276,24 +276,25 @@ class PublishWidget(BASE, WIDGET):
 
     def isMetadataOnServer(self, layer):
         try:
-            catalog = metadataServers()[self.comboMetadataServer.currentText()].catalog
+            catalog = metadataServers()[self.comboMetadataServer.currentText()].catalog()
             self.comboMetadataServer.setStyleSheet("QComboBox {}")
             return catalog.metadata_exists(layer)
         except KeyError:
             self.comboMetadataServer.setStyleSheet("QComboBox {}")
             return False
-        except:
+        except:            
             self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def isDataOnServer(self, layer):
         try:
-            catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog
+            catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog()
             self.comboGeodataServer.setStyleSheet("QComboBox {}")
             return catalog.layer_exists(layer)
         except KeyError:
             self.comboGeodataServer.setStyleSheet("QComboBox {}")
             return False
         except:
+            raise
             self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def validateMetadata(self):
@@ -322,13 +323,13 @@ class PublishWidget(BASE, WIDGET):
         dlg.exec_()
 
     def unpublishData(self, name):
-        catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog
+        catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog()
         catalog.delete_layer(name)
         catalog.delete_style(name)
         self.updateLayerIsDataPublished(name, False)
 
     def unpublishMetadata(self, name):
-        catalog = metadataServers()[self.comboMetadataServer.currentText()].catalog
+        catalog = metadataServers()[self.comboMetadataServer.currentText()].catalog()
         catalog.delete_metadata(name)
         self.updateLayerIsMetadataPublished(name, False)
 
@@ -372,7 +373,7 @@ class PublishWidget(BASE, WIDGET):
                 self.unpublishMetadata(name)            
 
     def viewWms(self, name):
-        catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog
+        catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog()
         layer = self.layerFromName(name)
         names = [layer.name()]        
         bbox = layer.extent()
@@ -380,7 +381,7 @@ class PublishWidget(BASE, WIDGET):
         catalog.open_wms(names, sbbox, layer.crs().authid())
 
     def viewAllWms(self):
-        catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog
+        catalog = geodataServers()[self.comboGeodataServer.currentText()].catalog()
         layers = self.publishableLayers()
         bbox = QgsRectangle()
         canvasCrs = iface.mapCanvas().mapSettings().destinationCrs()

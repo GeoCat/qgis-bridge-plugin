@@ -75,7 +75,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
                     else:
                         self.setCurrentServer(server)
                 elif res == QMessageBox.Cancel:
-                    print(self.listServers.itemWidget(old).serverName())
                     self.listServers.setCurrentItem(old)
                 else:
                     self.setCurrentServer(server)

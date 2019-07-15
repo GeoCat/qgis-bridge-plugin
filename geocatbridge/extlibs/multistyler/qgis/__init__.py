@@ -1,3 +1,4 @@
+import zipfile
 from xml.dom import minidom
 from multistyler.qgis.geostyler import layerAsGeostyler
 from multistyler.sld.sld import processLayer
@@ -23,5 +24,4 @@ def saveLayerStyleAsZippedSld(layer, filename):
         z.write(icon, os.path.basename(icon))
     z.writestr(layer.name() + ".sld", sld)
     z.close()
-    log.logInfo("Style for layer %s exported as zip file to %s" % (layer.name(), filename))
     return warnings

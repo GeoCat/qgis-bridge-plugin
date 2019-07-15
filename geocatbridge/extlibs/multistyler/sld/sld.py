@@ -87,12 +87,12 @@ def _createSymbolizer(sl):
 
 def _symbolProperty(sl, name):
     if name in sl:        
-        _processProperty(sl[name])        
+        return _processProperty(sl[name])      
     else:
         return None
 
 def _processProperty(value):
-    v = convertExpression(sl[name])
+    v = convertExpression(value)
     if isinstance(v, Element) and v.tag == "ogc:Literal":
         v = v.text
     return v

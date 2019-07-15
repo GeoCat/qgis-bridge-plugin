@@ -59,8 +59,8 @@ def metadataServers():
 class GeodataServer():
     
     def unpublishData(self, layer):
-        self.catalog.delete_layer(layer.name())
-        self.catalog.delete_style(layer.name())    
+        self.catalog().delete_layer(layer.name())
+        self.catalog().delete_style(layer.name())    
 
 class GeoserverServer(GeodataServer):
 
@@ -85,36 +85,39 @@ class GeoserverServer(GeodataServer):
 
     def publishStyle(self, layer):
         style = getCompatibleSldAsZip(layer)
-        self.catalog.publishStyle(layer.name(), zipfile = style)
+        self.catalog().publishStyle(layer.name(), zipfile = style)
         
-    def publishLayer(self, layer, fields):        
-        filename = tempFilenameInTempFolder(layer.name() + ".zip")
-        warnings = saveLayerStyleAsZippedSld(layer)
+    def publishLayer(self, layer, fields):
+        styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
+        warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
+
         for w in warnings:
             QgsMessageLog.logMessage(w, 'GeoCat Bridge', level=Qgis.Warning)
+        QgsMessageLog.logMessage("Style for layer %s exported as zip file to %s" % (layer.name(), styleFilename), 'GeoCat Bridge', level=Qgis.Info)
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
                 filename = exportLayer(layer, fields)
-                self.catalog.publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), style, layer.name())
+                self.catalog().publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), styleFilename, layer.name())
             else:
                 try:
                     db = allServers()[self.postgisdb]
                 except KeyError:
                     raise Exception("Cannot find the selected PostGIS database")
                 db.importLayer(layer, fields)                
-                self.catalog.publish_vector_layer_from_postgis(db.host, db.port, 
+                self.catalog().publish_vector_layer_from_postgis(db.host, db.port, 
                                         db.database, db.schema, layer.name(), 
                                         db._username, db._password, layer.crs().authid(), 
-                                        layer.name(), style, layer.name())
+                                        layer.name(), styleFilename, layer.name())
         elif layer.type() == layer.RasterLayer:
             filename = exportLayer(layer, fields)            
-            self.catalog.publish_raster_layer_file(filename, layer.name(), style, layer.name())
+            self.catalog().publish_raster_layer_file(filename, layer.name(), styleFilename, layer.name())
 
     def testConnection(self):
         try:
-            self._catalog.gscatalog.gsversion()
+            self.catalog().gscatalog.gsversion()
             return True
         except:
+            raise
             return False
 
 
@@ -128,6 +131,7 @@ class GeocatLiveServer():
     def __init__(self, name, userid="", geoserverAuthid="", geonetworkAuthid=""):
         self.name = name
         self.userid = userid
+        self.profile = GeonetworkServer.PROFILE_DEFAULT
         self.geoserverAuthid = geoserverAuthid
         self.geonetworkAuthid = geonetworkAuthid
         self._isMetadataCatalog = True
@@ -148,7 +152,6 @@ class GeocatLiveServer():
             if serv["application"] == "geonetwork":
                 self._geonetworkUrl = serv["url"]
 
-    @property
     def dataCatalog(self):
         if self._geoserverUrl is None:
             self._getUrls()
@@ -157,7 +160,6 @@ class GeocatLiveServer():
             self._dataCatalog = GeoServerCatalog(self._geoserverUrl, geoserverNam, "geocatlive") #TODO:workspace
         return self._dataCatalog
 
-    @property
     def metadataCatalog(self):
         if self._geonetworkUrl is None:
             self._getUrls()
@@ -167,13 +169,13 @@ class GeocatLiveServer():
         return self._metadataCatalog
 
     def publishLayerMetadata(self, layer):
-        self.metadataCatalog.publishLayerMetadata(layer)
+        self.metadataCatalog().publishLayerMetadata(layer)
 
     def publishStyle(self, layer):
-        self.dataCatalog.publishStyle(layer)
+        self.dataCatalog().publishStyle(layer)
         
     def publishLayer(self, layer, fields): 
-        self.dataCatalog.publishLayer(layer, fields)
+        self.dataCatalog().publishLayer(layer, fields)
 
     def testConnection(self):
         try:
@@ -222,6 +224,9 @@ class GeonetworkServer():
         password = authConfig.config('password')        
         nam = TokenNetworkAccessManager(self.url, username, password)
         self._catalog = GeoNetworkCatalog(self.url, nam)
+
+    def catalog(self):
+        return self._catalog
 
     def publishLayerMetadata(self, layer):
         uuid = layer.metadata().id()

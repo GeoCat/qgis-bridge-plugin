@@ -26,7 +26,7 @@ def processLayer(layer):
             pass #show error
         for rule in renderer.rootRule().children():
             rules.append(processRule(rule))
-        labeling = processLabeling(layer)
+        labelingSymbolizer = processLabeling(layer)
         if labelingSymbolizer is not None:
             rules.append(labelingSymbolizer)
         return  {"name": layer.name(), "rules": rules}
@@ -35,13 +35,15 @@ quadOffset = ["top", "top-right", "left", "center", "right", "bottom-left", "bot
 
 def processLabeling(layer):
     labeling = layer.labeling()
+    if labeling is None:
+        return None
     if not isinstance(labeling, QgsVectorLayerSimpleLabeling):
-        warnings.append("Unsupported labeling class: '%s'" % str(labeling))
+        _warnings.append("Unsupported labeling class: '%s'" % str(labeling))
         return None
     symbolizer = {"Kind": "Text"}
     settings = labeling.settings()
     textFormat = settings.format()    
-    size = _labelingProperty(settings, textFormat, "size", QgsPalLayerSetings.Size)
+    size = _labelingProperty(settings, textFormat, "size", QgsPalLayerSettings.Size)
     color = _toHexColor(textFormat.color())
     font = textFormat.font().family()
     buff = textFormat.buffer()
@@ -52,7 +54,7 @@ def processLabeling(layer):
     offsetY = _labelingProperty(settings, None, "yOffset")
     exp = settings.getLabelExpression()
     label = walkExpression(exp.rootNode())
-    symbolizer.extend({"color": color,
+    symbolizer.update({"color": color,
                         "offset": [offsetX, offsetY],
                         "font": font,
                         "anchor": anchor,

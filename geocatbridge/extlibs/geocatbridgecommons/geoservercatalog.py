@@ -20,7 +20,7 @@ class GSConfigCatalogUsingNetworkAccessManager(Catalog):
 
     def http_request(self, url, data=None, method='get', headers = {}):
         log.logInfo("Making '%s' request to '%s'" % (method, url))
-        resp, content = self.nam.request(url, method, data, headers)
+        resp = self.nam.request(url, method, data, headers)
         return resp
 
     def setup_connection(self):
@@ -55,14 +55,7 @@ class GeoServerCatalog(GeodataCatalog):
                 self.http_request(url, f.read(), "put",)
             storeName = os.path.splitext(os.path.basename(filename))[0]
             url = "%s/workspaces/%s/layers/%s.json" % (self.service_url, self.workspace, storeName)
-            self.http_request(url, json.dumps({"name": layername}), "put")
-            '''
-            storeName = os.path.splitext(os.path.basename(filename))[0]
-            print(storeName)
-            layer = self._get_layer(storeName)
-            layer.title = layername
-            self.gscatalog.save(layer) 
-            '''     
+            #TODO ensure layer name 
             log.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
             self._set_layer_style(layername, stylename)
 
@@ -109,7 +102,7 @@ class GeoServerCatalog(GeodataCatalog):
                 method = "put"
                 url = self.service_url + "/workspaces/%s/styles/%s" % (self.workspace, name)
             else:
-                url = self.service_url + "/workspaces/%s/styles" % self.workspace
+                url = self.service_url + "/workspaces/%s/styles?name=%s" % (self.workspace, name)
                 method = "post"
             with open(zipfile, "rb") as f:
                 self.http_request(url, f.read(), method, headers)
@@ -118,11 +111,14 @@ class GeoServerCatalog(GeodataCatalog):
             raise ValueError("A style definition must be provided, whether using a zipfile path or a SLD string")
 
     def style_exists(self, name):
+        if not self._workspaceExists():
+            return False
         return len(self.gscatalog.get_styles(name, self.workspace)) > 0
 
     def delete_style(self, name):
-        style = self.gscatalog.get_styles(name, self.workspace)[0]
-        self.gscatalog.delete(style)
+        styles = self.gscatalog.get_styles(name, self.workspace)
+        if styles:
+            self.gscatalog.delete(styles[0])
 
     def layer_exists(self, name):
         '''
@@ -159,6 +155,11 @@ class GeoServerCatalog(GeodataCatalog):
         layer.default_style = default
         self.gscatalog.save(layer)
         log.logInfo("Style %s correctly assigned to layer %s" % (stylename, layername))
+
+
+    def _workspaceExists(self):
+        ws  = self.gscatalog.get_workspaces(self.workspace)
+        return bool(ws)
 
     def _ensureWorkspaceExists(self):
         ws  = self.gscatalog.get_workspaces(self.workspace)
