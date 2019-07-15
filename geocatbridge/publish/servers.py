@@ -59,8 +59,8 @@ def metadataServers():
 class GeodataServer():
     
     def unpublishData(self, layer):
-        self.catalog().delete_layer(layer.name())
-        self.catalog().delete_style(layer.name())    
+        self.dataCatalog().delete_layer(layer.name())
+        self.dataCatalog().delete_style(layer.name())    
 
 class GeoserverServer(GeodataServer):
 
@@ -80,12 +80,12 @@ class GeoserverServer(GeodataServer):
         nam = NetworkAccessManager(self.authid, debug=False)
         self._catalog = GeoServerCatalog(self.url, nam, self.workspace)
 
-    def catalog(self):
+    def dataCatalog(self):
         return self._catalog
 
     def publishStyle(self, layer):
         style = getCompatibleSldAsZip(layer)
-        self.catalog().publishStyle(layer.name(), zipfile = style)
+        self.dataCatalog().publishStyle(layer.name(), zipfile = style)
         
     def publishLayer(self, layer, fields):
         styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
@@ -97,24 +97,24 @@ class GeoserverServer(GeodataServer):
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
                 filename = exportLayer(layer, fields)
-                self.catalog().publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), styleFilename, layer.name())
+                self.dataCatalog().publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), styleFilename, layer.name())
             else:
                 try:
                     db = allServers()[self.postgisdb]
                 except KeyError:
                     raise Exception("Cannot find the selected PostGIS database")
                 db.importLayer(layer, fields)                
-                self.catalog().publish_vector_layer_from_postgis(db.host, db.port, 
+                self.dataCatalog().publish_vector_layer_from_postgis(db.host, db.port, 
                                         db.database, db.schema, layer.name(), 
                                         db._username, db._password, layer.crs().authid(), 
                                         layer.name(), styleFilename, layer.name())
         elif layer.type() == layer.RasterLayer:
             filename = exportLayer(layer, fields)            
-            self.catalog().publish_raster_layer_file(filename, layer.name(), styleFilename, layer.name())
+            self.dataCatalog().publish_raster_layer_file(filename, layer.name(), styleFilename, layer.name())
 
     def testConnection(self):
         try:
-            self.catalog().gscatalog.gsversion()
+            self.dataCatalog().gscatalog.gsversion()
             return True
         except:
             raise
@@ -128,54 +128,58 @@ class GeocatLiveServer():
 
     BASE_URL = "https://artemis.geocat.net/geocat-live/api/1.0/order/"
 
-    def __init__(self, name, userid="", geoserverAuthid="", geonetworkAuthid=""):
+    def __init__(self, name, userid="", geoserverAuthid="", geonetworkAuthid="", profile=0):
         self.name = name
         self.userid = userid
-        self.profile = GeonetworkServer.PROFILE_DEFAULT
+        self.profile = profile
         self.geoserverAuthid = geoserverAuthid
         self.geonetworkAuthid = geonetworkAuthid
         self._isMetadataCatalog = True
         self._isDataCatalog = True
         self._geoserverUrl = None
         self._geonetworkUrl = None
-        self._dataCatalog = None
-        self._metadataCatalog = None
+        self._geoserverServer = None
+        self._geonetworkServer = None
 
     def _getUrls(self):
         url = "%s/%s" % (self.BASE_URL, self.userid)
         nam = NetworkAccessManager(None, debug=False)
-        response, content = nam.request(url, "get")
-        res = json.loads(content)
+        response = nam.request(url, "get")
+        res = json.loads(response.content)
         for serv in res["services"]:
             if serv["application"] == "geoserver":
                 self._geoserverUrl = serv["url"] + "/rest"
             if serv["application"] == "geonetwork":
                 self._geonetworkUrl = serv["url"]
 
-    def dataCatalog(self):
+    def geoserverServer(self):
         if self._geoserverUrl is None:
             self._getUrls()
-        if self._dataCatalog is None:
-            geoserverNam = NetworkAccessManager(self.geoserverAuthid, debug=False)
-            self._dataCatalog = GeoServerCatalog(self._geoserverUrl, geoserverNam, "geocatlive") #TODO:workspace
-        return self._dataCatalog
+        if self._geoserverServer is None:            
+            self._geoserverServer = GeoserverServer("GeoServer", self._geoserverUrl, self.geoserverAuthid, workspace="geocatlive") #TODO:workspace
+        return self._geoserverServer
 
-    def metadataCatalog(self):
+    def geonetworkServer(self):
         if self._geonetworkUrl is None:
             self._getUrls()
-        if self._metadataCatalog is None:
-            geonetworkNam = NetworkAccessManager(self.geonetworkAuthid, debug=False)
-            self._metadataCatalog = GeoNetworkCatalog(self._geonetworkUrl, geonetworkNam)
-        return self._metadataCatalog
+        if self._geonetworkServer is None:
+            self._geonetworkServer = GeonetworkServer("GeoNetwork", self._geonetworkUrl, self.geonetworkAuthid)
+        return self._geonetworkServer
+
+    def dataCatalog(self):
+        return self.geoserverServer().dataCatalog()
+
+    def metadataCatalog(self):
+        return self.geonetworkServer().metadataCatalog()
 
     def publishLayerMetadata(self, layer):
-        self.metadataCatalog().publishLayerMetadata(layer)
+        self.geonetworkServer().publishLayerMetadata(layer)
 
     def publishStyle(self, layer):
-        self.dataCatalog().publishStyle(layer)
+        self.geoserverServer().publishStyle(layer)
         
     def publishLayer(self, layer, fields): 
-        self.dataCatalog().publishLayer(layer, fields)
+        self.geoserverServer().publishLayer(layer, fields)
 
     def testConnection(self):
         try:
@@ -225,7 +229,7 @@ class GeonetworkServer():
         nam = TokenNetworkAccessManager(self.url, username, password)
         self._catalog = GeoNetworkCatalog(self.url, nam)
 
-    def catalog(self):
+    def metadataCatalog(self):
         return self._catalog
 
     def publishLayerMetadata(self, layer):
