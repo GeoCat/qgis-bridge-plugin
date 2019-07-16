@@ -84,13 +84,15 @@ class GeoserverServer(GeodataServer):
         return self._catalog
 
     def publishStyle(self, layer):
-        style = getCompatibleSldAsZip(layer)
-        self.dataCatalog().publishStyle(layer.name(), zipfile = style)
+        styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
+        warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
+        for w in warnings:
+            QgsMessageLog.logMessage(w, 'GeoCat Bridge', level=Qgis.Warning)   
+        self.dataCatalog().publish_style(layer.name(), zipfile = styleFilename)        
         
     def publishLayer(self, layer, fields):
         styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
-
         for w in warnings:
             QgsMessageLog.logMessage(w, 'GeoCat Bridge', level=Qgis.Warning)
         QgsMessageLog.logMessage("Style for layer %s exported as zip file to %s" % (layer.name(), styleFilename), 'GeoCat Bridge', level=Qgis.Info)
