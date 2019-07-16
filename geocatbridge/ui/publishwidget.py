@@ -428,6 +428,15 @@ class PublishWidget(BASE, WIDGET):
         else:
             metadataServer = None 
 
+
+        toPublish = []
+        for i in range(self.listLayers.count()):            
+            item = self.listLayers.item(i)
+            widget = self.listLayers.itemWidget(item)
+            if widget.checked():
+                name = widget.name()   
+                toPublish.append(name)
+
         progressMessageBar = self.bar.createMessage("Publishing layers")
         progress = QProgressBar()
         progress.setMaximum(self.listLayers.count())
@@ -459,38 +468,34 @@ class PublishWidget(BASE, WIDGET):
         allowWithoutMetadata = ALLOW #pluginSetting("allowWithoutMetadata")
 
         results = {}
-        for i in range(self.listLayers.count()):
-            progress.setValue(i)
-            item = self.listLayers.item(i)
-            widget = self.listLayers.itemWidget(item)
-            if widget.checked():
-                try:
-                    self.logger.reset()              
-                    name = widget.name()              
-                    layer = self.layerFromName(name)
-                    validates, _ = validator.validate(layer.metadata())
-                    validates = True
-                    if geodataServer is not None:
-                        if self.chkOnlySymbology.checkState() == Qt.Checked:
-                            geodataServer.publishStyle(layer)
+        for i, name in enumerate(toPublish):
+            progress.setValue(i)                        
+            try:
+                self.logger.reset()                         
+                layer = self.layerFromName(name)
+                validates, _ = validator.validate(layer.metadata())
+                validates = True
+                if geodataServer is not None:
+                    if self.chkOnlySymbology.checkState() == Qt.Checked:
+                        geodataServer.publishStyle(layer)
+                    else:
+                        if validates or allowWithoutMetadata in [ALLOW, ALLOWONLYDATA]:
+                            fields = None
+                            if layer.type() == layer.VectorLayer:
+                                fields = [name for name, publish in self.fieldsToPublish[layer].items() if publish]                            
+                            geodataServer.publishLayer(layer, fields)
+                            self.updateLayerIsDataPublished(name, True)
                         else:
-                            if validates or allowWithoutMetadata in [ALLOW, ALLOWONLYDATA]:
-                                fields = None
-                                if layer.type() == layer.VectorLayer:
-                                    fields = [name for name, publish in self.fieldsToPublish[layer].items() if publish]                            
-                                geodataServer.publishLayer(layer, fields)
-                                self.updateLayerIsDataPublished(name, True)
-                            else:
-                                self.logger.logError("Layer '%s' has invalid metadata. Layer was not published" % layer.name())
-                    if metadataServer is not None:
-                        if validates or allowWithoutMetadata == ALLOW:
-                            metadataServer.publishLayerMetadata(layer)
-                            self.updateLayerIsMetadataPublished(name, True)
-                        else:
-                            self.logger.logError("Layer '%s' has invalid metadata. Metadata was not published" % layer.name())
-                except:
-                    self.logger.logError(traceback.format_exc())
-                results[name] = (self.logger.warnings, self.logger.errors)
+                            self.logger.logError("Layer '%s' has invalid metadata. Layer was not published" % layer.name())
+                if metadataServer is not None:
+                    if validates or allowWithoutMetadata == ALLOW:
+                        metadataServer.publishLayerMetadata(layer)
+                        self.updateLayerIsMetadataPublished(name, True)
+                    else:
+                        self.logger.logError("Layer '%s' has invalid metadata. Metadata was not published" % layer.name())
+            except:
+                self.logger.logError(traceback.format_exc())
+            results[name] = (self.logger.warnings, self.logger.errors)
 
         return results
 
