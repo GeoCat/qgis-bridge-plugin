@@ -1,3 +1,4 @@
+import os
 import zipfile
 from xml.dom import minidom
 from multistyler.qgis.geostyler import layerAsGeostyler

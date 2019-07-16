@@ -9,9 +9,9 @@ binaryOps = [
      "PropertyIsEqualTo",
      "PropertyIsNotEqualTo",
      "PropertyIsLessThanOrEqualTo",
-     "PropertyIsGreaterThanEqualTo",
+     "PropertyIsGreaterThanOrEqualTo",
      "PropertyIsLessThan",
-     "PropertyIsGreater",
+     "PropertyIsGreaterThan",
      None, None, None, None, None, None, None,
      "Add",
       "Sub",
@@ -35,7 +35,7 @@ functions = {"radians": "toRadians",
              "end_point": "endPoint",
              "start_point": "startPoint",
              "x": "getX",
-             "x": "getY",
+             "y": "getY",
              "concat": "Concatenate",
              "substr": "strSubstr",
              "lower": "strToLower",
@@ -61,7 +61,9 @@ functions = {"radians": "toRadians",
              "tan": "tan",
              "ln": "log",
              "title": "strCapitalize",
-             "translate": "offset"
+             "translate": "offset",
+             "min": "min",
+             "max": "max"
              } #TODO
 
 def walkExpression(node):
@@ -83,7 +85,7 @@ def walkExpression(node):
 
 def handleBinary(node):
     op = node.op()
-    retOp = binary_ops[op]
+    retOp = binaryOps[op]
     left = node.opLeft()
     right = node.opRight()
     retLeft = walkExpression(left)

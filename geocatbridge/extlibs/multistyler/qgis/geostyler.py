@@ -34,9 +34,12 @@ def processLayer(layer):
 quadOffset = ["top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"]
 
 def processLabeling(layer):
+    if not layer.labelsEnabled():
+        return None
     labeling = layer.labeling()
     if labeling is None:
         return None
+
     if not isinstance(labeling, QgsVectorLayerSimpleLabeling):
         _warnings.append("Unsupported labeling class: '%s'" % str(labeling))
         return None
@@ -60,7 +63,7 @@ def processLabeling(layer):
                         "anchor": anchor,
                         "label": label,
                         "size": size})
-    return {"symbolizers", symbolizer}
+    return {"symbolizers": symbolizer}
 
 def processRule(rule):
     symbolizers = _createSymbolizers(rule.symbol().clone())
@@ -310,8 +313,11 @@ def _markGraphic(sl):
     outlineWidth = _symbolProperty(sl, "outline_width", QgsSymbolLayer.PropertyStrokeWidth)    
     try:
         path = sl.path()
+        global _usedIcons
+        _usedIcons.append(sl.path())
         name = "file://" + os.path.basename(path)
         outlineStyle = "solid"
+        size = _symbolProperty(sl, "size", QgsSymbolLayer.PropertyWidth)
     except:
         name = props["name"]
         name = wknReplacements.get(name, name)
