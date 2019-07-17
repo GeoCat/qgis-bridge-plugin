@@ -1,22 +1,5 @@
-from qgis.PyQt.QtXml import QDomDocument
+import uuid 
 
-def createMetadataXml(layer, metadata):
-    doc = QDomDocument()
-    layer.exportNamedMetadata(doc)
-    return doc.toString()
-    #TODO: convert to ISO
+def uuidForLayer(layer):
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, layer.source()))
 
-def createMetadataXmlFile(layer, metadata):
-    filename = tempFilenameInTempFolder("metadata.xml")
-    xml = createMetadataXml(layer, metadata)
-    with open(filename, "w") as f:
-        f.write(xml)
-    return filename
-
-def createMetadataMefFile(layer, metadata):
-    xml = createMetadataXml(layer, metadata)
-    filename = tempFilenameInTempFolder(layer.name() + ".mef")
-    z = zipfile.ZipFile(filename, "w")    
-    z.writestr("metadata.xml", xml)
-    z.close()
-    return filename

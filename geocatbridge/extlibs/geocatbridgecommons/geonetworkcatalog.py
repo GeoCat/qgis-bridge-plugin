@@ -21,14 +21,18 @@ class GeoNetworkCatalog(MetadataCatalog):
 
     def publish_metadata(self, metadata):
         headers = {"accept": "application/json"}
-        url = self.api_url() + "/records"
-        with open(metadata, "rb") as f:
-            data = f.read()
-            self.http_request(url, data, "post", headers)
+        url = self.api_url() + "/records?uuidProcessing=OVERWRITE"        
+        with open(metadata,'rb') as f:
+            files = {'file': (metadata, f, 'application/zip', {'Expires': '0'})}        
+            r = self.nam.session.post(url, files=files, headers = headers)
+        r.raise_for_status()
+        js = r.json()
+        if "errors" in r and r['errors']:
+            raise Exception(r['errors'])       
 
     def delete_metadata(self, uuid):
         #TODO: bucket??
-        url = self.api_url() + "/records?uuids=%s&withBackup=true" % uuid
+        url = self.api_url() + "/records?uuids=%s" % uuid
         self.http_request(url, method="delete")
 
     def me(self):

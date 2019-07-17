@@ -7,6 +7,8 @@ from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
 from qgiscommons2.files import tempFilenameInTempFolder
 from multistyler.qgis import saveLayerStyleAsZippedSld
 from qgis.PyQt.QtCore import QSettings
+from geocatbridgecommons import meftools
+from geocatbridge.publish.metadata import uuidForLayer
 from geocatbridgecommons.geoservercatalog import GeoServerCatalog
 from geocatbridgecommons.geonetworkcatalog import GeoNetworkCatalog
 from geocatbridgecommons.catalog import GeodataCatalog, MetadataCatalog
@@ -119,7 +121,6 @@ class GeoserverServer(GeodataServer):
             self.dataCatalog().gscatalog.gsversion()
             return True
         except:
-            raise
             return False
 
 
@@ -199,7 +200,8 @@ class TokenNetworkAccessManager():
     
     def request(self, url, method, data=None, headers={}):
         if self.token is None:
-            self.getToken()        
+            self.getToken()
+        self.session.headers.update({"X-XSRF-TOKEN" : self.token})    
         method = getattr(self.session, method.lower())
         resp = method(url, headers=headers, data=data)
         resp.raise_for_status()
@@ -209,7 +211,7 @@ class TokenNetworkAccessManager():
         xmlInfoUrl = self.url + '/xml.info'
         self.session.post(xmlInfoUrl)
         self.token = self.session.cookies.get('XSRF-TOKEN')
-        self.session.headers.update({"X-XSRF-TOKEN" : self.session.cookies.get('XSRF-TOKEN')})
+        self.session.headers.update({"X-XSRF-TOKEN" : self.token})
 
 class GeonetworkServer():
 
@@ -235,10 +237,13 @@ class GeonetworkServer():
         return self._catalog
 
     def publishLayerMetadata(self, layer):
-        uuid = layer.metadata().id()
-
-        #TODO create MEF
-        self._catalog.publish_metadata(mefFile)
+        uuid = uuidForLayer(layer)
+        filename = tempFilenameInTempFolder(layer.name() + ".qmd")
+        layer.saveNamedMetadata(filename)
+        transformedFilename = self.transformMetadata(filename)
+        mefFilename = tempFilenameInTempFolder(uuid + ".mef")
+        meftools.createMef(uuid, transformedFilename, mefFilename)        
+        self._catalog.publish_metadata(mefFilename)
 
     def testConnection(self):
         try:
@@ -246,6 +251,14 @@ class GeonetworkServer():
             return True
         except:
             return False
+
+    def transformMetadata(self, filename):
+        xmlFilename = tempFilenameInTempFolder("metadata.xml")
+        with open(filename) as f:
+            content = f.read()
+        with open(xmlFilename, "w") as f:
+            f.write(content)
+        return xmlFilename #TODO
 
 class PostgisServer(): 
     

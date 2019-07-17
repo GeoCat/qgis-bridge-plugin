@@ -6,6 +6,7 @@ from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 from geocatbridgecommons import log
 from geocatbridgecommons import feedback
+from geocatbridge.publish.metadata import uuidForLayer
 from qgis.core import *
 from qgis.gui import *
 from qgis.PyQt.QtWidgets import *
@@ -84,6 +85,7 @@ class PublishWidget(BASE, WIDGET):
         self.btnRemoveAll.clicked.connect(self.unpublishAll)
         self.btnRemoveAll.setIcon(REMOVE_ICON)
         self.btnValidate.setIcon(VALIDATE_ICON)
+        self.btnPreview.clicked.connect(self.viewMetadata)
         self.btnPreview.setIcon(PREVIEW_ICON)
         self.btnSave.setIcon(SAVE_ICON)
         self.btnValidate.clicked.connect(self.validateMetadata)
@@ -278,11 +280,13 @@ class PublishWidget(BASE, WIDGET):
         try:
             catalog = metadataServers()[self.comboMetadataServer.currentText()].metadataCatalog()
             self.comboMetadataServer.setStyleSheet("QComboBox {}")
-            return catalog.metadata_exists(layer)
+            uuid = uuidForLayer(self.layerFromName(layer))
+            return catalog.metadata_exists(uuid)
         except KeyError:
             self.comboMetadataServer.setStyleSheet("QComboBox {}")
             return False
-        except:            
+        except:
+            raise  
             self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def isDataOnServer(self, layer):
@@ -330,7 +334,8 @@ class PublishWidget(BASE, WIDGET):
 
     def unpublishMetadata(self, name):
         catalog = metadataServers()[self.comboMetadataServer.currentText()].metadataCatalog()
-        catalog.delete_metadata(name)
+        uuid = uuidForLayer(self.layerFromName(name))
+        catalog.delete_metadata(uuid)
         self.updateLayerIsMetadataPublished(name, False)
 
     def updateLayerIsMetadataPublished(self, name, value):
@@ -396,7 +401,11 @@ class PublishWidget(BASE, WIDGET):
         catalog.open_wms(names, sbbox, canvasCrs.authid())
 
     def viewMetadata(self, name):
-        pass        
+        html = self.currentLayer.htmlMetadata()
+        dlg = QgsMessageOutput.createMessageOutput()
+        dlg.setTitle("Layer metadata")
+        dlg.setMessage(html, QgsMessageOutput.MessageHtml)
+        dlg.showMessage()
 
     def publish(self):
         try:
@@ -411,23 +420,14 @@ class PublishWidget(BASE, WIDGET):
 
     def _publish(self):
         if self.comboGeodataServer.currentIndex() != 0:
-            try:
-                geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
-            except KeyError:                
-                self.bar.pushMessage("Error", "No map server has been defined", level=Qgis.Warning, duration=5)
-                return
+            geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
         else:
             geodataServer = None
 
         if self.comboMetadataServer.currentIndex() != 0:
-            try:
-                metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
-            except KeyError:  
-                self.bar.pushMessage("Error", "No metadata catalogue has been defined", level=Qgis.Warning, duration=5)              
-                return
+            metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
         else:
             metadataServer = None 
-
 
         toPublish = []
         for i in range(self.listLayers.count()):            
