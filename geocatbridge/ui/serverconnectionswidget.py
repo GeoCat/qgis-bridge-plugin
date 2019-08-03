@@ -138,19 +138,19 @@ class ServerConnectionsWidget(BASE, WIDGET):
 
     def createGeoserverServer(self):
         ##TODO check validity of name and values        
-        name = self.txtGeoserverName.text()
-        url = self.txtGeoserverUrl.text()
-        workspace = self.txtGeoserverWorkspace.text()
-        url = self.txtGeoserverUrl.text()
+        name = self.txtGeoserverName.text().strip()
+        url = self.txtGeoserverUrl.text().strip()
+        workspace = self.txtGeoserverWorkspace.text().strip()
         authid = self.geoserverAuth.configId()
-        datastore = self.comboDatastore.currentText()
         if self.radioUploadData.isChecked():
             storage = GeoserverServer.UPLOAD_DATA
             postgisdb = None
         else:
             storage = GeoserverServer.STORE_IN_POSTGIS
             postgisdb = self.comboDatastore.currentText()
-        server = GeoserverServer(name, url, authid, storage, workspace, datastore, postgisdb)
+        if "" in [name, url, workspace]:
+            return None
+        server = GeoserverServer(name, url, authid, storage, workspace, postgisdb)
         return server
 
     def createPostgisServer(self):
