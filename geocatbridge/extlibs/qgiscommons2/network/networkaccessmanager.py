@@ -287,7 +287,7 @@ class NetworkAccessManager(object):
             # check if errorString is empty, if so, then set err string as
             # reply dump
             if re.match('(.)*server replied: $', self.reply.errorString()):
-                errString = self.reply.errorString() + self.http_call_result.content
+                errString = self.reply.errorString() + self.http_call_result.text
             else:
                 errString = self.reply.errorString()
             # check if self.http_call_result.status_code is available (client abort
