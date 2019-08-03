@@ -69,13 +69,12 @@ class GeoserverServer(GeodataServer):
     UPLOAD_DATA = 0
     STORE_IN_POSTGIS = 1
 
-    def __init__(self, name, url="", authid="", storage=0, workspace="", datastore="", postgisdb=None):
+    def __init__(self, name, url="", authid="", storage=0, workspace="", postgisdb=None):
         self.name = name
         self.url = url
         self.authid = authid
         self.storage = storage
         self.workspace = workspace
-        self.datastore = datastore
         self.postgisdb = postgisdb
         self._isMetadataCatalog = False
         self._isDataCatalog = True
