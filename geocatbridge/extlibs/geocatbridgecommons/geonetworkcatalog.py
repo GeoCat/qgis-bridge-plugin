@@ -2,9 +2,6 @@ from .catalog import MetadataCatalog
 
 class GeoNetworkCatalog(MetadataCatalog):
 
-    def login_url(self):
-        return self.service_url + "/signin"
-
     def api_url(self):
         return self.service_url + "/srv/api/0.1"
 
