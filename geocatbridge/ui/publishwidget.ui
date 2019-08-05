@@ -82,6 +82,9 @@
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QToolButton" name="btnPreview">
+             <property name="toolTip">
+              <string>Preview metadata</string>
+             </property>
              <property name="text">
               <string/>
              </property>
@@ -96,6 +99,9 @@
            </item>
            <item>
             <widget class="QToolButton" name="btnValidate">
+             <property name="toolTip">
+              <string>Validate metadata</string>
+             </property>
              <property name="text">
               <string/>
              </property>
@@ -110,6 +116,9 @@
            </item>
            <item>
             <widget class="QToolButton" name="btnSave">
+             <property name="toolTip">
+              <string>Save metadata</string>
+             </property>
              <property name="text">
               <string/>
              </property>
