@@ -234,6 +234,8 @@ class ServerConnectionsWidget(BASE, WIDGET):
 
     def buttonRemoveClicked(self):
         item = self.listServers.currentItem()
+        if item is None:
+            return
         name = self.listServers.itemWidget(item).serverName()
         removeServer(name)
         self.listServers.takeItem(self.listServers.currentRow())
