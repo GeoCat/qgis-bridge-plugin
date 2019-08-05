@@ -286,7 +286,6 @@ class PublishWidget(BASE, WIDGET):
             self.comboMetadataServer.setStyleSheet("QComboBox {}")
             return False
         except:
-            raise  
             self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def isDataOnServer(self, layer):
@@ -298,7 +297,6 @@ class PublishWidget(BASE, WIDGET):
             self.comboGeodataServer.setStyleSheet("QComboBox {}")
             return False
         except:
-            raise
             self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def validateMetadata(self):
