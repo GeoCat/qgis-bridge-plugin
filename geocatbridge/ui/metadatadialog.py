@@ -31,3 +31,4 @@ class MetadataDialog(QDialog):
 
     def cancelPressed(self):
         self.metadata = None
+        self.close()

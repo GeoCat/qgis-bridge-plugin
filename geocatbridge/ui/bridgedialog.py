@@ -59,3 +59,7 @@ class BridgeDialog(BASE, WIDGET):
             self.publishWidget.updateServers()
         else:
             self.stackedWidget.setCurrentWidget(self.serversWidget)
+
+    def closeEvent(self, evt):
+        self.publishWidget.storeMetadata() 
+        evt.accept()

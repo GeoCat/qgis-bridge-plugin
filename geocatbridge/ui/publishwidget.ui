@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>Form</class>
  <widget class="QWidget" name="Form">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -156,7 +159,7 @@
          <item>
           <widget class="QTabWidget" name="tabWidgetMetadata">
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tabMetadataGeneral">
             <attribute name="title">
@@ -165,81 +168,15 @@
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
               <layout class="QGridLayout" name="gridLayout_2">
-               <item row="3" column="2">
-                <widget class="QLineEdit" name="txtKeywords">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="3">
-                <widget class="QToolButton" name="btnKeywords">
+               <item row="2" column="3">
+                <widget class="QToolButton" name="btnIsoTopic">
                  <property name="text">
                   <string>...</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_2">
-                 <property name="text">
-                  <string>Abstract</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="2" colspan="2">
-                <widget class="QTextEdit" name="txtAbstract"/>
-               </item>
-               <item row="5" column="2">
-                <widget class="QComboBox" name="comboMetadataContact"/>
-               </item>
-               <item row="2" column="2">
-                <widget class="QLineEdit" name="txtIsoTopic">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_7">
-                 <property name="text">
-                  <string>Keywords</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_3">
-                 <property name="text">
-                  <string>ISO topic category</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="3">
-                <widget class="QToolButton" name="btnMetadataContact">
-                 <property name="text">
-                  <string>...</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label">
-                 <property name="text">
-                  <string>Title</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="3">
-                <widget class="QToolButton" name="btnDataContact">
-                 <property name="text">
-                  <string>...</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="0">
-                <widget class="QLabel" name="label_6">
-                 <property name="text">
-                  <string>Access constraints</string>
-                 </property>
-                </widget>
+               <item row="0" column="2" colspan="2">
+                <widget class="QLineEdit" name="txtMetadataTitle"/>
                </item>
                <item row="4" column="0">
                 <widget class="QLabel" name="label_4">
@@ -248,41 +185,10 @@
                  </property>
                 </widget>
                </item>
-               <item row="6" column="3">
-                <widget class="QToolButton" name="btnAccessConstraints">
+               <item row="8" column="3">
+                <widget class="QToolButton" name="btnUseConstraints">
                  <property name="text">
                   <string>...</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="3">
-                <widget class="QToolButton" name="btnIsoTopic">
-                 <property name="text">
-                  <string>...</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="2">
-                <widget class="QComboBox" name="comboDataContact">
-                 <property name="editable">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="0">
-                <widget class="QLabel" name="label_5">
-                 <property name="text">
-                  <string>Metadata contact</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="2" colspan="2">
-                <widget class="QLineEdit" name="txtMetadataTitle"/>
-               </item>
-               <item row="8" column="0">
-                <widget class="QLabel" name="label_8">
-                 <property name="text">
-                  <string>Use constraints</string>
                  </property>
                 </widget>
                </item>
@@ -305,10 +211,10 @@
                  </item>
                 </widget>
                </item>
-               <item row="9" column="0">
-                <widget class="QLabel" name="label_9">
+               <item row="6" column="3">
+                <widget class="QToolButton" name="btnAccessConstraints">
                  <property name="text">
-                  <string>Language</string>
+                  <string>...</string>
                  </property>
                 </widget>
                </item>
@@ -322,6 +228,79 @@
                  </property>
                 </widget>
                </item>
+               <item row="2" column="2">
+                <widget class="QLineEdit" name="txtIsoTopic">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="3">
+                <widget class="QToolButton" name="btnMetadataContact">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="3">
+                <widget class="QToolButton" name="btnDataContact">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="8" column="0">
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>Use constraints</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_7">
+                 <property name="text">
+                  <string>Keywords</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QLabel" name="label_5">
+                 <property name="text">
+                  <string>Metadata contact</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2" colspan="2">
+                <widget class="QTextEdit" name="txtAbstract"/>
+               </item>
+               <item row="9" column="0">
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Language</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_3">
+                 <property name="text">
+                  <string>ISO topic category</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="QLabel" name="label_6">
+                 <property name="text">
+                  <string>Access constraints</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_2">
+                 <property name="text">
+                  <string>Abstract</string>
+                 </property>
+                </widget>
+               </item>
                <item row="8" column="2">
                 <widget class="QLineEdit" name="txtUseConstraints">
                  <property name="enabled">
@@ -329,10 +308,38 @@
                  </property>
                 </widget>
                </item>
-               <item row="8" column="3">
-                <widget class="QToolButton" name="btnUseConstraints">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>Title</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="2">
+                <widget class="QLineEdit" name="txtKeywords">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="3">
+                <widget class="QToolButton" name="btnKeywords">
                  <property name="text">
                   <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="2">
+                <widget class="QLineEdit" name="txtDataContact">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="2">
+                <widget class="QLineEdit" name="txtMetadataContact">
+                 <property name="enabled">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>

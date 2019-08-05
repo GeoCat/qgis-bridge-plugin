@@ -155,9 +155,9 @@ class PublishWidget(BASE, WIDGET):
         for group in metadata.keywords().values():
             keywords.extend(group)
         self.txtKeywords.setText(",".join(keywords))
-        if metadata.contacts(): 
-            self.comboDataContact.setCurrentText(metadata.contacts()[0].name)
-            self.comboMetadataContact.setCurrentText(metadata.contacts()[0].name)
+        if metadata.contacts():
+            self.txtDataContact.setText(metadata.contacts()[0].name)
+            self.txtMetadataContact.setText(metadata.contacts()[0].name)
         self.txtUseConstraints.setText(metadata.fees())
         licenses = metadata.licenses()
         if licenses:
@@ -313,6 +313,7 @@ class PublishWidget(BASE, WIDGET):
         dlg.showMessage()
 
     def openMetadataEditor(self, tab):
+        self.storeMetadata()
         metadata = self.metadata[self.currentLayer].clone()
         w = MetadataDialog(metadata, tab, self)
         w.exec_()
@@ -456,7 +457,6 @@ class PublishWidget(BASE, WIDGET):
         self.storeMetadata()
         self.storeFieldsToPublish()
 
-        self.storeMetadata()
         validator = QgsNativeMetadataValidator()        
             
         DONOTALLOW = 0
@@ -512,10 +512,8 @@ class LayerItemWidget(QWidget):
         self.check = QCheckBox()
         self.check.setText(layer.name())
         self.labelMetadata = QLabel()
-        #self.labelMetadata.setPixmap(QPixmap(self.iconPath(server)))
         self.labelMetadata.setFixedWidth(50)
         self.labelData = QLabel()
-        #self.labelMetadata.setPixmap(QPixmap(self.iconPath(server)))
         self.labelData.setFixedWidth(50)
         self.layout.addWidget(self.check)
         self.layout.addWidget(self.labelData)
