@@ -30,6 +30,76 @@ def processLayer(layer):
         if labelingSymbolizer is not None:
             rules.append(labelingSymbolizer)
         return  {"name": layer.name(), "rules": rules}
+    elif layer.type()  = layer.RasterLayer:
+        rules = ["name": layer.name(), "symbolizers": [rasterSymbolizer(layer)]]
+        return  {"name": layer.name(), "rules": rules}
+
+def rasterSymbolizer(layer):    
+    renderer = layer.renderer()    
+    symbolizer = {"kind": "Raster", "opacity": renderer.opacity(),
+                 "channelSelection": channelSelection(renderer)}
+    colMap = colorMap(renderer)
+    if colMap:
+        symbolier["colorMap"] = colMap
+    return symbolizer
+
+def channelSelection(renderer):
+    if isinstance(renderer, QgsSingleBandGrayRenderer):
+        return {"grayChannel": {"sourceChannelName": str(renderer.grayBand())}}
+    elif isinstance(renderer, (QgsSingleBandPseudoColorRenderer, QgsPalettedRasterRenderer)):
+         return {"grayChannel": {"sourceChannelName": str(renderer.band())}}
+    elif isinstance(renderer, QgsMultiBandColorRenderer):
+        bands = renderer.usesBands()
+        channels = {}
+        if len(bands) > 0:
+            channels["redChannel"] = {"sourceChannelName": str(bands[0])}
+        if len(bands) > 1:
+            channels["greenChannel"] = {"sourceChannelName": str(bands[1])}
+        if len(bands) > 2:
+            channels["blueChannel"] = {"sourceChannelName": str(bands[2])}
+        return channels
+    else:
+        _warnings.append("Unsupported raster renderer class: '%s'" % str(renderer))
+        return None
+
+def colorMap(renderer):
+    colMap = {}
+    mapEntries = []
+    if isinstance(renderer, QgsSingleBandGrayRenderer):
+        colMap["type"] = "ramp"
+        entries = renderer.legendSymbologyItems()
+        for entry in entries:
+            mapEntries.append({"color": entry[1].name() , "quantity": float(entry[0]),
+                            "opacity": entry[1].alpha(), "label": entry[0]})
+    elif isinstance(renderer, QgsSingleBandPseudoColorRenderer):
+        rampType = "ramp"
+        shader = renderer.shader().rasterShaderFunction()
+        colorRampType = shader.colorRampType   
+        if colorRampType == QgsColorRampShader.Exact:
+            rampType = "values"
+        elif colorRampType == QgsColorRampShader.Discrete:
+            rampType = "intervals"
+        colMap["type"] = rampType
+        items = shader.colorRampItemList()
+        for item in items:
+            mapEntries.append({"color": item.color.name() , "quantity": item.value(),
+                            "label": item.label(), "opacity": item.color.alpha()})
+    elif isinstance(renderer, QgsPalettedRasterRenderer):
+        colMap["type"] = "values"
+        classes = renderer.classes()
+        for c in classes:
+            mapEntries.append({"color": c.color.name() , "quantity": c.value(),
+                            "label": c.label(), "opacity": c.color.alpha()})
+    elif isinstance(renderer, QgsMultiBandColorRenderer):
+        return None
+    else:
+        _warnings.append("Unsupported raster renderer class: '%s'" % str(renderer))
+        return None
+
+    colMap.update["extended"] = True
+    if mapEntries is not None:
+        colMap["colorMapEntries"] = mapEntries
+    return colMap
 
 quadOffset = ["top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"]
 
