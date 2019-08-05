@@ -11,7 +11,7 @@ class GSConfigCatalogUsingNetworkAccessManager(Catalog):
 
     #A class that patches the gsconfig Catalog class, to allow using a custom network access manager 
     def __init__(self, service_url, network_access_manager):
-        self.service_url = service_url.strip("/")
+        self.service_url = service_url.strip("/") + "/rest"
         self._cache = dict()
         self._version = None
         self.nam = network_access_manager
