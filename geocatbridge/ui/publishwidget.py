@@ -228,7 +228,7 @@ class PublishWidget(BASE, WIDGET):
     def populateLayers(self):
         layers = self.publishableLayers()
         for i, layer in enumerate(layers):
-            fields = [f.name() for f in layer.fields()]
+            fields = [f.name() for f in layer.fields()] if layer.type() == layer.VectorLayer else []
             self.fieldsToPublish[layer] = {f:True for f in fields}
             self.metadata[layer] = layer.metadata().clone()
             self.addLayerListItem(layer)

@@ -110,8 +110,9 @@ def _addCssParameter(parent, name, value):
         _addValueToElement(sub, value)
         return sub
 
-def _addSubElement(parent, tag, value=None, attrib=None):
-    sub = SubElement(parent, tag, attrib)
+def _addSubElement(parent, tag, value=None, attrib={}):
+    strAttrib = {k: str(v) for k,v in attrib.items()}
+    sub = SubElement(parent, tag, strAttrib)
     _addValueToElement(sub, value)
     return sub
 
@@ -124,19 +125,22 @@ def _rasterSymbolizer(sl):
     opacity = sl["opacity"]
     root = Element("RasterSymbolizer")
     _addSubElement(root, "Opacity", opacity)
+    
+    channelSelectionElement = _addSubElement(root, "ChannelSelection")
+    for chanName in ["grayChannel", "redChannel", "greenChannel", "blueChannel"]:
+        if chanName in sl["channelSelection"]:
+            sldChanName = chanName[0].upper() + chanName[1:]
+            channel = _addSubElement(channelSelectionElement, sldChanName)
+            _addSubElement(channel, "SourceChannelName", sl["channelSelection"][chanName]["sourceChannelName"])
+        
     if "colorMap" in sl:
         colMap = sl["colorMap"]
         colMapElement = _addSubElement(root, "ColorMap", None, {"type": sl["colorMap"]["type"]})
-        colMapEntriesElement = _addSubElement(colMapElement, "ColorMapEntries")
         for entry in colMap["colorMapEntries"]:
             attribs = {"color": entry["color"], "quantity": entry["quantity"],
                         "label": entry["label"], "opacity": entry["opacity"]}                        
-            SubElement(colMapEntries, "ColorMapEntry", attribs)
-    channelSelectionElement = _addSubElement(root, "ChannelSelection")
-    for k,v in sl["channelSelection"].items():
-        channel = _addSubElement(channelSelectionElement, k)
-        _addSubElement(channel, "SourceChannelName", v)
-        
+            _addSubElement(colMapElement, "ColorMapEntry", None, attribs)
+
     return root
 
 def _textSymbolizer(sl):

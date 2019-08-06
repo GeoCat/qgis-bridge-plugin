@@ -30,8 +30,8 @@ def processLayer(layer):
         if labelingSymbolizer is not None:
             rules.append(labelingSymbolizer)
         return  {"name": layer.name(), "rules": rules}
-    elif layer.type()  = layer.RasterLayer:
-        rules = ["name": layer.name(), "symbolizers": [rasterSymbolizer(layer)]]
+    elif layer.type() == layer.RasterLayer:
+        rules = [{"name": layer.name(), "symbolizers": [rasterSymbolizer(layer)]}]
         return  {"name": layer.name(), "rules": rules}
 
 def rasterSymbolizer(layer):    
@@ -40,7 +40,7 @@ def rasterSymbolizer(layer):
                  "channelSelection": channelSelection(renderer)}
     colMap = colorMap(renderer)
     if colMap:
-        symbolier["colorMap"] = colMap
+        symbolizer["colorMap"] = colMap
     return symbolizer
 
 def channelSelection(renderer):
@@ -70,7 +70,7 @@ def colorMap(renderer):
         entries = renderer.legendSymbologyItems()
         for entry in entries:
             mapEntries.append({"color": entry[1].name() , "quantity": float(entry[0]),
-                            "opacity": entry[1].alpha(), "label": entry[0]})
+                            "opacity": entry[1].alphaF(), "label": entry[0]})
     elif isinstance(renderer, QgsSingleBandPseudoColorRenderer):
         rampType = "ramp"
         shader = renderer.shader().rasterShaderFunction()
@@ -82,21 +82,21 @@ def colorMap(renderer):
         colMap["type"] = rampType
         items = shader.colorRampItemList()
         for item in items:
-            mapEntries.append({"color": item.color.name() , "quantity": item.value(),
-                            "label": item.label(), "opacity": item.color.alpha()})
+            mapEntries.append({"color": item.color.name() , "quantity": item.value,
+                            "label": item.label, "opacity": item.color.alphaF()})
     elif isinstance(renderer, QgsPalettedRasterRenderer):
         colMap["type"] = "values"
         classes = renderer.classes()
         for c in classes:
-            mapEntries.append({"color": c.color.name() , "quantity": c.value(),
-                            "label": c.label(), "opacity": c.color.alpha()})
+            mapEntries.append({"color": c.color.name() , "quantity": c.value,
+                            "label": c.label, "opacity": c.color.alphaF()})
     elif isinstance(renderer, QgsMultiBandColorRenderer):
         return None
     else:
         _warnings.append("Unsupported raster renderer class: '%s'" % str(renderer))
         return None
 
-    colMap.update["extended"] = True
+    colMap["extended"] = True
     if mapEntries is not None:
         colMap["colorMapEntries"] = mapEntries
     return colMap

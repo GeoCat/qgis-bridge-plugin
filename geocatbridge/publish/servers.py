@@ -71,7 +71,11 @@ class GeoserverServer(GeodataServer):
 
     def __init__(self, name, url="", authid="", storage=0, workspace="", postgisdb=None):
         self.name = name
-        self.url = url
+        if url.endswith("rest"):
+            self.url = url.strip("/")
+        else:
+            self.url = url.strip("/") + "/rest"
+
         self.authid = authid
         self.storage = storage
         self.workspace = workspace
@@ -113,7 +117,7 @@ class GeoserverServer(GeodataServer):
                                         layer.name(), styleFilename, layer.name())
         elif layer.type() == layer.RasterLayer:
             filename = exportLayer(layer, fields)            
-            self.dataCatalog().publish_raster_layer_file(filename, layer.name(), styleFilename, layer.name())
+            self.dataCatalog().publish_raster_layer(filename, styleFilename, layer.name(), layer.name())
 
     def testConnection(self):
         try:

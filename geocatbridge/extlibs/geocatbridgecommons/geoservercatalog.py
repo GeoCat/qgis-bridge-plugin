@@ -11,7 +11,7 @@ class GSConfigCatalogUsingNetworkAccessManager(Catalog):
 
     #A class that patches the gsconfig Catalog class, to allow using a custom network access manager 
     def __init__(self, service_url, network_access_manager):
-        self.service_url = service_url.strip("/") + "/rest"
+        self.service_url = service_url.strip("/")
         self._cache = dict()
         self._version = None
         self.nam = network_access_manager
@@ -78,9 +78,9 @@ class GeoServerCatalog(GeodataCatalog):
     def publish_raster_layer(self, filename, style, layername, stylename):
         feedback.setText("Publishing data for layer %s" % layername)
         self._ensureWorkspaceExists()
-        self.publish_style(stylename, sld = style)
-        self.gscatalog.create_coveragestore(layername, filename, self.workspace, True)
-        self._set_layer_style(layerame, stylename)
+        self.publish_style(stylename, zipfile = style)
+        self.gscatalog.create_coveragestore(layername, self.workspace, filename)
+        self._set_layer_style(layername, stylename)
 
     def create_group(self, groupname, layernames, styles, bounds):
         try:
