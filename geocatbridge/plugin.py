@@ -7,6 +7,7 @@ __copyright__ = '(C) 2019 Victor Olaya'
 import os
 import webbrowser
 
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsMessageLog, Qgis
@@ -16,6 +17,7 @@ from .extlibs.qgiscommons2.settings import readSettings
 from .extlibs.qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
 from .extlibs.qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu
 from .ui.bridgedialog import BridgeDialog
+from .ui.multistylerdialog import MultistylerDialog
 from .publish.servers import readServers
 
 class GeocatBridge:
@@ -50,7 +52,17 @@ class GeocatBridge:
         self.actionPublish.setObjectName("startPublish")
         self.actionPublish.triggered.connect(self.publishClicked)
         self.iface.addPluginToMenu("GeoCatBridge", self.actionPublish)
-        
+
+        self.multistylerDialog = MultistylerDialog()
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
+        self.multistylerDialog.hide()        
+
+        self.actionMultistyler = QAction("Multistyler", self.iface.mainWindow())
+        self.actionMultistyler.setObjectName("multistyler")
+        self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
+        self.iface.addPluginToMenu("GeoCatBridge", self.actionMultistyler)
+
+        self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
 
     def unload(self):
         
@@ -61,8 +73,9 @@ class GeocatBridge:
         removeAboutMenu("GeoCatBridge")
                 
         self.iface.removePluginMenu("GeoCatBridge", self.actionPublish)
-        
-
+        self.iface.removePluginMenu("GeoCatBridge", self.actionMultistyler)
+    
+        self.iface.currentLayerChanged.disconnect(self.multistylerDialog.updateForCurrentLayer)
     
     def publishClicked(self):
         readSettings()

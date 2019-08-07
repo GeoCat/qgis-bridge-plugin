@@ -10,7 +10,7 @@ def layerStyleAsSld(layer):
     xml = processLayer(geostyler)
     sld = ElementTree.tostring(xml, encoding='utf8', method='xml').decode()
     dom = minidom.parseString(sld)
-    return dom.toprettyxml(), icons, warnings    
+    return dom.toprettyxml(indent="  "), icons, warnings    
 
 def saveLayerStyleAsSld(layer, filename):
     sld, icons, warnings = layerStyleAsSld(layer)       
