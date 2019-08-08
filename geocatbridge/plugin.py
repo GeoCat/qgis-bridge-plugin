@@ -12,10 +12,10 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsMessageLog, Qgis
 
-from .extlibs.geocatbridgecommons import log
-from .extlibs.qgiscommons2.settings import readSettings
-from .extlibs.qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
-from .extlibs.qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu
+from geocatbridgecommons import log
+from qgiscommons2.settings import readSettings
+from qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
+from qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu
 from .ui.bridgedialog import BridgeDialog
 from .ui.multistylerdialog import MultistylerDialog
 from .publish.servers import readServers

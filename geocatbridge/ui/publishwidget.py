@@ -491,6 +491,13 @@ class PublishWidget(BASE, WIDGET):
                         self.updateLayerIsMetadataPublished(name, True)
                     else:
                         self.logger.logError("Layer '%s' has invalid metadata. Metadata was not published" % layer.name())
+
+                if geodataServer is not None and metadataServer is not None:
+                    url = metadataServer.metadataCatalog().metadata_url()
+                    geodataServer.dataCatalog().set_layer_metadata_link(name, url)
+                    url = geodataServer.dataCatalog().layer_wms()
+                    metadataUuid = uuidForLayer(layer)
+                    metadataServer.metadataCatalog().set_layer_url(metadataUuid, url)
             except:
                 self.logger.logError(traceback.format_exc())
             results[name] = (self.logger.warnings, self.logger.errors)

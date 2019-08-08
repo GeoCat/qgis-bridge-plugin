@@ -35,7 +35,7 @@ class MultistylerDialog(BASE, WIDGET):
             sld = ""
             geostyler = ""
         else:
-            sld = layerStyleAsSld(layer)[0]
+            sld = "" #layerStyleAsSld(layer)[0]
             geostyler = json.dumps(layerAsGeostyler(layer)[0], indent=4)
         self.txtSld.setText(sld)
         self.txtGeostyler.setText(geostyler)
