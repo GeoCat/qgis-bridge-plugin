@@ -1,8 +1,19 @@
-# GeoCatBridge
+# QGIS Bridge Plugin
 
-A plugin to publish data and metadata from QGIS.
+GeoCat Bridge making publishing geospatial data on the internet as easy as hitting the Publish button.
 
-Usage is almost completely identical to the ArcGIS version, which is documented [here](http://bridge-manual.geocat.net/3/3.1/index.html)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.md)
 
-To install, just copy the `geocatbridge` folder in your QGIS 3 plugins folder
+## Installation
+
+To install, copy the `geocatbridge` folder in your *QGIS 3* plugins folder.
+
+This plugin is compatibile with QGIS 3.4 or later.
+
+## Using GeoCat Bridge
+
+While GeoCat Bridge is new to QGIS using the plugin is very close ArcGIS extension described below:
+
+* [GeoCat Bridge Manual](http://bridge-manual.geocat.net/3/3.1/index.html)
+
 
