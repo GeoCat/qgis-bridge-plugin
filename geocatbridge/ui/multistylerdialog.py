@@ -27,6 +27,11 @@ class MultistylerDialog(BASE, WIDGET):
         layout.addWidget(self.txtGeostyler)
         self.widgetGeostyler.setLayout(layout)
 
+        self.txtMapbox = EditorWidget(QsciLexerXML())
+        layout = QVBoxLayout()
+        layout.addWidget(self.txtMapbox)
+        self.widgetMapbox.setLayout(layout)
+
         self.updateForCurrentLayer()
 
     def updateForCurrentLayer(self):
@@ -34,11 +39,14 @@ class MultistylerDialog(BASE, WIDGET):
         if layer is None:
             sld = ""
             geostyler = ""
+            mapbox = ""
         else:
-            sld = "" #layerStyleAsSld(layer)[0]
+            sld = layerStyleAsSld(layer)[0]
             geostyler = json.dumps(layerAsGeostyler(layer)[0], indent=4)
+            mapbox = json.dumps(layerStyleAsMapbox(layer)[0], indent=4)
         self.txtSld.setText(sld)
         self.txtGeostyler.setText(geostyler)
+        self.txtMapbox.setText(mapbox)
 
 class EditorWidget(QsciScintilla):
     ARROW_MARKER_NUM = 8
@@ -64,7 +72,6 @@ class EditorWidget(QsciScintilla):
         self.setCaretLineVisible(True)
         self.setCaretLineBackgroundColor(QColor("#ffe4e4"))
 
-
         lexer.setDefaultFont(font)
         self.setLexer(lexer)
-        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier'.encode())       
+        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier'.encode())
