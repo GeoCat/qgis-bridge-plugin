@@ -4,8 +4,9 @@ from qgis.PyQt.QtWidgets import *
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
 from qgis.utils import iface
-from multistyler.qgis.geostyler import layerAsGeostyler
-from multistyler.qgis import layerStyleAsSld
+from bridgestyle.qgis.geostyler import layerAsGeostyler
+from bridgestyle.qgis import layerStyleAsSld
+from bridgestyle.qgis import layerStyleAsMapbox
 from qgis.PyQt.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
 from qgis.PyQt import uic
 
@@ -27,7 +28,7 @@ class MultistylerDialog(BASE, WIDGET):
         layout.addWidget(self.txtGeostyler)
         self.widgetGeostyler.setLayout(layout)
 
-        self.txtMapbox = EditorWidget(QsciLexerXML())
+        self.txtMapbox = EditorWidget(QsciLexerJSON())
         layout = QVBoxLayout()
         layout.addWidget(self.txtMapbox)
         self.widgetMapbox.setLayout(layout)

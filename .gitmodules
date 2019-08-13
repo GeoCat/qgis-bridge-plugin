@@ -1,6 +1,6 @@
-[submodule "geocatbridge/libs/multistyler"]
-	path = geocatbridge/libs/multistyler
-	url = git@eos.geocat.net:bridge/lib-mapmultistyler.git
-[submodule "geocatbridge/libs/geocatbridgecommons"]
-	path = geocatbridge/libs/geocatbridgecommons
-	url = git@eos.geocat.net:bridge/geocatbridgecommons.git
+[submodule "geocatbridge/libs/bridgestyle"]
+	path = geocatbridge/libs/bridgestyle
+	url = git@github.com:bridge/bridge-style.git
+[submodule "geocatbridge/libs/bridgecommon"]
+	path = geocatbridge/libs/bridgecommon
+	url = git@github.com:bridge/bridge-common.git

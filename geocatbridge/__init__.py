@@ -13,8 +13,8 @@ import os
 import site
 
 site.addsitedir(os.path.abspath(os.path.dirname(__file__) + '/libs'))
-site.addsitedir(os.path.abspath(os.path.dirname(__file__) + '/libs/multistyler'))
-site.addsitedir(os.path.abspath(os.path.dirname(__file__) + '/libs/geocatbridgecommons'))
+site.addsitedir(os.path.abspath(os.path.dirname(__file__) + '/libs/bridgestyle'))
+site.addsitedir(os.path.abspath(os.path.dirname(__file__) + '/libs/bridgecommon'))
 
 def classFactory(iface):
     from .plugin import GeocatBridge

@@ -4,8 +4,8 @@ from qgis.PyQt import uic
 from geocatbridge.publish.servers import geodataServers, metadataServers, GeonetworkServer
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
-from geocatbridgecommons import log
-from geocatbridgecommons import feedback
+from bridgecommon import log
+from bridgecommon import feedback
 from geocatbridge.publish.metadata import uuidForLayer
 from qgis.core import *
 from qgis.gui import *

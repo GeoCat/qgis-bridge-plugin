@@ -2,7 +2,7 @@ import os
 import gdal
 from qgis.core import QgsVectorFileWriter, QgsRasterFileWriter
 from qgiscommons2.files import tempFilenameInTempFolder
-from geocatbridgecommons import log
+from bridgecommon import log
 
 def isSingleTableGpkg(layer):
     ds = gdal.OpenEx(layer.source())

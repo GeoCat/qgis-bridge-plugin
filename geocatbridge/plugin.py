@@ -12,7 +12,7 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsMessageLog, Qgis
 
-from geocatbridgecommons import log
+from bridgecommon import log
 from qgiscommons2.settings import readSettings
 from qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
 from qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu

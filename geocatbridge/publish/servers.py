@@ -5,13 +5,13 @@ from requests.auth import HTTPBasicAuth
 from .exporter import exportLayer
 from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
 from qgiscommons2.files import tempFilenameInTempFolder
-from multistyler.qgis import saveLayerStyleAsZippedSld
+from bridgestyle.qgis import saveLayerStyleAsZippedSld
 from qgis.PyQt.QtCore import QSettings
-from geocatbridgecommons import meftools
+from bridgecommon import meftools
 from geocatbridge.publish.metadata import uuidForLayer
-from geocatbridgecommons.geoservercatalog import GeoServerCatalog
-from geocatbridgecommons.geonetworkcatalog import GeoNetworkCatalog
-from geocatbridgecommons.catalog import GeodataCatalog, MetadataCatalog
+from bridgecommon.geoservercatalog import GeoServerCatalog
+from bridgecommon.geonetworkcatalog import GeoNetworkCatalog
+from bridgecommon.catalog import GeodataCatalog, MetadataCatalog
 from qgis.core import QgsMessageLog, Qgis, QgsVectorLayerExporter, QgsAuthMethodConfig, QgsApplication, QgsFeatureSink, QgsFields
 
 SERVERS_SETTING = "geocatbridge/BridgeServers"
