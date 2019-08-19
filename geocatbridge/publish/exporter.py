@@ -12,7 +12,7 @@ def exportLayer(layer, fields=None):
     filename = layer.source()
     destFilename = layer.name()
     if layer.type() == layer.VectorLayer:
-        if (os.path.splitext(filename.lower())[1] not in [".shp", ".gpkg"] 
+        if (os.path.splitext(filename.lower())[1]  != ".gpkg"
                         or layer.fields().count() != len(fields) or not isSingleTableGpkg(layer)):
             attrs = [i for i, f in enumerate(layer.fields()) if fields is None or f.name() in fields]
             output = tempFilenameInTempFolder(destFilename + ".gpkg")
