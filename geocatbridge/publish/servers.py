@@ -71,10 +71,14 @@ class GeoserverServer(GeodataServer):
 
     def __init__(self, name, url="", authid="", storage=0, workspace="", postgisdb=None):
         self.name = name
-        if url.endswith("rest"):
-            self.url = url.strip("/")
+        
+        if url:
+            if url.endswith("rest"):
+                self.url = url.strip("/")
+            else:
+                self.url = url.strip("/") + "/rest"
         else:
-            self.url = url.strip("/") + "/rest"
+            self.url = url
 
         self.authid = authid
         self.storage = storage
