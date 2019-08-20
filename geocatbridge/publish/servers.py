@@ -1,7 +1,9 @@
+import os
 import json
 import psycopg2
 import requests
 from requests.auth import HTTPBasicAuth
+import lxml.etree as ET
 from .exporter import exportLayer
 from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
 from qgiscommons2.files import tempFilenameInTempFolder
@@ -226,6 +228,8 @@ class GeonetworkServer():
     PROFILE_INSPIRE = 1
     PROFILE_DUTCH = 2
 
+    XSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
+
     def __init__(self, name, url="", authid="", profile=0):
         self.name = name
         self.url = url
@@ -247,7 +251,7 @@ class GeonetworkServer():
         uuid = uuidForLayer(layer)
         filename = tempFilenameInTempFolder(layer.name() + ".qmd")
         layer.saveNamedMetadata(filename)
-        transformedFilename = self.transformMetadata(filename)
+        transformedFilename = self.transformMetadata(filename, uuid)
         mefFilename = tempFilenameInTempFolder(uuid + ".mef")
         meftools.createMef(uuid, transformedFilename, mefFilename)        
         self._catalog.publish_metadata(mefFilename)
@@ -259,13 +263,20 @@ class GeonetworkServer():
         except:
             return False
 
-    def transformMetadata(self, filename):
-        xmlFilename = tempFilenameInTempFolder("metadata.xml")
-        with open(filename) as f:
-            content = f.read()
-        with open(xmlFilename, "w") as f:
-            f.write(content)
-        return xmlFilename #TODO
+    def transformMetadata(self, filename, uuid):
+        isoFilename = tempFilenameInTempFolder("metadata.xml")
+        dom = ET.parse(filename)
+        xslt = ET.parse(self.XSLTFILENAME)
+        transform = ET.XSLT(xslt)
+        newdom = transform(dom)
+        print(ET.tostring(newdom, pretty_print=True))
+        for ident in newdom.iter('{http://www.isotc211.org/2005/gmd}fileIdentifier'):
+            print(ident)
+            ident[0].text = uuid
+        with open(isoFilename, "wb") as f:
+            f.write(ET.tostring(newdom, pretty_print=True))
+        
+        return isoFilename
 
 class PostgisServer(): 
     
