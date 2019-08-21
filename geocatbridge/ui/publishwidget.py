@@ -400,11 +400,10 @@ class PublishWidget(BASE, WIDGET):
         catalog.open_wms(names, sbbox, canvasCrs.authid())
 
     def viewMetadata(self, name):
-        html = self.currentLayer.htmlMetadata()
-        dlg = QgsMessageOutput.createMessageOutput()
-        dlg.setTitle("Layer metadata")
-        dlg.setMessage(html, QgsMessageOutput.MessageHtml)
-        dlg.showMessage()
+        catalog = geodataServers()[self.comboMetadataServer.currentText()].metadataCatalog()
+        layer = self.layerFromName(name)
+        uuid = uuidForLayer(layer)
+        catalog.open_metadata(uuid)
 
     def publish(self):
         try:
