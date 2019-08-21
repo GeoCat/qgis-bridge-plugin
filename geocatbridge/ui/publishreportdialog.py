@@ -27,8 +27,11 @@ class PublishReportDialog(BASE, WIDGET):
             self.labelUrlMetadataServer.setText('<a href="%s">%s</a>' % (url, url))
         else:
             self.labelUrlMetadataServer.setText("----")
-        self.labelPublishMapData.setText("ON" if publishWidget.comboGeodataServer.currentIndex() != 0 else "OFF")
-        self.labelPublishMetadata.setText("ON" if publishWidget.comboMetadataServer.currentIndex() != 0 == Qt.Checked else "OFF")
+        publishData = publishWidget.comboGeodataServer.currentIndex() != 0 
+        onlySymbology = publishWidget.chkOnlySymbology.checkState() == Qt.Checked
+        self.labelPublishMapData.setText("ON" if publishData and onlySymbology else "OFF")
+        self.labelPublishSymbology.setText("ON" if publishData else "OFF")
+        self.labelPublishMetadata.setText("ON" if publishWidget.comboMetadataServer.currentIndex() != 0 else "OFF")
         self.tableWidget.setRowCount(len(results))
         for i, name in enumerate(results.keys()):
             warnings, errors = results[name]
