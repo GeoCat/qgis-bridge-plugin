@@ -207,17 +207,21 @@ class TokenNetworkAccessManager():
         self.session = requests.Session()
         self.session.auth = HTTPBasicAuth(username, password)
     
-    def request(self, url, method, data=None, headers={}):
+    def setTokenInHeader(self):
         if self.token is None:
             self.getToken()
-        self.session.headers.update({"X-XSRF-TOKEN" : self.token})    
+        self.session.headers.update({"X-XSRF-TOKEN" : self.token}) 
+
+    def request(self, url, method, data=None, headers={}):
+        QgsMessageLog.logMessage("Making '%s' request to '%s'" % (method, url), 'GeoCat Bridge', level=Qgis.Info)
+        self.setTokenInHeader()
         method = getattr(self.session, method.lower())
         resp = method(url, headers=headers, data=data)
         resp.raise_for_status()
         return resp
 
     def getToken(self):                
-        xmlInfoUrl = self.url + '/xml.info'
+        xmlInfoUrl = self.url + 'srv/eng/info?type=me'
         self.session.post(xmlInfoUrl)
         self.token = self.session.cookies.get('XSRF-TOKEN')
         self.session.headers.update({"X-XSRF-TOKEN" : self.token})
@@ -269,14 +273,13 @@ class GeonetworkServer():
         xslt = ET.parse(self.XSLTFILENAME)
         transform = ET.XSLT(xslt)
         newdom = transform(dom)
-        print(ET.tostring(newdom, pretty_print=True))
         for ident in newdom.iter('{http://www.isotc211.org/2005/gmd}fileIdentifier'):
-            print(ident)
             ident[0].text = uuid
         with open(isoFilename, "wb") as f:
             f.write(ET.tostring(newdom, pretty_print=True))
         
         return isoFilename
+
 
 class PostgisServer(): 
     
