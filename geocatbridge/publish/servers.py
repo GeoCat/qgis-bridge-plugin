@@ -221,7 +221,7 @@ class TokenNetworkAccessManager():
         return resp
 
     def getToken(self):                
-        xmlInfoUrl = self.url + 'srv/eng/info?type=me'
+        xmlInfoUrl = self.url + '/info.xml'
         self.session.post(xmlInfoUrl)
         self.token = self.session.cookies.get('XSRF-TOKEN')
         self.session.headers.update({"X-XSRF-TOKEN" : self.token})
@@ -275,8 +275,9 @@ class GeonetworkServer():
         newdom = transform(dom)
         for ident in newdom.iter('{http://www.isotc211.org/2005/gmd}fileIdentifier'):
             ident[0].text = uuid
-        with open(isoFilename, "wb") as f:
-            f.write(ET.tostring(newdom, pretty_print=True))
+        s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
+        with open(isoFilename, "w", encoding="utf8") as f:
+            f.write(s)
         
         return isoFilename
 
