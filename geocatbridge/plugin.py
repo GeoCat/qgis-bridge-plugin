@@ -16,6 +16,7 @@ from bridgecommon import log
 from qgiscommons2.settings import readSettings
 from qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
 from qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu
+from qgiscommons2.files import removeTempFolder
 from .ui.bridgedialog import BridgeDialog
 from .ui.multistylerdialog import MultistylerDialog
 from .publish.servers import readServers
@@ -71,6 +72,8 @@ class GeocatBridge:
         removeHelpMenu("GeoCatBridge")
         
         removeAboutMenu("GeoCatBridge")
+
+        removeTempFolder()
                 
         self.iface.removePluginMenu("GeoCatBridge", self.actionPublish)
         self.iface.removePluginMenu("GeoCatBridge", self.actionMultistyler)
