@@ -251,11 +251,11 @@ class GeonetworkServer():
     def metadataCatalog(self):
         return self._catalog
 
-    def publishLayerMetadata(self, layer):
+    def publishLayerMetadata(self, layer, wms=None):
         uuid = uuidForLayer(layer)
         filename = tempFilenameInTempFolder(layer.name() + ".qmd")
         layer.saveNamedMetadata(filename)
-        transformedFilename = self.transformMetadata(filename, uuid)
+        transformedFilename = self.transformMetadata(filename, uuid, wms)
         mefFilename = tempFilenameInTempFolder(uuid + ".mef")
         meftools.createMef(uuid, transformedFilename, mefFilename)        
         self._catalog.publish_metadata(mefFilename)
@@ -267,14 +267,29 @@ class GeonetworkServer():
         except:
             return False
 
-    def transformMetadata(self, filename, uuid):
+
+    def transformMetadata(self, filename, uuid, wms):
+        def _ns(n):
+            return '{http://www.isotc211.org/2005/gmd}' + n
         isoFilename = tempFilenameInTempFolder("metadata.xml")
         dom = ET.parse(filename)
         xslt = ET.parse(self.XSLTFILENAME)
         transform = ET.XSLT(xslt)
         newdom = transform(dom)
-        for ident in newdom.iter('{http://www.isotc211.org/2005/gmd}fileIdentifier'):
+        for ident in newdom.iter(_ns('fileIdentifier')):
             ident[0].text = uuid
+        if wms is not None:
+            for root in newdom.iter(_ns('MD_Distribution')):
+                trans = ET.SubElement(root, _ns('transferOptions'))
+                dtrans = ET.SubElement(trans, _ns('MD_DigitalTransferOptions'))
+                online = ET.SubElement(dtrans, _ns('onLine'))
+                cionline = ET.SubElement(online, _ns('CI_OnlineResource'))
+                linkage = ET.SubElement(cionline, _ns('linkage'))
+                url = ET.SubElement(linkage, _ns('URL'))
+                url.text = wms
+                protocol = ET.SubElement(cionline, _ns('protocol'))
+                cs = ET.SubElement(protocol, '{http://www.isotc211.org/2005/gco}CharacterString')
+                cs.text = "OGC:WMS"                
         s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
         with open(isoFilename, "w", encoding="utf8") as f:
             f.write(s)

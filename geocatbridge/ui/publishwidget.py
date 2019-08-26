@@ -376,12 +376,12 @@ class PublishWidget(BASE, WIDGET):
             if self.isMetadataPublished[name]:
                 self.unpublishMetadata(name)            
 
-    def viewWms(self, name):
-        catalog = geodataServers()[self.comboGeodataServer.currentText()].dataCatalog()
+    def viewWms(self, name):        
         layer = self.layerFromName(name)
         names = [layer.name()]        
         bbox = layer.extent()
-        sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])
+        sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])        
+        catalog = geodataServers()[self.comboGeodataServer.currentText()].dataCatalog()
         catalog.open_wms(names, sbbox, layer.crs().authid())
 
     def viewAllWms(self):
@@ -481,22 +481,30 @@ class PublishWidget(BASE, WIDGET):
                             if layer.type() == layer.VectorLayer:
                                 fields = [name for name, publish in self.fieldsToPublish[layer].items() if publish]                            
                             geodataServer.publishLayer(layer, fields)
+                            if metadataServer is not None:
+                                metadataUuid = uuidForLayer(layer)
+                                url = metadataServer.metadataCatalog().metadata_url(metadataUuid)
+                                geodataServer.dataCatalog().set_layer_metadata_link(name, url)
                             self.updateLayerIsDataPublished(name, True)
                         else:
                             self.logger.logError("Layer '%s' has invalid metadata. Layer was not published" % layer.name())
                 if metadataServer is not None:
                     if validates or allowWithoutMetadata == ALLOW:
-                        metadataServer.publishLayerMetadata(layer)
+                        if geodataServer is not None:
+                            names = [layer.name()]        
+                            bbox = layer.extent()
+                            sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])
+                            catalog = geodataServer.dataCatalog()
+                            wms = "%s/%s/wms" % (catalog.base_url(), catalog.workspace)
+                        else:
+                            wms = None
+                        metadataServer.publishLayerMetadata(layer, wms)
                         self.updateLayerIsMetadataPublished(name, True)
                     else:
                         self.logger.logError("Layer '%s' has invalid metadata. Metadata was not published" % layer.name())
-
-                if geodataServer is not None and metadataServer is not None:
-                    url = metadataServer.metadataCatalog().metadata_url()
-                    geodataServer.dataCatalog().set_layer_metadata_link(name, url)
-                    url = geodataServer.dataCatalog().layer_wms()
-                    metadataUuid = uuidForLayer(layer)
-                    metadataServer.metadataCatalog().set_layer_url(metadataUuid, url)
+                    
+                    
+                        
             except:
                 self.logger.logError(traceback.format_exc())
             results[name] = (self.logger.warnings, self.logger.errors)
