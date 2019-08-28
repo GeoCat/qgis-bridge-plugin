@@ -380,6 +380,8 @@ class PublishWidget(BASE, WIDGET):
         layer = self.layerFromName(name)
         names = [layer.name()]        
         bbox = layer.extent()
+        if bbox.isEmpty():
+            bbox.grow(1)
         sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])        
         catalog = geodataServers()[self.comboGeodataServer.currentText()].dataCatalog()
         catalog.open_wms(names, sbbox, layer.crs().authid())
