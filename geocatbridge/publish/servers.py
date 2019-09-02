@@ -8,13 +8,14 @@ from .exporter import exportLayer
 from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
 from qgiscommons2.files import tempFilenameInTempFolder
 from bridgestyle.qgis import saveLayerStyleAsZippedSld
-from qgis.PyQt.QtCore import QSettings
+from qgis.PyQt.QtCore import QSettings, QSize
+from qgis.PyQt.QtGui import QImage, QColor, QPainter
 from bridgecommon import meftools
 from geocatbridge.publish.metadata import uuidForLayer
 from bridgecommon.geoservercatalog import GeoServerCatalog
 from bridgecommon.geonetworkcatalog import GeoNetworkCatalog
 from bridgecommon.catalog import GeodataCatalog, MetadataCatalog
-from qgis.core import QgsMessageLog, Qgis, QgsVectorLayerExporter, QgsAuthMethodConfig, QgsApplication, QgsFeatureSink, QgsFields
+from qgis.core import QgsMessageLog, Qgis, QgsVectorLayerExporter, QgsAuthMethodConfig, QgsApplication, QgsFeatureSink, QgsFields, QgsMapSettings, QgsMapRendererCustomPainterJob
 
 SERVERS_SETTING = "geocatbridge/BridgeServers"
 
@@ -184,8 +185,8 @@ class GeocatLiveServer():
     def metadataCatalog(self):
         return self.geonetworkServer().metadataCatalog()
 
-    def publishLayerMetadata(self, layer):
-        self.geonetworkServer().publishLayerMetadata(layer)
+    def publishLayerMetadata(self, layer, wms):
+        self.geonetworkServer().publishLayerMetadata(layer, wms)
 
     def publishStyle(self, layer):
         self.geoserverServer().publishStyle(layer)
@@ -251,13 +252,14 @@ class GeonetworkServer():
     def metadataCatalog(self):
         return self._catalog
 
-    def publishLayerMetadata(self, layer, wms=None):
+    def publishLayerMetadata(self, layer, wms):
         uuid = uuidForLayer(layer)
         filename = tempFilenameInTempFolder(layer.name() + ".qmd")
         layer.saveNamedMetadata(filename)
+        thumbnail = self.saveLayerThumbnail(layer)
         transformedFilename = self.transformMetadata(filename, uuid, wms)
         mefFilename = tempFilenameInTempFolder(uuid + ".mef")
-        meftools.createMef(uuid, transformedFilename, mefFilename)        
+        meftools.createMef(uuid, transformedFilename, mefFilename, thumbnail)        
         self._catalog.publish_metadata(mefFilename)
 
     def testConnection(self):
@@ -267,6 +269,25 @@ class GeonetworkServer():
         except:
             return False
 
+    def saveLayerThumbnail(self, layer):
+        filename = tempFilenameInTempFolder("thumbnail.png")
+        img = QImage(QSize(800,800), QImage.Format_A2BGR30_Premultiplied)
+        color = QColor(255,255,255,255)
+        img.fill(color.rgba())
+        p = QPainter()
+        p.begin(img)
+        p.setRenderHint(QPainter.Antialiasing)
+        ms = QgsMapSettings()
+        ms.setBackgroundColor(color)        
+        ms.setLayers([layer])
+        ms.setExtent(layer.extent())
+        ms.setOutputSize(img.size())
+        render = QgsMapRendererCustomPainterJob(ms, p)
+        render.start()
+        render.waitForFinished()
+        p.end()
+        img.save(filename)
+        return filename
 
     def transformMetadata(self, filename, uuid, wms):
         def _ns(n):
@@ -289,7 +310,14 @@ class GeonetworkServer():
                 url.text = wms
                 protocol = ET.SubElement(cionline, _ns('protocol'))
                 cs = ET.SubElement(protocol, '{http://www.isotc211.org/2005/gco}CharacterString')
-                cs.text = "OGC:WMS"                
+                cs.text = "OGC:WMS"
+        for root in newdom.iter(_ns('MD_DataIdentification')):
+            overview = ET.SubElement(root, _ns('graphicOverview'))
+            browseGraphic = ET.SubElement(overview, _ns('MD_BrowseGraphic'))
+            file = ET.SubElement(browseGraphic, _ns('fileName'))
+            cs = ET.SubElement(file, '{http://www.isotc211.org/2005/gco}CharacterString')
+            thumbnailUrl = "%s/srv/api/records/%s/attachments/thumbnail.png" % (self.url, uuid)
+            cs.text = thumbnailUrl
         s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
         with open(isoFilename, "w", encoding="utf8") as f:
             f.write(s)
