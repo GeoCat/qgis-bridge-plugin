@@ -34,6 +34,10 @@ class MultistylerDialog(BASE, WIDGET):
 
         self.updateForCurrentLayer()
 
+    def updateLayer(self, layer):
+        if layer.id() == iface.activeLayer().id():
+            self.updateForCurrentLayer()
+
     def updateForCurrentLayer(self):
         layer = iface.activeLayer()
         if layer is None:

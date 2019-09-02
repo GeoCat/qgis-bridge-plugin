@@ -1,16 +1,11 @@
-# -*- coding: utf-8 -*-
-
-__author__ = 'Victor Olaya'
-__date__ = 'April 2019'
-__copyright__ = '(C) 2019 Victor Olaya'
-
 import os
 import webbrowser
+from functools import partial
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import QgsMessageLog, Qgis, QgsProject
 
 from bridgecommon import log
 from qgiscommons2.settings import readSettings
@@ -65,6 +60,8 @@ class GeocatBridge:
 
         self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
 
+        QgsProject.instance().layerWasAdded.connect(self.layerWasAdded)
+
     def unload(self):
         
         removeSettingsMenu("GeoCatBridge")
@@ -79,6 +76,17 @@ class GeocatBridge:
         self.iface.removePluginMenu("GeoCatBridge", self.actionMultistyler)
     
         self.iface.currentLayerChanged.disconnect(self.multistylerDialog.updateForCurrentLayer)
+
+        QgsProject.instance().layerWasAdded.disconnect(self.layerWasAdded)
+
+        for layer, func in self._layerSignals.items():
+            layer.styleChanged.disconnect(func)
+
+    _layerSignals = {}
+
+    def layerWasAdded(self, layer):
+        self._layerSignals[layer.id()] = partial(self.multistylerDialog.updateLayer, layer) 
+        layer.styleChanged.connect(self._layerSignals[layer.id()])
     
     def publishClicked(self):
         readSettings()
