@@ -85,7 +85,7 @@ class PublishWidget(BASE, WIDGET):
         self.btnRemoveAll.clicked.connect(self.unpublishAll)
         self.btnRemoveAll.setIcon(REMOVE_ICON)
         self.btnValidate.setIcon(VALIDATE_ICON)
-        self.btnPreview.clicked.connect(self.viewMetadata)
+        self.btnPreview.clicked.connect(self.previewMetadata)
         self.btnPreview.setIcon(PREVIEW_ICON)
         self.btnSave.setIcon(SAVE_ICON)
         self.btnValidate.clicked.connect(self.validateMetadata)
@@ -401,6 +401,13 @@ class PublishWidget(BASE, WIDGET):
         sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])
         catalog.open_wms(names, sbbox, canvasCrs.authid())
 
+    def previewMetadata(self):
+        html = self.currentLayer.htmlMetadata()
+        dlg = QgsMessageOutput.createMessageOutput()
+        dlg.setTitle("Layer metadata")
+        dlg.setMessage(html, QgsMessageOutput.MessageHtml)
+        dlg.showMessage()
+
     def viewMetadata(self, name):
         catalog = geodataServers()[self.comboMetadataServer.currentText()].metadataCatalog()
         layer = self.layerFromName(name)
@@ -499,14 +506,11 @@ class PublishWidget(BASE, WIDGET):
                             catalog = geodataServer.dataCatalog()
                             wms = "%s/%s/wms" % (catalog.base_url(), catalog.workspace)
                         else:
-                            wms = None
+                            wms = None                        
                         metadataServer.publishLayerMetadata(layer, wms)
                         self.updateLayerIsMetadataPublished(name, True)
                     else:
                         self.logger.logError("Layer '%s' has invalid metadata. Metadata was not published" % layer.name())
-                    
-                    
-                        
             except:
                 self.logger.logError(traceback.format_exc())
             results[name] = (self.logger.warnings, self.logger.errors)
