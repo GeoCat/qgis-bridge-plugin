@@ -102,7 +102,7 @@ class GeoserverServer(GeodataServer):
             QgsMessageLog.logMessage(w, 'GeoCat Bridge', level=Qgis.Warning)   
         self.dataCatalog().publish_style(layer.name(), zipfile = styleFilename)        
         
-    def publishLayer(self, layer, fields):
+    def publishLayer(self, layer, fields=None):
         styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
         for w in warnings:

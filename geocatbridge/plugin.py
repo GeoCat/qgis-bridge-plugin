@@ -5,7 +5,7 @@ from functools import partial
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsMessageLog, Qgis, QgsProject
+from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication
 
 from bridgecommon import log
 from qgiscommons2.settings import readSettings
@@ -15,6 +15,7 @@ from qgiscommons2.files import removeTempFolder
 from .ui.bridgedialog import BridgeDialog
 from .ui.multistylerdialog import MultistylerDialog
 from .publish.servers import readServers
+from .processing.bridgeprovider import BridgeProvider
 
 class GeocatBridge:
     def __init__(self, iface):
@@ -32,6 +33,8 @@ class GeocatBridge:
 
         logger = QgisLogger()
         log.setLogger(logger)
+
+        self.provider = BridgeProvider()
 
     def initGui(self):
 
@@ -62,6 +65,8 @@ class GeocatBridge:
 
         QgsProject.instance().layerWasAdded.connect(self.layerWasAdded)
 
+        QgsApplication.processingRegistry().addProvider(self.provider)
+
     def unload(self):
         
         removeSettingsMenu("GeoCatBridge")
@@ -81,6 +86,8 @@ class GeocatBridge:
 
         for layer, func in self._layerSignals.items():
             layer.styleChanged.disconnect(func)
+
+        QgsApplication.processingRegistry().removeProvider(self.provider)
 
     _layerSignals = {}
 

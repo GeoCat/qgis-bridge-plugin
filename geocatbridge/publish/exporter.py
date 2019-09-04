@@ -11,10 +11,11 @@ def isSingleTableGpkg(layer):
 def exportLayer(layer, fields=None):
     filename = layer.source()
     destFilename = layer.name()
+    fields = fields or []
     if layer.type() == layer.VectorLayer:
         if (os.path.splitext(filename.lower())[1]  != ".gpkg"
                         or layer.fields().count() != len(fields) or not isSingleTableGpkg(layer)):
-            attrs = [i for i, f in enumerate(layer.fields()) if fields is None or f.name() in fields]
+            attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
             output = tempFilenameInTempFolder(destFilename + ".gpkg")
             QgsVectorFileWriter.writeAsVectorFormat(layer, output, "UTF-8", attributes=attrs)
             log.logInfo("Layer %s exported to %s" % (destFilename, output))
