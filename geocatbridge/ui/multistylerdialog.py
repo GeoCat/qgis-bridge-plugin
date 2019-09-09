@@ -4,6 +4,7 @@ from qgis.PyQt.QtWidgets import *
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
 from qgis.utils import iface
+from qgis.core import QgsVectorLayer
 from bridgestyle.qgis import layerStyleAsSld, layerStyleAsMapbox
 from bridgestyle.qgis.togeostyler import convert
 from qgis.PyQt.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
@@ -39,13 +40,12 @@ class MultistylerDialog(BASE, WIDGET):
             self.updateForCurrentLayer()
 
     def updateForCurrentLayer(self):
-        layer = iface.activeLayer()
-        if layer is None:
-            sld = ""
-            geostyler = ""
-            mapbox = ""
-            warnings = []
-        else:
+        layer = iface.activeLayer()        
+        sld = ""
+        geostyler = ""
+        mapbox = ""
+        warnings = []
+        if layer is not None and isinstance(layer, QgsVectorLayer):
             sld, _, sldWarnings = layerStyleAsSld(layer)
             geostyler, _, geostylerWarnings = convert(layer)
             geostyler = json.dumps(geostyler, indent=4)
