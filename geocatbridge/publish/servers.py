@@ -7,7 +7,7 @@ import lxml.etree as ET
 from .exporter import exportLayer
 from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
 from qgiscommons2.files import tempFilenameInTempFolder
-from bridgestyle.qgis import saveLayerStyleAsZippedSld
+from bridgestyle.qgis import saveLayerStyleAsZippedSld, saveLayerStyleAsMapfile
 from qgis.PyQt.QtCore import QSettings, QSize
 from qgis.PyQt.QtGui import QImage, QColor, QPainter
 from bridgecommon import meftools
@@ -61,13 +61,7 @@ def metadataServers():
     return {name: server for name, server in _servers.items() if server._isMetadataCatalog}
 
 
-class GeodataServer():
-    
-    def unpublishData(self, layer):
-        self.dataCatalog().delete_layer(layer.name())
-        self.dataCatalog().delete_style(layer.name())    
-
-class GeoserverServer(GeodataServer):
+class GeoserverServer():
 
     UPLOAD_DATA = 0
     STORE_IN_POSTGIS = 1
@@ -133,9 +127,37 @@ class GeoserverServer(GeodataServer):
         except:
             return False
 
+    def unpublishData(self, layer):
+        self.dataCatalog().delete_layer(layer.name())
+        self.dataCatalog().delete_style(layer.name()) 
+
 
 class MapserverServer(): 
-    pass
+
+    def __init__(self, name, url=""):
+        self.name = name
+        self.url = url
+
+        self._isMetadataCatalog = False
+        self._isDataCatalog = True
+        nam = NetworkAccessManager(self.authid, debug=False)
+        self._catalog = MapServerCatalog(self.url)
+
+    def dataCatalog(self):
+        return self._catalog
+
+    def publishStyle(self, layer):
+        pass        
+        
+    def publishLayer(self, layer, fields=None):
+        styleFilename = tempFilenameInTempFolder(layer.name() + ".map")
+        styleFolder = os.path.dirname(styleFilename)
+        warnings = saveLayerStyleAsMapfileFolder(layer, styleFolder)
+        pass
+
+    def testConnection(self):
+        return True
+
 
 class GeocatLiveServer(): 
 

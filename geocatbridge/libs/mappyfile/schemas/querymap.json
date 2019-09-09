@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^__[a-z]+__$": {}
+  },
+  "properties": {
+    "__type__": {
+      "enum": [ "querymap" ]
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "color": {
+      "$ref": "color.json"
+    },
+    "size": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "status": {
+      "$ref": "onoff.json"
+    },
+    "style": {
+      "type": "string",
+      "enum": [ "normal", "hilite", "selected" ],
+      "additionalProperties": false
+    }
+  }
+}

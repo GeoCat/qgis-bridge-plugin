@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^__[a-z]+__$": {}
+  },
+  "properties": {
+    "__type__": {
+      "enum": [ "outputformat" ]
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "driver": {
+      "type": "string"
+    },
+    "extension": {
+      "type": "string"
+    },
+    "formatoption": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "imagemode": {
+      "type": "string",
+      "enum": [ "pc256", "rgb", "rgba", "int16", "float32", "feature" ],
+      "additionalProperties": false
+    },
+    "mimetype": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "transparent": {
+      "$ref": "onoff.json"
+    }
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^__[a-z]+__$": {}
+  },
+  "properties": {
+    "__type__": {
+      "enum": [ "map" ]
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "angle": {
+      "type": "number"
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "CGI_CONTEXT_URL": { "type": "string" },
+        "MS_ENCRYPTION_KEY": { "type": "string" },
+        "MS_ERRORFILE": { "type": "string" },
+        "MS_NONSQUARE": {
+          "$ref": "yesno.json"
+        },
+        "ON_MISSING_DATA": {
+          "type": "string",
+          "enum": [ "FAIL", "LOG", "IGNORE" ]
+        },
+        "PROJ_LIB": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "datapattern": {
+      "type": "string"
+    },
+    "debug": {
+      "$ref": "debug.json"
+    },
+    "defresolution": {
+      "type": "number",
+      "metadata": {
+        "minVersion": 5.6
+      }
+    },
+    "extent": {
+      "$ref": "extent.json"
+    },
+    "fontset": {
+      "type": "string"
+    },
+    "imagecolor": {
+      "$ref": "color.json"
+    },
+    "imagequality": {
+      "type": "integer"
+    },
+    "imagetype": {
+      "type": "string"
+    },
+    "interlace": {
+      "$ref": "onoff.json"
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "layer.json"
+      }
+    },
+    "legend": {
+      "type": "object"
+    },
+    "maxsize": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "outputformats": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "projection": {
+      "$ref": "projection.json"
+    },
+    "querymap": {
+      "$ref": "querymap.json"
+    },
+    "reference": {
+      "type": "object"
+    },
+    "resolution": {
+      "type": "number"
+    },
+    "scaledenom": {
+      "type": "number"
+    },
+    "scalebar": {
+      "type": "object"
+    },
+    "shapepath": {
+      "type": "string"
+    },
+    "size": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "status": {
+      "$ref": "onoff.json"
+    },
+    "symbolset": {
+      "type": "string"
+    },
+    "symbols": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "symbol.json"
+      }
+    },
+    "templatepattern": {
+      "type": "string"
+    },
+    "transparent": {
+      "$ref": "onoff.json"
+    },
+    "units": {
+      "$ref": "units.json"
+    },
+    "web": {
+      "type": "object"
+    },
+    "__type__": {
+      "type": "string"
+    }
+  }
+}

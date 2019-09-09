@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^__[a-z]+__$": {}
+  },
+  "properties": {
+    "__type__": {
+      "enum": [ "cluster" ]
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "maxdistance": {
+      "type": "number"
+    },
+    "region": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^rectangle$"
+        },
+        {
+          "type": "string",
+          "pattern": "^ellipse$"
+        }
+      ]
+    },
+    "buffer": {
+      "type": "number"
+    },
+    "group": {
+      "$ref": "expression.json"
+    },
+    "filter": {
+      "$ref": "expression.json"
+    }
+  }
+}

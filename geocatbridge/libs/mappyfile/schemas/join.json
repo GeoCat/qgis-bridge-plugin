@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^__[a-z]+__$": {}
+  },
+  "properties": {
+    "__type__": {
+      "enum": [ "join" ]
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "connection": {
+      "type": "string"
+    },
+    "footer": {
+      "type": "string",
+      "description": "filename"
+    },
+    "from": {
+      "type": "string"
+    },
+    "header": {
+      "type": "string",
+      "description": "filename"
+    },
+    "name": {
+      "type": "string"
+    },
+    "table": {
+      "type": "string"
+    },
+    "template": {
+      "type": "string",
+      "description": "filename"
+    },
+    "to": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [ "one-to-one", "one-to-many" ],
+      "additionalProperties": false
+    }
+  }
+}
