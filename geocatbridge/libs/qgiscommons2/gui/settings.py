@@ -3,7 +3,7 @@ import json
 from collections import defaultdict
 
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, QCoreApplication
 from qgis.PyQt.QtWidgets import (QAction,
                                  QDialog,
                                  QVBoxLayout,
@@ -50,7 +50,7 @@ def addSettingsMenu(menuName, parentMenuFunction=None):
     namespace = _callerName().split(".")[0]
     settingsAction = QAction(
         QgsApplication.getThemeIcon('/mActionOptions.svg'),
-        "Plugin Settings...",
+        QCoreApplication.translate("qgiscommons", "Plugin Settings..."),
         iface.mainWindow())
     settingsAction.setObjectName(namespace + "settings")
     settingsAction.triggered.connect(lambda: openSettingsDialog(namespace))
@@ -115,10 +115,10 @@ class ConfigDialog(QDialog):
         self.horizontalLayout.addWidget(self.buttonBox)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.setWindowTitle("Configuration options")
-        self.searchBox.setToolTip("Enter setting name to filter list")
-        self.tree.headerItem().setText(0, "Setting")
-        self.tree.headerItem().setText(1, "Value")
+        self.setWindowTitle(self.tr("Configuration options"))
+        self.searchBox.setToolTip(self.tr("Enter setting name to filter list"))
+        self.tree.headerItem().setText(0, self.tr("Setting"))
+        self.tree.headerItem().setText(1, self.tr("Value"))
 
         def saveValues():
             iterator = QTreeWidgetItemIterator(self.tree)

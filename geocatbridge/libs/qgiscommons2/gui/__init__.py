@@ -22,7 +22,7 @@ def addHelpMenu(menuName, parentMenuFunction=None):
     path = "file://{}".format(os.path.join(os.path.dirname(_callerPath()), "docs",  "html", "index.html"))
     helpAction = QtWidgets.QAction(
         QgsApplication.getThemeIcon('/mActionHelpAPI.png'),
-        "Plugin help...",
+        QtCore.QCoreApplication.translate("qgiscommons", "Plugin help..."),
         iface.mainWindow())
     helpAction.setObjectName(namespace + "help")
     helpAction.triggered.connect(lambda: openHelp(path))
@@ -58,7 +58,7 @@ def addAboutMenu(menuName, parentMenuFunction=None):
     namespace = _callerName().split(".")[0]
     aboutAction = QtWidgets.QAction(
         QgsApplication.getThemeIcon('/mActionHelpContents.svg'),
-        "About...",
+        QtCore.QCoreApplication.translate("qgiscommons", "About..."),
         iface.mainWindow())
     aboutAction.setObjectName(namespace + "about")
     aboutAction.triggered.connect(lambda: openAboutDialog(namespace))
@@ -75,7 +75,7 @@ def removeAboutMenu(menuName, parentMenuFunction=None):
     action.deleteLater()
 
 def openAboutDialog(namespace):
-    showMessageDialog("Plugin info", pluginDetails(namespace))
+    showMessageDialog(QtCore.QCoreApplication.translate("qgiscommons", "Plugin info"), pluginDetails(namespace))
 
 def showMessageDialog(title, text):
     '''
