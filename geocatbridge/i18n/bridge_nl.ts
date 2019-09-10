@@ -1,4 +1,4 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="es_ES" sourcelanguage="en" version="2.0">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="nl_NL" sourcelanguage="en" version="2.0">
 <context>
     <name>Dialog</name>
     <message>
@@ -9,82 +9,82 @@
     <message>
         <location filename="ui/bridgedialog.ui" line="21"/>
         <source>Publish</source>
-        <translation>Publicar</translation>
+        <translation>Publiceren</translation>
     </message>
     <message>
         <location filename="ui/bridgedialog.ui" line="26"/>
         <source>Servers</source>
-        <translation>Servidores</translation>
+        <translation>Servers</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="14"/>
         <source>Publish report</source>
-        <translation>Informe de publicación</translation>
+        <translation>Publicatie rapport</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="25"/>
         <source>Publish map data</source>
-        <translation>Publicar datos</translation>
+        <translation>Publiceer kaart data</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="60"/>
         <source>TextLabel</source>
-        <translation></translation>
+        <translation>Text Label</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="87"/>
         <source>ON</source>
-        <translation>SÍ</translation>
+        <translation>Aan</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="46"/>
         <source>URL metadata server</source>
-        <translation>URL del servidor de metadatos</translation>
+        <translation>URL metadata server</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="53"/>
         <source>URL map server</source>
-        <translation>URL del servidor de datos</translation>
+        <translation>URL kaart server</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="94"/>
         <source>Open log</source>
-        <translation>Abrir log</translation>
+        <translation>Open log</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="101"/>
         <source>Publish symbology</source>
-        <translation>Publicar simbología</translation>
+        <translation>Publiceer symbologie</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="108"/>
         <source>Publish metadata</source>
-        <translation>Publicar metadatos</translation>
+        <translation>Publiceer metadata</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="150"/>
         <source>Layer</source>
-        <translation>Capa</translation>
+        <translation>Laag</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="155"/>
         <source>Data published</source>
-        <translation>Datos publicados</translation>
+        <translation>Gepubliceerde data</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="160"/>
         <source>Symbology published</source>
-        <translation>Simbología publicada</translation>
+        <translation>Gepubliceerde symbologie</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="165"/>
         <source>Metadata published</source>
-        <translation>Metadatos publicados</translation>
+        <translation>Gepubliceerde metadata</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.ui" line="170"/>
         <source>Error messages</source>
-        <translation>Mensajes de error</translation>
+        <translation>Fout meldingen</translation>
     </message>
 </context>
 <context>
@@ -92,292 +92,292 @@
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="14"/>
         <source>Form</source>
-        <translation></translation>
+        <translation>Formulier</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="29"/>
         <source>Select: &lt;a href=&quot;all&quot;&gt;All&lt;/a&gt; | &lt;a href=&quot;none&quot;&gt;None&lt;/a&gt;</source>
-        <translation>Seleccionar: &lt;a href=&quot;all&quot;&gt;Todas&lt;/a&gt; | &lt;a href=&quot;none&quot;&gt;Ninguna&lt;/a&gt;</translation>
+        <translation>Selecteer: &lt;a href=&quot;all&quot;&gt;Alle&lt;/a&gt; | &lt;a href=&quot;none&quot;&gt;Geen&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="81"/>
         <source>Metadata</source>
-        <translation>Metadatos</translation>
+        <translation>Metadata</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="89"/>
         <source>Preview metadata</source>
-        <translation>Previsualizar metadatos</translation>
+        <translation>Metadata voorvertoning</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="106"/>
         <source>Validate metadata</source>
-        <translation>Validar metadatos</translation>
+        <translation>Metadata valideren</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="123"/>
         <source>Save metadata</source>
-        <translation>Guardar metadatos</translation>
+        <translation>Opslaan</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="153"/>
         <source>Open QGIS metadata editor</source>
-        <translation>Abrir editor de metadatos de QGIS</translation>
+        <translation>Open QGIS metadata editor</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="166"/>
         <source>General</source>
-        <translation>General</translation>
+        <translation>Generiek</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="328"/>
         <source>...</source>
-        <translation></translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="184"/>
         <source>Data contact</source>
-        <translation>Contacto del dato</translation>
+        <translation>Data contact informatie</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="199"/>
         <source>English</source>
-        <translation></translation>
+        <translation>English</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="204"/>
         <source>Spanish</source>
-        <translation></translation>
+        <translation>Spanish</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="209"/>
         <source>French</source>
-        <translation></translation>
+        <translation>French</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="255"/>
         <source>Use constraints</source>
-        <translation>Restricciones de uso</translation>
+        <translation>Gebruiks beperkingen</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="262"/>
         <source>Keywords</source>
-        <translation>Palabras clave</translation>
+        <translation>Trefwoorden</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="269"/>
         <source>Metadata contact</source>
-        <translation>Contacto del metadato</translation>
+        <translation>Metadata contactinformatie</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="279"/>
         <source>Language</source>
-        <translation>Idioma</translation>
+        <translation>Taal</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="286"/>
         <source>ISO topic category</source>
-        <translation>Categoria ISO</translation>
+        <translation>ISO categorie</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="293"/>
         <source>Access constraints</source>
-        <translation>Restricciones de acceso</translation>
+        <translation>Toegangs beperkingen</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="300"/>
         <source>Abstract</source>
-        <translation>Resumen</translation>
+        <translation>Samenvatting</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="314"/>
         <source>Title</source>
-        <translation>Título</translation>
+        <translation>Titel</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="307"/>
         <source>INSPIRE</source>
-        <translation></translation>
+        <translation>INSPIRE</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="372"/>
         <source>Quality (lineage)</source>
-        <translation>Calidad (linaje)</translation>
+        <translation>Herkomst</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="379"/>
         <source>Spatial resolution</source>
-        <translation>Resolución espacial</translation>
+        <translation>Ruimtelijke resolutie</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="386"/>
         <source>Resource language</source>
-        <translation>Idioma del recurso</translation>
+        <translation>Taal van de bron</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="393"/>
         <source>Status</source>
-        <translation>Estatus</translation>
+        <translation>Status</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="403"/>
         <source>Temporal</source>
-        <translation>Temporal</translation>
+        <translation>Temporeel</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="409"/>
         <source>Temporal extent</source>
-        <translation>Rango temporal</translation>
+        <translation>Temporele dekking</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="415"/>
         <source>End</source>
-        <translation>Fin</translation>
+        <translation>Einde</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="422"/>
         <source>Begin</source>
-        <translation>Inicio</translation>
+        <translation>Begin</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="438"/>
         <source>Dates</source>
-        <translation>Fechas</translation>
+        <translation>Datums</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="444"/>
         <source>Creation</source>
-        <translation>Creación</translation>
+        <translation>Aanmaak</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="451"/>
         <source>Publication</source>
-        <translation>Publicación</translation>
+        <translation>Publicatie</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="458"/>
         <source>Last revision</source>
-        <translation>Última revisión</translation>
+        <translation>Herziening</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="128"/>
         <source>Data</source>
-        <translation>Datos</translation>
+        <translation>Data</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="599"/>
         <source>Publish</source>
-        <translation>Publicar</translation>
+        <translation>Publiceren</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="354"/>
         <source>Name</source>
-        <translation>Nombre</translation>
+        <translation>Naam</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.ui" line="523"/>
         <source>Only symbology</source>
-        <translation>Sólo simbología</translation>
+        <translation>Alleen symbologie</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="73"/>
         <source>GeoNetwork credentials</source>
-        <translation>Autenticación GeoNetwork</translation>
+        <translation>GeoNetwork inlog gegevens</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="80"/>
         <source>Instance identifier</source>
-        <translation>Identificador</translation>
+        <translation>Identificatie</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="87"/>
         <source>GeoServer credentials</source>
-        <translation>Autenticación GeoServer</translation>
+        <translation>Geoserver inlog gegevens</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="424"/>
         <source>Connect</source>
-        <translation>Conectar</translation>
+        <translation>Verbinden</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="121"/>
         <source>Datastore</source>
-        <translation>Datastore</translation>
+        <translation>Data opslag</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="381"/>
         <source>Credentials</source>
-        <translation>Autenticación</translation>
+        <translation>Inlog gegevens</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="164"/>
         <source>Upload data</source>
-        <translation>Subir datos</translation>
+        <translation>Data uploaden</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="171"/>
         <source>Store in PostGIS</source>
-        <translation>Almacenar en PostGIS</translation>
+        <translation>Opslaan in PostGIS</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="269"/>
         <source>URL</source>
-        <translation></translation>
+        <translation>URL</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="204"/>
         <source>Workspace</source>
-        <translation>Espacio de trabajo</translation>
+        <translation>Workspace</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="289"/>
         <source>Metadata profile</source>
-        <translation>Perfil de metadatos</translation>
+        <translation>Metadata profiel</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="302"/>
         <source>Default</source>
-        <translation>Valor por defecto</translation>
+        <translation>Default</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="312"/>
         <source>Dutch Geography</source>
-        <translation></translation>
+        <translation>Nederlands profiel</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="361"/>
         <source>Database</source>
-        <translation>Base de datos</translation>
+        <translation>Database</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="374"/>
         <source>Schema</source>
-        <translation>Esquema</translation>
+        <translation>Schema</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="407"/>
         <source>Port</source>
-        <translation>Puerto</translation>
+        <translation>Poort</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="414"/>
         <source>Server address</source>
-        <translation>Dirección del servidor</translation>
+        <translation>Server adres</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="465"/>
         <source>New Server</source>
-        <translation>Nuevo servidor</translation>
+        <translation>Nieuwe server</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="472"/>
         <source>Remove server</source>
-        <translation>Eliminar servidor</translation>
+        <translation>Verwijder server</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.ui" line="492"/>
         <source>Save</source>
-        <translation>Guardar</translation>
+        <translation>Opslaan</translation>
     </message>
 </context>
 <context>
@@ -385,42 +385,42 @@
     <message>
         <location filename="plugin.py" line="63"/>
         <source>Publish</source>
-        <translation>Publicar</translation>
+        <translation>Publiceren</translation>
     </message>
     <message>
         <location filename="plugin.py" line="72"/>
         <source>Multistyler</source>
-        <translation>Panel muti-estilos</translation>
+        <translation>Stijl conversie voorvertoning</translation>
     </message>
     <message>
         <location filename="publish/exporter.py" line="34"/>
         <source>Layer %s exported to %s</source>
-        <translation>Capa %s exportada a %s</translation>
+        <translation>Laad %s geexporteerd naar %s</translation>
     </message>
     <message>
         <location filename="publish/exporter.py" line="37"/>
         <source>No need to export layer %s stored at %s</source>
-        <translation>No es necesario exportar la capa %s almacenada en %s</translation>
+        <translation>Niet nodig om laag %s te exporteren naar %s</translation>
     </message>
     <message>
         <location filename="publish/servers.py" line="109"/>
         <source>Style for layer %s exported as zip file to %s</source>
-        <translation>Estilo de la capa %s exportado como archivo ZIP en %s</translation>
+        <translation>Symbology voor laag %s geexporteerd als zip naar %s</translation>
     </message>
     <message>
         <location filename="publish/servers.py" line="119"/>
         <source>Cannot find the selected PostGIS database</source>
-        <translation>No se encuentra la base de datos PostGIS seleccionada</translation>
+        <translation>Kan de geselecteerde PostGIS database niet bereiken</translation>
     </message>
     <message>
         <location filename="publish/servers.py" line="217"/>
         <source>Making &apos;%s&apos; request to &apos;%s&apos;</source>
-        <translation>Realizando peticion &apos;%s&apos; a &apos;%s&apos;</translation>
+        <translation>Verzoek &apos;%s&apos; richting &apos;%s&apos;</translation>
     </message>
     <message>
         <location filename="publish/servers.py" line="364"/>
         <source>Error importing to PostGIS: {0}</source>
-        <translation>Error al importar a PostGIS: {0}</translation>
+        <translation>Fout bij importeren in PostGIS: {0}</translation>
     </message>
 </context>
 <context>
@@ -428,7 +428,7 @@
     <message>
         <location filename="ui/metadatadialog.py" line="13"/>
         <source>Metadata</source>
-        <translation>Metadatos</translation>
+        <translation>Metadata</translation>
     </message>
 </context>
 <context>
@@ -436,32 +436,32 @@
     <message>
         <location filename="ui/publishreportdialog.py" line="60"/>
         <source>Yes</source>
-        <translation>Sí</translation>
+        <translation>Ja</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.py" line="60"/>
         <source>No</source>
-        <translation>No</translation>
+        <translation>Nee</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.py" line="63"/>
         <source>warnings(%i), errors(%i)</source>
-        <translation>avisos(%i), errores(%i)</translation>
+        <translation>Waarschuwingen(%i), Fouten(%i)</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.py" line="79"/>
         <source>Warnings:</source>
-        <translation>Avisos:</translation>
+        <translation>Waarschuwingen:</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.py" line="79"/>
         <source>Errors:</source>
-        <translation>Errores:</translation>
+        <translation>Fouten:</translation>
     </message>
     <message>
         <location filename="ui/publishreportdialog.py" line="81"/>
         <source>Layer details</source>
-        <translation>Detalles de la capa</translation>
+        <translation>Laag details</translation>
     </message>
 </context>
 <context>
@@ -469,32 +469,32 @@
     <message>
         <location filename="processing/publishtogeonetwork.py" line="23"/>
         <source>Bridge</source>
-        <translation></translation>
+        <translation>Bridge</translation>
     </message>
     <message>
         <location filename="processing/publishtogeonetwork.py" line="29"/>
         <source>Layer</source>
-        <translation>Capa</translation>
+        <translation>Laag</translation>
     </message>
     <message>
         <location filename="processing/publishtogeonetwork.py" line="32"/>
         <source>Server_URL</source>
-        <translation>URL del servidor</translation>
+        <translation>Server URL</translation>
     </message>
     <message>
         <location filename="processing/publishtogeonetwork.py" line="34"/>
         <source>Auth credentials</source>
-        <translation>Autenticación</translation>
+        <translation>Inlog gegevens</translation>
     </message>
     <message>
         <location filename="processing/publishtogeonetwork.py" line="41"/>
         <source>Publish layer metadata to GeoNetwork</source>
-        <translation>Publicar metadatos en GeoNetwork</translation>
+        <translation>Publiceer dataset metadata naar GeoNetwork</translation>
     </message>
     <message>
         <location filename="processing/publishtogeonetwork.py" line="44"/>
         <source>Publishes metadata to a GeoNetwork instance</source>
-        <translation>Publica los metadatos de una capa en una instancia de GeoNetwork</translation>
+        <translation>Publiceer metadata naar GeoNetwork</translation>
     </message>
 </context>
 <context>
@@ -502,32 +502,32 @@
     <message>
         <location filename="processing/publishtogeoserver.py" line="20"/>
         <source>Layer</source>
-        <translation>Capa</translation>
+        <translation>Laag</translation>
     </message>
     <message>
         <location filename="processing/publishtogeoserver.py" line="23"/>
         <source>Server URL</source>
-        <translation>URL del servidor</translation>
+        <translation>Server URL</translation>
     </message>
     <message>
         <location filename="processing/publishtogeoserver.py" line="25"/>
         <source>Workspace</source>
-        <translation>Espacio de trabajo</translation>
+        <translation>Workspace</translation>
     </message>
     <message>
         <location filename="processing/publishtogeoserver.py" line="27"/>
         <source>Auth credentials</source>
-        <translation>Autenticación</translation>
+        <translation>Inlog gegevens</translation>
     </message>
     <message>
         <location filename="processing/publishtogeoserver.py" line="34"/>
         <source>Publish layer to GeoServer</source>
-        <translation>Publicar capa en GeoServer</translation>
+        <translation>Publiceer laag naar GeoServer</translation>
     </message>
     <message>
         <location filename="processing/publishtogeoserver.py" line="37"/>
         <source>Publishes a layer and its style to a GeoServer instance</source>
-        <translation>Publica una capa y su estilo correspondiente en una instancia de GeoServer</translation>
+        <translation>Publiceer laag en symbologie naar GeoServer</translation>
     </message>
 </context>
 <context>
@@ -535,72 +535,72 @@
     <message>
         <location filename="ui/publishwidget.py" line="125"/>
         <source>Temporal</source>
-        <translation>Temporal</translation>
+        <translation>Temporeel</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="214"/>
         <source>View WMS layer</source>
-        <translation>Ver capa WMS</translation>
+        <translation>Bekijk WMS laag</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="215"/>
         <source>Unpublish data</source>
-        <translation>Despublicar datos</translation>
+        <translation>Laag van server verwijderen</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="217"/>
         <source>View metadata</source>
-        <translation>Ver metadatos</translation>
+        <translation>Bekijk metadata</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="218"/>
         <source>Unpublish metadata</source>
-        <translation>Despublicar metadatos</translation>
+        <translation>Metadata uit server verwijderen</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="220"/>
         <source>View all WMS layers</source>
-        <translation>Ver todas las capas WMS</translation>
+        <translation>Bekijk alle WMS lagen</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="254"/>
         <source>Do not publish data</source>
-        <translation>No publicar datos</translation>
+        <translation>Geen data publiceren</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="259"/>
         <source>Do not publish metadata</source>
-        <translation>No publicar metadatos</translation>
+        <translation>Geen metadata publiceren</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="307"/>
         <source>No validation errors</source>
-        <translation>No hay errores de validación</translation>
+        <translation>Geen validatie fouten</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="309"/>
         <source>The following issues were found:</source>
-        <translation>Se encontraron los siguientes problemas:</translation>
+        <translation>De volgende punten zijn gedetecteerd</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="311"/>
         <source>Metadata validation</source>
-        <translation>Validación de metadatos</translation>
+        <translation>Metadata validatie</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="425"/>
         <source>Error while publishing</source>
-        <translation>Error en el proceso de publicación</translation>
+        <translation>Fout tijdens publiceren</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="425"/>
         <source>See QGIS log for details</source>
-        <translation>Consulte el log de QGIS para más detalles</translation>
+        <translation>Bekijk de QGIS log voor details</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="447"/>
         <source>Publishing layers</source>
-        <translation>Publicando capas</translation>
+        <translation>Lagen publiceren</translation>
     </message>
 </context>
 <context>
@@ -608,12 +608,12 @@
     <message>
         <location filename="ui/publishwidget.py" line="499"/>
         <source>Layer &apos;%s&apos; has invalid metadata. Layer was not published</source>
-        <translation>La capa &apos;%s&apos; tiene metadatos invalidos y no se ha publicado</translation>
+        <translation>Laag &apos;%s&apos; heeft invalide metadata. Laag is niet gepubliceerd</translation>
     </message>
     <message>
         <location filename="ui/publishwidget.py" line="513"/>
         <source>Layer &apos;%s&apos; has invalid metadata. Metadata was not published</source>
-        <translation>La capa &apos;%s&apos; tiene metadatos invalidos. Los metadatos no se han publicado</translation>
+        <translation>Laag &apos;%s&apos; heeft invalide metadata. Metadata is niet gepubliceerd</translation>
     </message>
 </context>
 <context>
@@ -621,42 +621,42 @@
     <message>
         <location filename="ui/serverconnectionswidget.py" line="336"/>
         <source>Servers</source>
-        <translation>Servidores</translation>
+        <translation>Servers</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.py" line="68"/>
         <source>Do you want to save changes to the current server?</source>
-        <translation>¿Desea guardr los cambios del servidor actual?</translation>
+        <translation>Wilt u de wijzigingen aan deze verbinding opslaan?</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.py" line="332"/>
         <source>Error</source>
-        <translation>Error</translation>
+        <translation>Fout</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.py" line="332"/>
         <source>Wrong values in current item</source>
-        <translation>El elemento actual tiene valores erróneos</translation>
+        <translation>Onjuiste waarde in huidig item</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.py" line="90"/>
         <source>Success</source>
-        <translation>OK</translation>
+        <translation>Success</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.py" line="90"/>
         <source>Connection succesfully established with server</source>
-        <translation>Conexión establecida correctament con el servidor</translation>
+        <translation>Connectie succesvol</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.py" line="92"/>
         <source>Could not connect with server</source>
-        <translation>No se pudo conectar con el servidor</translation>
+        <translation>Kan niet met de server verbinden</translation>
     </message>
     <message>
         <location filename="ui/serverconnectionswidget.py" line="336"/>
         <source>Do you want to close without saving the current changes?</source>
-        <translation>¿Desea salir sin guardar los cambios actuales?</translation>
+        <translation>Wilt u het venster sluiten zonder op te slaan?</translation>
     </message>
 </context>
 </TS>
