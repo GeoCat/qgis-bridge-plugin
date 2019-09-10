@@ -2,7 +2,7 @@ import os
 import webbrowser
 from functools import partial
 
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication
@@ -36,6 +36,19 @@ class GeocatBridge:
 
         self.provider = BridgeProvider()
 
+        self.pluginFolder = os.path.dirname(__file__)
+        localePath = ""
+        self.locale = QSettings().value("locale/userLocale")[0:2]
+
+        if os.path.exists(self.pluginFolder):
+            localePath = os.path.join(self.pluginFolder, "i18n", "bridge_" + self.locale + ".qm")
+
+        self.translator = QTranslator()
+        if os.path.exists(localePath):
+            self.translator.load(localePath)
+            QCoreApplication.installTranslator(self.translator)
+
+
     def initGui(self):
 
         readSettings()
@@ -47,7 +60,7 @@ class GeocatBridge:
         addAboutMenu("GeoCatBridge")
         
         iconPublish = QIcon(os.path.join(os.path.dirname(__file__), "icons", "publish_button.png"))
-        self.actionPublish = QAction(iconPublish, "Publish", self.iface.mainWindow())
+        self.actionPublish = QAction(iconPublish, QCoreApplication.translate("GeocatBridge", "Publish"), self.iface.mainWindow())
         self.actionPublish.setObjectName("startPublish")
         self.actionPublish.triggered.connect(self.publishClicked)
         self.iface.addPluginToMenu("GeoCatBridge", self.actionPublish)
@@ -56,7 +69,7 @@ class GeocatBridge:
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
         self.multistylerDialog.hide()        
 
-        self.actionMultistyler = QAction("Multistyler", self.iface.mainWindow())
+        self.actionMultistyler = QAction(QCoreApplication.translate("GeocatBridge", "Multistyler"), self.iface.mainWindow())
         self.actionMultistyler.setObjectName("multistyler")
         self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
         self.iface.addPluginToMenu("GeoCatBridge", self.actionMultistyler)

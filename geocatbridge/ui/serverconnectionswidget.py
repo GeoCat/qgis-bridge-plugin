@@ -65,12 +65,12 @@ class ServerConnectionsWidget(BASE, WIDGET):
                 if server.name == self.currentServer.name:
                     return
             if self.currentServerHasChanges:
-                res = QMessageBox.question(self, "Servers", "Do you want to save changes to the current server?",
+                res = QMessageBox.question(self, self.tr("Servers"), self.tr("Do you want to save changes to the current server?"),
                                 QMessageBox.Cancel | QMessageBox.No | QMessageBox.Yes,
                                 QMessageBox.Yes)        
                 if res == QMessageBox.Yes:
                     if not self.saveCurrentServer():
-                        self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
+                        self.bar.pushMessage(self.tr("Error"), self.tr("Wrong values in current item"), level=Qgis.Warning, duration=5)
                         self.listServers.setCurrentItem(old)
                     else:
                         self.setCurrentServer(server)
@@ -84,12 +84,12 @@ class ServerConnectionsWidget(BASE, WIDGET):
 
     def _testConnection(self, server):
         if server is None:
-            self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)
+            self.bar.pushMessage(self.tr("Error"), self.tr("Wrong values in current item"), level=Qgis.Warning, duration=5)
         else:
             if execute(server.testConnection):
-                self.bar.pushMessage("Success", "Connection succesfully established with server", level=Qgis.Success, duration=5)
+                self.bar.pushMessage(self.tr("Success"), self.tr("Connection succesfully established with server"), level=Qgis.Success, duration=5)
             else:
-                self.bar.pushMessage("Error", "Could not connect with server", level=Qgis.Warning, duration=5)                    
+                self.bar.pushMessage(self.tr("Error"), self.tr("Could not connect with server"), level=Qgis.Warning, duration=5)                    
     
     def testConnectionPostgis(self):
         server = self.createPostgisServer()
@@ -329,11 +329,11 @@ class ServerConnectionsWidget(BASE, WIDGET):
         if self.saveCurrentServer():
             self.currentServerHasChanges = False
         else:
-            self.bar.pushMessage("Error", "Wrong values in current item", level=Qgis.Warning, duration=5)    
+            self.bar.pushMessage(self.tr("Error"), self.tr("Wrong values in current item"), level=Qgis.Warning, duration=5)    
 
     def onClose(self, evt):
         if self.currentServerHasChanges:
-            res = QMessageBox.question(self, "Servers", "Do you want to close without saving the current changes?",
+            res = QMessageBox.question(self, self.tr("Servers"), self.tr("Do you want to close without saving the current changes?"),
                                 QMessageBox.Cancel | QMessageBox.No | QMessageBox.Yes,
                                 QMessageBox.Yes)
         

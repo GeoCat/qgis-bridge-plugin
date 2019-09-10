@@ -10,7 +10,7 @@ class MetadataDialog(QDialog):
         super(MetadataDialog, self).__init__(parent)
         self.metadata = metadata
         
-        self.setWindowTitle('Metadata')
+        self.setWindowTitle(self.tr('Metadata'))
         layout = QVBoxLayout()
         self.metadataWidget = QgsMetadataWidget()
         self.metadataWidget.setMetadata(metadata)

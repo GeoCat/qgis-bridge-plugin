@@ -57,10 +57,10 @@ class PublishReportDialog(BASE, WIDGET):
                 metadataPublished = True
             else:
                 metadataPublished = False
-            item = QTableWidgetItem("Yes" if metadataPublished else "No")
+            item = QTableWidgetItem(self.tr("Yes") if metadataPublished else self.tr("No"))
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 3, item)
-            txt = "warnings(%i), errors(%i)" % (len(warnings), len(errors))
+            txt = self.tr("warnings(%i), errors(%i)") % (len(warnings), len(errors))
             widget = QWidget()
             button = QPushButton()
             button.setText(txt)
@@ -76,9 +76,9 @@ class PublishReportDialog(BASE, WIDGET):
         warnings, errors = self.results[name]
         w = "<br>".join(warnings)
         e = "<br>".join(errors)
-        txt = "<b>Warnings:</b><br>%s<br><b>Errors:</b><br>%s" % (w, e)
+        txt = "<b>%s</b><br>%s<br><b>%s</b><br>%s" % (self.tr("Warnings:"), w, self.tr("Errors:"), e)
         dlg = QgsMessageOutput.createMessageOutput()
-        dlg.setTitle("Layer details")
+        dlg.setTitle(self.tr("Layer details"))
         dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
         dlg.showMessage()
 
