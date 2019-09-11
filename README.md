@@ -8,15 +8,13 @@ GeoCat Bridge making publishing geospatial data on the internet as easy as hitti
 
 To install, follow these steps:
 
-
 - Clone this repository using `git clone --recursive`.
 
 - Run `git submodule update --init` to fetch the code of the dependencies that are used by the plugin, which are contained in other repos that are declared as submodules of this one.
 
 - Copy the `geocatbridge` folder in your QGIS 3 plugins folder.
 
-- Start QGIS and the plugin should be already available. If it's not, make sure that it's active in the QGIS Plugin Manager.
-
+- Start QGIS and you will find the Geocat Bridge plugin in the plugins menu. If it's not available yet, activate it in the QGIS Plugin Manager.
 
 This plugin is compatible with QGIS 3.4 or later.
 
@@ -26,4 +24,7 @@ While GeoCat Bridge is new to QGIS using the plugin is very close to the ArcGIS 
 
 * [GeoCat Bridge Manual](http://bridge-manual.geocat.net/3/3.1/index.html)
 
+## Translating the plugin
+
+This project uses [transifex.com](https://www.transifex.com/geocat/bridge-common) to manage translations. Join a translation team (or request a new language) to bring bridge to as many users as possible.
 
