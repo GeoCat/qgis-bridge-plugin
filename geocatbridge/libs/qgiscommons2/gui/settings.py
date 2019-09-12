@@ -169,7 +169,7 @@ class ConfigDialog(QDialog):
 
         grouped = defaultdict(list)
         for setting in self.settings:
-            grouped[setting["group"]].append(setting)
+            grouped["group"].append(setting)
         for groupName, group in grouped.items():
             item = self._getGroupItem(groupName, group)
             self.tree.addTopLevelItem(item)
