@@ -20,7 +20,7 @@ class BridgeProvider(QgsProcessingProvider):
         return 'geocatbridge'
 
     def name(self):
-        return 'GeoCat Bridge'
+        return self.tr('GeoCat Bridge')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'icons', 'geocat.png'))

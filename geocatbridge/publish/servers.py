@@ -8,7 +8,7 @@ from .exporter import exportLayer
 from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
 from qgiscommons2.files import tempFilenameInTempFolder
 from bridgestyle.qgis import saveLayerStyleAsZippedSld, saveLayerStyleAsMapfile
-from qgis.PyQt.QtCore import QSettings, QSize
+from qgis.PyQt.QtCore import QSettings, QSize, QCoreApplication
 from qgis.PyQt.QtGui import QImage, QColor, QPainter
 from bridgecommon import meftools
 from geocatbridge.publish.metadata import uuidForLayer
@@ -60,7 +60,6 @@ def geodataServers():
 def metadataServers():
     return {name: server for name, server in _servers.items() if server._isMetadataCatalog}
 
-
 class GeoserverServer():
 
     UPLOAD_DATA = 0
@@ -101,7 +100,8 @@ class GeoserverServer():
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
         for w in warnings:
             QgsMessageLog.logMessage(w, 'GeoCat Bridge', level=Qgis.Warning)
-        QgsMessageLog.logMessage("Style for layer %s exported as zip file to %s" % (layer.name(), styleFilename), 'GeoCat Bridge', level=Qgis.Info)
+        QgsMessageLog.logMessage(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s") % (layer.name(), styleFilename), 
+                                'GeoCat Bridge', level=Qgis.Info)
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
                 filename = exportLayer(layer, fields)
@@ -110,7 +110,7 @@ class GeoserverServer():
                 try:
                     db = allServers()[self.postgisdb]
                 except KeyError:
-                    raise Exception("Cannot find the selected PostGIS database")
+                    raise Exception(QCoreApplication.translate("GeocatBridge", "Cannot find the selected PostGIS database"))
                 db.importLayer(layer, fields)                
                 self.dataCatalog().publish_vector_layer_from_postgis(db.host, db.port, 
                                         db.database, db.schema, layer.name(), 
@@ -236,9 +236,9 @@ class TokenNetworkAccessManager():
         self.session.headers.update({"X-XSRF-TOKEN" : self.token}) 
 
     def request(self, url, method, data=None, headers={}):
-        QgsMessageLog.logMessage("Making '%s' request to '%s'" % (method, url), 'GeoCat Bridge', level=Qgis.Info)
+        QgsMessageLog.logMessage(QCoreApplication.translate("GeocatBridge", "Making '%s' request to '%s'") % (method, url), 'GeoCat Bridge', level=Qgis.Info)
         self.setTokenInHeader()
-        method = getattr(self.session, method.lower())
+        method = getatQCoreApplication.translate("GeocatBridge", self.session, method.lower())
         resp = method(url, headers=headers, data=data)
         resp.raise_for_status()
         return resp
@@ -375,15 +375,15 @@ class PostgisServer():
                                           layer.wkbType(), layer.sourceCrs(), True)
 
         if exporter.errorCode() != QgsVectorLayerExporter.NoError:
-            raise Exception('Error importing to PostGIS: {0}'.format(exporter.errorMessage()))
+            raise Exception(QCoreApplication.translate("GeocatBridge", 'Error importing to PostGIS: {0}').format(exporter.errorMessage()))
 
         features = layer.getFeatures()
         for f in features:
             if not exporter.addFeature(f, QgsFeatureSink.FastInsert):
-                raise Exception('Error importing to PostGIS: {0}').format(exporter.errorMessage())
+                raise Exception(QCoreApplication.translate("GeocatBridge", 'Error importing to PostGIS: {0}').format(exporter.errorMessage()))
         exporter.flushBuffer()
         if exporter.errorCode() != QgsVectorLayerExporter.NoError:
-            raise Exception('Error importing to PostGIS: {0}').format(exporter.errorMessage())
+            raise Exception(QCoreApplication.translate("GeocatBridge", 'Error importing to PostGIS: {0}').format(exporter.errorMessage()))
 
     def testConnection(self):
         con = None

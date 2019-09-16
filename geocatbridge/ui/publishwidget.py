@@ -122,7 +122,7 @@ class PublishWidget(BASE, WIDGET):
             if self.tabWidgetMetadata.count() == 1:
                 title = "Dutch geography" if profile == GeonetworkServer.PROFILE_DUTCH else "INSPIRE"
                 self.tabWidgetMetadata.addTab(self.tabInspire, title)
-                self.tabWidgetMetadata.addTab(self.tabTemporal, "Temporal")
+                self.tabWidgetMetadata.addTab(self.tabTemporal, self.tr("Temporal"))
             self.comboStatus.setVisible(profile == GeonetworkServer.PROFILE_DUTCH)
         
     def selectLabelClicked(self, url):
@@ -211,13 +211,13 @@ class PublishWidget(BASE, WIDGET):
         name = self.listLayers.itemWidget(item).name()
         menu = QMenu()        
         if self.isDataPublished[name]:
-            menu.addAction("View WMS layer", lambda: self.viewWms(name))
-            menu.addAction("Unpublish data", lambda: self.unpublishData(name))
+            menu.addAction(self.tr("View WMS layer"), lambda: self.viewWms(name))
+            menu.addAction(self.tr("Unpublish data"), lambda: self.unpublishData(name))
         if self.isMetadataPublished[name]:
-            menu.addAction("View metadata", lambda: self.viewMetadata(name))  
-            menu.addAction("Unpublish metadata", lambda: self.unpublishMetadata(name))
+            menu.addAction(self.tr("View metadata"), lambda: self.viewMetadata(name))  
+            menu.addAction(self.tr("Unpublish metadata"), lambda: self.unpublishMetadata(name))
         if any(self.isDataPublished.values()):
-            menu.addAction("View all WMS layers", self.viewAllWms)
+            menu.addAction(self.tr("View all WMS layers"), self.viewAllWms)
         menu.exec_(self.listLayers.mapToGlobal(pos))
 
     def publishableLayers(self):
@@ -251,12 +251,12 @@ class PublishWidget(BASE, WIDGET):
 
     def populatecomboGeodataServer(self):
         self.comboGeodataServer.clear()
-        self.comboGeodataServer.addItem("Do not publish data")
+        self.comboGeodataServer.addItem(self.tr("Do not publish data"))
         self.comboGeodataServer.addItems(geodataServers().keys())
 
     def populatecomboMetadataServer(self):
         self.comboMetadataServer.clear()
-        self.comboMetadataServer.addItem("Do not publish metadata")
+        self.comboMetadataServer.addItem(self.tr("Do not publish metadata"))
         self.comboMetadataServer.addItems(metadataServers().keys())
 
     def updateServers(self):
@@ -304,11 +304,11 @@ class PublishWidget(BASE, WIDGET):
         validator = QgsNativeMetadataValidator()
         result, errors = validator.validate(self.metadata[self.currentLayer])
         if result:
-            txt = "No validation errors"
+            txt = self.tr("No validation errors")
         else:
-            txt = "The following issues were found:<br>" + "<br>".join(["<b>%s</b>:%s" % (err.section, err.note) for err in errors])
+            txt = self.tr("The following issues were found:") + "<br>" + "<br>".join(["<b>%s</b>:%s" % (err.section, err.note) for err in errors])
         dlg = QgsMessageOutput.createMessageOutput()
-        dlg.setTitle("Metadata validation")
+        dlg.setTitle(self.tr("Metadata validation"))
         dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
         dlg.showMessage()
 
@@ -422,7 +422,7 @@ class PublishWidget(BASE, WIDGET):
                 dialog = PublishReportDialog(self, ret)
                 dialog.exec_()
         except:
-            self.bar.pushMessage("Error while publishing", "See QGIS log for details", level=Qgis.Warning, duration=5)
+            self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
             QgsMessageLog.logMessage(traceback.format_exc(), 'GeoCat Bridge', level=Qgis.Critical)
 
     def _publish(self):
@@ -444,7 +444,7 @@ class PublishWidget(BASE, WIDGET):
                 name = widget.name()   
                 toPublish.append(name)
 
-        progressMessageBar = self.bar.createMessage("Publishing layers")
+        progressMessageBar = self.bar.createMessage(self.tr("Publishing layers"))
         progress = QProgressBar()
         progress.setMaximum(self.listLayers.count())
         progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
@@ -452,10 +452,10 @@ class PublishWidget(BASE, WIDGET):
         self.bar.pushWidget(progressMessageBar, Qgis.Info)
 
         class QgisProgress():
-            def setProgress(self, v):
+            def setProgress(_self, v):
                 progress.setValue(v)
                 QApplication.processEvents()
-            def setText(self, text):                
+            def setText(_self, text):                
                 progressMessageBar.setText(text)
                 QApplication.processEvents()
 
@@ -496,7 +496,7 @@ class PublishWidget(BASE, WIDGET):
                                 geodataServer.dataCatalog().set_layer_metadata_link(name, url)
                             self.updateLayerIsDataPublished(name, True)
                         else:
-                            self.logger.logError("Layer '%s' has invalid metadata. Layer was not published" % layer.name())
+                            self.logger.logError(self.tr("Layer '%s' has invalid metadata. Layer was not published") % layer.name())
                 if metadataServer is not None:
                     if validates or allowWithoutMetadata == ALLOW:
                         if geodataServer is not None:
@@ -510,7 +510,7 @@ class PublishWidget(BASE, WIDGET):
                         metadataServer.publishLayerMetadata(layer, wms)
                         self.updateLayerIsMetadataPublished(name, True)
                     else:
-                        self.logger.logError("Layer '%s' has invalid metadata. Metadata was not published" % layer.name())
+                        self.logger.logError(self.tr("Layer '%s' has invalid metadata. Metadata was not published") % layer.name())
             except:
                 self.logger.logError(traceback.format_exc())
             results[name] = (self.logger.warnings, self.logger.errors)
