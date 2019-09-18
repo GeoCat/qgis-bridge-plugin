@@ -29,6 +29,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.setCurrentServer(None)
         self.buttonSave.clicked.connect(self.saveButtonClicked)
         self.radioUploadData.toggled.connect(self.datastoreChanged)
+        self.radioLocalPath.toggled.connect(self.mapserverStorageChanged)
         self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
         self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
         self.btnConnectGeocatLive.clicked.connect(self.testConnectionGeocatLive)
@@ -54,6 +55,17 @@ class ServerConnectionsWidget(BASE, WIDGET):
     def datastoreChanged(self, checked):
         self.comboDatastore.setEnabled(not checked)
         #self.btnNewDatastore.setEnabled(not checked)
+        self._setCurrentServerHasChanges()
+
+    def mapserverStorageChanged(self, checked):
+        self.labelOutputFolder.setVisible(checked)
+        self.fileMapserver.setVisible(checked)
+        self.labelHost.setVisible(not checked)
+        self.labelPort.setVisible(not checked)
+        self.labelMapserverCredentials.setVisible(not checked)
+        self.txtMapserverHost.setVisible(not checked)
+        self.txtMapserverPort.setVisible(not checked)
+        self.mapserverAuthWidget.setVisible(not checked)
         self._setCurrentServerHasChanges()
 
     def currentServerChanged(self, new, old):
@@ -181,7 +193,11 @@ class ServerConnectionsWidget(BASE, WIDGET):
         ##TODO check validity of name and values        
         name = self.txtMapserverName.text()        
         folder = self.fileMapserver.filePath()
-        server = MapserverServer(name, folder)
+        authid = self.mapserverAuth.configId()
+        host = self.txtMapserverHost.text()
+        port = self.txtMapserverPort.text()
+        local = self.radioLocalPath.isChecked()
+        server = MapserverServer(name, local, folder, authid, host, port)
         return server
 
     def createGeocatLiveServer(self):
@@ -199,14 +215,12 @@ class ServerConnectionsWidget(BASE, WIDGET):
         layout.addWidget(self.geoserverAuth)
         self.geoserverAuthWidget.setLayout(layout)
         self.geoserverAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-        '''
         self.mapserverAuth = QgsAuthConfigSelect()
         layout = QHBoxLayout()
         layout.setMargin(0)
         layout.addWidget(self.mapserverAuth)
         self.mapserverAuthWidget.setLayout(layout)
         self.mapserverAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-        '''
         self.postgisAuth = QgsAuthConfigSelect()        
         layout = QHBoxLayout()
         layout.setMargin(0)
@@ -303,6 +317,11 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.stackedWidget.setCurrentWidget(self.widgetMapserver)
             self.txtMapserverName.setText(server.name)            
             self.fileMapserver.setFilePath(server.folder)
+            self.txtMapserverHost.setText(server.host)
+            self.txtMapserverPort.setText(server.port)
+            self.mapserverAuth.setConfigId(server.authid)
+            self.radioLocalPath.setChecked(server.useLocalFolder)
+            self.radioFtp.setChecked(not server.useLocalFolder)
         elif isinstance(server, PostgisServer):
             self.stackedWidget.setCurrentWidget(self.widgetPostgis)
             self.txtPostgisName.setText(server.name)

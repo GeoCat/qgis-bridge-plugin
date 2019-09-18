@@ -135,14 +135,25 @@ class GeoserverServer():
 
 class MapserverServer(): 
 
-    def __init__(self, name, folder=""):
+    def __init__(self, name, local=True, folder="", authid="", host="", port=""):
         self.name = name
         self.folder = folder
+        self.useLocalFolder = local
+        self.authid = authid
+        self.host = host
+        self.port = port
 
         self._isMetadataCatalog = False
         self._isDataCatalog = True
 
-        self._catalog = MapServerCatalog(self.folder)
+        if local:
+            self._catalog = MapServerCatalog(folder=self.folder)
+        else:
+            authConfig = QgsAuthMethodConfig()
+            QgsApplication.authManager().loadAuthenticationConfig(self.authid, authConfig, True)
+            username = authConfig.config('username')
+            password = authConfig.config('password')
+            self._catalog = MapServerCatalog(host=host, port=port, username=username, password=password)            
         
     def dataCatalog(self):
         return self._catalog
