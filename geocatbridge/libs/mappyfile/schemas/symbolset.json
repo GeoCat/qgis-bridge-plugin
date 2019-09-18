@@ -1,9 +1,0 @@
-{
-  "type": "object",
-  "properties": {
-    "type": "array",
-    "items": {
-      "$ref": "symbol.json"
-    }
-  }
-}
