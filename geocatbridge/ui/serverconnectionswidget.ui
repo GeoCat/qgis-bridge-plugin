@@ -41,7 +41,7 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="widgetGeocatLive">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -236,6 +236,47 @@
               </size>
              </property>
             </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="widgetMapserver">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="2">
+            <widget class="QLineEdit" name="txtMapserverName"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>Output folder</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string>Name</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <spacer name="verticalSpacer_8">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="2">
+            <widget class="QgsFileWidget" name="fileMapserver"/>
            </item>
           </layout>
          </item>
@@ -497,6 +538,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsFileWidget</class>
+   <extends>QWidget</extends>
+   <header>qgsfilewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

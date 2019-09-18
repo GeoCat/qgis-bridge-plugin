@@ -7,12 +7,13 @@ import lxml.etree as ET
 from .exporter import exportLayer
 from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
 from qgiscommons2.files import tempFilenameInTempFolder
-from bridgestyle.qgis import saveLayerStyleAsZippedSld, saveLayerStyleAsMapfile
+from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStyleAsMapfileFolder
 from qgis.PyQt.QtCore import QSettings, QSize, QCoreApplication
 from qgis.PyQt.QtGui import QImage, QColor, QPainter
 from bridgecommon import meftools
 from geocatbridge.publish.metadata import uuidForLayer
 from bridgecommon.geoservercatalog import GeoServerCatalog
+from .mapservercatalog import MapServerCatalog
 from bridgecommon.geonetworkcatalog import GeoNetworkCatalog
 from bridgecommon.catalog import GeodataCatalog, MetadataCatalog
 from qgis.core import QgsMessageLog, Qgis, QgsVectorLayerExporter, QgsAuthMethodConfig, QgsApplication, QgsFeatureSink, QgsFields, QgsMapSettings, QgsMapRendererCustomPainterJob
@@ -104,7 +105,7 @@ class GeoserverServer():
                                 'GeoCat Bridge', level=Qgis.Info)
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
-                filename = exportLayer(layer, fields)
+                filename = exportLayer(layer, fields, forceShp = True)
                 self.dataCatalog().publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), styleFilename, layer.name())
             else:
                 try:
@@ -134,26 +135,35 @@ class GeoserverServer():
 
 class MapserverServer(): 
 
-    def __init__(self, name, url=""):
+    def __init__(self, name, folder=""):
         self.name = name
-        self.url = url
+        self.folder = folder
 
         self._isMetadataCatalog = False
         self._isDataCatalog = True
-        nam = NetworkAccessManager(self.authid, debug=False)
-        self._catalog = MapServerCatalog(self.url)
 
+        self._catalog = MapServerCatalog(self.folder)
+        
     def dataCatalog(self):
         return self._catalog
 
+    def createStyleFolder(self, layer):
+        layerFilename = layer.name() + ".shp"        
+        warnings = layerStyleAsMapfileFolder(layer, layerFilename, self.folder)        
+        for w in warnings:
+            QgsMessageLog.logMessage(w, 'GeoCat Bridge', level=Qgis.Warning)
+        QgsMessageLog.logMessage(QCoreApplication.translate("GeocatBridge", 
+                                "Style for layer %s exported to %s") % (layer.name(), self.folder), 
+                                'GeoCat Bridge', level=Qgis.Info)            
+    
     def publishStyle(self, layer):
-        pass        
+        self.createStyleFolder(layer)
         
     def publishLayer(self, layer, fields=None):
-        styleFilename = tempFilenameInTempFolder(layer.name() + ".map")
-        styleFolder = os.path.dirname(styleFilename)
-        warnings = saveLayerStyleAsMapfileFolder(layer, styleFolder)
-        pass
+        self.publishStyle(layer)
+        layerFilename = layer.name() + ".shp"
+        layerPath = os.path.join(self.folder, layerFilename)         
+        exportLayer(layer, fields, toShapefile=True, path=layerPath, force=True)
 
     def testConnection(self):
         return True

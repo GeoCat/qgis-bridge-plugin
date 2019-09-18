@@ -9,24 +9,31 @@ def isSingleTableGpkg(layer):
     ds = gdal.OpenEx(layer.source())
     return ds.GetLayerCount() == 1
 
-def exportLayer(layer, fields=None):
+def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False):
     filename = layer.source()
     destFilename = layer.name()
     fields = fields or []
     if layer.type() == layer.VectorLayer:
-        if (os.path.splitext(filename.lower())[1]  != ".gpkg"
+        if toShapefile:
+            if force or layer.fields().count() != len(fields) or (os.path.splitext(filename.lower())[1]  != ".shp"):
+                attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
+                output = path or tempFilenameInTempFolder(destFilename + ".shp")
+                QgsVectorFileWriter.writeAsVectorFormat(layer, output, "UTF-8", attributes=attrs, driverName="ESRI Shapefile")
+                log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
+                return output
+        elif (force or os.path.splitext(filename.lower())[1]  != ".gpkg"
                         or layer.fields().count() != len(fields) or not isSingleTableGpkg(layer)):
             attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
-            output = tempFilenameInTempFolder(destFilename + ".gpkg")
+            output = path or tempFilenameInTempFolder(destFilename + ".gpkg")
             QgsVectorFileWriter.writeAsVectorFormat(layer, output, "UTF-8", attributes=attrs)
             log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
             return output
-        else:
-            log.logInfo(QCoreApplication.translate("GeocatBridge", "No need to export layer %s stored at %s") % (destFilename, filename))
-            return filename
+        
+        log.logInfo(QCoreApplication.translate("GeocatBridge", "No need to export layer %s stored at %s") % (destFilename, filename))
+        return filename
     else:
-        if (not filename.lower().endswith("tif")):        
-            output = tempFilenameInTempFolder(destFilename + ".tif")
+        if (force or not filename.lower().endswith("tif")):        
+            output = path or tempFilenameInTempFolder(destFilename + ".tif")
             writer = QgsRasterFileWriter(output)
             writer.setOutputFormat("GTiff");
             writer.writeRaster(layer.pipe(), layer.width(), layer.height(), layer.extent(), layer.crs())
@@ -36,7 +43,6 @@ def exportLayer(layer, fields=None):
         else:
             log.logInfo(QCoreApplication.translate("GeocatBridge", "No need to export layer %s stored at %s") % (destFilename, filename))
             return filename
-
 
 
 

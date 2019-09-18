@@ -49,6 +49,8 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.comboMetadataProfile.currentIndexChanged.connect(self._setCurrentServerHasChanges)
         self.comboDatastore.currentIndexChanged.connect(self._setCurrentServerHasChanges)
 
+        self.fileMapserver.setStorageMode(QgsFileWidget.GetDirectory)
+
     def datastoreChanged(self, checked):
         self.comboDatastore.setEnabled(not checked)
         #self.btnNewDatastore.setEnabled(not checked)
@@ -114,6 +116,8 @@ class ServerConnectionsWidget(BASE, WIDGET):
             return True
         elif w == self.widgetGeoserver:
             server = self.createGeoserverServer()
+        elif w == self.widgetMapserver:
+            server = self.createMapserverServer()             
         elif w == self.widgetPostgis:
             server = self.createPostgisServer()
         elif w == self.widgetMetadataCatalog:
@@ -173,13 +177,11 @@ class ServerConnectionsWidget(BASE, WIDGET):
         server = GeonetworkServer(name, url, authid, profile)
         return server
 
-    def createGeonetworkServer(self):
+    def createMapserverServer(self):
         ##TODO check validity of name and values        
-        name = self.txtCswName.text()        
-        authid = self.cswAuth.configId()
-        url = self.txtCswUrl.text()
-        profile = self.comboMetadataProfile.currentIndex()
-        server = GeonetworkServer(name, url, authid, profile)
+        name = self.txtMapserverName.text()        
+        folder = self.fileMapserver.filePath()
+        server = MapserverServer(name, folder)
         return server
 
     def createGeocatLiveServer(self):
@@ -197,7 +199,15 @@ class ServerConnectionsWidget(BASE, WIDGET):
         layout.addWidget(self.geoserverAuth)
         self.geoserverAuthWidget.setLayout(layout)
         self.geoserverAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-        self.postgisAuth = QgsAuthConfigSelect()
+        '''
+        self.mapserverAuth = QgsAuthConfigSelect()
+        layout = QHBoxLayout()
+        layout.setMargin(0)
+        layout.addWidget(self.mapserverAuth)
+        self.mapserverAuthWidget.setLayout(layout)
+        self.mapserverAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
+        '''
+        self.postgisAuth = QgsAuthConfigSelect()        
         layout = QHBoxLayout()
         layout.setMargin(0)
         layout.addWidget(self.postgisAuth)
@@ -290,8 +300,9 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.radioUploadData.setChecked(server.storage == server.UPLOAD_DATA)
             self.radioStoreInPostgis.setChecked(server.storage == server.STORE_IN_POSTGIS)                
         elif isinstance(server, MapserverServer):
-            pass
-            #TODO
+            self.stackedWidget.setCurrentWidget(self.widgetMapserver)
+            self.txtMapserverName.setText(server.name)            
+            self.fileMapserver.setFilePath(server.folder)
         elif isinstance(server, PostgisServer):
             self.stackedWidget.setCurrentWidget(self.widgetPostgis)
             self.txtPostgisName.setText(server.name)
