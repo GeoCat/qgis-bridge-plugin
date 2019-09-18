@@ -105,7 +105,7 @@ class GeoserverServer():
                                 'GeoCat Bridge', level=Qgis.Info)
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
-                filename = exportLayer(layer, fields, forceShp = True)
+                filename = exportLayer(layer, fields)
                 self.dataCatalog().publish_vector_layer_from_file(filename, layer.name(), layer.crs().authid(), styleFilename, layer.name())
             else:
                 try:
