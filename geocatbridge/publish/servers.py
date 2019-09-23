@@ -16,7 +16,8 @@ from bridgecommon.geoservercatalog import GeoServerCatalog
 from .mapservercatalog import MapServerCatalog
 from bridgecommon.geonetworkcatalog import GeoNetworkCatalog
 from bridgecommon.catalog import GeodataCatalog, MetadataCatalog
-from qgis.core import QgsMessageLog, Qgis, QgsVectorLayerExporter, QgsAuthMethodConfig, QgsApplication, QgsFeatureSink, QgsFields, QgsMapSettings, QgsMapRendererCustomPainterJob
+from qgis.core import (QgsMessageLog, Qgis, QgsVectorLayerExporter, QgsAuthMethodConfig, QgsApplication, 
+                        QgsFeatureSink, QgsFields, QgsMapSettings, QgsMapRendererCustomPainterJob, QgsProject)
 
 SERVERS_SETTING = "geocatbridge/BridgeServers"
 
@@ -85,9 +86,21 @@ class GeoserverServer():
         self._isDataCatalog = True
         nam = NetworkAccessManager(self.authid, debug=False)
         self._catalog = GeoServerCatalog(self.url, nam, self.workspace)
+        self.setupForProject()
 
     def dataCatalog(self):
         return self._catalog
+
+    def setupForProject(self):
+        if self.workspace is None:
+            self._catalog.workspace = os.path.splitext(os.path.basename(QgsProject.instance().absoluteFilePath()))[0]
+    
+    def prepareForPublishing(self, onlySymbology):
+        self. setupForProject()
+        if self.workspace is None and not onlySymbology:
+            self._catalog.delete_workspace()
+        else:            
+            self._catalog.workspace = self.workspace
 
     def publishStyle(self, layer):
         styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
@@ -179,6 +192,11 @@ class MapserverServer():
     def testConnection(self):
         return True
 
+    def setupForProject(self):
+        pass
+
+    def prepareForPublishing(self):
+        pass
 
 class GeocatLiveServer(): 
 

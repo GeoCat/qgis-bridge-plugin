@@ -34,6 +34,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
         self.btnConnectGeocatLive.clicked.connect(self.testConnectionGeocatLive)
         self.btnConnectCsw.clicked.connect(self.testConnectionCsw)
+        self.chkManagedWorkspace.stateChanged.connect(self.managedWorkspaceChanged)
 
         self.txtCswName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeoserverName.textChanged.connect(self._setCurrentServerHasChanges)
@@ -56,6 +57,9 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.comboDatastore.setEnabled(not checked)
         #self.btnNewDatastore.setEnabled(not checked)
         self._setCurrentServerHasChanges()
+
+    def managedWorkspaceChanged(self, state):
+        self.txtGeoserverWorkspace.setEnabled(state == Qt.Unchecked)
 
     def mapserverStorageChanged(self, checked):
         self.labelOutputFolder.setVisible(checked)
@@ -156,7 +160,10 @@ class ServerConnectionsWidget(BASE, WIDGET):
         ##TODO check validity of name and values        
         name = self.txtGeoserverName.text().strip()
         url = self.txtGeoserverUrl.text().strip()
-        workspace = self.txtGeoserverWorkspace.text().strip()
+        if self.chkManagedWorkspace.isChecked():
+            workspace = None
+        else:
+            workspace = self.txtGeoserverWorkspace.text().strip()
         authid = self.geoserverAuth.configId()
         if self.radioUploadData.isChecked():
             storage = GeoserverServer.UPLOAD_DATA
@@ -306,7 +313,12 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.stackedWidget.setCurrentWidget(self.widgetGeoserver)
             self.txtGeoserverName.setText(server.name)
             self.txtGeoserverUrl.setText(server.url)
-            self.txtGeoserverWorkspace.setText(server.workspace)            
+            if server.workspace is None:
+                self.txtGeoserverWorkspace.setText("")
+                self.chkManagedWorkspace.setChecked(True)
+            else:
+                self.txtGeoserverWorkspace.setText(server.workspace)
+                self.chkManagedWorkspace.setChecked(False)
             self.geoserverAuth.setConfigId(server.authid)
             self.populatePostgisCombo()
             if server.postgisdb is not None:

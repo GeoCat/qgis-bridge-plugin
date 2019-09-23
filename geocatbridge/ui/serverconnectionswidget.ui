@@ -41,7 +41,7 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="widgetGeocatLive">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -115,27 +115,6 @@
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>Datastore</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Data</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="2">
-            <widget class="QPushButton" name="btnConnectGeoserver">
-             <property name="text">
-              <string>Connect</string>
-             </property>
-            </widget>
-           </item>
            <item row="7" column="2">
             <widget class="QWidget" name="geoserverAuthWidget" native="true">
              <property name="sizePolicy">
@@ -153,37 +132,6 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
-            <widget class="QLineEdit" name="txtGeoserverUrl"/>
-           </item>
-           <item row="5" column="2">
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QRadioButton" name="radioUploadData">
-               <property name="text">
-                <string>Upload data</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioStoreInPostgis">
-               <property name="text">
-                <string>Store in PostGIS</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Name</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QLineEdit" name="txtGeoserverName"/>
-           </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_4">
              <property name="text">
@@ -191,12 +139,19 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="2">
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <item>
-              <widget class="QComboBox" name="comboDatastore"/>
-             </item>
-            </layout>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Data</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Name</string>
+             </property>
+            </widget>
            </item>
            <item row="4" column="0">
             <widget class="QLabel" name="label_16">
@@ -207,6 +162,13 @@
            </item>
            <item row="4" column="2">
             <widget class="QLineEdit" name="txtGeoserverWorkspace"/>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Datastore</string>
+             </property>
+            </widget>
            </item>
            <item row="10" column="0">
             <spacer name="verticalSpacer_2">
@@ -236,6 +198,51 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item row="4" column="3">
+            <widget class="QCheckBox" name="chkManagedWorkspace">
+             <property name="text">
+              <string>Managed workspace</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2" colspan="2">
+            <widget class="QLineEdit" name="txtGeoserverName"/>
+           </item>
+           <item row="1" column="2" colspan="2">
+            <widget class="QLineEdit" name="txtGeoserverUrl"/>
+           </item>
+           <item row="5" column="2" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QRadioButton" name="radioUploadData">
+               <property name="text">
+                <string>Upload data</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioStoreInPostgis">
+               <property name="text">
+                <string>Store in PostGIS</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="6" column="2" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
+              <widget class="QComboBox" name="comboDatastore"/>
+             </item>
+            </layout>
+           </item>
+           <item row="9" column="2" colspan="2">
+            <widget class="QPushButton" name="btnConnectGeoserver">
+             <property name="text">
+              <string>Connect</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>

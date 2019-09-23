@@ -63,6 +63,9 @@ class PublishWidget(BASE, WIDGET):
         self.metadata = {}
         execute(self._setupUi)
 
+        for s in geodataServers().values():
+            s.setupForProject()
+
     def _setupUi(self):
         self.setupUi(self)    
         self.bar = QgsMessageBar()
@@ -94,7 +97,7 @@ class PublishWidget(BASE, WIDGET):
         self.btnIsoTopic.clicked.connect(lambda: self.openMetadataEditor(CATEGORIES))
         self.btnKeywords.clicked.connect(lambda: self.openMetadataEditor(KEYWORDS))
         self.btnDataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
-        self.btnMetadataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
+        self.btnMetadataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))        
 
         if self.listLayers.count():
             item = self.listLayers.item(0)
@@ -296,7 +299,8 @@ class PublishWidget(BASE, WIDGET):
         except KeyError:
             self.comboGeodataServer.setStyleSheet("QComboBox {}")
             return False
-        except:
+        except Exception as e:
+            print(e)
             self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def validateMetadata(self):
@@ -473,6 +477,9 @@ class PublishWidget(BASE, WIDGET):
         
         allowWithoutMetadata = ALLOW #pluginSetting("allowWithoutMetadata")
 
+        if geodataServer is not None:
+            geodataServer.prepareForPublishing(self.chkOnlySymbology.checkState() == Qt.Checked)
+
         results = {}
         for i, name in enumerate(toPublish):
             progress.setValue(i)                        
@@ -515,7 +522,28 @@ class PublishWidget(BASE, WIDGET):
                 self.logger.logError(traceback.format_exc())
             results[name] = (self.logger.warnings, self.logger.errors)
 
+        if geodataServer is not None and geodataServer.workspace is None:            
+            groups = self._layerGroups(toPublish)            
+            for g, layers in groups.items():
+                geodataServer.dataCatalog().create_group(g, layers)
+
         return results
+
+
+    def _layerGroups(self, toPublish):
+        groups = {}
+        root = QgsProject.instance().layerTreeRoot()
+        for child in root.children():
+            if isinstance(child, QgsLayerTreeGroup):
+                layers = []
+                for subchild in child.children():
+                    name = subchild.layer().name()
+                    if isinstance(subchild, QgsLayerTreeLayer) and name in toPublish:
+                        layers.append(name)
+                if layers:
+                    groups[child.name()] = layers
+
+        return groups
 
     def layerFromName(self, name):
         layers = self.publishableLayers()
