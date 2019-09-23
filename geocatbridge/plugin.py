@@ -51,9 +51,9 @@ class GeocatBridge:
 
     def initGui(self):
 
-        readSettings()
+        #readSettings()
         
-        addSettingsMenu("GeoCatBridge")
+        #addSettingsMenu("GeoCatBridge")
         
         addHelpMenu("GeoCatBridge")
         
@@ -82,7 +82,7 @@ class GeocatBridge:
 
     def unload(self):
         
-        removeSettingsMenu("GeoCatBridge")
+        #removeSettingsMenu("GeoCatBridge")
         
         removeHelpMenu("GeoCatBridge")
         
