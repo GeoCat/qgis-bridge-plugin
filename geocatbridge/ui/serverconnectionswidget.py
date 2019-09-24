@@ -62,8 +62,10 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.txtGeoserverWorkspace.setEnabled(state == Qt.Unchecked)
 
     def mapserverStorageChanged(self, checked):
-        self.labelOutputFolder.setVisible(checked)
+        self.labelLocalFolder.setVisible(checked)
+        self.labelRemoteFolder.setVisible(not checked)
         self.fileMapserver.setVisible(checked)
+        self.txtRemoteFolder.setVisible(not checked)
         self.labelHost.setVisible(not checked)
         self.labelPort.setVisible(not checked)
         self.labelMapserverCredentials.setVisible(not checked)
@@ -198,12 +200,18 @@ class ServerConnectionsWidget(BASE, WIDGET):
 
     def createMapserverServer(self):
         ##TODO check validity of name and values        
-        name = self.txtMapserverName.text()        
-        folder = self.fileMapserver.filePath()
+        name = self.txtMapserverName.text()                
         authid = self.mapserverAuth.configId()
         host = self.txtMapserverHost.text()
-        port = self.txtMapserverPort.text()
+        try:
+            port = int(self.txtMapserverPort.text())
+        except:
+            return None
         local = self.radioLocalPath.isChecked()
+        if local:
+            folder = self.fileMapserver.filePath()
+        else:
+            folder = self.txtRemoteFolder.text()
         server = MapserverServer(name, local, folder, authid, host, port)
         return server
 
@@ -329,11 +337,13 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.stackedWidget.setCurrentWidget(self.widgetMapserver)
             self.txtMapserverName.setText(server.name)            
             self.fileMapserver.setFilePath(server.folder)
+            self.txtRemoteFolder.setText(server.folder)
             self.txtMapserverHost.setText(server.host)
-            self.txtMapserverPort.setText(server.port)
+            self.txtMapserverPort.setText(str(server.port))
             self.mapserverAuth.setConfigId(server.authid)
             self.radioLocalPath.setChecked(server.useLocalFolder)
             self.radioFtp.setChecked(not server.useLocalFolder)
+            self.mapserverStorageChanged(server.useLocalFolder)
         elif isinstance(server, PostgisServer):
             self.stackedWidget.setCurrentWidget(self.widgetPostgis)
             self.txtPostgisName.setText(server.name)

@@ -5,8 +5,9 @@ import requests
 from requests.auth import HTTPBasicAuth
 import lxml.etree as ET
 from .exporter import exportLayer
+from .ftpupload import uploadFolder
 from qgiscommons2.network.networkaccessmanager import NetworkAccessManager
-from qgiscommons2.files import tempFilenameInTempFolder
+from qgiscommons2.files import tempFilenameInTempFolder, tempFolder
 from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStyleAsMapfileFolder
 from qgis.PyQt.QtCore import QSettings, QSize, QCoreApplication
 from qgis.PyQt.QtGui import QImage, QColor, QPainter
@@ -148,10 +149,10 @@ class GeoserverServer():
 
 class MapserverServer(): 
 
-    def __init__(self, name, local=True, folder="", authid="", host="", port=""):
+    def __init__(self, name, useLocalFolder=True, folder="", authid="", host="", port=1):
         self.name = name
         self.folder = folder
-        self.useLocalFolder = local
+        self.useLocalFolder = useLocalFolder
         self.authid = authid
         self.host = host
         self.port = port
@@ -159,35 +160,38 @@ class MapserverServer():
         self._isMetadataCatalog = False
         self._isDataCatalog = True
 
-        if local:
-            self._catalog = MapServerCatalog(folder=self.folder)
-        else:
-            authConfig = QgsAuthMethodConfig()
-            QgsApplication.authManager().loadAuthenticationConfig(self.authid, authConfig, True)
-            username = authConfig.config('username')
-            password = authConfig.config('password')
-            self._catalog = MapServerCatalog(host=host, port=port, username=username, password=password)            
-        
+        self._catalog = MapServerCatalog()
+
     def dataCatalog(self):
         return self._catalog
 
-    def createStyleFolder(self, layer):
+    def publishStyle(self, layer, upload = True):
+        folder = self.folder if self.useLocalFolder else tempFolder()
         layerFilename = layer.name() + ".shp"        
-        warnings = layerStyleAsMapfileFolder(layer, layerFilename, self.folder)        
+        warnings = layerStyleAsMapfileFolder(layer, layerFilename, folder)        
         for w in warnings:
             QgsMessageLog.logMessage(w, 'GeoCat Bridge', level=Qgis.Warning)
         QgsMessageLog.logMessage(QCoreApplication.translate("GeocatBridge", 
-                                "Style for layer %s exported to %s") % (layer.name(), self.folder), 
-                                'GeoCat Bridge', level=Qgis.Info)            
-    
-    def publishStyle(self, layer):
-        self.createStyleFolder(layer)
+                                "Style for layer %s exported to %s") % (layer.name(), folder), 
+                                'GeoCat Bridge', level=Qgis.Info)
+        if not self.useLocalFolder and upload:
+            self.uploadFolder(folder)
+        return folder
         
     def publishLayer(self, layer, fields=None):
-        self.publishStyle(layer)
+        folder = self.publishStyle(layer, False)
         layerFilename = layer.name() + ".shp"
-        layerPath = os.path.join(self.folder, layerFilename)         
+        layerPath = os.path.join(folder, layerFilename)         
         exportLayer(layer, fields, toShapefile=True, path=layerPath, force=True)
+        if not self.useLocalFolder:
+            self.uploadFolder(folder)
+
+    def uploadFolder(self, folder):
+        authConfig = QgsAuthMethodConfig()
+        QgsApplication.authManager().loadAuthenticationConfig(self.authid, authConfig, True)
+        username = authConfig.config('username')
+        password = authConfig.config('password')
+        uploadFolder(folder, self.host, self.port, self.folder, username, password)
 
     def testConnection(self):
         return True
@@ -195,7 +199,7 @@ class MapserverServer():
     def setupForProject(self):
         pass
 
-    def prepareForPublishing(self):
+    def prepareForPublishing(self, onlySymbology):
         pass
 
 class GeocatLiveServer(): 

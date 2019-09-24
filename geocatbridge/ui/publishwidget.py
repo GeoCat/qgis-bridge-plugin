@@ -522,7 +522,7 @@ class PublishWidget(BASE, WIDGET):
                 self.logger.logError(traceback.format_exc())
             results[name] = (self.logger.warnings, self.logger.errors)
 
-        if geodataServer is not None and geodataServer.workspace is None:            
+        if geodataServer is not None:            
             groups = self._layerGroups(toPublish)            
             for g, layers in groups.items():
                 geodataServer.dataCatalog().create_group(g, layers)
