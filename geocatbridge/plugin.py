@@ -7,11 +7,7 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication
 
-from bridgecommon import log
-from qgiscommons2.settings import readSettings
-from qgiscommons2.gui.settings import addSettingsMenu, removeSettingsMenu
-from qgiscommons2.gui import addAboutMenu, removeAboutMenu, addHelpMenu, removeHelpMenu
-from qgiscommons2.files import removeTempFolder
+from .utils.files import removeTempFolder
 from .ui.bridgedialog import BridgeDialog
 from .ui.multistylerdialog import MultistylerDialog
 from .publish.servers import readServers
@@ -31,9 +27,6 @@ class GeocatBridge:
             def logError(self, text):
                 QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Critical)
 
-        logger = QgisLogger()
-        log.setLogger(logger)
-
         self.provider = BridgeProvider()
 
         self.pluginFolder = os.path.dirname(__file__)
@@ -50,14 +43,6 @@ class GeocatBridge:
 
 
     def initGui(self):
-
-        #readSettings()
-        
-        #addSettingsMenu("GeoCatBridge")
-        
-        addHelpMenu("GeoCatBridge")
-        
-        addAboutMenu("GeoCatBridge")
         
         iconPublish = QIcon(os.path.join(os.path.dirname(__file__), "icons", "publish_button.png"))
         self.actionPublish = QAction(iconPublish, QCoreApplication.translate("GeocatBridge", "Publish"), self.iface.mainWindow())
@@ -81,12 +66,6 @@ class GeocatBridge:
         QgsApplication.processingRegistry().addProvider(self.provider)
 
     def unload(self):
-        
-        #removeSettingsMenu("GeoCatBridge")
-        
-        removeHelpMenu("GeoCatBridge")
-        
-        removeAboutMenu("GeoCatBridge")
 
         removeTempFolder()
                 
@@ -105,11 +84,10 @@ class GeocatBridge:
     _layerSignals = {}
 
     def layerWasAdded(self, layer):
-        self._layerSignals[layer.id()] = partial(self.multistylerDialog.updateLayer, layer) 
-        layer.styleChanged.connect(self._layerSignals[layer.id()])
+        self._layerSignals[layer] = partial(self.multistylerDialog.updateLayer, layer) 
+        layer.styleChanged.connect(self._layerSignals[layer])
     
     def publishClicked(self):
-        readSettings()
         dialog = BridgeDialog(self.iface.mainWindow())
         dialog.exec_()
         

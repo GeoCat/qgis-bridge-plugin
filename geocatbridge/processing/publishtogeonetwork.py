@@ -11,7 +11,7 @@ from qgis.core import (QgsSettings,
 
 from .bridgealgorithm import BridgeAlgorithm
 
-from geocatbridge.publish.servers import GeonetworkServer
+from geocatbridge.publish.geonetwork import GeonetworkServer
 
 class PublishToGeonetworkAlgorithm(BridgeAlgorithm):
 
@@ -47,7 +47,6 @@ class PublishToGeonetworkAlgorithm(BridgeAlgorithm):
         return []
 
     def processAlgorithm(self, parameters, context, feedback):
-        super().processAlgorithm(parameters, context, feedback)
         url = self.parameterAsString(parameters, self.URL, context)
         authid = self.parameterAsString(parameters, self.AUTHID, context)        
         layer = self.parameterAsLayer(parameters, self.INPUT, context)

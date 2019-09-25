@@ -1,11 +1,10 @@
 import os
 import traceback
 from qgis.PyQt import uic
-from geocatbridge.publish.servers import geodataServers, metadataServers, GeonetworkServer
+from geocatbridge.publish.geonetwork import GeonetworkServer
+from geocatbridge.publish.servers import geodataServers, metadataServers
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
-from bridgecommon import log
-from bridgecommon import feedback
 from geocatbridge.publish.metadata import uuidForLayer
 from qgis.core import *
 from qgis.gui import *
@@ -13,8 +12,7 @@ from qgis.PyQt.QtWidgets import *
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
 from qgis.utils import iface
-from qgiscommons2.gui import execute
-from qgiscommons2.settings import pluginSetting
+from geocatbridge.utils.gui import execute
 
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
@@ -30,25 +28,6 @@ IDENTIFICATION, CATEGORIES, KEYWORDS, ACCESS, EXTENT, CONTACT = range(6)
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishwidget.ui'))
 
-class QgisLogger():
-    def __init__(self):
-        self.warnings = []
-        self.errors = []
-
-    def logInfo(self, text):
-        QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
-
-    def logWarning(self, text):
-        QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Warning)
-        self.warnings.append(text)
-
-    def logError(self, text):
-        QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Critical)
-        self.errors.append(text)
-
-    def reset(self):
-        self.warnings = []
-        self.errors = []
 
 class PublishWidget(BASE, WIDGET):
 
@@ -71,9 +50,6 @@ class PublishWidget(BASE, WIDGET):
         self.bar = QgsMessageBar()
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.layout().insertWidget(0, self.bar)
-
-        self.logger = QgisLogger()
-        log.setLogger(self.logger)
 
         self.populateComboBoxes()
         self.populateLayers()
@@ -281,26 +257,26 @@ class PublishWidget(BASE, WIDGET):
 
     def isMetadataOnServer(self, layer):
         try:
-            catalog = metadataServers()[self.comboMetadataServer.currentText()].metadataCatalog()
+            server = metadataServers()[self.comboMetadataServer.currentText()]
             self.comboMetadataServer.setStyleSheet("QComboBox {}")
             uuid = uuidForLayer(self.layerFromName(layer))
-            return catalog.metadata_exists(uuid)
+            return server.metadataExists(uuid)
         except KeyError:
             self.comboMetadataServer.setStyleSheet("QComboBox {}")
             return False
         except:
+            raise
             self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def isDataOnServer(self, layer):
         try:
-            catalog = geodataServers()[self.comboGeodataServer.currentText()].dataCatalog()
+            server = geodataServers()[self.comboGeodataServer.currentText()]
             self.comboGeodataServer.setStyleSheet("QComboBox {}")
-            return catalog.layer_exists(layer)
+            return server.layerExists(layer)
         except KeyError:
             self.comboGeodataServer.setStyleSheet("QComboBox {}")
             return False
         except Exception as e:
-            print(e)
             self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def validateMetadata(self):
@@ -330,15 +306,15 @@ class PublishWidget(BASE, WIDGET):
         dlg.exec_()
 
     def unpublishData(self, name):
-        catalog = geodataServers()[self.comboGeodataServer.currentText()].dataCatalog()
-        catalog.delete_layer(name)
-        catalog.delete_style(name)
+        server = geodataServers()[self.comboGeodataServer.currentText()]
+        server.deleteLayer(name)
+        server.deleteStyle(name)
         self.updateLayerIsDataPublished(name, False)
 
     def unpublishMetadata(self, name):
-        catalog = metadataServers()[self.comboMetadataServer.currentText()].metadataCatalog()
+        server = metadataServers()[self.comboMetadataServer.currentText()]
         uuid = uuidForLayer(self.layerFromName(name))
-        catalog.delete_metadata(uuid)
+        server.deleteMetadata(uuid)
         self.updateLayerIsMetadataPublished(name, False)
 
     def updateLayerIsMetadataPublished(self, name, value):
@@ -387,11 +363,11 @@ class PublishWidget(BASE, WIDGET):
         if bbox.isEmpty():
             bbox.grow(1)
         sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])        
-        catalog = geodataServers()[self.comboGeodataServer.currentText()].dataCatalog()
-        catalog.open_wms(names, sbbox, layer.crs().authid())
+        server = geodataServers()[self.comboGeodataServer.currentText()]
+        server.opeWms(names, sbbox, layer.crs().authid())
 
     def viewAllWms(self):
-        catalog = geodataServers()[self.comboGeodataServer.currentText()].dataCatalog()
+        server = geodataServers()[self.comboGeodataServer.currentText()]
         layers = self.publishableLayers()
         bbox = QgsRectangle()
         canvasCrs = iface.mapCanvas().mapSettings().destinationCrs()
@@ -403,7 +379,7 @@ class PublishWidget(BASE, WIDGET):
                 extent = xform.transform(layer.extent())
                 bbox.combineExtentWith(extent)
         sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])
-        catalog.open_wms(names, sbbox, canvasCrs.authid())
+        server.openWms(names, sbbox, canvasCrs.authid())
 
     def previewMetadata(self):
         html = self.currentLayer.htmlMetadata()
@@ -413,10 +389,10 @@ class PublishWidget(BASE, WIDGET):
         dlg.showMessage()
 
     def viewMetadata(self, name):
-        catalog = geodataServers()[self.comboMetadataServer.currentText()].metadataCatalog()
+        server = geodataServers()[self.comboMetadataServer.currentText()]
         layer = self.layerFromName(name)
         uuid = uuidForLayer(layer)
-        catalog.open_metadata(uuid)
+        server.openMetadata(uuid)
 
     def publish(self):
         try:
@@ -426,6 +402,7 @@ class PublishWidget(BASE, WIDGET):
                 dialog = PublishReportDialog(self, ret)
                 dialog.exec_()
         except:
+            self.bar.clearWidgets()
             self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
             QgsMessageLog.logMessage(traceback.format_exc(), 'GeoCat Bridge', level=Qgis.Critical)
 
@@ -455,17 +432,6 @@ class PublishWidget(BASE, WIDGET):
         progressMessageBar.layout().addWidget(progress)
         self.bar.pushWidget(progressMessageBar, Qgis.Info)
 
-        class QgisProgress():
-            def setProgress(_self, v):
-                progress.setValue(v)
-                QApplication.processEvents()
-            def setText(_self, text):                
-                progressMessageBar.setText(text)
-                QApplication.processEvents()
-
-        qgisprogress = QgisProgress()
-        feedback.setFeedbackIndicator(qgisprogress)
-
         self.storeMetadata()
         self.storeFieldsToPublish()
 
@@ -481,14 +447,16 @@ class PublishWidget(BASE, WIDGET):
             geodataServer.prepareForPublishing(self.chkOnlySymbology.checkState() == Qt.Checked)
 
         results = {}
+        warnings, errors = [], []
         for i, name in enumerate(toPublish):
-            progress.setValue(i)                        
-            try:
-                self.logger.reset()                         
+            progressMessageBar.setText("Publishing layer " + name)
+            progress.setValue(i)                    
+            try:                       
                 layer = self.layerFromName(name)
                 validates, _ = validator.validate(layer.metadata())
                 validates = True
                 if geodataServer is not None:
+                    geodataServer.resetLog()
                     if self.chkOnlySymbology.checkState() == Qt.Checked:
                         geodataServer.publishStyle(layer)
                     else:
@@ -499,33 +467,42 @@ class PublishWidget(BASE, WIDGET):
                             geodataServer.publishLayer(layer, fields)
                             if metadataServer is not None:
                                 metadataUuid = uuidForLayer(layer)
-                                url = metadataServer.metadataCatalog().metadata_url(metadataUuid)
-                                geodataServer.dataCatalog().set_layer_metadata_link(name, url)
-                            self.updateLayerIsDataPublished(name, True)
+                                url = metadataServer.metadataUrl(metadataUuid)
+                                geodataServer.setLayerMetadataLink(name, url)
                         else:
-                            self.logger.logError(self.tr("Layer '%s' has invalid metadata. Layer was not published") % layer.name())
+                            geodataServer.logError(self.tr("Layer '%s' has invalid metadata. Layer was not published") % layer.name())
                 if metadataServer is not None:
+                    metadataServer.resetLog()
                     if validates or allowWithoutMetadata == ALLOW:
                         if geodataServer is not None:
                             names = [layer.name()]        
                             bbox = layer.extent()
-                            sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])
-                            catalog = geodataServer.dataCatalog()
-                            wms = "%s/%s/wms" % (catalog.base_url(), catalog.workspace)
+                            sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])                            
+                            wms = layerWms(names, bbox, layer.crs().authid())
                         else:
                             wms = None                        
                         metadataServer.publishLayerMetadata(layer, wms)
-                        self.updateLayerIsMetadataPublished(name, True)
                     else:
-                        self.logger.logError(self.tr("Layer '%s' has invalid metadata. Metadata was not published") % layer.name())
+                        metadataServer.logError(self.tr("Layer '%s' has invalid metadata. Metadata was not published") % layer.name())
             except:
-                self.logger.logError(traceback.format_exc())
-            results[name] = (self.logger.warnings, self.logger.errors)
+                errors.append(traceback.format_exc())
+            if geodataServer is not None:
+                w, e = geodataServer.loggedInfo()
+                warnings.extend(w)
+                errors.extend(e)
+            if metadataServer is not None:
+                w, e = metadataServer.loggedInfo()
+                warnings.extend(w)
+                errors.extend(e)
+            results[name] = (warnings, errors)
 
         if geodataServer is not None:            
             groups = self._layerGroups(toPublish)            
-            for g, layers in groups.items():
-                geodataServer.dataCatalog().create_group(g, layers)
+            for g, layers in groups.items():                
+                    geodataServer.createGroup(g, layers)
+
+
+        self.updateLayersPublicationStatus(geodataServer is not None, metadataServer is not None)
 
         return results
 

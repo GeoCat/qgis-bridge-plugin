@@ -1,12 +1,17 @@
 import os
 from qgis.PyQt import uic
 from geocatbridge.publish.servers import *
+from geocatbridge.publish.geonetwork import GeonetworkServer
+from geocatbridge.publish.geoserver import GeoserverServer
+from geocatbridge.publish.geocatlive import GeocatLiveServer
+from geocatbridge.publish.mapserver import MapserverServer
+from geocatbridge.publish.postgis import PostgisServer
 from qgis.PyQt.QtWidgets import *
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtCore import *
 from qgis.gui import *
 from qgis.core import *
-from qgiscommons2.gui import execute
+from geocatbridge.utils.gui import execute
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'serverconnectionswidget.ui'))
 
@@ -99,8 +104,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
                 else:
                     self.setCurrentServer(server)
             else:
-                self.setCurrentServer(server)
-                    
+                self.setCurrentServer(server)                    
 
     def _testConnection(self, server):
         if server is None:

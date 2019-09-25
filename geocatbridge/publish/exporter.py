@@ -2,14 +2,13 @@ import os
 import gdal
 from qgis.core import QgsVectorFileWriter, QgsRasterFileWriter
 from qgis.PyQt.QtCore import QCoreApplication
-from qgiscommons2.files import tempFilenameInTempFolder
-from bridgecommon import log
+from geocatbridge.utils.files import tempFilenameInTempFolder
 
 def isSingleTableGpkg(layer):
     ds = gdal.OpenEx(layer.source())
     return ds.GetLayerCount() == 1
 
-def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False):
+def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False, log=None):
     filename = layer.source()
     destFilename = layer.name()
     fields = fields or []
@@ -29,7 +28,8 @@ def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False):
             log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
             return output
         
-        log.logInfo(QCoreApplication.translate("GeocatBridge", "No need to export layer %s stored at %s") % (destFilename, filename))
+        if log is not None:
+            log.logInfo(QCoreApplication.translate("GeocatBridge", "No need to export layer %s stored at %s") % (destFilename, filename))
         return filename
     else:
         if (force or not filename.lower().endswith("tif")):        
@@ -38,10 +38,12 @@ def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False):
             writer.setOutputFormat("GTiff");
             writer.writeRaster(layer.pipe(), layer.width(), layer.height(), layer.extent(), layer.crs())
             del writer
-            log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
+            if log is not None:
+                log.logInfo("GeocatBridge", QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
             return output
         else:
-            log.logInfo(QCoreApplication.translate("GeocatBridge", "No need to export layer %s stored at %s") % (destFilename, filename))
+            if log is not None:
+                log.logInfo(QCoreApplication.translate("GeocatBridge", "No need to export layer %s stored at %s") % (destFilename, filename))
             return filename
 
 

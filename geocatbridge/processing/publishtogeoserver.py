@@ -7,7 +7,7 @@ from qgis.core import (QgsSettings,
 
 from .bridgealgorithm import BridgeAlgorithm
 
-from geocatbridge.publish.servers import GeoserverServer
+from geocatbridge.publish.geoserver import GeoserverServer
 
 class PublishToGeoserverAlgorithm(BridgeAlgorithm):
 
@@ -40,7 +40,6 @@ class PublishToGeoserverAlgorithm(BridgeAlgorithm):
         return []
 
     def processAlgorithm(self, parameters, context, feedback):
-        super().processAlgorithm(parameters, context, feedback)
         url = self.parameterAsString(parameters, self.URL, context)
         authid = self.parameterAsString(parameters, self.AUTHID, context)
         workspace = self.parameterAsString(parameters, self.WORKSPACE, context)
