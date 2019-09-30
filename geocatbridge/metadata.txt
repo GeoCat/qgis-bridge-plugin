@@ -2,7 +2,7 @@
 name=GeoCatBridge
 description=Plugin to interact with publish data and metadata to different catalogs
 category=Plugins
-qgisMinimumVersion=3.0
+qgisMinimumVersion=3.6
 version=0.1
 
 author=GeoCat
