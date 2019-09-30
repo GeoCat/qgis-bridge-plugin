@@ -68,8 +68,10 @@ class GeonetworkServer(ServerBase):
         thumbnail = self.saveLayerThumbnail(layer)
         transformedFilename = self.transformMetadata(filename, uuid, wms)
         mefFilename = tempFilenameInTempFolder(uuid + ".mef")
-        meftools.createMef(uuid, transformedFilename, mefFilename, thumbnail)        
+        createMef(uuid, transformedFilename, mefFilename, thumbnail)        
         self.publishMetadata(mefFilename)
+        url = "%s/records/%s/publish" % (self.apiUrl(), uuid)
+        self.request(url, method = "put")
 
     def testConnection(self):
         try:
