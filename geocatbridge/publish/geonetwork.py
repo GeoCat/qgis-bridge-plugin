@@ -12,6 +12,8 @@ import webbrowser
 from ..utils.files import tempFilenameInTempFolder
 from qgis.core import QgsMessageLog, Qgis, QgsFeatureSink, QgsMapSettings, QgsMapRendererCustomPainterJob
 from .serverbase import ServerBase
+from qgis.PyQt.QtCore import QSize, QCoreApplication
+from qgis.PyQt.QtGui import QImage, QColor, QPainter
 
 class TokenNetworkAccessManager():
     def __init__(self, url, username, password):        
@@ -25,7 +27,7 @@ class TokenNetworkAccessManager():
             self.getToken()
         self.session.headers.update({"X-XSRF-TOKEN" : self.token}) 
 
-    def request(self, url, data=None, method="put", headers={}):
+    def request(self, url, data=None, method="get", headers={}):
         QgsMessageLog.logMessage(QCoreApplication.translate("GeocatBridge", "Making '%s' request to '%s'") % (method, url), 'GeoCat Bridge', level=Qgis.Info)
         self.setTokenInHeader()
         method = getattr(self.session, method.lower())
@@ -54,12 +56,12 @@ class GeonetworkServer(ServerBase):
         self.profile = profile
         self._isMetadataCatalog = True
         self._isDataCatalog = False        
-        user, password = getCredentials()
-        self.nam = TokenNetworkAccessManager(self.url, user, password)
+        user, password = self.getCredentials()
+        self._nam = TokenNetworkAccessManager(self.url, user, password)
 
 
     def request(self, url, data=None, method="put", headers={}):
-        return nam.request(url, data, method, headers)
+        return self._nam.request(url, data, method, headers)
 
     def publishLayerMetadata(self, layer, wms):
         uuid = uuidForLayer(layer)
@@ -68,7 +70,7 @@ class GeonetworkServer(ServerBase):
         thumbnail = self.saveLayerThumbnail(layer)
         transformedFilename = self.transformMetadata(filename, uuid, wms)
         mefFilename = tempFilenameInTempFolder(uuid + ".mef")
-        createMef(uuid, transformedFilename, mefFilename, thumbnail)        
+        self.createMef(uuid, transformedFilename, mefFilename, thumbnail)        
         self.publishMetadata(mefFilename)
         url = "%s/records/%s/publish" % (self.apiUrl(), uuid)
         self.request(url, method = "put")
@@ -77,7 +79,7 @@ class GeonetworkServer(ServerBase):
         try:
             self.me()
             return True
-        except:
+        except Exception as e:
             return False
 
     def saveLayerThumbnail(self, layer):
@@ -153,11 +155,11 @@ class GeonetworkServer(ServerBase):
         return self.request(url)
 
     def publishMetadata(self, metadata):
-        self.nam.setTokenInHeader()
+        self._nam.setTokenInHeader()
         url = self.xmlServicesUrl() + "/mef.import"
         with open(metadata, "rb") as f:
             files = {'mefFile': f}
-            r = self.nam.session.post(url, files=files)
+            r = self._nam.session.post(url, files=files)
         r.raise_for_status()
 
     def deleteMetadata(self, uuid):
@@ -182,7 +184,7 @@ class GeonetworkServer(ServerBase):
         z = zipfile.ZipFile(mefFilename, "w")    
         z.write(metadataFilename, os.path.join(uuid, "metadata", os.path.basename(metadataFilename)))
         z.write(thumbnailFilename, os.path.join(uuid, "public", os.path.basename(thumbnailFilename)))
-        info = getInfoXmlContent(uuid, thumbnailFilename)
+        info = self.getInfoXmlContent(uuid, thumbnailFilename)
         z.writestr(os.path.join(uuid, "info.xml"), info)
         z.close()
         self.logInfo("MEF file written to %s" % mefFilename)
@@ -193,9 +195,9 @@ class GeonetworkServer(ServerBase):
             sub.text = value
         return sub
 
-    def getInfoXmlContent(uuid, thumbnailFilename):
+    def getInfoXmlContent(self, uuid, thumbnailFilename):
         root = Element("info", {"version": "1.1"})
-        general = _addSubElement(root, "general")
+        general = self._addSubElement(root, "general")
         d = datetime.now().isoformat()
         self._addSubElement(general, "changeDate", d)
         self._addSubElement(general, "createDate", d)
