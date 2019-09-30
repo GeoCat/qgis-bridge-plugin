@@ -74,5 +74,5 @@ class MapserverServer(ServerBase):
     def setLayerMetadataLink(self, name, url):
         pass
 
-    def createGroup(self, name, layers):
+    def createGroups(self, groups):
         pass

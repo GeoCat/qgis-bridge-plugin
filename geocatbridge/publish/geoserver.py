@@ -161,13 +161,31 @@ class GeoserverServer(ServerBase):
         self._gscatalog.create_coveragestore(layername, self._workspace, filename)
         self._setLayerStyle(layername, stylename)
 
-    def createGroup(self, groupname, layernames):
-        try:            
-            group = self._gscatalog.create_layergroup(groupname, layernames, layernames, None, workspace=self._workspace)
-            self._gscatalog.save(group)
-        except ConflictingDataError:
-            layergroup = self._gscatalog.get_layergroups(groupname)[0]
-            layergroup.dirty.update(layers = layernames, styles = layernames)
+    def createGroups(self, groups): 
+        print(groups)       
+        for group in groups:
+            self._publishGroup(group)
+
+    def _publishGroup(self, group):
+        layers = []
+        for layer in group["layers"]:
+            if isinstance(layer, dict):
+                layers.append({"@type": "layerGroup", "name": "%s:%s" % (self._workspace, layer["name"])})
+                self._publishGroup(layer)
+            else:
+                layers.append({"@type": "layer", "name": "%s:%s" % (self._workspace, layer)})
+
+        groupdef = {"layerGroup":{"name": group["name"],"mode":"SINGLE","publishables": {"published":layers}}}
+        
+        headers = {"Content-Type": "application/json"}
+        url = "%s/workspaces/%s/layergroups" % (self.url, self._workspace) 
+        print (json.dumps(groupdef))           
+        try:
+            self.request(url, json.dumps(groupdef), "post", headers)
+        except:
+            self.request(url, json.dumps(groupdef), "put", headers)
+
+        self.logInfo("Group %s correctly created" % group["name"])
 
     def styleExists(self, name):
         if not self._workspaceExists():

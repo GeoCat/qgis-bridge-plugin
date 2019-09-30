@@ -497,9 +497,8 @@ class PublishWidget(BASE, WIDGET):
             results[name] = (warnings, errors)
 
         if geodataServer is not None:            
-            groups = self._layerGroups(toPublish)            
-            for g, layers in groups.items():                
-                    geodataServer.createGroup(g, layers)
+            groups = self._layerGroups(toPublish)                            
+            geodataServer.createGroups(groups)
 
 
         self.updateLayersPublicationStatus(geodataServer is not None, metadataServer is not None)
@@ -508,17 +507,30 @@ class PublishWidget(BASE, WIDGET):
 
 
     def _layerGroups(self, toPublish):
-        groups = {}
-        root = QgsProject.instance().layerTreeRoot()
-        for child in root.children():
-            if isinstance(child, QgsLayerTreeGroup):
-                layers = []
-                for subchild in child.children():
-                    name = subchild.layer().name()
-                    if isinstance(subchild, QgsLayerTreeLayer) and name in toPublish:
+        def _addGroup(layerTreeGroup):
+            layers = []
+            for child in layerTreeGroup.children():                    
+                if isinstance(child, QgsLayerTreeLayer):
+                    name = child.layer().name() 
+                    if name in toPublish:
                         layers.append(name)
-                if layers:
-                    groups[child.name()] = layers
+                elif isinstance(child, QgsLayerTreeGroup):
+                    subgroup = _addGroup(child)
+                    if subgroup is not None:
+                        layers.append(subgroup)
+            if layers:
+                return {"name": layerTreeGroup.name(), "layers": layers}
+            else:
+                return None
+        
+        groups = []
+        root = QgsProject.instance().layerTreeRoot()
+        for element in root.children():
+            if isinstance(element, QgsLayerTreeGroup):
+                group = _addGroup(element)
+                if group is not None:
+                    groups.append(group)
+                
 
         return groups
 
