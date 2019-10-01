@@ -138,7 +138,7 @@ class GeonetworkServer(ServerBase):
         return isoFilename
 
     def apiUrl(self):
-        return self.url + "/srv/api/"
+        return self.url + "/srv/api"
 
     def xmlServicesUrl(self):
         return self.url + "/srv/eng"
@@ -157,6 +157,7 @@ class GeonetworkServer(ServerBase):
     def publishMetadata(self, metadata):
         self._nam.setTokenInHeader()
         url = self.xmlServicesUrl() + "/mef.import"
+        print (self._nam.session.headers)
         with open(metadata, "rb") as f:
             files = {'mefFile': f}
             r = self._nam.session.post(url, files=files)

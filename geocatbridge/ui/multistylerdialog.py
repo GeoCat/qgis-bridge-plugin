@@ -57,7 +57,7 @@ class MultistylerDialog(BASE, WIDGET):
             geostyler, _, geostylerWarnings = convert(layer)
             geostyler = json.dumps(geostyler, indent=4)
             mapbox, _, mapboxWarnings = layerStyleAsMapbox(layer)
-            mapserver, _, mapserverWarnings = layerStyleAsMapfile(layer)
+            mapserver, _, _, mapserverWarnings = layerStyleAsMapfile(layer)
             warnings = set()
             warnings.update(sldWarnings)
             warnings.update(geostylerWarnings)

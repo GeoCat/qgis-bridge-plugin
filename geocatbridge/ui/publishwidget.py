@@ -480,7 +480,7 @@ class PublishWidget(BASE, WIDGET):
                             sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])                            
                             wms = layerWms(names, bbox, layer.crs().authid())
                         else:
-                            wms = None                        
+                            wms = None
                         metadataServer.publishLayerMetadata(layer, wms)
                     else:
                         metadataServer.logError(self.tr("Layer '%s' has invalid metadata. Metadata was not published") % layer.name())
@@ -500,6 +500,7 @@ class PublishWidget(BASE, WIDGET):
             groups = self._layerGroups(toPublish)                            
             geodataServer.createGroups(groups)
 
+            geodataServer.closePublishing()
 
         self.updateLayersPublicationStatus(geodataServer is not None, metadataServer is not None)
 

@@ -49,6 +49,9 @@ class GeoserverServer(ServerBase):
         if self.workspace is None and not onlySymbology:
             self.deleteWorkspace()
 
+    def closePublishing(self):
+        pass
+
     def publishStyle(self, layer):
         styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)

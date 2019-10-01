@@ -2,43 +2,43 @@ import os
 from .ftpupload import uploadFolder
 from .serverbase import ServerBase
 from bridgestyle.qgis import layerStyleAsMapfileFolder
+from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
 from .exporter import exportLayer
 
 from qgis.PyQt.QtCore import QCoreApplication
+from qgis.core import QgsProject, QgsRectangle
 
 class MapserverServer(ServerBase): 
 
-    def __init__(self, name, useLocalFolder=True, folder="", authid="", host="", port=1):
+    def __init__(self, name, url="", useLocalFolder=True, folder="", authid="", host="", port=1, servicesPath=""):
         self.name = name
         self.folder = folder
         self.useLocalFolder = useLocalFolder
         self.authid = authid
         self.host = host
         self.port = port
-        self.url = ""
+        self.url = url
+        self.servicesPath = servicesPath
 
         self._isMetadataCatalog = False
         self._isDataCatalog = True
 
-    def publishStyle(self, layer, upload = True):
-        folder = self.folder if self.useLocalFolder else tempFolder()
+    def publishStyle(self, layer, upload = True):        
         layerFilename = layer.name() + ".shp"        
-        warnings = layerStyleAsMapfileFolder(layer, layerFilename, folder)        
+        warnings = layerStyleAsMapfileFolder(layer, layerFilename, self._folder)        
         for w in warnings:
             self.logWarning(w)
         self.logInfo(QCoreApplication.translate("GeocatBridge", 
-                                "Style for layer %s exported to %s") % (layer.name(), folder))
-        if not self.useLocalFolder and upload:
-            self.uploadFolder(folder)
-        return folder
-        
+                                "Style for layer %s exported to %s") % (layer.name(), self._folder))
+                
     def publishLayer(self, layer, fields=None):
-        folder = self.publishStyle(layer, False)
+        self._layers.append(layer)
+        self.publishStyle(layer, False)
         layerFilename = layer.name() + ".shp"
-        layerPath = os.path.join(folder, layerFilename)         
+        layerFolder = os.path.join(self._folder, "data")
+        layerPath = os.path.join(layerFolder, layerFilename)
+        os.makedirs(layerFolder, exist_ok=True)
         exportLayer(layer, fields, toShapefile=True, path=layerPath, force=True, log=self)
-        if not self.useLocalFolder:
-            self.uploadFolder(folder)
 
     def uploadFolder(self, folder):
         username, password = getCredentials()
@@ -51,7 +51,75 @@ class MapserverServer(ServerBase):
         pass
 
     def prepareForPublishing(self, onlySymbology):
-        pass
+        self._layers = []
+        self._folder = self.folder if self.useLocalFolder else tempFolder()
+
+    def closePublishing(self):
+        filename = QgsProject.instance().fileName()
+        if filename:
+            name = os.path.splitext(os.path.basename(filename))[0]
+        else:
+            name = "myMap"
+
+        #TODO: CRSs
+        extent = QgsRectangle()
+        for layer in self._layers:
+            extent.combineExtentWith(layer.extent())
+
+        sExtent = " ".join([str(v) for v in [extent.xMinimum(), extent.xMaximum(), extent.yMinimum(), extent.yMaximum()]])
+
+        def _quote(t):
+            return '"%s"' % t
+
+        web = {}
+        mapElement = {"NAME": _quote(name),
+                "STATUS": '"ON"',
+                "CONFIG": '"PROJ_LIB" "/usr/share/proj"',
+                "EXTENT": sExtent,
+                "PROJECTION": '"init=epsg:4326"',
+                "MAXSIZE": 8000,
+                "SHAPEPATH": '"./data"',
+                "SIZE": "700 700",
+                "UNITS": "METERS",
+                "WEB": web,
+                "OUTPUTFORMAT": {"DRIVER": '"AGG/PNG"',
+                                "EXTENSION": '"png"',
+                                "IMAGEMODE": '"RGB"',
+                                "MIMETYPE": 'image/png"'},
+                "SCALEBAR": {"ALIGN": "CENTER",
+                                "OUTLINECOLOR": "0 0 0"}
+                }
+        mapElement["LAYERS"] = {"INCLUDE":'"%s.txt"' % layer.name() for layer in self._layers}
+        mapElement["SYMBOLS"] = {"INCLUDE": '"%s_symbols.txt"' % layer.name() for layer in self._layers}
+        mapfile = {"SYMBOLSET": '"symbols.txt"',
+                    "MAP": mapElement}
+        
+        s = convertDictToMapfile(mapfile)
+
+        mapfilePath = os.path.join(self._folder, "mapfile.map")
+        with open(mapfilePath, "w") as f:
+            f.write(s)
+        '''
+        WEB
+          # from configuration (use sensible default, mapserver binary needs write permission)
+          IMAGEPATH "/data/bridge/webdav/images"
+        # from configuration, references online location of previous path (not really relevant for wms)
+          IMAGEURL "http://localhost/images"
+          METADATA
+            # these params are exposed in getcapabilities
+            "wms_title" "ArcGIS4OIV_VRH_Haaglanden_FALCK"
+            "wms_onlineresource" "http://localhost/cgi-bin/mapserv?map=../maps/myMap.map"
+            # this enables WFS
+            "ows_enable_request" "*"
+            # projection of the project
+            "ows_srs" "EPSG:4326"
+            "wms_feature_info_mime_type" "text/html"
+          END
+        END
+        '''
+
+        if not self.useLocalFolder:
+            self.uploadFolder(folder)
 
     def styleExists(self, name):
         return False        
