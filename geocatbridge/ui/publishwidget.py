@@ -364,7 +364,7 @@ class PublishWidget(BASE, WIDGET):
             bbox.grow(1)
         sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])        
         server = geodataServers()[self.comboGeodataServer.currentText()]
-        server.opeWms(names, sbbox, layer.crs().authid())
+        server.openWms(names, sbbox, layer.crs().authid())
 
     def viewAllWms(self):
         server = geodataServers()[self.comboGeodataServer.currentText()]
