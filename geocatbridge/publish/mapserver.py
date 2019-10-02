@@ -6,7 +6,7 @@ from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
 from .exporter import exportLayer
 
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.core import QgsProject, QgsRectangle
+from qgis.core import QgsProject, QgsRectangle, QgsCoordinateReferenceSystem, QgsCoordinateTransform
 
 class MapserverServer(ServerBase): 
 
@@ -60,18 +60,29 @@ class MapserverServer(ServerBase):
             name = os.path.splitext(os.path.basename(filename))[0]
         else:
             name = "myMap"
-
-        #TODO: CRSs
+        
         extent = QgsRectangle()
+        epsg4326 = QgsCoordinateReferenceSystem("EPSG:4326")
         for layer in self._layers:
-            extent.combineExtentWith(layer.extent())
+            trans = QgsCoordinateTransform(layer.crs(), epsg4326, QgsProject.instance())
+            layerExtent = trans.transform(layer.extent())
+            extent.combineExtentWith(layerExtent)
 
         sExtent = " ".join([str(v) for v in [extent.xMinimum(), extent.xMaximum(), extent.yMinimum(), extent.yMaximum()]])
 
         def _quote(t):
             return '"%s"' % t
 
-        web = {}
+        web = {"IMAGEPATH": '"/data/bridge/webdav/images"',
+                "IMAGEURL": '"http://localhost/images"',
+                "METADATA": {
+                            '"wms_title"': _quote(name),
+                            '"wms_onlineresource"': _quote("%s?map=../maps/%s.map" % (self.url, name)),
+                            '"ows_enable_request"': '"*"',                          
+                            '"ows_srs"': '"EPSG:4326"',
+                            '"wms_feature_info_mime_type"': '"text/html"'
+
+                }}
         mapElement = {"NAME": _quote(name),
                 "STATUS": '"ON"',
                 "CONFIG": '"PROJ_LIB" "/usr/share/proj"',
@@ -89,34 +100,16 @@ class MapserverServer(ServerBase):
                 "SCALEBAR": {"ALIGN": "CENTER",
                                 "OUTLINECOLOR": "0 0 0"}
                 }
-        mapElement["LAYERS"] = {"INCLUDE":'"%s.txt"' % layer.name() for layer in self._layers}
-        mapElement["SYMBOLS"] = {"INCLUDE": '"%s_symbols.txt"' % layer.name() for layer in self._layers}
+        mapElement["LAYERS"] = [{"INCLUDE":'"%s.txt"' % layer.name() for layer in self._layers}]
+        mapElement["SYMBOLS"] = [{"INCLUDE": '"%s_symbols.txt"' % layer.name() for layer in self._layers}]
         mapfile = {"SYMBOLSET": '"symbols.txt"',
                     "MAP": mapElement}
         
         s = convertDictToMapfile(mapfile)
 
-        mapfilePath = os.path.join(self._folder, "mapfile.map")
+        mapfilePath = os.path.join(self._folder, name + ".map")
         with open(mapfilePath, "w") as f:
             f.write(s)
-        '''
-        WEB
-          # from configuration (use sensible default, mapserver binary needs write permission)
-          IMAGEPATH "/data/bridge/webdav/images"
-        # from configuration, references online location of previous path (not really relevant for wms)
-          IMAGEURL "http://localhost/images"
-          METADATA
-            # these params are exposed in getcapabilities
-            "wms_title" "ArcGIS4OIV_VRH_Haaglanden_FALCK"
-            "wms_onlineresource" "http://localhost/cgi-bin/mapserv?map=../maps/myMap.map"
-            # this enables WFS
-            "ows_enable_request" "*"
-            # projection of the project
-            "ows_srs" "EPSG:4326"
-            "wms_feature_info_mime_type" "text/html"
-          END
-        END
-        '''
 
         if not self.useLocalFolder:
             self.uploadFolder(folder)
