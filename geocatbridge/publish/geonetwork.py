@@ -4,16 +4,26 @@ from xml.etree.ElementTree import Element, SubElement
 from xml.etree import ElementTree
 from xml.dom import minidom
 from datetime import datetime
+import webbrowser
+
 import lxml.etree as ET
 import requests
 from requests.auth import HTTPBasicAuth
-from geocatbridge.publish.metadata import uuidForLayer
-import webbrowser
-from ..utils.files import tempFilenameInTempFolder
-from qgis.core import QgsMessageLog, Qgis, QgsFeatureSink, QgsMapSettings, QgsMapRendererCustomPainterJob
-from .serverbase import ServerBase
+
 from qgis.PyQt.QtCore import QSize, QCoreApplication
 from qgis.PyQt.QtGui import QImage, QColor, QPainter
+from qgis.core import (
+    QgsMessageLog, 
+    Qgis, 
+    QgsFeatureSink, 
+    QgsMapSettings, 
+    QgsMapRendererCustomPainterJob
+)
+
+from .metadata import uuidForLayer
+from ..utils.files import tempFilenameInTempFolder
+from .serverbase import ServerBase
+
 
 class TokenNetworkAccessManager():
     def __init__(self, url, username, password):        

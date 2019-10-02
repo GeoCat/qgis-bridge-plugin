@@ -1,12 +1,18 @@
 import os
-from .ftpupload import uploadFolder
-from .serverbase import ServerBase
-from bridgestyle.qgis import layerStyleAsMapfileFolder
-from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
-from .exporter import exportLayer
 
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.core import QgsProject, QgsRectangle, QgsCoordinateReferenceSystem, QgsCoordinateTransform
+from qgis.core import (
+    QgsProject,
+    QgsRectangle,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform
+)
+from bridgestyle.qgis import layerStyleAsMapfileFolder
+from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
+
+from .ftpupload import uploadFolder
+from .serverbase import ServerBase
+from .exporter import exportLayer
 
 class MapserverServer(ServerBase): 
 
@@ -68,7 +74,8 @@ class MapserverServer(ServerBase):
             layerExtent = trans.transform(layer.extent())
             extent.combineExtentWith(layerExtent)
 
-        sExtent = " ".join([str(v) for v in [extent.xMinimum(), extent.xMaximum(), extent.yMinimum(), extent.yMaximum()]])
+        sExtent = " ".join([str(v) for v in [extent.xMinimum(), extent.xMaximum(), 
+                                            extent.yMinimum(), extent.yMaximum()]])
 
         def _quote(t):
             return '"%s"' % t

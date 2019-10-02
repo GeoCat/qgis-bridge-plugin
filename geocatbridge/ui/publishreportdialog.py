@@ -1,11 +1,17 @@
 import os
 from functools import partial
+
 from qgis.PyQt import uic
-from qgis.core import *
-from qgis.gui import *
-from qgis.PyQt.QtWidgets import *
-from qgis.PyQt.QtCore import *
-from qgis.PyQt.QtGui import *
+from qgis.core import QgsMessageOutput
+
+from qgis.PyQt.QtWidgets import (
+    QPushButton,
+    QHBoxLayout,
+    QHeaderView,
+    QTableWidgetItem,
+    QWidget
+)
+
 from geocatbridge.publish.servers import geodataServers, metadataServers
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishreportdialog.ui'))

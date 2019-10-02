@@ -1,4 +1,5 @@
-import requests 
+import requests
+
 from .serverbase import ServerBase
 
 class GeocatLiveServer(ServerBase): 
@@ -32,7 +33,8 @@ class GeocatLiveServer(ServerBase):
         if self._geoserverUrl is None:
             self._getUrls()
         if self._geoserverServer is None:            
-            self._geoserverServer = GeoserverServer("GeoServer", self._geoserverUrl, self.geoserverAuthid, workspace="geocatlive") #TODO:workspace
+            self._geoserverServer = GeoserverServer("GeoServer", self._geoserverUrl, 
+                                                self.geoserverAuthid, workspace="geocatlive")
         return self._geoserverServer
 
     def geonetworkServer(self):

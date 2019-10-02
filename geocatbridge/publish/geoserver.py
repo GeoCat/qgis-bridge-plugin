@@ -2,14 +2,20 @@ import os
 import psycopg2
 import json
 import webbrowser
+
+from qgis.core import QgsProject
+
+from qgis.PyQt.QtCore import QCoreApplication
+
 from geoserver.catalog import Catalog
 from geoserver.catalog import ConflictingDataError
+
+from bridgestyle.qgis import saveLayerStyleAsZippedSld
+
 from .exporter import exportLayer
 from .serverbase import ServerBase
 from ..utils.files import tempFilenameInTempFolder
-from qgis.core import QgsProject
-from bridgestyle.qgis import saveLayerStyleAsZippedSld
-from qgis.PyQt.QtCore import QCoreApplication
+
 
 class GeoserverServer(ServerBase):
 
@@ -40,7 +46,8 @@ class GeoserverServer(ServerBase):
 
     def setupForProject(self):
         if self.workspace is None:
-            self._workspace = os.path.splitext(os.path.basename(QgsProject.instance().absoluteFilePath()))[0]
+            self._workspace = os.path.splitext(os.path.basename(
+                                QgsProject.instance().absoluteFilePath()))[0]
         else:
             self._workspace = self.workspace
     
@@ -57,7 +64,8 @@ class GeoserverServer(ServerBase):
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
         for w in warnings:
             self.logWarning(w)
-        self.logInfo(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s") % (layer.name(), styleFilename))
+        self.logInfo(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s")
+                     % (layer.name(), styleFilename))
         self._publishStyle(layer.name(), styleFilename)
 
     def _publishStyle(self, name, styleFilename):
@@ -73,7 +81,8 @@ class GeoserverServer(ServerBase):
             method = "post"
         with open(styleFilename, "rb") as f:
             self.request(url, f.read(), method, headers)
-        self.logInfo(QCoreApplication.translate("GeocatBridge", "Style %s correctly created from Zip file '%s'" % (name, styleFilename)))
+        self.logInfo(QCoreApplication.translate("GeocatBridge", "Style %s correctly created from Zip file '%s'"
+                     % (name, styleFilename)))
 
     def publishLayer(self, layer, fields=None):
         self.publishStyle(layer)
@@ -81,7 +90,8 @@ class GeoserverServer(ServerBase):
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
         for w in warnings:
             self.logWarning(w, 'GeoCat Bridge')
-        self.logInfo(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s") % (layer.name(), styleFilename))        
+        self.logInfo(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s")
+                     % (layer.name(), styleFilename))        
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
                 filename = exportLayer(layer, fields, log = self)

@@ -1,14 +1,17 @@
 import os
 import json
-from qgis.PyQt.QtWidgets import *
-from qgis.PyQt.QtCore import *
-from qgis.PyQt.QtGui import *
-from qgis.utils import iface
-from qgis.core import QgsVectorLayer, QgsRasterLayer
-from bridgestyle.qgis import layerStyleAsSld, layerStyleAsMapbox, layerStyleAsMapfile
-from bridgestyle.qgis.togeostyler import convert
+
+from qgis.PyQt.QtWidgets import QVBoxLayout
+from qgis.PyQt.QtGui import QFont, QColor, QFontMetrics
 from qgis.PyQt.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
 from qgis.PyQt import uic
+
+from qgis.utils import iface
+from qgis.core import QgsVectorLayer, QgsRasterLayer
+
+from bridgestyle.qgis import layerStyleAsSld, layerStyleAsMapbox, layerStyleAsMapfile
+from bridgestyle.qgis.togeostyler import convert
+
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'multistyler.ui'))
 

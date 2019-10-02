@@ -1,6 +1,11 @@
 import requests
 
-from qgis.core import (QgsMessageLog, Qgis, QgsAuthMethodConfig, QgsApplication)
+from qgis.core import (
+    QgsMessageLog,
+    Qgis,
+    QgsAuthMethodConfig,
+    QgsApplication
+)
 
 
 class ServerBase():

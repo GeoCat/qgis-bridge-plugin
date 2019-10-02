@@ -1,18 +1,40 @@
 import os
 import traceback
+
 from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import (
+    QProgressBar,
+    QLabel,
+    QMenu,
+    QWidget,
+    QComboBox,
+    QHBoxLayout,
+    QSizePolicy
+) 
+from qgis.PyQt.QtGui import (
+    QIcon,
+    QPixmap
+)
+
+from qgis.core import (
+    QgsCoordinateTransform,
+    QgsMessageOutput,
+    QgsMapLayer,
+    QgsMessageLog,
+    QgsNativeMetadataValidator, 
+    QgsLayerTreeGroup,
+    QgsLayerTreeLayer,
+    QgsMapLayer
+)
+from qgis.gui import QgsMessageBar, QgsMetadataWidget
+from qgis.utils import iface
+
+from geocatbridge.utils.gui import execute
 from geocatbridge.publish.geonetwork import GeonetworkServer
 from geocatbridge.publish.servers import geodataServers, metadataServers
+from geocatbridge.publish.metadata import uuidForLayer
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
-from geocatbridge.publish.metadata import uuidForLayer
-from qgis.core import *
-from qgis.gui import *
-from qgis.PyQt.QtWidgets import *
-from qgis.PyQt.QtCore import *
-from qgis.PyQt.QtGui import *
-from qgis.utils import iface
-from geocatbridge.utils.gui import execute
 
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)

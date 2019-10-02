@@ -6,11 +6,10 @@ from geocatbridge.publish.geoserver import GeoserverServer
 from geocatbridge.publish.geocatlive import GeocatLiveServer
 from geocatbridge.publish.mapserver import MapserverServer
 from geocatbridge.publish.postgis import PostgisServer
-from qgis.PyQt.QtWidgets import *
-from qgis.PyQt.QtGui import *
-from qgis.PyQt.QtCore import *
-from qgis.gui import *
-from qgis.core import *
+from qgis.PyQt.QtWidgets import QSizePolicy, QHBoxLayout, QMessageBox, QLabel, QMenu, QListWidgetItem, QWidget
+from qgis.PyQt.QtGui import QPixmap
+from qgis.gui import QgsMessageBar, QgsFileWidget, QgsAuthConfigSelect
+from qgis.core import Qgis
 from geocatbridge.utils.gui import execute
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'serverconnectionswidget.ui'))

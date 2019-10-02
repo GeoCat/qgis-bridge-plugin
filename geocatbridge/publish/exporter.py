@@ -1,7 +1,9 @@
 import os
 import gdal
+
 from qgis.core import QgsVectorFileWriter, QgsRasterFileWriter
 from qgis.PyQt.QtCore import QCoreApplication
+
 from geocatbridge.utils.files import tempFilenameInTempFolder
 
 def isSingleTableGpkg(layer):
