@@ -178,11 +178,10 @@ class GeoserverServer(ServerBase):
             else:
                 layers.append({"@type": "layer", "name": "%s:%s" % (self._workspace, layer)})
 
-        groupdef = {"layerGroup":{"name": group["name"],"mode":"SINGLE","publishables": {"published":layers}}}
+        groupdef = {"layerGroup":{"name": group["name"],"mode":"NAMED","publishables": {"published":layers}}}
         
         headers = {"Content-Type": "application/json"}
-        url = "%s/workspaces/%s/layergroups" % (self.url, self._workspace) 
-        print (json.dumps(groupdef))           
+        url = "%s/workspaces/%s/layergroups" % (self.url, self._workspace)           
         try:
             self.request(url, json.dumps(groupdef), "post", headers)
         except:
