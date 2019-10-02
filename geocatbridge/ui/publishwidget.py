@@ -494,7 +494,7 @@ class PublishWidget(BASE, WIDGET):
                 w, e = metadataServer.loggedInfo()
                 warnings.extend(w)
                 errors.extend(e)
-            results[name] = (warnings, errors)
+            results[name] = (set(warnings), errors)
 
         if geodataServer is not None:            
             groups = self._layerGroups(toPublish)                            

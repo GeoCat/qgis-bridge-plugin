@@ -29,7 +29,7 @@ class PublishReportDialog(BASE, WIDGET):
             self.labelUrlMetadataServer.setText("----")
         publishData = publishWidget.comboGeodataServer.currentIndex() != 0 
         onlySymbology = publishWidget.chkOnlySymbology.checkState() == Qt.Checked
-        self.labelPublishMapData.setText("ON" if publishData and onlySymbology else "OFF")
+        self.labelPublishMapData.setText("ON" if publishData and not onlySymbology else "OFF")
         self.labelPublishSymbology.setText("ON" if publishData else "OFF")
         self.labelPublishMetadata.setText("ON" if publishWidget.comboMetadataServer.currentIndex() != 0 else "OFF")
         self.tableWidget.setRowCount(len(results))
