@@ -4,6 +4,7 @@ from functools import partial
 from qgis.PyQt import uic
 from qgis.core import QgsMessageOutput
 
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import (
     QPushButton,
     QHBoxLayout,

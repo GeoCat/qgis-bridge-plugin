@@ -2,6 +2,7 @@ import os
 import traceback
 
 from qgis.PyQt import uic
+from qgis.PyQt.QtCore import Qt, QSize
 from qgis.PyQt.QtWidgets import (
     QProgressBar,
     QLabel,
@@ -9,7 +10,10 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
     QComboBox,
     QHBoxLayout,
-    QSizePolicy
+    QSizePolicy,
+    QCheckBox,
+    QListWidgetItem,
+    QTableWidgetItem
 ) 
 from qgis.PyQt.QtGui import (
     QIcon,
@@ -24,7 +28,9 @@ from qgis.core import (
     QgsNativeMetadataValidator, 
     QgsLayerTreeGroup,
     QgsLayerTreeLayer,
-    QgsMapLayer
+    QgsMapLayer,
+    QgsProject,
+    Qgis
 )
 from qgis.gui import QgsMessageBar, QgsMetadataWidget
 from qgis.utils import iface
@@ -287,7 +293,6 @@ class PublishWidget(BASE, WIDGET):
             self.comboMetadataServer.setStyleSheet("QComboBox {}")
             return False
         except:
-            raise
             self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def isDataOnServer(self, layer):

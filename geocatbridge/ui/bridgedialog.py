@@ -2,6 +2,8 @@ import os
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QFrame, QListWidget
+from qgis.PyQt.QtCore import QSize
 
 from .publishwidget import PublishWidget
 from .serverconnectionswidget import ServerConnectionsWidget
