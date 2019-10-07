@@ -1,4 +1,5 @@
 import requests
+import json
 
 from qgis.core import (
     QgsMessageLog,
@@ -39,7 +40,11 @@ class ServerBase():
         password = authConfig.config('password')
         return username, password
 
-    def request(self, url, data=None, method="put", headers={}):
+    def request(self, url, data=None, method="get", headers={}):
         username, password = self.getCredentials()
         req_method = getattr(requests, method.lower())
-        return req_method(url, headers=headers, data=data, auth=(username, password))
+        if isinstance(data, dict):
+            data = json.dumps(data)
+        r = req_method(url, headers=headers, data=data, auth=(username, password))
+        r.raise_for_status()
+        return r
