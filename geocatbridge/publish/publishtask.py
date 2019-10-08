@@ -100,7 +100,7 @@ class PublishTask(QgsTask):
                                 names = [layer.name()]        
                                 bbox = layer.extent()
                                 sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])                            
-                                wms = layerWms(names, bbox, layer.crs().authid())
+                                wms = self.geodataServer.layerWms(names, bbox, layer.crs().authid())
                             else:
                                 wms = None
                             self.metadataServer.publishLayerMetadata(layer, wms)
