@@ -2,7 +2,11 @@ import os
 import traceback
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import Qt, QSize
+from qgis.PyQt.QtCore import (
+    Qt,
+    QSize,
+    QCoreApplication
+)
 from qgis.PyQt.QtWidgets import (
     QProgressBar,
     QLabel,
@@ -30,13 +34,15 @@ from qgis.core import (
     QgsLayerTreeLayer,
     QgsMapLayer,
     QgsProject,
-    Qgis
+    Qgis,
+    QgsApplication
 )
 from qgis.gui import QgsMessageBar, QgsMetadataWidget
 from qgis.utils import iface
 
 from geocatbridge.utils.gui import execute
 from geocatbridge.publish.geonetwork import GeonetworkServer
+from geocatbridge.publish.publishtask import PublishTask
 from geocatbridge.publish.servers import geodataServers, metadataServers
 from geocatbridge.publish.metadata import uuidForLayer
 from geocatbridge.ui.metadatadialog import MetadataDialog
@@ -59,12 +65,13 @@ WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishwi
 
 class PublishWidget(BASE, WIDGET):
 
-    def __init__(self):
+    def __init__(self, parent):
         super(PublishWidget, self).__init__()
         self.isMetadataPublished = {}
         self.isDataPublished = {}
         self.currentRow = None
         self.currentLayer = None
+        self.parent = parent
 
         self.fieldsToPublish = {}
         self.metadata = {}
@@ -87,6 +94,7 @@ class PublishWidget(BASE, WIDGET):
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
         self.btnPublish.clicked.connect(self.publish)
+        self.btnPublishOnBackground.clicked.connect(self.publishOnBackground)
         self.btnOpenQgisMetadataEditor.clicked.connect(self.openMetadataEditor)
         self.labelSelect.linkActivated.connect(self.selectLabelClicked)
         self.btnRemoveAll.clicked.connect(self.unpublishAll)
@@ -422,18 +430,36 @@ class PublishWidget(BASE, WIDGET):
         server.openMetadata(uuid)
 
     def publish(self):
-        try:
-            ret = execute(self._publish)
-            if ret is not None:
-                self.bar.clearWidgets()
-                dialog = PublishReportDialog(self, ret)
-                dialog.exec_()
-        except:
+        progressMessageBar = self.bar.createMessage(self.tr("Publishing layers"))
+        progress = QProgressBar()
+        progress.setMaximum(100)        
+        progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
+        progressMessageBar.layout().addWidget(progress)
+        self.bar.pushWidget(progressMessageBar, Qgis.Info)
+        QCoreApplication.processEvents()
+        task = self.getPublishTask()
+        task.progressChanged.connect(progress.setValue)
+        ret = execute(task.run)            
+        self.bar.clearWidgets()
+        task.finished(ret)
+        if task.exception is not None:        
             self.bar.clearWidgets()
             self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
-            QgsMessageLog.logMessage(traceback.format_exc(), 'GeoCat Bridge', level=Qgis.Critical)
+            QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
+        self.updateLayersPublicationStatus(task.geodataServer is not None, task.metadataServer is not None)
 
-    def _publish(self):
+    def publishOnBackground(self):
+        self.parent.close()
+        task = self.getPublishTask()
+        def _finished():
+            if task.exception is not None:                    
+                iface.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
+                QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
+        task.taskTerminated.connect(_finished)
+        QgsApplication.taskManager().addTask(task)
+        QCoreApplication.processEvents()
+
+    def getPublishTask(self):
         if self.comboGeodataServer.currentIndex() != 0:
             geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
         else:
@@ -444,6 +470,9 @@ class PublishWidget(BASE, WIDGET):
         else:
             metadataServer = None 
 
+        self.storeMetadata()
+        self.storeFieldsToPublish()
+
         toPublish = []
         for i in range(self.listLayers.count()):            
             item = self.listLayers.item(i)
@@ -452,115 +481,9 @@ class PublishWidget(BASE, WIDGET):
                 name = widget.name()   
                 toPublish.append(name)
 
-        progressMessageBar = self.bar.createMessage(self.tr("Publishing layers"))
-        progress = QProgressBar()
-        progress.setMaximum(self.listLayers.count())
-        progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
-        progressMessageBar.layout().addWidget(progress)
-        self.bar.pushWidget(progressMessageBar, Qgis.Info)
+        onlySymbology = self.chkOnlySymbology.checkState() == Qt.Checked
 
-        self.storeMetadata()
-        self.storeFieldsToPublish()
-
-        validator = QgsNativeMetadataValidator()        
-            
-        DONOTALLOW = 0
-        ALLOW = 1
-        ALLOWONLYDATA = 2
-        
-        allowWithoutMetadata = ALLOW #pluginSetting("allowWithoutMetadata")
-
-        if geodataServer is not None:
-            geodataServer.prepareForPublishing(self.chkOnlySymbology.checkState() == Qt.Checked)
-
-        results = {}
-        warnings, errors = [], []
-        for i, name in enumerate(toPublish):
-            progressMessageBar.setText("Publishing layer " + name)
-            progress.setValue(i)                    
-            try:                       
-                layer = self.layerFromName(name)
-                validates, _ = validator.validate(layer.metadata())
-                validates = True
-                if geodataServer is not None:
-                    geodataServer.resetLog()
-                    if self.chkOnlySymbology.checkState() == Qt.Checked:
-                        geodataServer.publishStyle(layer)
-                    else:
-                        if validates or allowWithoutMetadata in [ALLOW, ALLOWONLYDATA]:
-                            fields = None
-                            if layer.type() == layer.VectorLayer:
-                                fields = [name for name, publish in self.fieldsToPublish[layer].items() if publish]                            
-                            geodataServer.publishLayer(layer, fields)
-                            if metadataServer is not None:
-                                metadataUuid = uuidForLayer(layer)
-                                url = metadataServer.metadataUrl(metadataUuid)
-                                geodataServer.setLayerMetadataLink(name, url)
-                        else:
-                            geodataServer.logError(self.tr("Layer '%s' has invalid metadata. Layer was not published") % layer.name())
-                if metadataServer is not None:
-                    metadataServer.resetLog()
-                    if validates or allowWithoutMetadata == ALLOW:
-                        if geodataServer is not None:
-                            names = [layer.name()]        
-                            bbox = layer.extent()
-                            sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])                            
-                            wms = layerWms(names, bbox, layer.crs().authid())
-                        else:
-                            wms = None
-                        metadataServer.publishLayerMetadata(layer, wms)
-                    else:
-                        metadataServer.logError(self.tr("Layer '%s' has invalid metadata. Metadata was not published") % layer.name())
-            except:
-                errors.append(traceback.format_exc())
-            if geodataServer is not None:
-                w, e = geodataServer.loggedInfo()
-                warnings.extend(w)
-                errors.extend(e)
-            if metadataServer is not None:
-                w, e = metadataServer.loggedInfo()
-                warnings.extend(w)
-                errors.extend(e)
-            results[name] = (set(warnings), errors)
-
-        if geodataServer is not None:            
-            groups = self._layerGroups(toPublish)                            
-            geodataServer.createGroups(groups)
-
-            geodataServer.closePublishing()
-
-        self.updateLayersPublicationStatus(geodataServer is not None, metadataServer is not None)
-
-        return results
-
-
-    def _layerGroups(self, toPublish):
-        def _addGroup(layerTreeGroup):
-            layers = []
-            for child in layerTreeGroup.children():                    
-                if isinstance(child, QgsLayerTreeLayer):
-                    name = child.layer().name() 
-                    if name in toPublish:
-                        layers.append(name)
-                elif isinstance(child, QgsLayerTreeGroup):
-                    subgroup = _addGroup(child)
-                    if subgroup is not None:
-                        layers.append(subgroup)
-            if layers:
-                return {"name": layerTreeGroup.name(), "layers": layers}
-            else:
-                return None
-        
-        groups = []
-        root = QgsProject.instance().layerTreeRoot()
-        for element in root.children():
-            if isinstance(element, QgsLayerTreeGroup):
-                group = _addGroup(element)
-                if group is not None:
-                    groups.append(group)
-                
-
-        return groups
+        return PublishTask(toPublish, self.fieldsToPublish, onlySymbology, geodataServer, metadataServer)
 
     def layerFromName(self, name):
         layers = self.publishableLayers()

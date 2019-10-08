@@ -3,6 +3,7 @@ from functools import partial
 
 from qgis.PyQt import uic
 from qgis.core import QgsMessageOutput
+from qgis.utils import iface
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import (
@@ -13,42 +14,38 @@ from qgis.PyQt.QtWidgets import (
     QWidget
 )
 
-from geocatbridge.publish.servers import geodataServers, metadataServers
-
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishreportdialog.ui'))
 
 class PublishReportDialog(BASE, WIDGET):
 
-    def __init__(self, publishWidget, results):
-        super(PublishReportDialog, self).__init__(publishWidget)
+    def __init__(self, results, onlySymbology, geodataServer, metadataServer):
+        super(PublishReportDialog, self).__init__(iface.mainWindow())
         self.results = results
         self.setupUi(self)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        if publishWidget.comboGeodataServer.currentIndex() != 0:
-            url = geodataServers()[publishWidget.comboGeodataServer.currentText()].url
+        if geodataServer is not None:
+            url = geodataServer.url
             self.labelUrlMapServer.setText('<a href="%s">%s</a>' % (url, url))
         else:
             self.labelUrlMapServer.setText("----")
-        if publishWidget.comboMetadataServer.currentIndex() != 0:            
-            url = metadataServers()[publishWidget.comboMetadataServer.currentText()].url
+        if metadataServer is not None:            
+            url = metadataServer.url
             self.labelUrlMetadataServer.setText('<a href="%s">%s</a>' % (url, url))
         else:
             self.labelUrlMetadataServer.setText("----")
-        publishData = publishWidget.comboGeodataServer.currentIndex() != 0 
-        onlySymbology = publishWidget.chkOnlySymbology.checkState() == Qt.Checked
+        publishData = geodataServer is not None
         self.labelPublishMapData.setText("ON" if publishData and not onlySymbology else "OFF")
         self.labelPublishSymbology.setText("ON" if publishData else "OFF")
-        self.labelPublishMetadata.setText("ON" if publishWidget.comboMetadataServer.currentIndex() != 0 else "OFF")
+        self.labelPublishMetadata.setText("ON" if metadataServer is not None else "OFF")
         self.tableWidget.setRowCount(len(results))
         for i, name in enumerate(results.keys()):
             warnings, errors = results[name]
             item = QTableWidgetItem(name)
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 0, item)
-            if publishWidget.comboGeodataServer.currentIndex() != 0:
-                server = geodataServers()[publishWidget.comboGeodataServer.currentText()]
-                dataPublished = server.layerExists(name)
-                stylePublished = server.styleExists(name)
+            if geodataServer is not None:                
+                dataPublished = geodataServer.layerExists(name)
+                stylePublished = geodataServer.styleExists(name)
             else:
                 dataPublished = False
                 stylePublished = False
@@ -57,11 +54,8 @@ class PublishReportDialog(BASE, WIDGET):
             self.tableWidget.setItem(i, 1, item)
             item = QTableWidgetItem("Yes" if stylePublished else "No")
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-            self.tableWidget.setItem(i, 2, item)
-            if publishWidget.comboMetadataServer.currentIndex() != 0:          
-                metadataPublished = True
-            else:
-                metadataPublished = False
+            self.tableWidget.setItem(i, 2, item)            
+            metadataPublished = metadataServer is not None            
             item = QTableWidgetItem(self.tr("Yes") if metadataPublished else self.tr("No"))
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 3, item)

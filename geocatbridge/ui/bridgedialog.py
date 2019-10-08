@@ -18,7 +18,7 @@ class BridgeDialog(BASE, WIDGET):
     def __init__(self, parent=None):
         super(BridgeDialog, self).__init__(parent)
         self.setupUi(self)
-        self.publishWidget = PublishWidget()
+        self.publishWidget = PublishWidget(self)
         self.serversWidget = ServerConnectionsWidget()
         self.stackedWidget.addWidget(self.publishWidget)
         self.stackedWidget.addWidget(self.serversWidget)
