@@ -84,33 +84,33 @@ class MapserverServer(ServerBase):
                 "IMAGEURL": '"http://localhost/images"',
                 "METADATA": {
                             '"wms_title"': _quote(name),
-                            '"wms_onlineresource"': _quote("%s?map=../maps/%s.map" % (self.url, name)),
+                            '"wms_onlineresource"': _quote("%s?map=%s.map" % (self.url, name)),
                             '"ows_enable_request"': '"*"',                          
                             '"ows_srs"': '"EPSG:4326"',
                             '"wms_feature_info_mime_type"': '"text/html"'
 
                 }}
         mapElement = {"NAME": _quote(name),
-                "STATUS": '"ON"',
-                "CONFIG": '"PROJ_LIB" "/usr/share/proj"',
+                "STATUS": 'ON',
+                "CONFIG": '"PROJ_LIB" "/usr/share/proj"', #todo: user configuration
                 "EXTENT": sExtent,
-                "PROJECTION": '"init=epsg:4326"',
+                "PROJECTION": {'AUTO':''}, #todo: add projection info 
                 "MAXSIZE": 8000,
                 "SHAPEPATH": '"./data"',
+                "SYMBOLSET": '"symbols.txt"',
                 "SIZE": "700 700",
                 "UNITS": "METERS",
                 "WEB": web,
                 "OUTPUTFORMAT": {"DRIVER": '"AGG/PNG"',
                                 "EXTENSION": '"png"',
                                 "IMAGEMODE": '"RGB"',
-                                "MIMETYPE": 'image/png"'},
+                                "MIMETYPE": '"image/png"'},
                 "SCALEBAR": {"ALIGN": "CENTER",
                                 "OUTLINECOLOR": "0 0 0"}
                 }
-        mapElement["LAYERS"] = [{"INCLUDE":'"%s.txt"' % layer.name() for layer in self._layers}]
-        mapElement["SYMBOLS"] = [{"INCLUDE": '"%s_symbols.txt"' % layer.name() for layer in self._layers}]
-        mapfile = {"SYMBOLSET": '"symbols.txt"',
-                    "MAP": mapElement}
+        mapElement["LAYER"] = [{"LAYER":{"INCLUDE":'"%s.txt"' % layer.name() for layer in self._layers}}]
+        mapElement["SYMBOL"] = [{"INCLUDE": '"%s_symbols.txt"' % layer.name() for layer in self._layers}]
+        mapfile = {"MAP": mapElement}
         
         s = convertDictToMapfile(mapfile)
 
