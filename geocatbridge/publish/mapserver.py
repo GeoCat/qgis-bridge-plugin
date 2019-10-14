@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
