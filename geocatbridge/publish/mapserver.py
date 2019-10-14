@@ -98,7 +98,7 @@ class MapserverServer(ServerBase):
         def _quote(t):
             return '"%s"' % t
 
-        web = {"IMAGEPATH": '"/data/bridge/webdav/images"',
+        web = {"IMAGEPATH": '"../data/bridge/webdav/images"',
                 "IMAGEURL": '"http://localhost/images"',
                 "METADATA": {
                             '"wms_title"': _quote(name),
@@ -114,7 +114,7 @@ class MapserverServer(ServerBase):
                 "PROJECTION": {'AUTO':''}, #todo: add projection info
                 "SYMBOLSET": '"symbols.txt"',
                 "MAXSIZE": 8000,
-                "SHAPEPATH": '"./data"',
+                "SHAPEPATH": '"../data"',
                 "SIZE": "700 700",
                 "UNITS": "METERS",
                 "WEB": web,
