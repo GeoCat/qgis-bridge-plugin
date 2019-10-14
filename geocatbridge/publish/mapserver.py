@@ -9,6 +9,7 @@ from qgis.core import (
 )
 from bridgestyle.qgis import layerStyleAsMapfileFolder
 from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
+from bridgestyle.utils.file import tempFolder
 
 from .ftpupload import uploadFolder
 from .serverbase import ServerBase
@@ -31,19 +32,17 @@ class MapserverServer(ServerBase):
 
     def publishStyle(self, layer, upload = True):        
         layerFilename = layer.name() + ".shp"        
-        warnings = layerStyleAsMapfileFolder(layer, layerFilename, self._folder)        
+        warnings = layerStyleAsMapfileFolder(layer, layerFilename, self.dataFolder())        
         for w in warnings:
             self.logWarning(w)
         self.logInfo(QCoreApplication.translate("GeocatBridge", 
-                                "Style for layer %s exported to %s") % (layer.name(), self._folder))
+                                "Style for layer %s exported to %s") % (layer.name(), self.dataFolder()))
                 
     def publishLayer(self, layer, fields=None):
         self._layers.append(layer)
         self.publishStyle(layer, False)
         layerFilename = layer.name() + ".shp"
-        layerFolder = os.path.join(self._folder, "data")
-        layerPath = os.path.join(layerFolder, layerFilename)
-        os.makedirs(layerFolder, exist_ok=True)
+        layerPath = os.path.join(self.dataFolder(), layerFilename)
         exportLayer(layer, fields, toShapefile=True, path=layerPath, force=True, log=self)
 
     def uploadFolder(self, folder):
@@ -60,13 +59,30 @@ class MapserverServer(ServerBase):
         self._layers = []
         self._folder = self.folder if self.useLocalFolder else tempFolder()
 
-    def closePublishing(self):
+    def projectName(self):            
         filename = QgsProject.instance().fileName()
         if filename:
             name = os.path.splitext(os.path.basename(filename))[0]
         else:
             name = "myMap"
-        
+
+    def mapsFolder(self):
+        path = os.path.join(self._folder, projectName(), "maps")
+        makedirs(path, exist_ok=True)
+        return path
+
+    def dataFolder(self):
+        path = os.path.join(self._folder, projectName(), "data")
+        makedirs(path, exist_ok=True)
+        return path
+
+    def templatesFolder(self):
+        path = os.path.join(self._folder, projectName(), "templates")
+        makedirs(path, exist_ok=True)
+        return path
+
+    def closePublishing(self):
+        name = self.projectName()
         extent = QgsRectangle()
         epsg4326 = QgsCoordinateReferenceSystem("EPSG:4326")
         for layer in self._layers:
@@ -114,7 +130,7 @@ class MapserverServer(ServerBase):
         
         s = convertDictToMapfile(mapfile)
 
-        mapfilePath = os.path.join(self._folder, name + ".map")
+        mapfilePath = os.path.join(self.mapsFolder(), name + ".map")
         with open(mapfilePath, "w") as f:
             f.write(s)
 

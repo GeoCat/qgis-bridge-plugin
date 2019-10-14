@@ -1,0 +1,78 @@
+SYMBOLSET 
+
+SYMBOL
+  NAME "circle"
+  TYPE ELLIPSE
+  FILLED TRUE
+  POINTS
+    1 1
+  END
+END
+
+SYMBOL
+  NAME "square"
+  TYPE VECTOR
+  FILLED TRUE
+  POINTS
+    0 0
+    0 1
+    1 1
+    1 0
+    0 0
+  END
+END
+
+SYMBOL
+  NAME "cross"
+  TYPE VECTOR
+  POINTS
+    0.5 0
+    0.5 1
+    -99 -99
+    0 0.5
+    1 0.5
+  END
+END
+
+SYMBOL
+  NAME "x"
+  TYPE VECTOR
+  POINTS
+    0 0
+    1 1
+    -99 -99
+    0 1
+    1 0
+  END
+END
+
+SYMBOL
+  NAME "diamond"
+  TYPE VECTOR
+  FILLED TRUE
+  POINTS
+    0 0.5
+    0.5 0
+    1 0.5
+    0.5 1
+    0 0.5
+  END
+END
+
+SYMBOL
+  NAME "hatch"
+  TYPE HATCH
+END
+
+SYMBOL
+  NAME "arrowhead"
+  TYPE VECTOR
+  FILLED TRUE
+  POINTS
+    0 2
+    4 1
+    0 0
+  END
+END
+
+END
