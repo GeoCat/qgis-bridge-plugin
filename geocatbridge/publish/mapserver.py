@@ -104,13 +104,13 @@ class MapserverServer(ServerBase):
                             '"ows_enable_request"': '"*"',                          
                             '"ows_srs"': '"EPSG:4326"',
                             '"wms_feature_info_mime_type"': '"text/html"'
-
                 }}
         mapElement = {"NAME": _quote(name),
-                "STATUS": '"ON"',
-                "CONFIG": '"PROJ_LIB" "/usr/share/proj"',
+                "STATUS": 'ON',
+                "CONFIG": '"PROJ_LIB" "/usr/share/proj"', #todo: user configuration
                 "EXTENT": sExtent,
-                "PROJECTION": '"init=epsg:4326"',
+                "PROJECTION": {'AUTO':''}, #todo: add projection info
+                "SYMBOLSET": '"symbols.txt"',
                 "MAXSIZE": 8000,
                 "SHAPEPATH": '"./data"',
                 "SIZE": "700 700",
@@ -119,20 +119,23 @@ class MapserverServer(ServerBase):
                 "OUTPUTFORMAT": {"DRIVER": '"AGG/PNG"',
                                 "EXTENSION": '"png"',
                                 "IMAGEMODE": '"RGB"',
-                                "MIMETYPE": 'image/png"'},
+                                "MIMETYPE": '"image/png"'},
                 "SCALEBAR": {"ALIGN": "CENTER",
                                 "OUTLINECOLOR": "0 0 0"}
                 }
-        mapElement["LAYERS"] = [{"INCLUDE":'"%s.txt"' % layer.name() for layer in self._layers}]
-        mapElement["SYMBOLS"] = [{"INCLUDE": '"%s_symbols.txt"' % layer.name() for layer in self._layers}]
-        mapfile = {"SYMBOLSET": '"symbols.txt"',
-                    "MAP": mapElement}
+        mapElement["LAYER"] = [{"LAYER":{"INCLUDE":'"%s.txt"' % layer.name() for layer in self._layers}}]
+        mapElement["SYMBOL"] = [{"INCLUDE": '"%s_symbols.txt"' % layer.name() for layer in self._layers}]
+        mapfile = {"MAP": mapElement}
         
         s = convertDictToMapfile(mapfile)
 
         mapfilePath = os.path.join(self.mapsFolder(), name + ".map")
         with open(mapfilePath, "w") as f:
             f.write(s)
+
+        src = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "mapserver", "symbols.txt")
+        dst = self.mapsFolder()
+        shutil.copy2(src, dst)
 
         if not self.useLocalFolder:
             self.uploadFolder(folder)
