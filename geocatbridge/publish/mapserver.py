@@ -9,7 +9,7 @@ from qgis.core import (
 )
 from bridgestyle.qgis import layerStyleAsMapfileFolder
 from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
-from bridgestyle.utils.file import tempFolder
+from geocatbridge.utils.files import tempFolder
 
 from .ftpupload import uploadFolder
 from .serverbase import ServerBase
@@ -32,11 +32,11 @@ class MapserverServer(ServerBase):
 
     def publishStyle(self, layer, upload = True):        
         layerFilename = layer.name() + ".shp"        
-        warnings = layerStyleAsMapfileFolder(layer, layerFilename, self.dataFolder())        
+        warnings = layerStyleAsMapfileFolder(layer, layerFilename, self.mapsFolder())        
         for w in warnings:
             self.logWarning(w)
         self.logInfo(QCoreApplication.translate("GeocatBridge", 
-                                "Style for layer %s exported to %s") % (layer.name(), self.dataFolder()))
+                                "Style for layer %s exported to %s") % (layer.name(), self.mapsFolder()))
                 
     def publishLayer(self, layer, fields=None):
         self._layers.append(layer)
