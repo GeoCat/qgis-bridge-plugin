@@ -65,19 +65,20 @@ class MapserverServer(ServerBase):
             name = os.path.splitext(os.path.basename(filename))[0]
         else:
             name = "myMap"
+        return name
 
     def mapsFolder(self):
-        path = os.path.join(self._folder, projectName(), "maps")
+        path = os.path.join(self._folder, self.projectName(), "maps")
         makedirs(path, exist_ok=True)
         return path
 
     def dataFolder(self):
-        path = os.path.join(self._folder, projectName(), "data")
+        path = os.path.join(self._folder, self.projectName(), "data")
         makedirs(path, exist_ok=True)
         return path
 
     def templatesFolder(self):
-        path = os.path.join(self._folder, projectName(), "templates")
+        path = os.path.join(self._folder, self.projectName(), "templates")
         makedirs(path, exist_ok=True)
         return path
 
