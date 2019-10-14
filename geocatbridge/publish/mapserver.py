@@ -125,8 +125,9 @@ class MapserverServer(ServerBase):
                 "SCALEBAR": {"ALIGN": "CENTER",
                                 "OUTLINECOLOR": "0 0 0"}
                 }
-        mapElement["LAYER"] = [{"LAYER":{"INCLUDE":'"%s.txt"' % layer.name() for layer in self._layers}}]
-        mapElement["SYMBOL"] = [{"INCLUDE": '"%s_symbols.txt"' % layer.name() for layer in self._layers}]
+        print (self._layers)
+        mapElement["LAYERS"] = [{"INCLUDE":'"%s.txt"' % layer.name()} for layer in self._layers]
+        mapElement["SYMBOLS"] = [{"INCLUDE": '"%s_symbols.txt"' % layer.name()} for layer in self._layers]
         mapfile = {"MAP": mapElement}
         
         s = convertDictToMapfile(mapfile)
