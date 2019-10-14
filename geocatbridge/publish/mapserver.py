@@ -69,17 +69,17 @@ class MapserverServer(ServerBase):
 
     def mapsFolder(self):
         path = os.path.join(self._folder, self.projectName(), "maps")
-        makedirs(path, exist_ok=True)
+        os.makedirs(path, exist_ok=True)
         return path
 
     def dataFolder(self):
         path = os.path.join(self._folder, self.projectName(), "data")
-        makedirs(path, exist_ok=True)
+        os.makedirs(path, exist_ok=True)
         return path
 
     def templatesFolder(self):
         path = os.path.join(self._folder, self.projectName(), "templates")
-        makedirs(path, exist_ok=True)
+        os.makedirs(path, exist_ok=True)
         return path
 
     def closePublishing(self):
