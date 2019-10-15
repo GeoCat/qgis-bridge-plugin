@@ -45,6 +45,7 @@ class ServerBase():
         req_method = getattr(requests, method.lower())
         if isinstance(data, dict):
             data = json.dumps(data)
+            headers["content-type"] = "application/json"
         r = req_method(url, headers=headers, data=data, auth=(username, password))
         r.raise_for_status()
         return r

@@ -3,7 +3,11 @@ import psycopg2
 import json
 import webbrowser
 
-from qgis.core import QgsProject
+import sqlite3
+
+from requests.exceptions import ConnectionError
+
+from qgis.core import QgsProject, QgsVectorLayer
 
 from qgis.PyQt.QtCore import QCoreApplication
 
@@ -113,6 +117,15 @@ class GeoserverServer(ServerBase):
         with open(filename, "rb") as f:
             url = "%s/workspaces/%s/datastores/%s/file.gpkg?update=overwrite" % (self.url, self._workspace, layername)
             self.request(url, f.read(), "put")
+        conn = sqlite3.connect(filename)
+        cursor = conn.cursor()
+        cursor.execute("SELECT table_name FROM gpkg_geometry_columns")
+        tablename = cursor.fetchall()[0][0]
+        url = "%s/workspaces/%s/datastores/%s/featuretypes/%s.json" % (self.url, self._workspace, layername, tablename)
+        r = self.request(url)
+        ft = r.json()
+        ft["featureType"]["name"] = layername
+        r = self.request(url, ft, "put")
         self.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
         self._setLayerStyle(layername, stylename)
 
@@ -141,9 +154,8 @@ class GeoserverServer(ServerBase):
                 }
             }
         }
-        dsUrl = "%s/workspaces/%s/datastores/" % (self.url, self._workspace)        
-        headers = {"content-type": "application/json"}
-        self.request(dsUrl, data=ds, method="post", headers=headers)
+        dsUrl = "%s/workspaces/%s/datastores/" % (self.url, self._workspace)
+        self.request(dsUrl, data=ds, method="post")
         ft = {
             "featureType": {
                 "name": layername,
@@ -151,7 +163,7 @@ class GeoserverServer(ServerBase):
             }
         }    
         ftUrl = "%s/workspaces/%s/datastores/%s/featuretypes" % (self.url, self._workspace, layername)        
-        self.request(ftUrl, data=ft, method="post", headers=headers)             
+        self.request(ftUrl, data=ft, method="post")             
         self._setLayerStyle(layername, stylename)
 
     def _publishRasterLayer(self, filename, style, layername, stylename):
@@ -179,12 +191,11 @@ class GeoserverServer(ServerBase):
 
         groupdef = {"layerGroup":{"name": group["name"],"mode":"NAMED","publishables": {"published":layers}}}
         
-        headers = {"Content-Type": "application/json"}
         url = "%s/workspaces/%s/layergroups" % (self.url, self._workspace)
         try:
-            self.request(url, json.dumps(groupdef), "post", headers)
+            self.request(url, groupdef, "post")
         except:
-            self.request(url, json.dumps(groupdef), "put", headers)
+            self.request(url, groupdef, "put")
 
         self.logInfo("Group %s correctly created" % group["name"])
 
@@ -214,9 +225,12 @@ class GeoserverServer(ServerBase):
         url = "%s/workspaces/%s/styles.json" % (self.url, self._workspace)
         return self._exists(url, "style", name)
 
-    def workspaceExists(self):
-        url = "%s/workspaces.json" % (self.url)
-        return self._exists(url, "workspace", self._workspace)
+    def workspaceExists(self):        
+        try:
+            url = "%s/workspaces.json" % (self.url)
+            return self._exists(url, "workspace", self._workspace)
+        except ConnectionError:
+            return False
 
     def deleteLayer(self, name):
         if self.layerExists(name):
@@ -281,14 +295,12 @@ class GeoserverServer(ServerBase):
                     "name": stylename,
                     "href": styleUrl
                 }
-        headers = {"content-type": "application/json"}
-        r = self.request(url, data=layer, method="put", headers=headers)
+        r = self.request(url, data=layer, method="put")
 
     def _ensureWorkspaceExists(self):
         if not self.workspaceExists():
             url = "%s/workspaces" % self.url
-            headers = {"content-type": "application/json"}
             ws = {"workspace": {"name": self._workspace}}
-            self.request(url, data=ws, method="post", headers=headers)
+            self.request(url, data=ws, method="post")
 
         
