@@ -6,7 +6,16 @@ from geocatbridge.publish.geoserver import GeoserverServer
 from geocatbridge.publish.geocatlive import GeocatLiveServer
 from geocatbridge.publish.mapserver import MapserverServer
 from geocatbridge.publish.postgis import PostgisServer
-from qgis.PyQt.QtWidgets import QSizePolicy, QHBoxLayout, QMessageBox, QLabel, QMenu, QListWidgetItem, QWidget
+from qgis.PyQt.QtWidgets import (
+    QSizePolicy, 
+    QHBoxLayout, 
+    QMessageBox, 
+    QLabel, 
+    QMenu, 
+    QListWidgetItem, 
+    QWidget
+)
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
 from qgis.gui import QgsMessageBar, QgsFileWidget, QgsAuthConfigSelect
 from qgis.core import Qgis
