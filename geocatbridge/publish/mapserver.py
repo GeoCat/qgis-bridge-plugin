@@ -93,8 +93,8 @@ class MapserverServer(ServerBase):
             layerExtent = trans.transform(layer.extent())
             extent.combineExtentWith(layerExtent)
 
-        sExtent = " ".join([str(v) for v in [extent.xMinimum(), extent.xMaximum(), 
-                                            extent.yMinimum(), extent.yMaximum()]])
+        sExtent = " ".join([str(v) for v in [extent.xMinimum(), extent.yMinimum(),
+                                            extent.xMaximum(), extent.yMaximum()]])
 
         def _quote(t):
             return '"%s"' % t
