@@ -272,18 +272,12 @@
                <string>Mapserver details</string>
               </attribute>
               <layout class="QGridLayout" name="gridLayout_7">
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="txtMapserverUrl"/>
-               </item>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_20">
                  <property name="text">
                   <string>URL</string>
                  </property>
                 </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="txtMapServicesPath"/>
                </item>
                <item row="1" column="0">
                 <widget class="QLabel" name="label_21">
@@ -292,7 +286,10 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="0">
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="txtMapserverUrl"/>
+               </item>
+               <item row="3" column="0">
                 <spacer name="verticalSpacer_10">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
@@ -304,6 +301,19 @@
                   </size>
                  </property>
                 </spacer>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="txtMapServicesPath"/>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_23">
+                 <property name="text">
+                  <string>Proj folder</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLineEdit" name="txtProjFolder"/>
                </item>
               </layout>
              </widget>

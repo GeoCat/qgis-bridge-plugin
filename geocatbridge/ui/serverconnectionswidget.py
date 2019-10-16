@@ -217,7 +217,8 @@ class ServerConnectionsWidget(BASE, WIDGET):
             folder = self.txtRemoteFolder.text()
         url = self.txtMapserverUrl.text()
         servicesPath = self.txtMapServicesPath.text()
-        server = MapserverServer(name, url, local, folder, authid, host, port, servicesPath)
+        projFolder = self.txtProjFolder.text()
+        server = MapserverServer(name, url, local, folder, authid, host, port, servicesPath, projFolder)
         return server
 
     def createGeocatLiveServer(self):
@@ -348,6 +349,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.mapserverAuth.setConfigId(server.authid)
             self.txtMapserverUrl.setText(server.url)
             self.txtMapServicesPath.setText(server.servicesPath)
+            self.txtProjFolder.setText(server.projFolder)
             self.radioLocalPath.setChecked(server.useLocalFolder)
             self.radioFtp.setChecked(not server.useLocalFolder)
             self.mapserverStorageChanged(server.useLocalFolder)

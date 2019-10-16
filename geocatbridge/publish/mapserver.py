@@ -18,7 +18,7 @@ from .exporter import exportLayer
 
 class MapserverServer(ServerBase): 
 
-    def __init__(self, name, url="", useLocalFolder=True, folder="", authid="", host="", port=1, servicesPath=""):
+    def __init__(self, name, url="", useLocalFolder=True, folder="", authid="", host="", port=1, servicesPath="", projFolder=""):
         self.name = name
         self.folder = folder
         self.useLocalFolder = useLocalFolder
@@ -27,6 +27,7 @@ class MapserverServer(ServerBase):
         self.port = port
         self.url = url
         self.servicesPath = servicesPath
+        self.projFolder = projFolder or "/usr/share/proj"
 
         self._isMetadataCatalog = False
         self._isDataCatalog = True
@@ -109,7 +110,7 @@ class MapserverServer(ServerBase):
                 }}
         mapElement = {"NAME": _quote(name),
                 "STATUS": 'ON',
-                "CONFIG": '"PROJ_LIB" "/usr/share/proj"', #todo: user configuration
+                "CONFIG": '"PROJ_LIB" "%s"' % self.projFolder,
                 "EXTENT": sExtent,
                 "PROJECTION": {'AUTO':''}, #todo: add projection info
                 "SYMBOLSET": '"symbols.txt"',
