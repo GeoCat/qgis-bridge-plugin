@@ -6,7 +6,10 @@ from qgis.core import (
     QgsProject,
     QgsRectangle,
     QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform
+    QgsCoordinateTransform,
+    QgsRasterLayer,
+    QgsVectorLayer,
+    QgsWkbTypes
 )
 from bridgestyle.qgis import layerStyleAsMapfileFolder
 from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
@@ -32,17 +35,14 @@ class MapserverServer(ServerBase):
         self._isMetadataCatalog = False
         self._isDataCatalog = True
 
-    def publishStyle(self, layer, upload = True):        
-        layerFilename = layer.name() + ".shp"        
-        warnings = layerStyleAsMapfileFolder(layer, layerFilename, self.mapsFolder())        
-        for w in warnings:
-            self.logWarning(w)
-        self.logInfo(QCoreApplication.translate("GeocatBridge", 
-                                "Style for layer %s exported to %s") % (layer.name(), self.mapsFolder()))
+    def publishStyle(self, layer):        
+        self._layers.append(layer)       
+
+        #self.logInfo(QCoreApplication.translate("GeocatBridge", 
+        #                        "Style for layer %s exported to %s") % (layer.name(), self.mapsFolder()))
                 
     def publishLayer(self, layer, fields=None):
-        self._layers.append(layer)
-        self.publishStyle(layer, False)
+        self.publishStyle(layer)
         layerFilename = layer.name() + ".shp"
         layerPath = os.path.join(self.dataFolder(), layerFilename)
         exportLayer(layer, fields, toShapefile=True, path=layerPath, force=True, log=self)
@@ -59,6 +59,7 @@ class MapserverServer(ServerBase):
 
     def prepareForPublishing(self, onlySymbology):
         self._layers = []
+        self._metadataLinks = {}
         self._folder = self.folder if self.useLocalFolder else tempFolder()
 
     def projectName(self):            
@@ -99,6 +100,37 @@ class MapserverServer(ServerBase):
         def _quote(t):
             return '"%s"' % t
 
+        for layer in self._layers:
+            add = {}
+            layerFilename = layer.name() + ".shp" 
+            add["DATA"] = _quote(layerFilename)
+            if isinstance(layer, QgsRasterLayer):
+                layerType = "raster"
+            elif isinstance(layer, QgsVectorLayer):
+                layerType = QgsWkbTypes.geometryDisplayString(layer.geometryType())
+            add["TYPE"] = layerType
+
+            bbox = layer.extent()
+            if bbox.isEmpty():
+                bbox.grow(1)
+
+            metadata = {
+                        "wms_abstract": _quote(layer.metadata().abstract()),
+                        "wms_title": _quote(layer.name()),
+                        "ows_srs": _quote("EPSG:4326 EPSG:3857 " + layer.crs().authid()),
+                        "wms_extent": _quote(" ".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), 
+                                                bbox.xMaximum(), bbox.yMaximum()]]))
+                        }
+            if layer.name() in self._metadataLinks:
+                metadata["ows_metadataurl_href"] = _quote(self._metadataLinks[layer.name()])
+                metadata["ows_metadataurl_type"] = _quote("TC211")
+                metadata["ows_metadataurl_format"] = _quote("XML")
+
+            add["METADATA"] = metadata
+            warnings = layerStyleAsMapfileFolder(layer, self.mapsFolder(), add)
+            for w in warnings:
+                self.logWarning(w)
+
         web = {"IMAGEPATH": '"../data/bridge/webdav/images"',
                 "IMAGEURL": '"http://localhost/images"',
                 "METADATA": {
@@ -126,7 +158,6 @@ class MapserverServer(ServerBase):
                 "SCALEBAR": {"ALIGN": "CENTER",
                                 "OUTLINECOLOR": "0 0 0"}
                 }
-        print (self._layers)
         mapElement["LAYERS"] = [{"INCLUDE":'"%s.txt"' % layer.name()} for layer in self._layers]
         mapElement["SYMBOLS"] = [{"INCLUDE": '"%s_symbols.txt"' % layer.name()} for layer in self._layers]
         mapfile = {"MAP": mapElement}
@@ -163,7 +194,7 @@ class MapserverServer(ServerBase):
         return ""
         
     def setLayerMetadataLink(self, name, url):
-        pass
+        self._metadataLinks[name] = url
 
     def createGroups(self, groups):
         pass
