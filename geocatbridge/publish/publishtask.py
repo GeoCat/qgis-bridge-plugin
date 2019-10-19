@@ -3,6 +3,7 @@ import traceback
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 from qgis.core import QgsTask, QgsLayerTreeLayer, QgsLayerTreeGroup, QgsNativeMetadataValidator, QgsProject, QgsMapLayer
 
+from .metadata import uuidForLayer
 
 class PublishTask(QgsTask):
 
