@@ -60,6 +60,8 @@ class GeonetworkServer(ServerBase):
     XSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
 
     def __init__(self, name, url="", authid="", profile=0):
+        self._warnings = []
+        self._errors = []
         self.name = name
         self.url = url
         self.authid = authid
