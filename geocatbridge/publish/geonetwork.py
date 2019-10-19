@@ -181,7 +181,7 @@ class GeonetworkServer(ServerBase):
         return ret
 
     def metadataUrl(self, uuid):
-        return self.url + "/srv/spa/catalog.search#/metadata/" + uuid
+        return self.url + "/srv/api/records/" + uuid
 
     def openMetadata(self, uuid):        
         webbrowser.open_new_tab(self.metadataUrl(uuid))
