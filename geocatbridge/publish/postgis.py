@@ -6,6 +6,7 @@ from .serverbase import ServerBase
 class PostgisServer(ServerBase): 
     
     def __init__(self, name, authid="", host="localhost", port="5432", schema="public", database="db"):
+        super().__init__()
         self.name = name
         self.host = host
         self.port = port

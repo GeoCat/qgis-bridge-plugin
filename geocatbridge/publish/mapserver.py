@@ -22,6 +22,7 @@ from .exporter import exportLayer
 class MapserverServer(ServerBase): 
 
     def __init__(self, name, url="", useLocalFolder=True, folder="", authid="", host="", port=1, servicesPath="", projFolder=""):
+        super().__init__()
         self.name = name
         self.folder = folder
         self.useLocalFolder = useLocalFolder
