@@ -7,14 +7,15 @@ from .metadata import uuidForLayer
 
 class PublishTask(QgsTask):
 
-    def __init__(self, layers, fields, onlySymbology, geodataServer, metadataServer):
+    def __init__(self, layers, fields, onlySymbology, geodataServer, metadataServer, parent):
         super().__init__("Publish from GeoCat Bridge", QgsTask.CanCancel)
         self.exception = None
         self.layers = layers
         self.geodataServer = geodataServer
         self.metadataServer = metadataServer
         self.onlySymbology = onlySymbology
-        self.fields = fields      
+        self.fields = fields
+        self.parent = parent
 
     def _layerGroups(self, toPublish):
         def _addGroup(layerTreeGroup):
@@ -132,7 +133,9 @@ class PublishTask(QgsTask):
 
     def finished(self, result):      
         if result:
-            dialog = PublishReportDialog(self.results, self.onlySymbology, self.geodataServer, self.metadataServer)
+            dialog = PublishReportDialog(self.results, self.onlySymbology, 
+                                        self.geodataServer, self.metadataServer,
+                                        parent)
             dialog.exec_()
 
 

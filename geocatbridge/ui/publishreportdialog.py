@@ -18,8 +18,8 @@ WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishre
 
 class PublishReportDialog(BASE, WIDGET):
 
-    def __init__(self, results, onlySymbology, geodataServer, metadataServer):
-        super(PublishReportDialog, self).__init__(iface.mainWindow())
+    def __init__(self, results, onlySymbology, geodataServer, metadataServer, parent):
+        super(PublishReportDialog, self).__init__(parent)
         self.results = results
         self.setupUi(self)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)

@@ -336,10 +336,6 @@ class PublishWidget(BASE, WIDGET):
             self.metadata[self.currentLayer] = w.metadata
             self.populateLayerMetadata()          
 
-    def openConnectionsDialog(self):
-        dlg = ServerConnectionsDialog(iface.mainWindow())
-        dlg.exec_()
-
     def unpublishData(self, name):
         server = geodataServers()[self.comboGeodataServer.currentText()]
         server.deleteLayer(name)
@@ -437,7 +433,7 @@ class PublishWidget(BASE, WIDGET):
         progressMessageBar.layout().addWidget(progress)
         self.bar.pushWidget(progressMessageBar, Qgis.Info)
         QCoreApplication.processEvents()
-        task = self.getPublishTask()
+        task = self.getPublishTask(self.parent)
         task.progressChanged.connect(progress.setValue)
         ret = execute(task.run)            
         self.bar.clearWidgets()
@@ -450,7 +446,7 @@ class PublishWidget(BASE, WIDGET):
 
     def publishOnBackground(self):
         self.parent.close()
-        task = self.getPublishTask()
+        task = self.getPublishTask(iface.mainWindow())
         def _finished():
             if task.exception is not None:                    
                 iface.messageBar().pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
@@ -459,7 +455,7 @@ class PublishWidget(BASE, WIDGET):
         QgsApplication.taskManager().addTask(task)
         QCoreApplication.processEvents()
 
-    def getPublishTask(self):
+    def getPublishTask(self, parent):
         if self.comboGeodataServer.currentIndex() != 0:
             geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
         else:
@@ -483,7 +479,7 @@ class PublishWidget(BASE, WIDGET):
 
         onlySymbology = self.chkOnlySymbology.checkState() == Qt.Checked
 
-        return PublishTask(toPublish, self.fieldsToPublish, onlySymbology, geodataServer, metadataServer)
+        return PublishTask(toPublish, self.fieldsToPublish, onlySymbology, geodataServer, metadataServer, parent)
 
     def layerFromName(self, name):
         layers = self.publishableLayers()
