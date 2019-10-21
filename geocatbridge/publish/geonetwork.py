@@ -166,7 +166,7 @@ class GeonetworkServer(ServerBase):
 
     def publishMetadata(self, metadata):
         self._nam.setTokenInHeader()
-        url = self.xmlServicesUrl() + "/mef.import"
+        url = self.xmlServicesUrl() + "/mef.import?uuidAction=overwrite"
         with open(metadata, "rb") as f:
             files = {'mefFile': f}
             r = self._nam.session.post(url, files=files)
