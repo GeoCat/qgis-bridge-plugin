@@ -135,7 +135,7 @@ class PublishTask(QgsTask):
         if result:
             dialog = PublishReportDialog(self.results, self.onlySymbology, 
                                         self.geodataServer, self.metadataServer,
-                                        parent)
+                                        self.parent)
             dialog.exec_()
 
 
