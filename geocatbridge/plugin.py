@@ -44,11 +44,14 @@ class GeocatBridge:
 
     def initGui(self):
         
+        self.toolbar = self.iface.addToolBar("GeoCatBridge")
+
         iconPublish = QIcon(os.path.join(os.path.dirname(__file__), "icons", "publish_button.png"))
         self.actionPublish = QAction(iconPublish, QCoreApplication.translate("GeocatBridge", "Publish"), self.iface.mainWindow())
         self.actionPublish.setObjectName("startPublish")
         self.actionPublish.triggered.connect(self.publishClicked)
         self.iface.addPluginToMenu("GeoCatBridge", self.actionPublish)
+        self.toolbar.addAction(self.actionPublish)
 
         self.multistylerDialog = MultistylerDialog()
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
@@ -80,6 +83,8 @@ class GeocatBridge:
             layer.styleChanged.disconnect(func)
 
         QgsApplication.processingRegistry().removeProvider(self.provider)
+
+        self.iface.removeToolbar("GeoCatBridge")
 
     _layerSignals = {}
 
