@@ -167,7 +167,6 @@ class GeonetworkServer(ServerBase):
     def publishMetadata(self, metadata):
         self._nam.setTokenInHeader()
         url = self.xmlServicesUrl() + "/mef.import"
-        print (self._nam.session.headers)
         with open(metadata, "rb") as f:
             files = {'mefFile': f}
             r = self._nam.session.post(url, files=files)
@@ -178,8 +177,8 @@ class GeonetworkServer(ServerBase):
         self.request(url, method="delete")
 
     def me(self):
-        url = self.apiUrl() + "/me"
-        ret =  self.request(url, headers = {"Accept": "application/json"})
+        url = self.apiUrl() + "/info?type=me"
+        ret =  self.request(url)
         return ret
 
     def metadataUrl(self, uuid):
