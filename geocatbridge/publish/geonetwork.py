@@ -187,9 +187,6 @@ class GeonetworkServer(ServerBase):
     def openMetadata(self, uuid):        
         webbrowser.open_new_tab(self.metadataUrl(uuid))
 
-    def setLayerUrl(self, uuid, url):
-        pass
-
     def createMef(self, uuid, metadataFilename, mefFilename, thumbnailFilename):
         z = zipfile.ZipFile(mefFilename, "w")    
         z.write(metadataFilename, os.path.join(uuid, "metadata", os.path.basename(metadataFilename)))

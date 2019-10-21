@@ -237,16 +237,19 @@ class GeoserverServer(ServerBase):
             url = "%s/workspaces/%s/layers/%s.json?recurse=true" % (self.url, self._workspace, name)        
             r = self.request(url, method="delete")        
         
-    def openWms(self, names, bbox, srs):
-        url = self.layerWms(names, bbox, srs)
+    def openPreview(self, names, bbox, srs):
+        url = self.layerPreviewUrl(names, bbox, srs)
         webbrowser.open_new_tab(url)
 
-    def layerWms(self, names, bbox, srs):
+    def layerPreviewUrl(self, names, bbox, srs):
         baseurl = self.baseUrl()
         names = ",".join(["%s:%s" % (self._workspace, name) for name in names])
         url = ("%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s&format=application/openlayers&bbox=%s&srs=%s&width=800&height=600" 
                     % (baseurl, self._workspace, names, bbox, srs))
         return url
+
+    def layerWmsUrl(self, name):
+        return "%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s"% (self.baseUrl(), self._workspace, name)        
         
     def setLayerMetadataLink(self, name, url):
         url = "%s/workspaces/%s/layers/%s.json" % (self.url, self._workspace, name)

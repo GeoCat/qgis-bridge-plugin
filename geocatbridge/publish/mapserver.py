@@ -136,7 +136,7 @@ class MapserverServer(ServerBase):
                 "IMAGEURL": '"http://localhost/images"',
                 "METADATA": {
                             '"wms_title"': _quote(name),
-                            '"wms_onlineresource"': _quote("%s?map=../maps/%s.map" % (self.url, name)),
+                            '"wms_onlineresource"': _quote(self.layerWmsUrl()),
                             '"ows_enable_request"': '"*"',                          
                             '"ows_srs"': '"EPSG:4326"',
                             '"wms_feature_info_mime_type"': '"text/html"'
@@ -188,11 +188,12 @@ class MapserverServer(ServerBase):
     def deleteLayer(self, name):
         return False
     
-    def openWms(self, names, bbox, srs):
+    def openPreview(self, names, bbox, srs):
         pass
 
-    def layerWms(self, names, bbox, srs):
-        return ""
+    def layerWmsUrl(name):
+        name = self.projectName()
+        return "%s?map=../maps/%s.map" % (self.url, name)
         
     def setLayerMetadataLink(self, name, url):
         self._metadataLinks[name] = url

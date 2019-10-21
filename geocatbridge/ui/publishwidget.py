@@ -395,7 +395,7 @@ class PublishWidget(BASE, WIDGET):
             bbox.grow(1)
         sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])        
         server = geodataServers()[self.comboGeodataServer.currentText()]
-        server.openWms(names, sbbox, layer.crs().authid())
+        server.openPreview(names, sbbox, layer.crs().authid())
 
     def viewAllWms(self):
         server = geodataServers()[self.comboGeodataServer.currentText()]
@@ -410,7 +410,7 @@ class PublishWidget(BASE, WIDGET):
                 extent = xform.transform(layer.extent())
                 bbox.combineExtentWith(extent)
         sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])
-        server.openWms(names, sbbox, canvasCrs.authid())
+        server.openPreview(names, sbbox, canvasCrs.authid())
 
     def previewMetadata(self):
         html = self.currentLayer.htmlMetadata()
