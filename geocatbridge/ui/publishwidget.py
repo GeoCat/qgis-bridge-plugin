@@ -453,7 +453,7 @@ class PublishWidget(BASE, WIDGET):
         task = self.getPublishTask()
         def _finished():
             if task.exception is not None:                    
-                iface.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
+                iface.messageBar().pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
                 QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
         task.taskTerminated.connect(_finished)
         QgsApplication.taskManager().addTask(task)
