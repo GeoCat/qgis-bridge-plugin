@@ -267,7 +267,7 @@ class GeoserverServer(ServerBase):
 
     def deleteWorkspace(self):
         if self.workspaceExists():
-            url = "%s/workspaces/%s" % (self.url, self._workspace)
+            url = "%s/workspaces/%s?recurse=true" % (self.url, self._workspace)
             r = self.request(url, method="delete")
 
     def _publishStyle(self, name, styleFilename):
