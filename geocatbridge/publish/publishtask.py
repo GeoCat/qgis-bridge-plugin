@@ -1,7 +1,19 @@
 import traceback
 
+from qgis.core import (
+    QgsTask, 
+    QgsLayerTreeLayer, 
+    QgsLayerTreeGroup, 
+    QgsNativeMetadataValidator, 
+    QgsProject, 
+    QgsMapLayer,
+    QgsLayerMetadata,
+    QgsBox3d,
+    QgsCoordinateTransform,
+    QgsCoordinateReferenceSystem
+)
+
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
-from qgis.core import QgsTask, QgsLayerTreeLayer, QgsLayerTreeGroup, QgsNativeMetadataValidator, QgsProject, QgsMapLayer
 
 from .metadata import uuidForLayer
 
@@ -99,12 +111,10 @@ class PublishTask(QgsTask):
                         self.metadataServer.resetLog()
                         if validates or allowWithoutMetadata == ALLOW:
                             if self.geodataServer is not None:
-                                names = [layer.name()]        
-                                bbox = layer.extent()
-                                sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])                            
-                                wms = self.geodataServer.layerWms(names, bbox, layer.crs().authid())
+                                wms = self.geodataServer.layerWmsUrl(layer.name())
                             else:
                                 wms = None
+                            self.autofillMetadata(layer)
                             self.metadataServer.publishLayerMetadata(layer, wms)
                         else:
                             self.metadataServer.logError(self.tr("Layer '%s' has invalid metadata. Metadata was not published") % layer.name())
@@ -130,6 +140,23 @@ class PublishTask(QgsTask):
             self.exception = traceback.format_exc()
             return False
 
+    def autofillMetadata(self, layer):
+        metadata = layer.metadata()
+        if not (bool(metadata.title())):
+            metadata.setTitle(layer.name())
+        extents = metadata.extent().spatialExtents()        
+        if not metadata.crs().isValid() or len(extents) == 0 or extents[0].bounds.width() == 0:
+            epsg4326 = QgsCoordinateReferenceSystem("EPSG:4326")
+            metadata.setCrs(epsg4326)
+            trans = QgsCoordinateTransform(layer.crs(), epsg4326, QgsProject.instance())
+            layerExtent = trans.transform(layer.extent())
+            box = QgsBox3d(layerExtent.xMinimum(), layerExtent.yMinimum(), 0, 
+                            layerExtent.xMaximum(), layerExtent.yMaximum(), 0)
+            extent = QgsLayerMetadata.SpatialExtent()
+            extent.bounds = box
+            extent.extentCrs = epsg4326
+            metadata.extent().setSpatialExtents([extent])
+        layer.setMetadata(metadata)
 
     def finished(self, result):      
         if result:
