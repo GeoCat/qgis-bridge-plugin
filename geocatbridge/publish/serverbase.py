@@ -1,5 +1,6 @@
 import requests
 import json
+import urllib
 
 from qgis.core import (
     QgsMessageLog,
@@ -41,6 +42,7 @@ class ServerBase():
         return username, password
 
     def request(self, url, data=None, method="get", headers={}):
+        url = urllib.parse.quote(url)
         username, password = self.getCredentials()
         req_method = getattr(requests, method.lower())
         if isinstance(data, dict):
