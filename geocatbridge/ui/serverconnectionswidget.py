@@ -50,6 +50,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.chkManagedWorkspace.stateChanged.connect(self.managedWorkspaceChanged)
 
         self.txtCswName.textChanged.connect(self._setCurrentServerHasChanges)
+        self.txtCswNode.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeoserverName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeoserverUrl.textChanged.connect(self._setCurrentServerHasChanges)
@@ -203,11 +204,12 @@ class ServerConnectionsWidget(BASE, WIDGET):
 
     def createGeonetworkServer(self):
         ##TODO check validity of name and values        
-        name = self.txtCswName.text()        
+        name = self.txtCswName.text()
+        node = self.txtCswNode.text()
         authid = self.cswAuth.configId()
         url = self.txtCswUrl.text()
         profile = self.comboMetadataProfile.currentIndex()
-        server = GeonetworkServer(name, url, authid, profile)
+        server = GeonetworkServer(name, url, authid, profile, node)
         return server
 
     def createMapserverServer(self):
@@ -239,7 +241,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         return server
 
     def addAuthWidgets(self):
-        self.geoserverAuth = QgsAuthConfigSelect()
+        self.geoserverAuth = QgsAuthConfigSelect()        
         layout = QHBoxLayout()
         layout.setMargin(0)
         layout.addWidget(self.geoserverAuth)
@@ -373,6 +375,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         elif isinstance(server, (GeonetworkServer, CswServer)):
             self.stackedWidget.setCurrentWidget(self.widgetMetadataCatalog)
             self.txtCswName.setText(server.name)
+            self.txtCswNode.setText(server.node)
             self.txtCswUrl.setText(server.url)            
             self.cswAuth.setConfigId(server.authid)
             self.comboMetadataProfile.setCurrentIndex(server.profile)

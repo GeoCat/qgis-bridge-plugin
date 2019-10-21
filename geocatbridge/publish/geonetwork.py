@@ -59,14 +59,15 @@ class GeonetworkServer(ServerBase):
 
     XSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
 
-    def __init__(self, name, url="", authid="", profile=0):
+    def __init__(self, name, url="", authid="", profile=0, node="srv"):
         super().__init__()
         self.name = name
         self.url = url
         self.authid = authid
         self.profile = profile
         self._isMetadataCatalog = True
-        self._isDataCatalog = False        
+        self._isDataCatalog = False 
+        self.node = node
         user, password = self.getCredentials()
         self._nam = TokenNetworkAccessManager(self.url, user, password)
 
@@ -138,7 +139,7 @@ class GeonetworkServer(ServerBase):
             browseGraphic = ET.SubElement(overview, _ns('MD_BrowseGraphic'))
             file = ET.SubElement(browseGraphic, _ns('fileName'))
             cs = ET.SubElement(file, '{http://www.isotc211.org/2005/gco}CharacterString')
-            thumbnailUrl = "%s/srv/api/records/%s/attachments/thumbnail.png" % (self.url, uuid)
+            thumbnailUrl = "%s/records/%s/attachments/thumbnail.png" % (self.apiUrl() , uuid)
             cs.text = thumbnailUrl
         s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
         with open(isoFilename, "w", encoding="utf8") as f:
@@ -147,10 +148,10 @@ class GeonetworkServer(ServerBase):
         return isoFilename
 
     def apiUrl(self):
-        return self.url + "/srv/api"
+        return self.url + "/%s/api" % self.node
 
     def xmlServicesUrl(self):
-        return self.url + "/srv/eng"
+        return self.url + "/%s/eng"  % self.node
 
     def metadataExists(self, uuid):
         try:
@@ -182,7 +183,7 @@ class GeonetworkServer(ServerBase):
         return ret
 
     def metadataUrl(self, uuid):
-        return self.url + "/srv/api/records/" + uuid
+        return self.url + "/%s/api/records/%s" % (self.node, uuid)
 
     def openMetadata(self, uuid):        
         webbrowser.open_new_tab(self.metadataUrl(uuid))
