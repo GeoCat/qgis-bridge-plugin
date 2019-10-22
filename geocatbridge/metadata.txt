@@ -12,9 +12,9 @@ icon=icons/geocat.png
 
 tags=GeoServer, MapServer, GeoNetwork, GeoCat
 
-homepage=
-tracker=https://github.com/volaya/qgis-geocatbridge-plugin/issues
-repository=https://github.com/volaya/qgis-geocatbridge-plugin
+homepage=https://www.geocat.net
+tracker=https://github.com/geocat/qgis-geocatbridge-plugin/issues
+repository=https://github.com/geocat/qgis-geocatbridge-plugin
 
-experimental=False
+experimental=True
 deprecated=False
