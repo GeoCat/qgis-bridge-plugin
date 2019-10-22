@@ -24,12 +24,6 @@ options(
             ".git"
         ]
     ),
-
-    sphinx = Bunch(
-        docroot = path('docs'),
-        sourcedir = path('docs/source'),
-        builddir = path('docs/build')
-    )
 )
 
 @task
@@ -81,7 +75,6 @@ def read_requirements():
 ])
 def package(options):
     '''create package for plugin'''
-    builddocs(options)
     package_file = options.plugin.package_dir / ('%s.zip' % options.plugin.name)
     with zipfile.ZipFile(package_file, "w", zipfile.ZIP_DEFLATED) as f:
         if not hasattr(options.package, 'tests'):
@@ -91,13 +84,12 @@ def package(options):
 
 def make_zip(zipFile, options):
     excludes = set(options.plugin.excludes)
-
     src_dir = options.plugin.source_dir
     exclude = lambda p: any([fnmatch.fnmatch(p, e) for e in excludes])
     def filter_excludes(files):
         if not files: return []
         # to prevent descending into dirs, modify the list in place
-        for i in xrange(len(files) - 1, -1, -1):
+        for i in range(len(files) - 1, -1, -1):
             f = files[i]
             if exclude(f):
                 files.remove(f)
@@ -108,9 +100,4 @@ def make_zip(zipFile, options):
             relpath = os.path.relpath(root, '.')
             zipFile.write(path(root) / f, path(relpath) / f)
         filter_excludes(dirs)
-
-    for root, dirs, files in os.walk(options.sphinx.builddir):
-        for f in files:
-            relpath = os.path.join(options.plugin.name, "docs", os.path.relpath(root, options.sphinx.builddir))
-            zipFile.write(path(root) / f, path(relpath) / f)
 
