@@ -136,7 +136,7 @@ class MapserverServer(ServerBase):
                 "IMAGEURL": '"http://localhost/images"',
                 "METADATA": {
                             '"wms_title"': _quote(name),
-                            '"wms_onlineresource"': _quote(self.layerWmsUrl()),
+                            '"wms_onlineresource"': _quote(self.layerWmsUrl(layer.name())),
                             '"ows_enable_request"': '"*"',                          
                             '"ows_srs"': '"EPSG:4326"',
                             '"wms_feature_info_mime_type"': '"text/html"'
@@ -191,9 +191,9 @@ class MapserverServer(ServerBase):
     def openPreview(self, names, bbox, srs):
         pass
 
-    def layerWmsUrl(name):
-        name = self.projectName()
-        return "%s?map=../maps/%s.map" % (self.url, name)
+    def layerWmsUrl(self,name):
+        project = self.projectName()
+        return "%s?map=%s/maps/%s.map&service=WMS&version=1.1.0&request=GetMap&layers=%s" % (self.url, project, project, name)
         
     def setLayerMetadataLink(self, name, url):
         self._metadataLinks[name] = url
