@@ -290,7 +290,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         menu.addAction("MapServer", lambda: self._addServer("MapServer", MapserverServer))
         menu.addAction("GeoCat Live", lambda: self._addServer("GeoCat Live", GeocatLiveServer))
         menu.addAction("GeoNetwork", lambda: self._addServer("GeoNetwork", GeonetworkServer))
-        menu.addAction("CSW", lambda: self._addServer("CSW", CswServer))
+        #menu.addAction("CSW", lambda: self._addServer("CSW", CswServer))
         menu.addAction("PostGIS", lambda: self._addServer("PostGIS", PostgisServer))
         self.buttonNew.setMenu(menu)
 
