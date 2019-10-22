@@ -8,7 +8,7 @@ version=0.1
 author=GeoCat
 email=volayaf@gmail.com
 
-icon=icons/qgis.png
+icon=icons/geocat.png
 
 tags=GeoServer, MapServer, GeoNetwork, GeoCat
 
