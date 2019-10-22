@@ -41,7 +41,7 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="widgetGeocatLive">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -54,25 +54,18 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="0">
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_2">
+           <item row="4" column="0">
+            <widget class="QLabel" name="label">
              <property name="text">
-              <string>GeoNetwork credentials</string>
+              <string>GeoServer credentials</string>
              </property>
             </widget>
+           </item>
+           <item row="6" column="1" colspan="2">
+            <widget class="QWidget" name="geocatLiveGeonetworkAuthWidget" native="true"/>
+           </item>
+           <item row="4" column="1" colspan="2">
+            <widget class="QWidget" name="geocatLiveGeoserverAuthWidget" native="true"/>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="instanceIdentifierLabel">
@@ -81,10 +74,10 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label">
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>GeoServer credentials</string>
+              <string>GeoNetwork credentials</string>
              </property>
             </widget>
            </item>
@@ -101,11 +94,44 @@
            <item row="0" column="1" colspan="2">
             <widget class="QLineEdit" name="txtGeocatLiveName"/>
            </item>
-           <item row="4" column="1" colspan="2">
-            <widget class="QWidget" name="geocatLiveGeoserverAuthWidget" native="true"/>
+           <item row="8" column="1">
+            <widget class="QLabel" name="labelRegisterLive">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;You don't a GeoCat Live account? &lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;https://www.geocat.net/es/live/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Click here to register.&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="openExternalLinks">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
-           <item row="6" column="1" colspan="2">
-            <widget class="QWidget" name="geocatLiveGeonetworkAuthWidget" native="true"/>
+           <item row="9" column="1">
+            <spacer name="verticalSpacer_11">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="7" column="1">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </item>
