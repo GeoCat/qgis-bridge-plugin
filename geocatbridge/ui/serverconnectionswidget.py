@@ -318,13 +318,15 @@ class ServerConnectionsWidget(BASE, WIDGET):
         return item
 
     def _addServer(self, name, clazz):
-        if self.saveCurrentServer():                    
+        if self.currentServerHasChanges:
+            self.bar.pushMessage(self.tr("Save changes to current server before creating one"), level=Qgis.Warning, duration=5)
+        else:        
             name = self.getNewName(name)
             server = clazz(name)            
             addServer(server)
+            self.setCurrentServer(server)
             item = self.addServerItem(server)
             self.listServers.setCurrentItem(item)
-            self.setCurrentServer(server) 
 
     def populatePostgisCombo(self):
         self.comboDatastore.clear()
