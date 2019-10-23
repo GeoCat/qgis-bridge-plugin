@@ -9,7 +9,6 @@ from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication
 
 from .utils.files import removeTempFolder
 from .ui.bridgedialog import BridgeDialog
-from .ui.multistylerdialog import MultistylerDialog
 from .publish.servers import readServers
 from .processing.bridgeprovider import BridgeProvider
 
@@ -18,14 +17,6 @@ class GeocatBridge:
         self.iface = iface
 
         readServers()
-        
-        class QgisLogger():
-            def logInfo(self, text):
-                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
-            def logWarning(self, text):
-                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Warning)
-            def logError(self, text):
-                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Critical)
 
         self.provider = BridgeProvider()
 
@@ -41,7 +32,6 @@ class GeocatBridge:
             self.translator.load(localePath)
             QCoreApplication.installTranslator(self.translator)
 
-
     def initGui(self):
         
         self.toolbar = self.iface.addToolBar("GeoCatBridge")
@@ -50,21 +40,8 @@ class GeocatBridge:
         self.actionPublish = QAction(iconPublish, QCoreApplication.translate("GeocatBridge", "Publish"), self.iface.mainWindow())
         self.actionPublish.setObjectName("startPublish")
         self.actionPublish.triggered.connect(self.publishClicked)
-        self.iface.addPluginToMenu("GeoCatBridge", self.actionPublish)
-        self.toolbar.addAction(self.actionPublish)
-
-        self.multistylerDialog = MultistylerDialog()
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
-        self.multistylerDialog.hide()        
-
-        self.actionMultistyler = QAction(QCoreApplication.translate("GeocatBridge", "Multistyler"), self.iface.mainWindow())
-        self.actionMultistyler.setObjectName("multistyler")
-        self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
-        self.iface.addPluginToMenu("GeoCatBridge", self.actionMultistyler)
-
-        self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
-
-        QgsProject.instance().layerWasAdded.connect(self.layerWasAdded)
+        self.iface.addPluginToWebMenu("GeoCatBridge", self.actionPublish)
+        self.iface.addWebToolBarIcon(self.actionPublish)
 
         QgsApplication.processingRegistry().addProvider(self.provider)
 
@@ -72,25 +49,12 @@ class GeocatBridge:
 
         removeTempFolder()
                 
-        self.iface.removePluginMenu("GeoCatBridge", self.actionPublish)
-        self.iface.removePluginMenu("GeoCatBridge", self.actionMultistyler)
-    
-        self.iface.currentLayerChanged.disconnect(self.multistylerDialog.updateForCurrentLayer)
-
-        QgsProject.instance().layerWasAdded.disconnect(self.layerWasAdded)
-
-        for layer, func in self._layerSignals.items():
-            layer.styleChanged.disconnect(func)
+        self.iface.removePluginWebMenu("GeoCatBridge", self.actionPublish)
+        self.iface.removeWebToolBarIcon(self.actionPublish)
 
         QgsApplication.processingRegistry().removeProvider(self.provider)
 
         self.iface.removeToolbar("GeoCatBridge")
-
-    _layerSignals = {}
-
-    def layerWasAdded(self, layer):
-        self._layerSignals[layer] = partial(self.multistylerDialog.updateLayer, layer) 
-        layer.styleChanged.connect(self._layerSignals[layer])
     
     def publishClicked(self):
         dialog = BridgeDialog(self.iface.mainWindow())
