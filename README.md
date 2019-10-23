@@ -16,6 +16,8 @@ To install, follow these steps:
 
 - Start QGIS and you will find the Geocat Bridge plugin in the plugins menu. If it's not available yet, activate it in the QGIS Plugin Manager.
 
+- When updating to a newer version you may run into challenges due to changed configuration parameters. Go to QGIS settings > Advanced settings, remove the 'geocatbridge' group and restart QGIS.
+
 This plugin is compatible with QGIS 3.4 or later.
 
 ## Using GeoCat Bridge
