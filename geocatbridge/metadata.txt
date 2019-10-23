@@ -1,12 +1,16 @@
 [general]
 name=GeoCatBridge
-description=Plugin to interact with publish data and metadata to different catalogs
-category=Plugins
+about=Easy publication of data and metadata from QGIS.
+description=Plugin to publish data and metadata to different catalogs.
+
+Note:The plugin uses the lxml library to provide XSLT transformations needed to convert metadata before it can be published. It ships with the Windows build of this library. If using on a different OS, download the corresponding lxml distribution from https://pypi.org/project/lxml/#files and install in the 'libs' folder, replacing the existing one.
+
+category=Web
 qgisMinimumVersion=3.6
 version=0.1
 
 author=GeoCat
-email=volayaf@gmail.com
+email=support@geocat.net
 
 icon=icons/geocat.png
 
