@@ -33,9 +33,6 @@ class GeocatBridge:
             QCoreApplication.installTranslator(self.translator)
 
     def initGui(self):
-        
-        self.toolbar = self.iface.addToolBar("GeoCatBridge")
-
         iconPublish = QIcon(os.path.join(os.path.dirname(__file__), "icons", "publish_button.png"))
         self.actionPublish = QAction(iconPublish, QCoreApplication.translate("GeocatBridge", "Publish"), self.iface.mainWindow())
         self.actionPublish.setObjectName("startPublish")
