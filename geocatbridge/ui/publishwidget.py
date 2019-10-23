@@ -103,6 +103,7 @@ class PublishWidget(BASE, WIDGET):
         self.btnPreview.clicked.connect(self.previewMetadata)
         self.btnPreview.setIcon(PREVIEW_ICON)
         self.btnSave.setIcon(SAVE_ICON)
+        self.btnSave.setVisible(False)
         self.btnValidate.clicked.connect(self.validateMetadata)
         self.btnUseConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
         self.btnAccessConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
