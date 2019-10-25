@@ -73,7 +73,7 @@ class GeoserverServer(ServerBase):
         styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
         for w in warnings:
-            self.logWarning(w, 'GeoCat Bridge')
+            self.logWarning(w)
         self.logInfo(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s")
                      % (layer.name(), styleFilename))        
         if layer.type() == layer.VectorLayer:
