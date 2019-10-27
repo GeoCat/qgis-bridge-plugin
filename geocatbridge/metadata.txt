@@ -15,9 +15,9 @@ icon=icons/geocat.png
 
 tags=GeoServer, MapServer, GeoNetwork, GeoCat
 
-homepage=https://www.geocat.net
-tracker=https://github.com/geocat/qgis-geocatbridge-plugin/issues
-repository=https://github.com/geocat/qgis-geocatbridge-plugin
+homepage=https://github.com/geocat/qgis-bridge-plugin
+tracker=https://github.com/geocat/qgis-bridge-plugin/issues
+repository=https://github.com/geocat/qgis-bridge-plugin
 
 experimental=True
 deprecated=False
