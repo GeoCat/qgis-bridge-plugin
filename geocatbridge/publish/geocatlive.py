@@ -49,10 +49,13 @@ class GeocatLiveServer(ServerBase):
         return self._geonetworkServer
 
     def setupForProject(self):
-        pass
+        self.geoserverServer().setupForProject()
     
     def prepareForPublishing(self, onlySymbology):
-        pass
+        self.geoserverServer().prepareForPublishing(onlySymbology)
+
+    def closePublishing(self):
+        self.geoserverServer().closePublishing()
 
     def publishLayerMetadata(self, layer, wms):
         self.geonetworkServer().publishLayerMetadata(layer, wms)
@@ -73,8 +76,8 @@ class GeocatLiveServer(ServerBase):
     def unpublishData(self, layer):
         return self.geoserverServer().unpublishData(layer)
 
-    def createGroup(self, groupname, layernames):
-        return self.geoserverServer().createGroup(groupname, layernames)
+    def createGroups(self, groups):
+        return self.geoserverServer().createGroups(groups)
 
     def styleExists(self, name):
         return self.geoserverServer().styleExists(name)
