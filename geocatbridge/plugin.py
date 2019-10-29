@@ -50,8 +50,6 @@ class GeocatBridge:
         self.iface.removeWebToolBarIcon(self.actionPublish)
 
         QgsApplication.processingRegistry().removeProvider(self.provider)
-
-        self.iface.removeToolbar("GeoCatBridge")
     
     def publishClicked(self):
         dialog = BridgeDialog(self.iface.mainWindow())
