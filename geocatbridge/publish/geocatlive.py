@@ -1,6 +1,8 @@
 import requests
 
 from .serverbase import ServerBase
+from .geoserver import GeoserverServer
+from .geonetwork import GeonetworkServer
 
 class GeocatLiveServer(ServerBase): 
 
@@ -35,7 +37,10 @@ class GeocatLiveServer(ServerBase):
 
     def geoserverServer(self):
         if self._geoserverUrl is None:
-            self._getUrls()
+            try:
+                self._getUrls()
+            except:
+                self._geoserverUrl = ""
         if self._geoserverServer is None:            
             self._geoserverServer = GeoserverServer("GeoServer", self._geoserverUrl, 
                                                 self.geoserverAuthid, workspace="geocatlive")
@@ -43,7 +48,10 @@ class GeocatLiveServer(ServerBase):
 
     def geonetworkServer(self):
         if self._geonetworkUrl is None:
-            self._getUrls()
+            try:
+                self._getUrls()
+            except:
+                self._geonetworkUrl = ""
         if self._geonetworkServer is None:
             self._geonetworkServer = GeonetworkServer("GeoNetwork", self._geonetworkUrl, self.geonetworkAuthid)
         return self._geonetworkServer
