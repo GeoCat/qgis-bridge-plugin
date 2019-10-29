@@ -8,7 +8,6 @@ class GeocatLiveServer(ServerBase):
 
     def __init__(self, name, userid="", geoserverAuthid="", geonetworkAuthid="", profile=0):
         super().__init__()
-        self.url = "GeocatLive server"
         self.name = name
         self.userid = userid
         self.profile = profile
@@ -21,6 +20,10 @@ class GeocatLiveServer(ServerBase):
         self._geoserverServer = None
         self._geonetworkServer = None
 
+    @property
+    def url(self):
+        return "GeocatLive server"
+        
     def _getUrls(self):
         url = "%s/%s" % (self.BASE_URL, self.userid)
         response = requests.get(url).json()
