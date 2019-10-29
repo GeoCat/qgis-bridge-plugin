@@ -163,6 +163,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
                 item = self.itemFromServerName(self.currentServer.name)
                 self.listServers.itemWidget(item).setServerName(server.name)
             addServer(server)
+            self.currentServer = server
             return True
         
     def itemFromServerName(self, name):
