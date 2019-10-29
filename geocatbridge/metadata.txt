@@ -1,7 +1,10 @@
 [general]
 name=GeoCatBridge
 description=Easy publication of data and metadata from QGIS.
-about=Plugin to publish data and metadata to different catalogs.
+about=GeoCat Bridge offers a one-click publishing experience for QGIS Desktop. Create great looking maps and publish them to GeoServer, MapServer and share via GeoNetwork 
+ opensource metadata catalog. Your data is uploaded as a GeoPackage or shared PostGIS database. GeoCat Bridge brings our celebrated symbology output to the QGIS Desktop to share
+ your cartography online.
+ 
  Note:The plugin uses the lxml library to provide XSLT transformations needed to convert metadata before it can be published. It ships with the Windows build of this library. If using on a different OS, download the corresponding lxml distribution from https://pypi.org/project/lxml/#files and install in the 'libs' folder, replacing the existing one.
 
 category=Web
