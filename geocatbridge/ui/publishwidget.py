@@ -316,6 +316,8 @@ class PublishWidget(BASE, WIDGET):
             self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
 
     def validateMetadata(self):
+        if self.currentLayer is None:
+            return
         self.storeMetadata()
         validator = QgsNativeMetadataValidator()
         result, errors = validator.validate(self.metadata[self.currentLayer])
@@ -329,6 +331,8 @@ class PublishWidget(BASE, WIDGET):
         dlg.showMessage()
 
     def openMetadataEditor(self, tab):
+        if self.currentLayer is None:
+            return        
         self.storeMetadata()
         metadata = self.metadata[self.currentLayer].clone()
         w = MetadataDialog(metadata, tab, self)
@@ -414,6 +418,8 @@ class PublishWidget(BASE, WIDGET):
         server.openPreview(names, sbbox, canvasCrs.authid())
 
     def previewMetadata(self):
+        if self.currentLayer is None:
+            return        
         html = self.currentLayer.htmlMetadata()
         dlg = QgsMessageOutput.createMessageOutput()
         dlg.setTitle("Layer metadata")
