@@ -9,7 +9,7 @@ about=GeoCat Bridge offers a one-click publishing experience for QGIS Desktop. C
 
 category=Web
 qgisMinimumVersion=3.6
-version=0.1
+version=4.0
 
 author=GeoCat
 email=support@geocat.net
