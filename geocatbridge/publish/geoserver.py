@@ -55,6 +55,8 @@ class GeoserverServer(ServerBase):
         self.setupForProject()
         if self.workspace is None and not onlySymbology:
             self.deleteWorkspace()
+        self.uploadedDatasets = {}
+        self.exportedLayers = {}
 
     def closePublishing(self):
         pass
@@ -78,7 +80,10 @@ class GeoserverServer(ServerBase):
                      % (layer.name(), styleFilename))        
         if layer.type() == layer.VectorLayer:
             if self.storage == self.UPLOAD_DATA:
-                filename = exportLayer(layer, fields, log = self)
+                if layer.source() not in self.exportedLayers:
+                    path = exportLayer(layer, fields, log = self)
+                    self.exportedLayers[layer.source()] = path
+                filename = self.exportedLayers[layer.source()]
                 self._publishVectorLayerFromFile(filename, layer.name(), layer.crs().authid(), styleFilename, layer.name())
             else:
                 try:
@@ -90,7 +95,10 @@ class GeoserverServer(ServerBase):
                 self._publishVectorLayerFromPostgis(db, layer.crs().authid(), 
                                         layer.name(), styleFilename, layer.name())
         elif layer.type() == layer.RasterLayer:
-            filename = exportLayer(layer, fields, log = self)            
+            if layer.source() not in self.exportedLayers:
+                path = exportLayer(layer, fields, log = self)
+                self.exportedLayers[layer.source()] = path
+            filename = self.exportedLayers[layer.source()]
             self._publishRasterLayer(filename, styleFilename, layer.name(), layer.name())
 
     def testConnection(self):
@@ -113,19 +121,28 @@ class GeoserverServer(ServerBase):
         self._ensureWorkspaceExists()
         self.deleteLayer(layername)
         self._publishStyle(stylename, style)
-        #feedback.setText("Publishing data for layer %s" % layername)
-        with open(filename, "rb") as f:
-            url = "%s/workspaces/%s/datastores/%s/file.gpkg?update=overwrite" % (self.url, self._workspace, layername)
-            self.request(url, f.read(), "put")
-        conn = sqlite3.connect(filename)
-        cursor = conn.cursor()
-        cursor.execute("SELECT table_name FROM gpkg_geometry_columns")
-        tablename = cursor.fetchall()[0][0]
-        url = "%s/workspaces/%s/datastores/%s/featuretypes/%s.json" % (self.url, self._workspace, layername, tablename)
+        isDataUploaded = filename in self.uploadedDatasets        
+        if not isDataUploaded:
+            with open(filename, "rb") as f:
+                self._deleteDatastore(layername)
+                url = "%s/workspaces/%s/datastores/%s/file.gpkg?update=overwrite" % (self.url, self._workspace, layername)
+                self.request(url, f.read(), "put")            
+            conn = sqlite3.connect(filename)
+            cursor = conn.cursor()
+            cursor.execute("SELECT table_name FROM gpkg_geometry_columns")
+            tablename = cursor.fetchall()[0][0]
+            self.uploadedDatasets[filename] = (layername, tablename)
+        datasetName, geoserverLayerName = self.uploadedDatasets[filename]
+        url = "%s/workspaces/%s/datastores/%s/featuretypes/%s.json" % (self.url, self._workspace, datasetName, geoserverLayerName)
         r = self.request(url)
         ft = r.json()
         ft["featureType"]["name"] = layername
-        r = self.request(url, ft, "put")
+        ft["featureType"]["title"] = layername        
+        if isDataUploaded:
+            url = "%s/workspaces/%s/datastores/%s/featuretypes" % (self.url, self._workspace, datasetName)
+            r = self.request(url, ft, "post")
+        else:
+            r = self.request(url, ft, "put")
         self.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
         self._setLayerStyle(layername, stylename)
 
@@ -232,10 +249,18 @@ class GeoserverServer(ServerBase):
         except ConnectionError:
             return False
 
-    def deleteLayer(self, name):
+    def _deleteDatastore(self, name):
+        url = "%s/workspaces/%s/datastores/%s?recurse=true" % (self.url, self._workspace, name)
+        try:
+            r = self.request(url, method="delete")
+        except:
+            pass
+
+    def deleteLayer(self, name, recurse=True):
         if self.layerExists(name):
-            url = "%s/workspaces/%s/layers/%s.json?recurse=true" % (self.url, self._workspace, name)        
-            r = self.request(url, method="delete")        
+            recurseParam = 'recurse=true' if recurse else ""
+            url = "%s/workspaces/%s/layers/%s.json?%s" % (self.url, self._workspace, name, recurseParam)
+            r = self.request(url, method="delete")
         
     def openPreview(self, names, bbox, srs):
         url = self.layerPreviewUrl(names, bbox, srs)
