@@ -128,7 +128,7 @@ class PublishTask(QgsTask):
                     w, e = self.metadataServer.loggedInfo()
                     warnings.extend(w)
                     errors.extend(e)
-                self.results[name] = (set(warnings), errors)
+                self.results[name] = (set(warnings), set(errors))
 
             if self.geodataServer is not None:            
                 groups = self._layerGroups(self.layers)                            
