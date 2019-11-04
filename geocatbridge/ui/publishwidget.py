@@ -433,34 +433,66 @@ class PublishWidget(BASE, WIDGET):
         server.openMetadata(uuid)
 
     def publish(self):
-        progressMessageBar = self.bar.createMessage(self.tr("Publishing layers"))
-        progress = QProgressBar()
-        progress.setMaximum(100)        
-        progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
-        progressMessageBar.layout().addWidget(progress)
-        self.bar.pushWidget(progressMessageBar, Qgis.Info)
-        QCoreApplication.processEvents()
-        task = self.getPublishTask(self.parent)
-        task.progressChanged.connect(progress.setValue)
-        ret = execute(task.run)            
-        self.bar.clearWidgets()
-        task.finished(ret)
-        if task.exception is not None:        
+        if self.validateBeforePublication():
+            progressMessageBar = self.bar.createMessage(self.tr("Publishing layers"))
+            progress = QProgressBar()
+            progress.setMaximum(100) 
+            progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
+            progressMessageBar.layout().addWidget(progress)
+            self.bar.pushWidget(progressMessageBar, Qgis.Info)
+            QCoreApplication.processEvents()
+            task = self.getPublishTask(self.parent)
+            task.progressChanged.connect(progress.setValue)
+            ret = execute(task.run)            
             self.bar.clearWidgets()
-            self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
-            QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
-        self.updateLayersPublicationStatus(task.geodataServer is not None, task.metadataServer is not None)
+            task.finished(ret)
+            if task.exception is not None:        
+                self.bar.clearWidgets()
+                self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
+                QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
+            self.updateLayersPublicationStatus(task.geodataServer is not None, task.metadataServer is not None)
 
     def publishOnBackground(self):
-        self.parent.close()
-        task = self.getPublishTask(iface.mainWindow())
-        def _finished():
-            if task.exception is not None:                    
-                iface.messageBar().pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
-                QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
-        task.taskTerminated.connect(_finished)
-        QgsApplication.taskManager().addTask(task)
-        QCoreApplication.processEvents()
+        if self.validateBeforePublication():
+            self.parent.close()
+            task = self.getPublishTask(iface.mainWindow())
+            def _finished():
+                if task.exception is not None:                    
+                    iface.messageBar().pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
+                    QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
+            task.taskTerminated.connect(_finished)
+            QgsApplication.taskManager().addTask(task)
+            QCoreApplication.processEvents()
+
+    def validateBeforePublication(self):
+        names = []
+        errors = set()
+        for i in range(self.listLayers.count()):            
+            item = self.listLayers.item(i)
+            widget = self.listLayers.itemWidget(item)
+            if widget.checked():
+                name = widget.name()
+                if name in names:
+                    errors.add("Several layers with the same name")
+                names.append(name)
+        
+        if errors:
+            txt = '''<p><b>Cannot publish data.</b></p>
+                    <p>The following issues were found:<p><ul><li>%s</li></ul>
+                    ''' % "</li>%s<li>".join(errors)
+            dlg = QgsMessageOutput.createMessageOutput()
+            dlg.setTitle("Publish")
+            dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
+            dlg.showMessage()
+            return False
+        else:
+            return True
+
+
+
+
+
+
 
     def getPublishTask(self, parent):
         if self.comboGeodataServer.currentIndex() != 0:
