@@ -73,11 +73,11 @@ class PublishReportDialog(BASE, WIDGET):
 
     def openDetails(self, name):
         warnings, errors = self.results[name]
-        w = "<br>".join(warnings)
-        e = "<br>".join(errors)
-        txt = "<b>%s</b><br>%s<br><b>%s</b><br>%s" % (self.tr("Warnings:"), w, self.tr("Errors:"), e)
+        w = "<br><br>".join(warnings)
+        e = "<br><br>".join(errors)
+        txt = "<p><b>%s</b></p>%s<p><b>%s</b></p>%s" % (self.tr("Warnings:"), w, self.tr("Errors:"), e)
         dlg = QgsMessageOutput.createMessageOutput()
-        dlg.setTitle(self.tr("Layer details"))
+        dlg.setTitle(self.tr("Wanings / Errors"))
         dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
         dlg.showMessage()
 

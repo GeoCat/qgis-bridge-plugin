@@ -446,7 +446,7 @@ class PublishWidget(BASE, WIDGET):
             ret = execute(task.run)            
             self.bar.clearWidgets()
             task.finished(ret)
-            if task.exception is not None:        
+            if task.exception is not None:
                 self.bar.clearWidgets()
                 self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
                 QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
@@ -472,6 +472,9 @@ class PublishWidget(BASE, WIDGET):
             widget = self.listLayers.itemWidget(item)
             if widget.checked():
                 name = widget.name()
+                for c in "?&=#":
+                    if c in name:
+                        errors.add("Unsupported character in layer name: " + c)
                 if name in names:
                     errors.add("Several layers with the same name")
                 names.append(name)
@@ -479,7 +482,7 @@ class PublishWidget(BASE, WIDGET):
         if errors:
             txt = '''<p><b>Cannot publish data.</b></p>
                     <p>The following issues were found:<p><ul><li>%s</li></ul>
-                    ''' % "</li>%s<li>".join(errors)
+                    ''' % "</li><li>".join(errors)
             dlg = QgsMessageOutput.createMessageOutput()
             dlg.setTitle("Publish")
             dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
@@ -487,12 +490,6 @@ class PublishWidget(BASE, WIDGET):
             return False
         else:
             return True
-
-
-
-
-
-
 
     def getPublishTask(self, parent):
         if self.comboGeodataServer.currentIndex() != 0:

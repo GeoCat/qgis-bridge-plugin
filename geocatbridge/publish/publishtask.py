@@ -1,4 +1,5 @@
 import traceback
+import string
 
 from qgis.core import (
     QgsTask, 
@@ -81,14 +82,15 @@ class PublishTask(QgsTask):
             if self.geodataServer is not None:
                 self.geodataServer.prepareForPublishing(self.onlySymbology)
 
-            self.results = {}
-            warnings, errors = [], []
+            self.results = {}            
             for i, name in enumerate(self.layers):
                 if self.isCanceled():
                     return False
+                warnings, errors = [], []
                 self.setProgress(i * 100 / len(self.layers))
                 try:                       
                     layer = self.layerFromName(name)
+                    warnings.extend(self.validateLayer(layer))
                     validates, _ = validator.validate(layer.metadata())
                     validates = True
                     if self.geodataServer is not None:
@@ -140,6 +142,14 @@ class PublishTask(QgsTask):
             self.exception = traceback.format_exc()
             return False
 
+    def validateLayer(self, layer):
+        warnings = []
+        name = layer.name()        
+        correct = {c for c in string.ascii_letters + string.digits + "-_."}
+        if not {c for c in name}.issubset(correct):                
+            warnings.append("Layer name contain non-ascii characters that might cause issues")
+        return warnings
+
     def autofillMetadata(self, layer):
         metadata = layer.metadata()
         if not (bool(metadata.title())):
@@ -158,7 +168,7 @@ class PublishTask(QgsTask):
             metadata.extent().setSpatialExtents([extent])
         layer.setMetadata(metadata)
 
-    def finished(self, result):      
+    def finished(self, result): 
         if result:
             dialog = PublishReportDialog(self.results, self.onlySymbology, 
                                         self.geodataServer, self.metadataServer,
