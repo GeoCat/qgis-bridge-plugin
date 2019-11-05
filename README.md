@@ -4,9 +4,13 @@ GeoCat Bridge making publishing geospatial data on the internet as easy as hitti
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.md)
 
+## QGIS Plugin repository
+
+The plugin can be added to QGIS through the [QGIS Plugin Repository](https://plugins.qgis.org/plugins/geocatbridge/). The plugin is currently registered as 'experimental'.
+
 ## Installation
 
-To install, follow these steps:
+To install the latest version from github, follow these steps:
 
 - Clone this repository using `git clone --recursive`.
 
