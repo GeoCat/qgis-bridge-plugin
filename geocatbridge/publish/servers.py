@@ -19,21 +19,23 @@ def readServers():
         if value is not None:
             storedServers = json.loads(value)            
             for serverDef in storedServers:
-                s = _serverFromDefinition(serverDef)
+                s = serverFromDefinition(serverDef)
                 _servers[s.name] = s
     except KeyError:
         pass
 
-def _serverFromDefinition(defn):
+def serverFromDefinition(defn):
     return globals()[defn[0]](**defn[1])
 
-def _updateStoredServers():
+def serversAsJsonString():
     servList = []
     for s in _servers.values():
         d = {k:v for k,v in s.__dict__.items() if not k.startswith("_")}
         servList.append((s.__class__.__name__, d)) 
+    return json.dumps(servList)
 
-    QSettings().setValue(SERVERS_SETTING, json.dumps(servList))
+def _updateStoredServers():  
+    QSettings().setValue(SERVERS_SETTING, serversAsJsonString())
 
 def allServers():
     return _servers

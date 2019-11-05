@@ -194,7 +194,7 @@
             </widget>
            </item>
            <item row="6" column="0">
-            <widget class="QLabel" name="label_7">
+            <widget class="QLabel" name="labelGeoserverDatastore">
              <property name="text">
               <string>Datastore</string>
              </property>
@@ -245,28 +245,24 @@
            <item row="1" column="2" colspan="2">
             <widget class="QLineEdit" name="txtGeoserverUrl"/>
            </item>
-           <item row="5" column="2" colspan="2">
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QRadioButton" name="radioUploadData">
-               <property name="text">
-                <string>Upload data</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioStoreInPostgis">
-               <property name="text">
-                <string>Store in PostGIS</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
            <item row="6" column="2" colspan="2">
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <layout class="QHBoxLayout" name="datastoreLayout">
              <item>
-              <widget class="QComboBox" name="comboDatastore"/>
+              <widget class="QComboBox" name="comboGeoserverDatabase"/>
+             </item>
+             <item>
+              <widget class="QToolButton" name="btnRefreshDatabases">
+               <property name="text">
+                <string>Refresh</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="btnAddDatastore">
+               <property name="text">
+                <string>Add datastore</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -275,6 +271,25 @@
              <property name="text">
               <string>Connect</string>
              </property>
+            </widget>
+           </item>
+           <item row="5" column="2" colspan="2">
+            <widget class="QComboBox" name="comboGeoserverDataStorage">
+             <item>
+              <property name="text">
+               <string>File based</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Import into a PostGIS DB (import handled by Bridge)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Import into a PostGIS DB (import handled by GeoServer)</string>
+              </property>
+             </item>
             </widget>
            </item>
           </layout>
@@ -712,6 +727,36 @@
       <widget class="QPushButton" name="buttonRemove">
        <property name="text">
         <string>Remove server</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnSaveServers">
+       <property name="text">
+        <string>Save servers</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnLoadServers">
+       <property name="text">
+        <string>Load servers</string>
        </property>
       </widget>
      </item>

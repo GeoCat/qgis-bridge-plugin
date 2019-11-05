@@ -1,4 +1,5 @@
 import os
+import json
 from qgis.PyQt import uic
 from geocatbridge.publish.servers import *
 from geocatbridge.publish.geonetwork import GeonetworkServer
@@ -13,7 +14,8 @@ from qgis.PyQt.QtWidgets import (
     QLabel, 
     QMenu, 
     QListWidgetItem, 
-    QWidget
+    QWidget,
+    QFileDialog
 )
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
@@ -34,20 +36,20 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.addAuthWidgets()
         self.buttonRemove.clicked.connect(self.buttonRemoveClicked)
         self.populateServers()
-        self.populatePostgisCombo()
         self.listServers.currentItemChanged.connect(self.currentServerChanged)
         self.bar = QgsMessageBar()
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.layout().insertWidget(0, self.bar)
         self.setCurrentServer(None)
         self.buttonSave.clicked.connect(self.saveButtonClicked)
-        self.radioUploadData.toggled.connect(self.datastoreChanged)
-        self.radioLocalPath.toggled.connect(self.mapserverStorageChanged)
+        self.comboGeoserverDataStorage.currentIndexChanged.connect(self.geoserverDatastorageChanged)        
         self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
         self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
         self.btnConnectGeocatLive.clicked.connect(self.testConnectionGeocatLive)
         self.btnConnectCsw.clicked.connect(self.testConnectionCsw)
         self.chkManagedWorkspace.stateChanged.connect(self.managedWorkspaceChanged)
+        self.btnAddDatastore.clicked.connect(self.addPostgisDatastore)
+        self.btnRefreshDatabases.clicked.connect(self.populatePostgisComboWithGeoserverPostgisServers)
 
         self.txtCswName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtCswNode.textChanged.connect(self._setCurrentServerHasChanges)
@@ -63,14 +65,56 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.txtGeoserverWorkspace.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeocatLiveIdentifier.textChanged.connect(self._setCurrentServerHasChanges)
         self.comboMetadataProfile.currentIndexChanged.connect(self._setCurrentServerHasChanges)
-        self.comboDatastore.currentIndexChanged.connect(self._setCurrentServerHasChanges)
+        self.comboGeoserverDatabase.currentIndexChanged.connect(self._setCurrentServerHasChanges)
 
         self.fileMapserver.setStorageMode(QgsFileWidget.GetDirectory)
 
-    def datastoreChanged(self, checked):
-        self.comboDatastore.setEnabled(not checked)
-        #self.btnNewDatastore.setEnabled(not checked)
+        self.btnSaveServers.clicked.connect(self.saveServers)
+        self.btnLoadServers.clicked.connect(self.loadServers)
+
+    def saveServers(self):            
+        filename = QFileDialog.getSaveFileName(self, self.tr("Save servers"), "", '*.json')[0]        
+        if filename:
+            if not filename.endswith("json"):
+                filename += ".json"
+            with open(filename, "w") as f:
+                f.write(serversAsJsonString())
+
+    def loadServers(self):
+        filename = QFileDialog.getOpenFileName(self, self.tr("Load servers"), "", '*.json')[0]
+        if filename:
+            with open(filename) as f:
+                servers = json.load(f)
+            for server in servers:                
+                s = serverFromDefinition(server)
+                if s.name not in allServers():
+                    self.addServerItem(s)
+                    addServer(s)
+    def geoserverDatastorageChanged(self):
+        storage = self.comboGeoserverDataStorage.currentIndex()
+        if storage == GeoserverServer.POSTGIS_MANAGED_BY_BRIDGE:
+            self.populatePostgisComboWithPostgisServers()
+            self.comboGeoserverDatabase.setVisible(True)
+            self.btnAddDatastore.setVisible(False)
+            self.labelGeoserverDatastore.setVisible(True)
+            self.btnRefreshDatabases.setVisible(False)
+        elif storage == GeoserverServer.POSTGIS_MANAGED_BY_GEOSERVER:
+            self.comboGeoserverDatabase.setVisible(True)
+            self.btnAddDatastore.setVisible(True)
+            self.labelGeoserverDatastore.setVisible(True)
+            self.btnRefreshDatabases.setVisible(True)
+            self.populatePostgisComboWithGeoserverPostgisServers()
+
+        else:
+            self.comboGeoserverDatabase.setVisible(False)
+            self.btnAddDatastore.setVisible(False)
+            self.labelGeoserverDatastore.setVisible(False) 
+            self.btnRefreshDatabases.setVisible(False)
         self._setCurrentServerHasChanges()
+
+    def addPostgisDatastore(self):
+        pass
+        #TODO
 
     def managedWorkspaceChanged(self, state):
         self.txtGeoserverWorkspace.setEnabled(state == Qt.Unchecked)
@@ -182,12 +226,11 @@ class ServerConnectionsWidget(BASE, WIDGET):
         else:
             workspace = self.txtGeoserverWorkspace.text().strip()
         authid = self.geoserverAuth.configId()
-        if self.radioUploadData.isChecked():
-            storage = GeoserverServer.UPLOAD_DATA
-            postgisdb = None
-        else:
-            storage = GeoserverServer.STORE_IN_POSTGIS
-            postgisdb = self.comboDatastore.currentText()
+        storage = self.comboGeoserverDataStorage.currentIndex()
+        postgisdb = None
+        if storage in [GeoserverServer.POSTGIS_MANAGED_BY_BRIDGE, GeoserverServer.POSTGIS_MANAGED_BY_GEOSERVER]:            
+            postgisdb = self.comboGeoserverDatabase.currentText()                
+        
         if "" in [name, url, workspace]:
             return None
         server = GeoserverServer(name, url, authid, storage, workspace, postgisdb)
@@ -330,12 +373,28 @@ class ServerConnectionsWidget(BASE, WIDGET):
             item = self.addServerItem(server)
             self.listServers.setCurrentItem(item)
 
-    def populatePostgisCombo(self):
-        self.comboDatastore.clear()
+    def populatePostgisComboWithPostgisServers(self):
+        self.comboGeoserverDatabase.clear()
         servers = allServers().values()
         for s in servers:
             if isinstance(s, PostgisServer):
-                self.comboDatastore.addItem(s.name)
+                self.comboGeoserverDatabase.addItem(s.name)
+
+    def populatePostgisComboWithGeoserverPostgisServers(self):
+        url = self.txtGeoserverUrl.text().strip()
+        self.comboGeoserverDatabase.clear()
+        server = self.createGeoserverServer()
+        if server is None:
+            self.bar.pushMessage(self.tr("Wrong values in server definition"), level=Qgis.Warning, duration=5)
+            return
+        try:
+            datastores = execute(server.postgisDatastores)
+        except:
+            datastores = []
+        if datastores:
+            self.comboGeoserverDatabase.addItems(datastores)
+        else:
+            self.bar.pushMessage(self.tr("No PostGIS datastores in server or could not retrieve them"), level=Qgis.Warning, duration=5)
 
     def _setCurrentServerHasChanges(self):
         self.currentServerHasChanges = True
@@ -355,11 +414,12 @@ class ServerConnectionsWidget(BASE, WIDGET):
                 self.txtGeoserverWorkspace.setText(server.workspace)
                 self.chkManagedWorkspace.setChecked(False)
             self.geoserverAuth.setConfigId(server.authid)
-            self.populatePostgisCombo()
+            self.comboGeoserverDataStorage.blockSignals(True)
+            self.comboGeoserverDataStorage.setCurrentIndex(server.storage)
+            self.geoserverDatastorageChanged()            
             if server.postgisdb is not None:
-                self.comboDatastore.setCurrentText(server.postgisdb)
-            self.radioUploadData.setChecked(server.storage == server.UPLOAD_DATA)
-            self.radioStoreInPostgis.setChecked(server.storage == server.STORE_IN_POSTGIS)                
+                self.comboGeoserverDatabase.setCurrentText(server.postgisdb)
+            self.comboGeoserverDataStorage.blockSignals(False)
         elif isinstance(server, MapserverServer):
             self.stackedWidget.setCurrentWidget(self.widgetMapserver)
             self.txtMapserverName.setText(server.name)            

@@ -40,12 +40,14 @@ class ServerBase():
         password = authConfig.config('password')
         return username, password
 
-    def request(self, url, data=None, method="get", headers={}):
+    def request(self, url, data=None, method="get", headers=None, files=None):
+        headers = headers or {}
+        files = files or {}
         username, password = self.getCredentials()
         req_method = getattr(requests, method.lower())
         if isinstance(data, dict):
             data = json.dumps(data)
             headers["content-type"] = "application/json"
-        r = req_method(url, headers=headers, data=data, auth=(username, password))
+        r = req_method(url, headers=headers, files=files, data=data, auth=(username, password))
         r.raise_for_status()
         return r
