@@ -23,7 +23,7 @@ class GeoserverServer(ServerBase):
     UPLOAD_DATA = 0
     STORE_IN_POSTGIS = 1
 
-    def __init__(self, name, url="", authid="", storage=0, workspace="", postgisdb=None):
+    def __init__(self, name, url="", authid="", storage=0, workspace=None, postgisdb=None):
         super().__init__()
         self.name = name
         

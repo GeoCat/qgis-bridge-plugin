@@ -41,7 +41,7 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="widgetGeocatLive">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -187,7 +187,11 @@
             </widget>
            </item>
            <item row="4" column="2">
-            <widget class="QLineEdit" name="txtGeoserverWorkspace"/>
+            <widget class="QLineEdit" name="txtGeoserverWorkspace">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item row="6" column="0">
             <widget class="QLabel" name="label_7">
@@ -229,6 +233,9 @@
             <widget class="QCheckBox" name="chkManagedWorkspace">
              <property name="text">
               <string>Managed workspace</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>

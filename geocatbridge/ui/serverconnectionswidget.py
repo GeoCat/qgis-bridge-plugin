@@ -74,6 +74,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
 
     def managedWorkspaceChanged(self, state):
         self.txtGeoserverWorkspace.setEnabled(state == Qt.Unchecked)
+        self._setCurrentServerHasChanges()
 
     def mapserverStorageChanged(self, checked):
         self.labelLocalFolder.setVisible(checked)
