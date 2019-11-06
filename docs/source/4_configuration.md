@@ -1,5 +1,16 @@
 # Configuration
 
+In order to use bridge you need to set up a series of server connections. Some other configuration options are available to set sensible defaults. For advanced users there is also a configureation file in the installation folder to set advanced options, check the configuration file itself for additional documentation.
+
+Settings are available in the ArcMAP configuration wizard, the ArcMAP bridge toolbar or the second tab in the QGIS publish window.
+
+## Server connections
+
+![Add or edit connections](./img/wizard4.png)
+
+Here you can add or edit your GIS server connections, click on the
+*Open* button to go the server connection screen, see [Server Connections](7_server_configuration).
+
 ## Proxy to access the internet
 
 Bridge needs internet access, this section may be relevant if your
@@ -12,20 +23,8 @@ In Arcmap configure the proxy server in the bridge settings.
 
 In QGIS the proxy settings are available under generic QGIS settings.
 
-## Server connections
+![QGIS proxy setting](./img/qgis_proxy_setting.png)
 
-![Add or edit connections](./img/wizard4.png)
-
-Here you can add or edit your GIS server connections, click on the
-*Open* button to go the server connection screen, see [Server Connections](7_server_configuration).
-
-## Metadata configuration
-
-![Metadata configuration](./img/wizard13.png)
-
-Here you can enter the default metadata contact, license and language.
-When a layer does not have any metadata defined Bridge will use these
-values while publishing to the map and catalog servers.
 
 
 

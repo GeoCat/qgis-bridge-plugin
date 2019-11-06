@@ -49,16 +49,8 @@ with the requirements of INSPIRE.
 
 ### Client requirements
 
-Bridge supports the following versions of ArcGIS® Desktop (including
-minor releases such as 10.5.1):
-
--   10.1
--   10.2
--   10.3
--   10.4
--   10.5
--   10.6
--   10.7
+Bridge supports ArcGIS® Desktop versions 10.1 till 10.7 (including
+minor releases such as 10.5.1), QGIS versions 3.6 till 3.8. Bridge for ArcGIS Pro is not yet available.
 
 ### Server requirements
 
@@ -77,14 +69,6 @@ Requirement for MapServer are:
     from 5.6.0 is expected to operate fine in most of the cases.
 -   FTP connection or file write access to MapServer project path
 
-::: tip Note
-
-When using MapServer 5.X and PostGIS 2.X it is required to load
-legacy.sql from your PostGIS installation folder on your spatial
-database.
-[Legacy.sql](http://postgis.net/docs/PostGIS_FAQ.html#legacy_faq) can be
-found in in your PostGIS installation folder.
-:::
 
 #### GeoServer
 
