@@ -1,5 +1,7 @@
 # Bridge Command Line Interface (CLI)
 
+Bridge CLI is currently only available for ArcMAP. In QGIS, bridge can be used as a module in QGIS Processing modeler.
+
 The GeoCat Bridge Command Line Interface (CLI) allows GeoCat Bridge
 users to automate the publishing process, by setting up scheduled tasks
 to publish ArcGIS map documents to a map server and publish the

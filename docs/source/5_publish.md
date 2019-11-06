@@ -7,9 +7,8 @@ GeoCat Bridge supports the following layer types:
 
 -   Vector, featureclass from any source
 -   Raster, raster from any source
--   Raster mosaic[^1]
 -   Annotation layers
--   Layer groups[^2]
+-   Layer groups (in workspace mode)
 
 ## How to publish
 
@@ -195,12 +194,12 @@ Exports each layer in seperate SLD file. Currently supported SLD
 versions are:
 
 -   SLD version 1.0.0
--   SLD version 1.0.0 with GeoServer vendor extensions[^3]
+-   SLD version 1.0.0 with GeoServer vendor extensions
 
 For cases where the symbology is dependent on a attribute value, you can
 configure the SLD export to truncate the attribute names to 10
 characters, in case you plan to use the SLD with a Shapefile
-datasource[^4].
+datasource.
 
 ### ISO19319-XML
 
@@ -211,17 +210,4 @@ documents. Select profile:
 -   Dutch version 1.3.1
 -   Inspire
 
-**Footnotes**
 
-[^1]: Only for GeoServer and requires the configuration file setting
-    `file_raster_by_reference`{.interpreted-text role="ref"}
-
-[^2]: When publishing to GeoServer it is required to enable
-    `managed-workspace-mode`{.interpreted-text role="ref"}
-
-[^3]: For more information see the GeoServer
-    [docs](http://docs.geoserver.org/latest/en/user/styling/sld/extensions/index.html)
-
-[^4]: The Shapefile file format can only handle attribute name (field
-    names) with a length up to ten characters, for more information see
-    [Wikipedia](https://en.wikipedia.org/wiki/Shapefile#Data_storage)

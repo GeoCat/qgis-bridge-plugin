@@ -2,12 +2,12 @@
 
 ## Tools
 
+These configuration options are currently only available for ArcMAP.
+
 Clicking the *Tools* button in Bridge will reveal all the configuration
 menus available in Bridge:
 
 -   [Options](#options): shows Bridge options.
--   [Server Connections](7_server_configuration): to configure servers
-    to publish map data and metadata.
 -   [Contacts](#contacts): to manage contacts.
 -   [Data Licenses](#data-licenses): to manage data
     licenses.
@@ -15,7 +15,6 @@ menus available in Bridge:
 ![Tools menu](./img/tools_menu.png)
 
 ## Options
-
 
 ### Publishing
 

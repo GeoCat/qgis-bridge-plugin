@@ -1,25 +1,22 @@
-# Bridge Behaviour
-
+# Bridge Conventions
 
 ## Naming
 
-The following section is both valid for GeoServer and MapServer. Replace
-GeoServer with MapServer and ignore the part about the datastore for
-MapServer.
+The following section is both valid for GeoServer and MapServer. 
 
-When publishing data to GeoServer Bridge uses the following naming
+When publishing data Bridge uses the following naming
 convention:
 
--   The ArcMap layer name is used for the GeoServer layer name, for this
+-   The ArcMap layer name is used for the layer name, for this
     the ArcMap layer name is escaped to make it a valid WMS/WFS/WCS
     layer name (replacing spaces with underscores, replacing special
     characters with underscores)
--   The ArcMap layer name is used for the GeoServer layer title. There
+-   The ArcMap layer name is used for the layer title. There
     is also the option to use the metadata title of the layer, configure
     this by setting `MetadataTitleAsOWSTitle` configuration parameter,
     see [MetadataTitleAsOWSTitle](6_configuration_extension.html#metadatatitleasowstitle)
 -   When using a file based datastore (such as Shapefile, GeoPackage or
-    GeoTiff) in GeoServer the name of the datastore will be set to the
+    GeoTiff) the name of the datastore will be set to the
     escaped ArcMap layer name
 -   The filename of the exported file (Shapefile, GeoPackage or GeoTiff)
     will be set to the escaped ArcMap layer name
@@ -28,7 +25,7 @@ note:: Bridge does not use the name of the original dataset on the
 server. The reason is that users can decide to apply a filter on a
 dataset, so each layer is published as a new dataset to the map server
 (this not the case when publishing by reference to an Oracle or ArcSDE
-datastore in GeoServer). This can potentially duplicate the data on your
+datastore). This can potentially duplicate the data on your
 server, if you are creating multiple layers based upon the same data
 set.
 
@@ -44,7 +41,7 @@ set.
 ### Example
 
 We have a layer named *\"States US\"* . When the layer *\"States US\"*
-is published to GeoServer in a Shapefile datastore this will be the
+is published in a Shapefile datastore this will be the
 result:
 
 | Type                                 | Name                       |
@@ -61,14 +58,7 @@ result:
 
 #### GeoServer
 
-When publishing your data to GeoServer, Bridge uses the GeoPackage
-format by default, when GeoPackage format is supported by GeoServer. See
-also [GeoPackage](12_geoserver_setup.html#geopackage). When Bridge detects
-that GeoServer is not supporting GeoPackage, Bridge will use Shapefile
-as the transport format. The advantage of using GeoPackage over
-Shapefile is that GeoPackage does not have a limit on the field name
-length, as is the case with Shapefiles (maximum field name length is 10
-characters).
+When publishing your data to GeoServer, Bridge uses the [GeoPackage](12_geoserver_setup.html#geopackage) format by default. 
 
 If you prefer to use Shapefile as the transport format, you can set the
 following `ForceShapefile` configuration option in the Bridge
@@ -174,7 +164,7 @@ the GeoServer metadata fields:
 |  OwsFees from Bridge.config file | Fees in workspace specific service settings for WMS (if OwsFees from Bridge.config file is filled, otherwise fees configuration from global workspace settings in GeoServer takes effect) |
 |  OwsAccessConstraints from Bridge.config file | AccessConstraints in workspace specific service settings for WMS (if OwsAccessConstraints from Bridge.config file is filled, otherwise AccessConstraints configuration from global workspace settings in GeoServer takes effect) |
 
-## Multiple styles per layer
+## Multiple styles per layer (ArcMAP only)
 
 Bridge supports multiple styles per layer, but only for GeoServer. When
 your map project contains multiple layers based on the same source data,

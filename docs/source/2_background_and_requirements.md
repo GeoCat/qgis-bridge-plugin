@@ -50,7 +50,7 @@ with the requirements of INSPIRE.
 ### Client requirements
 
 Bridge supports ArcGIS® Desktop versions 10.1 till 10.7 (including
-minor releases such as 10.5.1), QGIS versions 3.6 till 3.8. Bridge for ArcGIS Pro is not yet available.
+minor releases such as 10.5.1), QGIS versions 3.6 till 3.10. Bridge for ArcGIS Pro is not yet available.
 
 ### Server requirements
 
