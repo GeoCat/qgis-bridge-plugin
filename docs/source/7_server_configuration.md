@@ -2,8 +2,6 @@
 
 Configure your server connections to publish your data and metadata to.
 
-
-
 ## Add new connection
 
 Click *New* ![](./img/add_button.png) and choose one of the supported
@@ -88,22 +86,6 @@ Fill the form fields.
 |      | Upload data                     | Upload data to GeoServer using Shapefile or GeoPackage and GeoTIFF.    |
 |      | Store in PostGIS                | Store data in PostGIS through direct connection with PostGIS database. This option requires the database to be accessible locally (by ArcMAP).       |
 |      | Reference data                  | Publish data in GeoServer by referencing existing data from a database.      |
-
-<!-- 
-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--+
-
-With the option `Upload data` there is an additional option to select a
-File based storage or Database storage. To enable storage in a database
-select an existing GeoServer Datastore or create a new Datastore by
-clicking \"+\". The database connection details are relative to the
-remote GeoServer. There is no need to expose the database locally. The
-database user should have `create` and `write` privileges on the
-database.
-
-When using `Reference data`, Bridge currently only supports Oracle
-databases. Make sure to use MDSYS.SDO\_GEOMETRY in stead of
-SDE.ST\_GEOMETRY to store geometries in Oracle and the data is spatially
-indexed. Oracle layers can be exposed to ArcMAP via ArcSDE. -->
 
 ### Managed Workspace
 
