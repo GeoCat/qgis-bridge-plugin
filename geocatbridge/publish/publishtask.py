@@ -43,7 +43,10 @@ class PublishTask(QgsTask):
                     if subgroup is not None:
                         layers.append(subgroup)
             if layers:
-                return {"name": layerTreeGroup.name(), "layers": layers}
+                return {"name": layerTreeGroup.name(),
+                        "title": layerTreeGroup.customProperty("wmsTitle", layerTreeGroup.name()),
+                        "abstract": layerTreeGroup.customProperty("wmsAbstract", layerTreeGroup.name()),
+                        "layers": layers}
             else:
                 return None
         

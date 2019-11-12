@@ -292,7 +292,11 @@ class GeoserverServer(ServerBase):
             else:
                 layers.append({"@type": "layer", "name": "%s:%s" % (self._workspace, layer)})
 
-        groupdef = {"layerGroup":{"name": group["name"],"mode":"NAMED","publishables": {"published":layers}}}
+        groupdef = {"layerGroup":{"name": group["name"],
+                                "title": group["title"],
+                                "abstractTxt": group["abstract"],
+                                "mode":"NAMED",
+                                "publishables": {"published":layers}}}
         
         url = "%s/workspaces/%s/layergroups" % (self.url, self._workspace)
         try:
