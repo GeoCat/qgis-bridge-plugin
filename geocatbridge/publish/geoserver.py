@@ -448,5 +448,6 @@ class GeoserverServer(ServerBase):
         return datastores
         
 
-    def addPostgisDatastore():
-        pass
+    def addPostgisDatastore(self, datastoreDef):        
+        url = "%s/workspaces/%s/datastores/" % (self.url, self._workspace)
+        self.request(url, data=datastoreDef, method="post")

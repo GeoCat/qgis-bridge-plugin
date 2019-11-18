@@ -15,13 +15,15 @@ from qgis.PyQt.QtWidgets import (
     QMenu, 
     QListWidgetItem, 
     QWidget,
-    QFileDialog
+    QFileDialog,
+    QDialog
 )
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
 from qgis.gui import QgsMessageBar, QgsFileWidget, QgsAuthConfigSelect
 from qgis.core import Qgis
 from geocatbridge.utils.gui import execute
+from .newdataset import NewDatasetDialog
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'serverconnectionswidget.ui'))
 
@@ -113,8 +115,43 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self._setCurrentServerHasChanges()
 
     def addPostgisDatastore(self):
-        pass
-        #TODO
+        url = self.txtGeoserverUrl.text().strip()
+        server = self.createGeoserverServer()
+        if server is None:
+            self.bar.pushMessage(self.tr("Wrong values in server definition"), level=Qgis.Warning, duration=5)
+            return
+        dlg = NewDatasetDialog(self)
+        dlg.exec_()
+        name = dlg.name
+        if name is None:
+            return
+        def _entry(k, v):
+            return {"@key":k, "$":v}
+        ds = {   
+            "dataStore": {
+                "name": dlg.name,
+                "type": "PostGIS",
+                "enabled": True,
+                "connectionParameters": {
+                    "entry": [
+                        _entry("schema", dlg.schema),
+                        _entry("port", dlg.port),
+                        _entry("database", dlg.database),
+                        _entry("passwd", dlg.password),
+                        _entry("user", dlg.username),
+                        _entry("host", dlg.host),
+                        _entry("dbtype", "postgis")
+                    ]                        
+                }
+            }
+        }
+        try:
+            datastores = execute(lambda: server.addPostgisDatastore(ds))
+            self.populatePostgisComboWithGeoserverPostgisServers()
+        except:
+            self.bar.pushMessage(self.tr("Could not create new PostGIS dataset"), level=Qgis.Warning, duration=5)
+
+
 
     def managedWorkspaceChanged(self, state):
         self.txtGeoserverWorkspace.setEnabled(state == Qt.Unchecked)
