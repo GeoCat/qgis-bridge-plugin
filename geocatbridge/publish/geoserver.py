@@ -238,7 +238,6 @@ class GeoserverServer(ServerBase):
             }
             url = "%s/imports" % (self.url)
             ret = self.request(url, _import, "post")
-            print(ret.json())
             importId = ret.json()["import"]["id"]
             url = "%s/imports/%s/tasks" % (self.url, importId)
             with open(filename, "rb") as f:
@@ -254,17 +253,17 @@ class GeoserverServer(ServerBase):
             url = "%s/imports/%s" % (self.url, importId)
             self.request(url, method="post")
             layername = os.path.splitext(os.path.basename(filename))[0]
-            self.uploadedDatasets[filename] = (name, layername)
+            self.uploadedDatasets[filename] = (datastoreName, layername)
         datasetName, geoserverLayerName = self.uploadedDatasets[filename]
         url = "%s/workspaces/%s/datastores/%s/featuretypes/%s.json" % (self.url, self._workspace, datasetName, geoserverLayerName)
         r = self.request(url)
         ft = r.json()
         ft["featureType"]["name"] = name
-        ft["featureType"]["title"] = name        
-        url = "%s/workspaces/%s/datastores/%s/featuretypes" % (self.url, self._workspace, datasetName)
+        ft["featureType"]["title"] = name                
         try:
-            r = self.request(url, ft, "post")
-        except:
+            ftUrl = "%s/workspaces/%s/datastores/%s/featuretypes" % (self.url, self._workspace, datasetName)
+            r = self.request(ftpUrl, ft, "post")
+        except:            
             r = self.request(url, ft, "put")
         self.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
         self._setLayerStyle(name, name)
