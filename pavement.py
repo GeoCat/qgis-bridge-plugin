@@ -24,7 +24,14 @@ options(
             ".git"
         ]
     ),
+
+    sphinx = Bunch(
+        docroot = path('docs'),
+        sourcedir = path('docs/source'),
+        builddir = path('docs/build')
+    )
 )
+
 
 @task
 @cmdopts([
@@ -75,6 +82,7 @@ def read_requirements():
 ])
 def package(options):
     '''create package for plugin'''
+    builddocs(options)
     package_file = options.plugin.package_dir / ('%s.zip' % options.plugin.name)
     with zipfile.ZipFile(package_file, "w", zipfile.ZIP_DEFLATED) as f:
         if not hasattr(options.package, 'tests'):
@@ -101,3 +109,25 @@ def make_zip(zipFile, options):
             zipFile.write(path(root) / f, path(relpath) / f)
         filter_excludes(dirs)
 
+    for root, dirs, files in os.walk(options.sphinx.builddir):
+        for f in files:
+            relpath = os.path.join(options.plugin.name, "docs", os.path.relpath(root, options.sphinx.builddir))
+            zipFile.write(path(root) / f, path(relpath) / f)
+
+@task
+@cmdopts([
+    ('clean', 'c', 'clean out built artifacts first'),
+    ('sphinx_theme=', 's', 'Sphinx theme to use in documentation'),
+])
+def builddocs(options):
+    if getattr(options, 'clean', False):
+        options.sphinx.builddir.rmtree()
+    if getattr(options, 'sphinx_theme', False):
+        # overrides default theme by the one provided in command line
+        set_theme = "-D html_theme='{}'".format(options.sphinx_theme)
+    else:
+        # Uses default theme defined in conf.py
+        set_theme = ""
+    sh("sphinx-build -a {} {} {}/html".format(set_theme,
+                                              options.sphinx.sourcedir,
+                                              options.sphinx.builddir))

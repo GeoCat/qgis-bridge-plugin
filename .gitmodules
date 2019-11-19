@@ -1,3 +1,8 @@
 [submodule "geocatbridge/libs/bridgestyle"]
 	path = geocatbridge/libs/bridgestyle
 	url = https://github.com/GeoCat/bridge-style.git
+[submodule "docs/themes/geocat"]
+	
+	path = docs/themes/geocat
+
+	url = git@eos.geocat.net:geocat/geocat_sphinx_template.git

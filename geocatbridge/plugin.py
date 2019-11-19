@@ -39,6 +39,12 @@ class GeocatBridge:
         self.actionPublish.triggered.connect(self.publishClicked)
         self.iface.addPluginToWebMenu("GeoCatBridge", self.actionPublish)
         self.iface.addWebToolBarIcon(self.actionPublish)
+            
+        helpPath = "file://{}".format(os.path.join(os.path.dirname(__file__), "docs",  "html", "index.html"))
+        self.actionHelp = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self.iface.mainWindow())
+        self.actionHelp.setObjectName("GeocatBridgeHelp")
+        self.actionHelp.triggered.connect(lambda: webbrowser.open_new(helpPath))
+        self.iface.addPluginToWebMenu("GeoCatBridge", self.actionHelp)
 
         QgsApplication.processingRegistry().addProvider(self.provider)
 
@@ -48,6 +54,8 @@ class GeocatBridge:
                 
         self.iface.removePluginWebMenu("GeoCatBridge", self.actionPublish)
         self.iface.removeWebToolBarIcon(self.actionPublish)
+
+        self.iface.removePluginWebMenu("GeoCatBridge", self.actionHelp)
 
         QgsApplication.processingRegistry().removeProvider(self.provider)
     
