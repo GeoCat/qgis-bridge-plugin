@@ -20,7 +20,7 @@ from qgis.core import (
     QgsMapRendererCustomPainterJob
 )
 
-from .metadata import uuidForLayer
+from .metadata import saveMetadata
 from ..utils.files import tempFilenameInTempFolder
 from .serverbase import ServerBase
 
@@ -57,8 +57,6 @@ class GeonetworkServer(ServerBase):
     PROFILE_INSPIRE = 1
     PROFILE_DUTCH = 2
 
-    XSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
-
     def __init__(self, name, url="", authid="", profile=0, node="srv"):
         super().__init__()
         self.name = name
@@ -76,13 +74,7 @@ class GeonetworkServer(ServerBase):
         return self._nam.request(url, data, method, headers)
 
     def publishLayerMetadata(self, layer, wms):
-        uuid = uuidForLayer(layer)
-        filename = tempFilenameInTempFolder(layer.name() + ".qmd")
-        layer.saveNamedMetadata(filename)
-        thumbnail = self.saveLayerThumbnail(layer)
-        transformedFilename = self.transformMetadata(filename, uuid, wms)
-        mefFilename = tempFilenameInTempFolder(uuid + ".mef")
-        self.createMef(uuid, transformedFilename, mefFilename, thumbnail)        
+        mefFilename = saveMetadata(layer, None, self.apiUrl(), wms)            
         self.publishMetadata(mefFilename)
 
     def testConnection(self):
@@ -91,61 +83,6 @@ class GeonetworkServer(ServerBase):
             return True
         except Exception as e:
             return False
-
-    def saveLayerThumbnail(self, layer):
-        filename = tempFilenameInTempFolder("thumbnail.png")
-        img = QImage(QSize(800,800), QImage.Format_A2BGR30_Premultiplied)
-        color = QColor(255,255,255,255)
-        img.fill(color.rgba())
-        p = QPainter()
-        p.begin(img)
-        p.setRenderHint(QPainter.Antialiasing)
-        ms = QgsMapSettings()
-        ms.setBackgroundColor(color)        
-        ms.setLayers([layer])
-        ms.setExtent(layer.extent())
-        ms.setOutputSize(img.size())
-        render = QgsMapRendererCustomPainterJob(ms, p)
-        render.start()
-        render.waitForFinished()
-        p.end()
-        img.save(filename)
-        return filename
-
-    def transformMetadata(self, filename, uuid, wms):
-        def _ns(n):
-            return '{http://www.isotc211.org/2005/gmd}' + n
-        isoFilename = tempFilenameInTempFolder("metadata.xml")
-        dom = ET.parse(filename)
-        xslt = ET.parse(self.XSLTFILENAME)
-        transform = ET.XSLT(xslt)
-        newdom = transform(dom)
-        for ident in newdom.iter(_ns('fileIdentifier')):
-            ident[0].text = uuid
-        if wms is not None:
-            for root in newdom.iter(_ns('MD_Distribution')):
-                trans = ET.SubElement(root, _ns('transferOptions'))
-                dtrans = ET.SubElement(trans, _ns('MD_DigitalTransferOptions'))
-                online = ET.SubElement(dtrans, _ns('onLine'))
-                cionline = ET.SubElement(online, _ns('CI_OnlineResource'))
-                linkage = ET.SubElement(cionline, _ns('linkage'))
-                url = ET.SubElement(linkage, _ns('URL'))
-                url.text = wms
-                protocol = ET.SubElement(cionline, _ns('protocol'))
-                cs = ET.SubElement(protocol, '{http://www.isotc211.org/2005/gco}CharacterString')
-                cs.text = "OGC:WMS"
-        for root in newdom.iter(_ns('MD_DataIdentification')):
-            overview = ET.SubElement(root, _ns('graphicOverview'))
-            browseGraphic = ET.SubElement(overview, _ns('MD_BrowseGraphic'))
-            file = ET.SubElement(browseGraphic, _ns('fileName'))
-            cs = ET.SubElement(file, '{http://www.isotc211.org/2005/gco}CharacterString')
-            thumbnailUrl = "%s/records/%s/attachments/thumbnail.png" % (self.apiUrl() , uuid)
-            cs.text = thumbnailUrl
-        s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
-        with open(isoFilename, "w", encoding="utf8") as f:
-            f.write(s)
-        
-        return isoFilename
 
     def apiUrl(self):
         return self.url + "/%s/api" % self.node
@@ -187,44 +124,3 @@ class GeonetworkServer(ServerBase):
     def openMetadata(self, uuid):        
         webbrowser.open_new_tab(self.metadataUrl(uuid))
 
-    def createMef(self, uuid, metadataFilename, mefFilename, thumbnailFilename):
-        z = zipfile.ZipFile(mefFilename, "w")    
-        z.write(metadataFilename, os.path.join(uuid, "metadata", os.path.basename(metadataFilename)))
-        z.write(thumbnailFilename, os.path.join(uuid, "public", os.path.basename(thumbnailFilename)))
-        info = self.getInfoXmlContent(uuid, thumbnailFilename)
-        z.writestr(os.path.join(uuid, "info.xml"), info)
-        z.close()
-        self.logInfo("MEF file written to %s" % mefFilename)
-
-    def _addSubElement(self, parent, tag, value=None, attrib=None):
-        sub = SubElement(parent, tag, attrib=attrib or {})
-        if value is not None:
-            sub.text = value
-        return sub
-
-    def getInfoXmlContent(self, uuid, thumbnailFilename):
-        root = Element("info", {"version": "1.1"})
-        general = self._addSubElement(root, "general")
-        d = datetime.now().isoformat()
-        self._addSubElement(general, "changeDate", d)
-        self._addSubElement(general, "createDate", d)
-        self._addSubElement(general, "schema", "iso19139")
-        self._addSubElement(general, "isTemplate", "n")
-        self._addSubElement(general, "format", "full")
-        self._addSubElement(general, "localId")
-        self._addSubElement(general, "uuid", uuid)
-        self._addSubElement(general, "siteId", "GeoCatBridge")
-        self._addSubElement(general, "siteName", "GeoCatBridge")
-        self._addSubElement(root, "categories")
-        privs = self._addSubElement(root, "privileges")
-        grp = self._addSubElement(privs, "group", attrib={"name":"all"})
-        self._addSubElement(grp, "operation", attrib={"name":"dynamic"})
-        self._addSubElement(grp, "operation", attrib={"name":"featured"})
-        self._addSubElement(grp, "operation", attrib={"name":"view"})
-        self._addSubElement(grp, "operation", attrib={"name":"download"})
-        public = self._addSubElement(root, "public")
-        self._addSubElement(public, "file", attrib = {"name": os.path.basename(thumbnailFilename), "changeDate": d})
-        self._addSubElement(root, "private")    
-        xmlstring = ElementTree.tostring(root, encoding='UTF-8', method='xml').decode()
-        dom = minidom.parseString(xmlstring)    
-        return dom.toprettyxml(indent="  ")

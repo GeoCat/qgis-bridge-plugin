@@ -1,3 +1,4 @@
+import os
 import traceback
 import string
 
@@ -16,7 +17,11 @@ from qgis.core import (
 
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 
-from .metadata import uuidForLayer
+from bridgestyle.qgis import saveLayerStyleAsZippedSld
+
+from .exporter import exportLayer
+
+from .metadata import uuidForLayer, saveMetadata
 
 class PublishTask(QgsTask):
 
@@ -180,3 +185,47 @@ class PublishTask(QgsTask):
 
 
 
+class ExportTask(QgsTask):
+
+    def __init__(self, folder, layers, fields, exportData, exportMetadata, exportSymbology):
+        super().__init__("Export from GeoCat Bridge", QgsTask.CanCancel)
+        self.exception = None
+        self.folder = folder
+        self.layers = layers
+        self.exportData = exportData
+        self.exportMetadata = exportMetadata
+        self.exportSymbology = exportSymbology
+        self.fields = fields
+
+    def layerFromName(self, name):
+        layers = self.publishableLayers()
+        for layer in layers:
+            if layer.name() == name:
+                return layer
+
+    def publishableLayers(self):
+        layers = [layer for layer in QgsProject.instance().mapLayers().values() 
+                if layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]]
+        return layers
+
+    def run(self):
+        try:
+            os.makedirs(self.folder, exist_ok=True)
+            for i, name in enumerate(self.layers):
+                if self.isCanceled():
+                    return False
+                self.setProgress(i * 100 / len(self.layers))                      
+                layer = self.layerFromName(name)
+                if self.exportData:
+                    layerFilename = os.path.join(self.folder, layer.name() + ".gpkg")
+                    exportLayer(layer, fields, log=self)
+                if self.exportMetadata:
+                    styleFilename = os.path.join(self.folder, layer.name() + "_style.zip")
+                    saveLayerStyleAsZippedSld(layer, styleFilename)
+                if self.exportSymbology:
+                    metadataFilename = os.path.join(self.folder, layer.name() + "_metadata.zip")
+                    saveMetadata(layer, metadataFilename)
+            return True
+        except Exception as e:
+            self.exception = traceback.format_exc()
+            return False

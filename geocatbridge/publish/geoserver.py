@@ -166,7 +166,7 @@ class GeoserverServer(ServerBase):
         r = self.request(url)
         ft = r.json()
         ft["featureType"]["name"] = name
-        ft["featureType"]["title"] = name        
+        ft["featureType"]["title"] = name    
         if isDataUploaded:
             url = "%s/workspaces/%s/datastores/%s/featuretypes" % (self.url, self._workspace, datasetName)
             r = self.request(url, ft, "post")

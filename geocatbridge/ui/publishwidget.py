@@ -42,7 +42,7 @@ from qgis.utils import iface
 
 from geocatbridge.utils.gui import execute
 from geocatbridge.publish.geonetwork import GeonetworkServer
-from geocatbridge.publish.publishtask import PublishTask
+from geocatbridge.publish.publishtask import PublishTask, ExportTask
 from geocatbridge.publish.servers import geodataServers, metadataServers
 from geocatbridge.publish.metadata import uuidForLayer
 from geocatbridge.ui.metadatadialog import MetadataDialog
@@ -450,7 +450,8 @@ class PublishWidget(BASE, WIDGET):
                 self.bar.clearWidgets()
                 self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
                 QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
-            self.updateLayersPublicationStatus(task.geodataServer is not None, task.metadataServer is not None)
+            if isinstance(task, PublishTask):
+                self.updateLayersPublicationStatus(task.geodataServer is not None, task.metadataServer is not None)
 
     def publishOnBackground(self):
         if self.validateBeforePublication():
@@ -492,16 +493,6 @@ class PublishWidget(BASE, WIDGET):
             return True
 
     def getPublishTask(self, parent):
-        if self.comboGeodataServer.currentIndex() != 0:
-            geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
-        else:
-            geodataServer = None
-
-        if self.comboMetadataServer.currentIndex() != 0:
-            metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
-        else:
-            metadataServer = None 
-
         self.storeMetadata()
         self.storeFieldsToPublish()
 
@@ -513,9 +504,24 @@ class PublishWidget(BASE, WIDGET):
                 name = widget.name()   
                 toPublish.append(name)
 
-        onlySymbology = self.chkOnlySymbology.checkState() == Qt.Checked
+        if self.tabOnOffline.currentIndex() == 0:
+            if self.comboGeodataServer.currentIndex() != 0:
+                geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
+            else:
+                geodataServer = None
 
-        return PublishTask(toPublish, self.fieldsToPublish, onlySymbology, geodataServer, metadataServer, parent)
+            if self.comboMetadataServer.currentIndex() != 0:
+                metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
+            else:
+                metadataServer = None 
+
+            onlySymbology = self.chkOnlySymbology.checkState() == Qt.Checked
+
+            return PublishTask(toPublish, self.fieldsToPublish, onlySymbology, geodataServer, metadataServer, parent)
+        else:
+            return ExportTask(self.txtExportFolder.text(), toPublish, self.fieldsToPublish, self.chkExportData.isChecked(),
+                                self.chkExportMetadata.isChecked(), self.chkExportSymbology.isChecked())
+
 
     def layerFromName(self, name):
         layers = self.publishableLayers()

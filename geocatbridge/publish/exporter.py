@@ -20,14 +20,16 @@ def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False, l
                 attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
                 output = path or tempFilenameInTempFolder(destFilename + ".shp")
                 QgsVectorFileWriter.writeAsVectorFormat(layer, output, "UTF-8", attributes=attrs, driverName="ESRI Shapefile")
-                log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
+                if log is not None:
+                    log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
                 return output
         elif (force or os.path.splitext(filename.lower())[1]  != ".gpkg"
                         or layer.fields().count() != len(fields) or not isSingleTableGpkg(layer)):
             attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
             output = path or tempFilenameInTempFolder(destFilename + ".gpkg")
             QgsVectorFileWriter.writeAsVectorFormat(layer, output, "UTF-8", attributes=attrs)
-            log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
+            if log is not None:
+                log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
             return output
         
         if log is not None:
