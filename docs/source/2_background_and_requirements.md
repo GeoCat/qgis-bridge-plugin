@@ -14,7 +14,7 @@ services that comply with these standards. Bridge will properly link service and
 ![Catalog Service Linkage](./img/catalog-service-linkage.png)
 
 Serverside software components currently supported by Bridge are GeoServer, MapServer, 
-GeoNetwork Opensource and generic CSW (transactional). Some options are available to migrate data to and expose data from PostGIS and Oracle.
+GeoNetwork Opensource. Some options are available to migrate data to and expose data from PostGIS.
 
 You can also choose to save the metadata and map symbology on your computer as files or in a GeoPackage so you can use them to publish on other software platforms
 (deegree, QGIS).
@@ -48,8 +48,7 @@ Opensource software complies with the requirements of INSPIRE discovery services
 
 ### Client requirements
 
-Bridge supports ArcGIS® Desktop versions 10.1 till 10.7 (including
-minor releases such as 10.5.1), QGIS versions 3.6 till 3.10. Bridge for ArcGIS Pro is not yet available.
+Bridge requires QGIS 3.6 or more recent.
 
 ### Server requirements
 
@@ -76,6 +75,4 @@ Requirement for GeoServer are:
 -   Officially supported versions are 2.15, 2.14 and 2.13. However other
     versions since 2.4 are expected to operate fine in most of the
     cases.
--   On a Linux server it is recommended to install the *msttcorefonts*
-    package. Some of the symbols from the default Esri® fonts are mapped
-    to equivalent Webdings and Wingdings symbol fonts.
+
