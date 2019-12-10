@@ -1,44 +1,30 @@
 import os
 import shutil
 import subprocess
+import argparse
 
 '''
-This script generates the documentation based on the content of this repo,
-for all available tags and also for the most recent version.
+This script generates the documentation based on the content of the current
+repo, for the most recent tag (if run without arguments), all available tags 
+(if run with the '--all' argument), or the current master HEAD (if the '--master'
+argument is used)
+ 
+If the '--deploy' argument is used, it adds the built documents to the corresponding 
+folder in the central GeoCat documentation site.
 
-It adds the built documents to the corresponding folder in the central 
-GeoCat documentation repository, adding a new commit to it.
+When the '--deploy' argument is not used, the documentation is added under the 
+docs/build folder.
 
-For instance, if there are two tags named 'v1.0' and 'v2.0', 
-this script will generate the following tree structure.
-
-|--docs
-   |--bridge
-      |--v1.0
-         |--index.html         
-         .
-         .
-         .
-      |--v2.0
-         |--index.html         
-         .
-         .
-         .
-      |--latest
-         |--index.html         
-         .
-         .
-         .
-
-The 'latest' folder is always added and contains the most recent version of the
-documentation for a given product (taken from the current master HEAD)
+The '-all' argument is not compatible with the '--deploy' argument
 '''
 
 NAME = "bridge"
 DOCS_REPO = "https://github.com/volaya/geocat-documentation.git"
 
-def sh(command):
-    out = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE)
+def sh(commands):
+    if isinstance(commands, str):
+        commands = commands.split(" ")
+    out = subprocess.Popen(commands, stdout=subprocess.PIPE)
     stdout, stderr = out.communicate()
     return stdout.decode("utf-8")
 
@@ -62,41 +48,71 @@ def fetch_central_repo():
         sh("git clone {} {}".format(DOCS_REPO, repopath))
     os.chdir(cwd)
 
-def builddocs():          
-    refs = getrefs()
-    for refname, ref in refs.items():
-        buildref(refname, ref)
+def builddocs(version, deploy):
+    if version == "dev":
+        buildref("latest", "master", deploy)
+    else:
+        refs = getrefs()
+        if refs:
+            if version == "stable":
+                refs = refs[:1]
+            for refname, ref in refs:
+                buildref(refname, ref, deploy)
 
 def getrefs():
-    refs = {"latest": "master"}
+    refs = {}
     try:
         tags = sh("git show-ref --tags").splitlines()
         for line in tags:
             ref, tag = line.split(" ")
-            refs[tag.replace("refs/tags/", "")] = ref
+            refs.append((tag.replace("refs/tags/", ""), ref))
     except:
-        pass # in case no tags exist yet    
+        pass # in case no tags exist yet
     return refs
 
-def buildref(refname, ref):    
+def buildref(refname, ref, deploy):    
     sh("git checkout -f {}".format(ref))
-    sourcedir = os.path.join(os.getcwd(), "source")
-    builddir = os.path.join(central_docs_path(), NAME, refname)
+    sourcedir = os.path.join(os.getcwd(), "docs", "source")
+    if deploy:
+        builddir = os.path.join(central_docs_path(), NAME, refname)
+    else:
+        builddir = os.path.join(os.getcwd(), "docs", "build")
     if os.path.exists(builddir):
         shutil.rmtree(builddir)
     os.makedirs(builddir)
     sh("pip install --user sphinx")
     sh("pip install --user recommonmark")
     sh("pip install --user sphinx-markdown-tables")
-    sh("sphinx-build -a ./source {}".format(builddir))
+    sh("sphinx-build -a {} {}".format(sourcedir, builddir))
+    if deploy:
+        deploy(refname)
 
-def deploy():
+def deploy(refname):
+    cwd = os.getcwd()
+    fetch_central_repo()
+    os.chdir(central_docs_path())
     sh('git add .')
-    sh('git commit -am update')
+    sh(['git', 'commit', '-am' '"added/updated docs for %s(%s)"' % (NAME, refname)])
     sh("git push")
+    os.chdir(cwd)
+
+def main():
+    parser = argparse.ArgumentParser(description='Build and deploy documentation.')
+    parser.add_argument('--version',
+                        help='Version to build',
+                        choices=["all", "stable", "dev"],
+                        default="stable")
+    parser.add_argument('--deploy',
+                        help='Deploy built docs to server',
+                        action="store_true")
+
+    args = parser.parse_args()
+
+    if args.version == "all" and not args.deploy:
+        print("'all' argument can only be used with '--deploy' argument")
+        return
+    builddocs(args.version, args.deploy)
+    sh("git checkout master")
 
 if __name__ == "__main__":
-      fetch_central_repo()
-      builddocs()
-      deploy()
-      sh("git checkout master")
+    main()

@@ -1,4 +1,5 @@
-# Metadata Editing
+Metadata Editing
+#################
 
 Bridge provides a basic editor for metadata properties to create
 ISO19139 metadata records. The purpose of this editor is to easily
