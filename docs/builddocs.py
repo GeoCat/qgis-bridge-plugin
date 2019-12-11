@@ -98,7 +98,7 @@ def deploydocs(refname):
     os.chdir(central_docs_path())
     sh('git add .')
     sh(['git', 'commit', '-am' '"added/updated docs for %s(%s)"' % (NAME, refname)])
-    #sh("git push")
+    sh("git push")
     os.chdir(cwd)
 
 def main():
