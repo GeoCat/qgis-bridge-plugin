@@ -26,10 +26,9 @@ implementations.
 
 ## Contents
 
-* `Background and requirements <2_background_and_requirements>`_
-* `Installation <3_installation.md>`_
-* `Configuration <4_configuration.md>`_
-* `Publish <5_publish.md>`_
+* `Background and requirements <2_background_and_requirements.rst>`_
+* `Installation <3_installation.rst>`_
+* `Publish <5_publish.rst>`_
 * `Configuration extension <6_configuration_extension.md>`_
 * `Server configuration <7_server_configuration.md>`_
 * `Metadata editing <8_metadata_editing.md>`_
