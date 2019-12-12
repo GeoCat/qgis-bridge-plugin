@@ -7,6 +7,7 @@ from qgis.PyQt.QtCore import QSize
 
 from .publishwidget import PublishWidget
 from .serverconnectionswidget import ServerConnectionsWidget
+from .geocatwidget import GeoCatWidget
 
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
@@ -20,8 +21,10 @@ class BridgeDialog(BASE, WIDGET):
         self.setupUi(self)
         self.publishWidget = PublishWidget(self)
         self.serversWidget = ServerConnectionsWidget()
+        self.geocatWidget = GeoCatWidget()
         self.stackedWidget.addWidget(self.publishWidget)
         self.stackedWidget.addWidget(self.serversWidget)
+        self.stackedWidget.addWidget(self.geocatWidget)
         self.listWidget.setMinimumSize(QSize(100, 200))
         self.listWidget.setMaximumSize(QSize(153, 16777215))
         self.listWidget.setStyleSheet("QListWidget{\n"
@@ -41,13 +44,11 @@ class BridgeDialog(BASE, WIDGET):
         self.listWidget.setLineWidth(0)
         self.listWidget.setIconSize(QSize(32, 32))
         self.listWidget.setUniformItemSizes(True)
-        item = self.listWidget.item(0)
-        item.setIcon(QIcon(iconPath('preview.png')))
-        self.listWidget.setCurrentItem(item)
-        self.setCurrentPanel(0)
-        item = self.listWidget.item(1)
-        item.setIcon(QIcon(iconPath('preview.png')))
+        for i in range(3):
+            item = self.listWidget.item(i)
+            item.setIcon(QIcon(iconPath('preview.png')))
         self.listWidget.currentRowChanged.connect(self.sectionChanged)
+        self.listWidget.setCurrentRow(0) 
 
     def sectionChanged(self):
         idx = self.listWidget.currentRow()
@@ -57,8 +58,10 @@ class BridgeDialog(BASE, WIDGET):
         if idx == 0:
             self.stackedWidget.setCurrentWidget(self.publishWidget)
             self.publishWidget.updateServers()
-        else:
+        elif idx == 1:
             self.stackedWidget.setCurrentWidget(self.serversWidget)
+        elif idx == 2:
+            self.stackedWidget.setCurrentWidget(self.geocatWidget)
 
     def closeEvent(self, evt):
         self.publishWidget.storeMetadata() 

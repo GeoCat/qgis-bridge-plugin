@@ -26,6 +26,11 @@
        <string>Servers</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>GeoCat</string>
+      </property>
+     </item>
     </widget>
    </item>
    <item>

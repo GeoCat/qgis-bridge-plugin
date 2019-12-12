@@ -271,6 +271,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         if "" in [name, url, workspace]:
             return None
         server = GeoserverServer(name, url, authid, storage, workspace, postgisdb)
+        server.addOGCServers()
         return server
 
     def createPostgisServer(self):

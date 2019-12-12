@@ -16,6 +16,7 @@ from bridgestyle.qgis import saveLayerStyleAsZippedSld
 from .exporter import exportLayer
 from .serverbase import ServerBase
 from ..utils.files import tempFilenameInTempFolder
+from ..utils.services import addServicesForGeodataServer
 
 
 class GeoserverServer(ServerBase):
@@ -451,3 +452,7 @@ class GeoserverServer(ServerBase):
     def addPostgisDatastore(self, datastoreDef):        
         url = "%s/workspaces/%s/datastores/" % (self.url, self._workspace)
         self.request(url, data=datastoreDef, method="post")
+
+    def addOGCServers(self):
+        baseurl = "/".join(self.url.split("/"))
+        addServicesForGeodataServer(self.name, baseurl, self.authid)
