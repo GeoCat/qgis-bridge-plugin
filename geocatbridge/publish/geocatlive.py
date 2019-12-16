@@ -3,6 +3,7 @@ import requests
 from .serverbase import ServerBase
 from .geoserver import GeoserverServer
 from .geonetwork import GeonetworkServer
+from ..utils.services import addServicesForGeodataServer
 
 class GeocatLiveServer(ServerBase): 
 
@@ -54,6 +55,7 @@ class GeocatLiveServer(ServerBase):
                 self._geonetworkUrl = ""
         if self._geonetworkServer is None:
             self._geonetworkServer = GeonetworkServer("GeoNetwork", self._geonetworkUrl, self.geonetworkAuthid)
+            self.addOGCServers()
         return self._geonetworkServer
 
     def setupForProject(self):
@@ -122,3 +124,12 @@ class GeocatLiveServer(ServerBase):
 
     def metadataUrl(self, uuid):
         return self.geonetworkServer().metadataUrl(uuid)
+
+    def addOGCServers(self):
+        if self._geoserverUrl is None:
+            try:
+                self._getUrls()
+            except:
+                return
+        baseurl = "/".join(self._geoserverUrl.split("/")[:-1])
+        addServicesForGeodataServer("GeoCat Live Geoserver - " + self.userid, baseurl, self.geoserverAuthid)

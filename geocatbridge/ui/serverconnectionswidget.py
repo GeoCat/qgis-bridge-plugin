@@ -239,7 +239,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
             server = self.createGeocatLiveServer()            
         if server is None:
             return False
-        else:
+        else:            
             if self.currentServer is not None:
                 removeServer(self.currentServer.name)
                 item = self.itemFromServerName(self.currentServer.name)
@@ -271,7 +271,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
         if "" in [name, url, workspace]:
             return None
         server = GeoserverServer(name, url, authid, storage, workspace, postgisdb)
-        server.addOGCServers()
         return server
 
     def createPostgisServer(self):

@@ -454,5 +454,5 @@ class GeoserverServer(ServerBase):
         self.request(url, data=datastoreDef, method="post")
 
     def addOGCServers(self):
-        baseurl = "/".join(self.url.split("/"))
+        baseurl = "/".join(self.url.split("/")[:-1])
         addServicesForGeodataServer(self.name, baseurl, self.authid)

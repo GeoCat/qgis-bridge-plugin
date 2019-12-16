@@ -1,3 +1,4 @@
+from qgis.PyQt.QtCore import QSettings
 
 def addServicesForGeodataServer(name, url, authcfg):
     s = QSettings()
@@ -5,7 +6,7 @@ def addServicesForGeodataServer(name, url, authcfg):
     s.setValue('qgis/WMS/{0}/password'.format(name), '')
     s.setValue('qgis/WMS/{0}/username'.format(name), '')
     s.setValue('qgis/WMS/{0}/authcfg'.format(name), authcfg)
-    s.setValue('qgis/connections-wms/{0}/dpiMode'.format(name), 7)  # refer to https://github.com/qgis/QGIS/blob/master/src/gui/qgsnewhttpconnection.cpp#L229-L247
+    s.setValue('qgis/connections-wms/{0}/dpiMode'.format(name), 7)
     s.setValue('qgis/connections-wms/{0}/ignoreAxisOrientation'.format(name), False)
     s.setValue('qgis/connections-wms/{0}/ignoreGetFeatureInfoURI'.format(name), False)
     s.setValue('qgis/connections-wms/{0}/ignoreGetMapURI'.format(name), False)

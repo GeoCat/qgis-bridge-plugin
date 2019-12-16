@@ -42,6 +42,7 @@ def allServers():
 
 def addServer(server):
     _servers[server.name] = server
+    server.addOGCServers()
     _updateStoredServers()
 
 def removeServer(name):

@@ -3,11 +3,13 @@ import os
 from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QFrame, QListWidget
-from qgis.PyQt.QtCore import QSize
+from qgis.PyQt.QtCore import QSize, QSettings
 
 from .publishwidget import PublishWidget
 from .serverconnectionswidget import ServerConnectionsWidget
 from .geocatwidget import GeoCatWidget
+
+FIRSTTIME_SETTING = "geocatbridge/FirstTimeRun"
 
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
@@ -48,7 +50,16 @@ class BridgeDialog(BASE, WIDGET):
             item = self.listWidget.item(i)
             item.setIcon(QIcon(iconPath('preview.png')))
         self.listWidget.currentRowChanged.connect(self.sectionChanged)
-        self.listWidget.setCurrentRow(0) 
+        if self.isFirstTime():
+            self.listWidget.setCurrentRow(2) 
+        else:
+            self.listWidget.setCurrentRow(0) 
+
+    def isFirstTime(self):
+        value = QSettings().value(FIRSTTIME_SETTING, True)
+        if value:
+            QSettings().setValue(FIRSTTIME_SETTING, False)
+        return value
 
     def sectionChanged(self):
         idx = self.listWidget.currentRow()
@@ -60,6 +71,7 @@ class BridgeDialog(BASE, WIDGET):
             self.publishWidget.updateServers()
         elif idx == 1:
             self.stackedWidget.setCurrentWidget(self.serversWidget)
+            self.serversWidget.populateServers()
         elif idx == 2:
             self.stackedWidget.setCurrentWidget(self.geocatWidget)
 
