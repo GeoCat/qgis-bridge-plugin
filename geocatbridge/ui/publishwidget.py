@@ -479,6 +479,15 @@ class PublishWidget(BASE, WIDGET):
                 if name in names:
                     errors.add("Several layers with the same name")
                 names.append(name)
+
+        if self.comboGeodataServer.currentIndex() != 0:
+            geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
+            geodataServer.validateBeforePublication(errors)
+
+
+        if self.comboMetadataServer.currentIndex() != 0:
+            metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
+            metadataServer.validateBeforePublication(errors)
         
         if errors:
             txt = '''<p><b>Cannot publish data.</b></p>

@@ -4,6 +4,7 @@ import json
 import webbrowser
 from zipfile import ZipFile 
 import sqlite3
+import secrets
 
 from requests.exceptions import ConnectionError
 
@@ -24,7 +25,7 @@ class GeoserverServer(ServerBase):
     POSTGIS_MANAGED_BY_BRIDGE = 1
     POSTGIS_MANAGED_BY_GEOSERVER = 2
 
-    def __init__(self, name, url="", authid="", storage=0, workspace=None, postgisdb=None):
+    def __init__(self, name, url="", authid="", storage=0, postgisdb=None):
         super().__init__()
         self.name = name
         
@@ -38,7 +39,6 @@ class GeoserverServer(ServerBase):
 
         self.authid = authid
         self.storage = storage
-        self.workspace = workspace
         self.postgisdb = postgisdb
         self._isMetadataCatalog = False
         self._isDataCatalog = True
@@ -46,15 +46,16 @@ class GeoserverServer(ServerBase):
         self.setupForProject()
 
     def setupForProject(self):
-        if self.workspace is None:
-            self._workspace = os.path.splitext(os.path.basename(
-                                QgsProject.instance().absoluteFilePath()))[0]
+        path = QgsProject.instance().absoluteFilePath()
+        if path:
+            self._workspace = os.path.splitext(os.path.basename(path))[0]
         else:
-            self._workspace = self.workspace
+            self._workspace = "bridge_%s" % secrets.token_hex(nbytes=8)
+
     
     def prepareForPublishing(self, onlySymbology):
         self.setupForProject()
-        if self.workspace is None and not onlySymbology:
+        if not onlySymbology:
             self.deleteWorkspace()
         self._ensureWorkspaceExists()
         self.uploadedDatasets = {}
@@ -72,13 +73,10 @@ class GeoserverServer(ServerBase):
         self.logInfo(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s")
                      % (layer.name(), styleFilename))
         self._publishStyle(layer.name(), styleFilename)
+        return styleFilename
 
     def publishLayer(self, layer, fields=None):
-        self.publishStyle(layer)
-        styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
-        warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
-        for w in warnings:
-            self.logWarning(w)
+        styleFilename = self.publishStyle(layer)        
         self.logInfo(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s")
                      % (layer.name(), styleFilename))        
         if layer.type() == layer.VectorLayer:
@@ -115,7 +113,6 @@ class GeoserverServer(ServerBase):
                 self.exportedLayers[layer.source()] = path
             filename = self.exportedLayers[layer.source()]
             self._publishRasterLayer(filename, styleFilename, layer.name(), layer.name())
-
 
     def createPostgisDatastore(self):
         ws, name = self.postgisdb.split(":")
@@ -451,3 +448,8 @@ class GeoserverServer(ServerBase):
     def addPostgisDatastore(self, datastoreDef):        
         url = "%s/workspaces/%s/datastores/" % (self.url, self._workspace)
         self.request(url, data=datastoreDef, method="post")
+
+    def validateBeforePublication(self, errors):
+        path = QgsProject.instance().absoluteFilePath()
+        if not path:
+            errors.add("QGIS Project is not saved. Project must be saved before publishing layers to GeoServer")

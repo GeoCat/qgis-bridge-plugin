@@ -49,7 +49,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
         self.btnConnectGeocatLive.clicked.connect(self.testConnectionGeocatLive)
         self.btnConnectCsw.clicked.connect(self.testConnectionCsw)
-        self.chkManagedWorkspace.stateChanged.connect(self.managedWorkspaceChanged)
         self.btnAddDatastore.clicked.connect(self.addPostgisDatastore)
         self.btnRefreshDatabases.clicked.connect(self.populatePostgisComboWithGeoserverPostgisServers)
 
@@ -64,7 +63,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.txtPostgisPort.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisSchema.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisDatabase.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtGeoserverWorkspace.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeocatLiveIdentifier.textChanged.connect(self._setCurrentServerHasChanges)
         self.comboMetadataProfile.currentIndexChanged.connect(self._setCurrentServerHasChanges)
         self.comboGeoserverDatabase.currentIndexChanged.connect(self._setCurrentServerHasChanges)
@@ -92,6 +90,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
                 if s.name not in allServers():
                     self.addServerItem(s)
                     addServer(s)
+
     def geoserverDatastorageChanged(self):
         storage = self.comboGeoserverDataStorage.currentIndex()
         if storage == GeoserverServer.POSTGIS_MANAGED_BY_BRIDGE:
@@ -150,12 +149,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.populatePostgisComboWithGeoserverPostgisServers()
         except:
             self.bar.pushMessage(self.tr("Could not create new PostGIS dataset"), level=Qgis.Warning, duration=5)
-
-
-
-    def managedWorkspaceChanged(self, state):
-        self.txtGeoserverWorkspace.setEnabled(state == Qt.Unchecked)
-        self._setCurrentServerHasChanges()
 
     def mapserverStorageChanged(self, checked):
         self.labelLocalFolder.setVisible(checked)
@@ -258,19 +251,15 @@ class ServerConnectionsWidget(BASE, WIDGET):
         ##TODO check validity of name and values        
         name = self.txtGeoserverName.text().strip()
         url = self.txtGeoserverUrl.text().strip()
-        if self.chkManagedWorkspace.isChecked():
-            workspace = None
-        else:
-            workspace = self.txtGeoserverWorkspace.text().strip()
         authid = self.geoserverAuth.configId()
         storage = self.comboGeoserverDataStorage.currentIndex()
         postgisdb = None
         if storage in [GeoserverServer.POSTGIS_MANAGED_BY_BRIDGE, GeoserverServer.POSTGIS_MANAGED_BY_GEOSERVER]:            
             postgisdb = self.comboGeoserverDatabase.currentText()                
         
-        if "" in [name, url, workspace]:
+        if "" in [name, url]:
             return None
-        server = GeoserverServer(name, url, authid, storage, workspace, postgisdb)
+        server = GeoserverServer(name, url, authid, storage, postgisdb)
         return server
 
     def createPostgisServer(self):
@@ -444,12 +433,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.stackedWidget.setCurrentWidget(self.widgetGeoserver)
             self.txtGeoserverName.setText(server.name)
             self.txtGeoserverUrl.setText(server.url)
-            if server.workspace is None:
-                self.txtGeoserverWorkspace.setText("")
-                self.chkManagedWorkspace.setChecked(True)
-            else:
-                self.txtGeoserverWorkspace.setText(server.workspace)
-                self.chkManagedWorkspace.setChecked(False)
             self.geoserverAuth.setConfigId(server.authid)
             self.comboGeoserverDataStorage.blockSignals(True)
             self.comboGeoserverDataStorage.setCurrentIndex(server.storage)
