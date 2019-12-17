@@ -1,0 +1,106 @@
+BODY { 
+      font-family:Arial; 
+      background-color:#ffffff;  }
+H1 { 
+    font-weight:bold; 
+    font-size:18.0pt; 
+    font-family:Arial;  }
+H2 { 
+    font-weight:bold; 
+    font-size:14.0pt; 
+    font-family:Arial;  }
+H3 { 
+    font-weight:bold; 
+    font-size:12.0pt; 
+    font-family:Arial;  }
+H4 { 
+    font-weight:bold; 
+    font-size:12.0pt; 
+    font-family:Arial;  }
+H5 { 
+    font-size:12.0pt; 
+    font-family:Arial; 
+    font-weight:bold;  }
+H6 { 
+    font-size:12.0pt; 
+    font-family:Arial; 
+    font-weight:bold;  }
+P { 
+   font-size:12.0pt; 
+   margin-top:1pt; 
+   font-family:Arial;  }
+CITE.expandspot { 
+                 font-style:normal; 
+                 color:green; 
+                 cursor:hand;  }
+DFN.collapsed { 
+               font-style:italic; 
+               font-weight:normal; 
+               display:none; 
+               color:red;  }
+DFN.expanded { 
+              font-style:italic; 
+              font-weight:normal; 
+              color:red;  }
+EM.dropspot { 
+             color:green; 
+             cursor:hand;  }
+CITE.glossterm { 
+                font-style:normal; 
+                color:maroon; 
+                cursor:hand;  }
+DFN.glosscollapsed { 
+                    font-style:italic; 
+                    font-weight:normal; 
+                    display:none; 
+                    color:blue;  }
+DFN.glossexpanded { 
+                   font-style:italic; 
+                   font-weight:normal; 
+                   color:blue;  }
+LI.kadov-H1 { 
+             font-weight:bold; 
+             font-size:18.0pt;  }
+LI.kadov-H2 { 
+             font-weight:bold; 
+             font-size:14.0pt;  }
+LI.kadov-H3 { 
+             font-weight:bold; 
+             font-size:12.0pt;  }
+LI.kadov-H4 { 
+             font-weight:bold; 
+             font-size:12.0pt;  }
+LI.kadov-H5 { 
+             font-size:12.0pt;  }
+LI.kadov-H6 { 
+             font-size:12.0pt;  }
+LI.kadov-P { 
+            font-size:12.0pt;  }
+A.expandspot { 
+              cursor:hand; 
+              color:#008000; 
+              font-style:normal;  }
+SPAN.expandtext { 
+                 color:#ff0000; 
+                 font-weight:normal; 
+                 font-style:italic;  }
+A.dropspot { 
+            font-style:italic; 
+            cursor:hand; 
+            color:#008000;  }
+A.glossterm { 
+             cursor:hand; 
+             color:#800000; 
+             font-style:normal;  }
+SPAN.glosstext { 
+                color:#0000ff; 
+                font-weight:normal; 
+                font-style:italic;  }
+ol ol { 
+       margin-top:1px;  }
+ol ul { 
+       margin-top:1px;  }
+ul ul { 
+       margin-top:1px;  }
+ul ol { 
+       margin-top:1px;  }

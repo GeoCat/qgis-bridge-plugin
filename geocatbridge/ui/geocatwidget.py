@@ -2,6 +2,7 @@ import os
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import QWidget, QSizePolicy
+from qgis.PyQt.QtGui import QTextDocument
 from qgis.PyQt.QtCore import QUrl
 from qgis.core import Qgis
 
@@ -21,8 +22,9 @@ class GeoCatWidget(WIDGET, BASE):
         self.btnLogin.clicked.connect(self.login)
         self.btnLogout.clicked.connect(self.logout)
 
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__), "resources", "aboutgeocat.html"))
-        self.txtAbout.loadResource(QUrl(path))
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "geocatlivepage", "index.html")
+        url = QUrl.fromLocalFile(path)
+        self.txtAbout.setSource(url)
 
         self.bar = QgsMessageBar()
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
