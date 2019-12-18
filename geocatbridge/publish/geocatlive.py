@@ -7,7 +7,7 @@ from ..utils.services import addServicesForGeodataServer
 
 class GeocatLiveServer(ServerBase): 
 
-    BASE_URL = "https://artemis.geocat.net/geocat-live/api/1.0/order/"
+    BASE_URL = "https://live-services.geocat.net/geocat-live/api/1.0/order"
 
     def __init__(self, name, userid="", geoserverAuthid="", geonetworkAuthid="", profile=0):
         super().__init__()

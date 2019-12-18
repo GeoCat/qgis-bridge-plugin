@@ -55,11 +55,12 @@ class BridgeDialog(BASE, WIDGET):
         else:
             self.listWidget.setCurrentRow(0) 
 
-    def isFirstTime(self):
-        value = QSettings().value(FIRSTTIME_SETTING, True)
-        if value:
+    def isFirstTime(self):        
+        if QSettings().contains(FIRSTTIME_SETTING):
+            return False
+        else:
             QSettings().setValue(FIRSTTIME_SETTING, False)
-        return value
+            return True
 
     def sectionChanged(self):
         idx = self.listWidget.currentRow()

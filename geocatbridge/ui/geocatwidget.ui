@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>677</width>
+    <width>572</width>
     <height>550</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabAbout">
       <attribute name="title">
@@ -25,7 +25,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QTextBrowser" name="txtAbout"/>
+        <widget class="QWebView" name="txtAbout" native="true"/>
        </item>
       </layout>
      </widget>
@@ -37,7 +37,7 @@
        <item>
         <widget class="QStackedWidget" name="stackedWidget">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="pageLogin">
           <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -77,7 +77,7 @@
                <property name="clearButtonEnabled">
                 <bool>true</bool>
                </property>
-               <property name="showLockIcon">
+               <property name="showLockIcon" stdset="0">
                 <bool>true</bool>
                </property>
               </widget>
@@ -225,10 +225,168 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QTextBrowser" name="txtMyGeoCat"/>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="2" column="3">
+              <widget class="QLabel" name="labelStatusGeonetwork">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>status</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QLabel" name="labelStatusGeoserver">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>status</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>GeoNetwork:  </string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>&lt;b&gt;Reports&lt;/b&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QLabel" name="labelUrlGeonetwork">
+               <property name="text">
+                <string>url</string>
+               </property>
+               <property name="openExternalLinks">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="label_3">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>GeoServer:  </string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLabel" name="labelUrlGeoserver">
+               <property name="text">
+                <string>url</string>
+               </property>
+               <property name="openExternalLinks">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1" colspan="3">
+              <widget class="QPushButton" name="btnSendReport">
+               <property name="text">
+                <string>Send report</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>&lt;b&gt;Servers&lt;/b&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <spacer name="horizontalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Maximum</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="2" column="4">
+              <spacer name="horizontalSpacer_8">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Maximum</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QLabel" name="labelLoggedInAs">
+               <property name="text">
+                <string>Logged in as </string>
+               </property>
+              </widget>
+             </item>
              <item>
               <spacer name="horizontalSpacer_4">
                <property name="orientation">
@@ -266,6 +424,11 @@
    <class>QgsPasswordLineEdit</class>
    <extends>QLineEdit</extends>
    <header>qgspasswordlineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QWebView</class>
+   <extends>QWidget</extends>
+   <header>qwebview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
