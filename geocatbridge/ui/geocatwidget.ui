@@ -37,7 +37,7 @@
        <item>
         <widget class="QStackedWidget" name="stackedWidget">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="pageLogin">
           <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -311,13 +311,6 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="1" colspan="3">
-              <widget class="QPushButton" name="btnSendReport">
-               <property name="text">
-                <string>Send report</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="label">
                <property name="sizePolicy">
@@ -362,6 +355,13 @@
                 </size>
                </property>
               </spacer>
+             </item>
+             <item row="4" column="1">
+              <widget class="QPushButton" name="btnSendReport">
+               <property name="text">
+                <string>Send report</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>

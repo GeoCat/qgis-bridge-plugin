@@ -5,13 +5,15 @@ from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import QWidget, QSizePolicy
 from qgis.PyQt.QtGui import QTextDocument
 from qgis.PyQt.QtCore import QUrl
-from qgis.core import Qgis
+from qgis.core import Qgis, QgsApplication
 
 from geocatbridge.publish.servers import *
 from geocatbridge.publish.geocatlive import GeocatLiveServer
 from geocatbridge.utils.gui import execute
 
 from qgis.gui import QgsMessageBar
+
+GEOCAT_AUTH_KEY = "geocat_credentials"
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatwidget.ui'))
 
@@ -31,14 +33,18 @@ class GeoCatWidget(WIDGET, BASE):
 
         self.bar = QgsMessageBar()
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        self.centralLayout.insertWidget(0, self.bar)        
+        self.centralLayout.insertWidget(0, self.bar)
+
+        self.tabWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(0)
+        self.retrieveCredentials()
 
     def sendReport(self):
         pass
 
     def login(self):
         user = self.txtUsername.text()
-        password = self.txtPassword.text()
+        password = self.txtPassword.text()        
         self.client = MyGeoCatClient()
         try:
             self.client.login(user, password)
@@ -48,13 +54,30 @@ class GeoCatWidget(WIDGET, BASE):
             self.labelStatusGeoserver.setText(self.client.geoserverStatus)
             self.labelStatusGeonetwork.setText(self.client.geonetworkStatus)
             self.stackedWidget.setCurrentIndex(1)
-            self.client.addLiveServer()
+            self.client.addLiveServer()            
         except:
             self.bar.pushMessage(self.tr("Login"), self.tr("Could not log in"), level=Qgis.Warning, duration=5)
+            return
+
+        if self.chkSaveCredentials.isChecked():
+            auth = "{}/{}".format(user, password)
+            QgsApplication.authManager().storeAuthSetting(GEOCAT_AUTH_KEY, auth, True)
+        else:
+            QgsApplication.authManager().removeAuthSetting(GEOCAT_AUTH_KEY)
 
     def logout(self):
         self.client = None
         self.stackedWidget.setCurrentIndex(0)
+        self.retrieveCredentials()
+
+    def retrieveCredentials(self):
+        auth = QgsApplication.authManager().authSetting(GEOCAT_AUTH_KEY, defaultValue='', decrypt=True)
+        if auth:
+            username, password = auth.split("/")            
+        else:
+            username, password = "", ""
+        self.txtUsername.setText(username)
+        self.txtPassword.setText(password)
 
 class MyGeoCatClient():
 
