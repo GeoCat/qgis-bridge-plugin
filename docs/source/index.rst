@@ -7,8 +7,7 @@ your map as OGC data services (WMS/WMTS/WFS/WCS) in GeoServer or
 MapServer. Bridge also offers the option to export metadata, symbology
 and/or data to your local computer as files.
 
-This plugin has been developed by `GeoCat <http://geocat.net.>`_. Bridge
-is not an ESRI® product. GeoCat focuses on the development,
+This plugin has been developed by `GeoCat <http://geocat.net.>`_. GeoCat focuses on the development,
 customization and support of cutting-edge geospatial software,
 especially geospatial catalog software on both server and desktop.
 GeoCat provides all-in-one solutions for the Spatial Data Infrastructure
@@ -24,13 +23,14 @@ Opensource can be considered the leading open source geospatial catalog
 application with numerous international and national geo-portal
 implementations.
 
-Contents
-##########
+.. toctree::
+    :glob:
+    :maxdepth: 2
 
-* `Background and requirements <background_and_requirements.rst>`_
-* `Installation <installation.rst>`_
-* `The Bridge dialog <bridge_dialog.rst>`_
-* `Publish <publish.rst>`_
-* `Server configuration <server_configuration.rst>`_
-* `Metadata editing <metadata_editing.rst>`_
-* `Supported symbology <supported_symbology.rst>`_
+    background_and_requirements
+    installation
+    bridge_dialog
+    publish
+    server_configuration
+    metadata_editing
+    supported_symbology

@@ -1,5 +1,7 @@
+.. _ServerConnections:
+
 Server Connections
-====================
+==================
 
 Configure your server connections to publish your data and metadata to. To do it, move to the *Servers* section of the Bridge dialog
 
@@ -26,7 +28,7 @@ Below you can find more detail about the different types of services and connect
 
 
 GeoCat Live
----------------
+-----------
 
 GeoCat Live is a SDI platform hosted by GeoCat. Depending on your GeoCat
 Live configuration Bridge is able to publish metadata to a catalogue
@@ -43,7 +45,7 @@ When you add a Live server, two new servers will be added to the list of availab
 You don't need to supply the URLs of those servers (as it would be the case if you wanted to manually add each of them), but you must supply their credentials.
 
 GeoNetwork server
-------------------
+-----------------
 
 Configure a GeoNetwork connection to publish your
 metadata to an online catalogue. 
@@ -57,7 +59,7 @@ Click *Connect* to test the server connection.
 ![Server connection test](./img/publish_servers5.png)
 
 GeoServer connection
----------------------
+--------------------
 
 Configure a GeoServer connection to publish your data to GeoServer.
 
@@ -76,7 +78,7 @@ Finally, you must select how data will be stored in the server. Three different 
 - Import into a PostGIS DB (handled by GeoServer): Layer data is uploaded to GeoServer, and GeoServer itself takes care of importing into the DB. A PostGIS DB must be selected from the datastores available in the GeoServer instance. If you want to add a new one, use the *Add datastore* button.
 
 Bridge and GeoServer workspaces
-**********************************
+*******************************
 
 Layers will be published to a workspace with the name of the current QGIS project. If you are trying to publish layers and your current project is not saved yet, you won't be able to start the publication process. A Warning message will be shown.
 
@@ -86,20 +88,20 @@ If the workspace exists, it will be deleted before publishing, so its content af
 
 
 PostGIS connection
----------------------
+------------------
 
 Configure a PostGIS connection to publish your map data to PostGIS. The
 PostGIS connection can be used in two different publish scenarios:
 
 1.  Publish only map data to PostGIS
 2.  Publish map layers to GeoServer and store data directly in PostGIS
-    using a direct database connection (as explained in `Geoserver connection`_)
+    using a direct database connection (as explained in `GeoServer connection`_)
 
 
 .. image:: ./img/publish_server_postgis.png
 
 MapServer connection
-------------------------
+--------------------
 
 Configure a MapServer connection to publish your map data to PostGIS. A mapserver
 endpoint (mapfile) is created for each QGIS project.
