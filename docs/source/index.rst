@@ -1,5 +1,5 @@
 Introduction
-##############
+=============
 
 GeoCat Bridge© for  QGIS enables you to publish your
 metadata in a spatial catalogue (CSW), like GeoNetwork opensource, and
@@ -24,18 +24,13 @@ Opensource can be considered the leading open source geospatial catalog
 application with numerous international and national geo-portal
 implementations.
 
-## Contents
+Contents
+##########
 
-* `Background and requirements <2_background_and_requirements.rst>`_
-* `Installation <3_installation.rst>`_
-* `Publish <5_publish.rst>`_
-* `Configuration extension <6_configuration_extension.md>`_
-* `Server configuration <7_server_configuration.md>`_
-* `Metadata editing <8_metadata_editing.md>`_
-* `Application_update <9_application_update.md>`_
-* `renderers and symbol support <10_renderers_and_symbols_support.md>`_
-* `Supported symbols examples <11_supported_symbols_examples.md>`_
-* `Geoserver setup <12_geoserver_setup.md>`_
-* `Mapserver setup <13_mapserver_setup.md>`_
-* `Bridge behaviour <14_bridge_behaviour.md>`_
-* `Bridge console <15_bridge_console.md>`_
+* `Background and requirements <background_and_requirements.rst>`_
+* `Installation <installation.rst>`_
+* `The Bridge dialog <bridge_dialog.rst>`_
+* `Publish <publish.rst>`_
+* `Server configuration <server_configuration.rst>`_
+* `Metadata editing <metadata_editing.rst>`_
+* `Supported symbology <supported_symbology.rst>`_
