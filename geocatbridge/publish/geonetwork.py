@@ -45,9 +45,9 @@ class TokenNetworkAccessManager():
         resp.raise_for_status()
         return resp
 
-    def getToken(self):                
-        xmlInfoUrl = self.url + '/info.xml'
-        self.session.post(xmlInfoUrl)
+    def getToken(self):
+        signinUrl = self.url + '/eng/catalog.signin'
+        self.session.post(signinUrl)
         self.token = self.session.cookies.get('XSRF-TOKEN')
         self.session.headers.update({"X-XSRF-TOKEN" : self.token})
 
