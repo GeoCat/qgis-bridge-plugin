@@ -303,17 +303,19 @@ class PublishWidget(BASE, WIDGET):
             return False
         except:
             self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
+            return False
 
     def isDataOnServer(self, layer):
         try:
             server = geodataServers()[self.comboGeodataServer.currentText()]
-            self.comboGeodataServer.setStyleSheet("QComboBox {}")
-            return server.layerExists(layer)
-        except KeyError:
+            self.comboGeodataServer.setStyleSheet("QComboBox {}")            
+            return server.layerExists(layer)            
+        except KeyError:            
             self.comboGeodataServer.setStyleSheet("QComboBox {}")
             return False
-        except Exception as e:
+        except Exception as e:            
             self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
+            return False
 
     def validateMetadata(self):
         if self.currentLayer is None:
@@ -372,17 +374,41 @@ class PublishWidget(BASE, WIDGET):
                 widget.setDataPublished(server)
 
     def updateLayersPublicationStatus(self, data=True, metadata=True):
+        if data:
+            try:
+                dataServer = geodataServers()[self.comboGeodataServer.currentText()]
+                if not dataServer.testConnection():
+                    self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
+                    dataServer = None
+            except KeyError:
+                self.comboGeodataServer.setStyleSheet("QComboBox { }")
+                dataServer = None
+            
+        if metadata:
+            try:
+                metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
+                if not metadataServer.testConnection():
+                    self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
+                    metadataServer = None
+            except KeyError:
+                self.comboMetadataServer.setStyleSheet("QComboBox { }")
+                metadataServer = None
+
         for i in range(self.listLayers.count()):
             item = self.listLayers.item(i)
             widget = self.listLayers.itemWidget(item)
             name = widget.name()
             if data:
-                self.isDataPublished[name] = self.isDataOnServer(name)
-                server = geodataServers()[self.comboGeodataServer.currentText()] if self.isDataPublished[name] else None
+                server = None
+                if dataServer:
+                    self.isDataPublished[name] = self.isDataOnServer(name)
+                    server = dataServer if self.isDataPublished[name] else None
                 widget.setDataPublished(server)
             if metadata:
-                self.isMetadataPublished[name] = self.isMetadataOnServer(name)
-                server = metadataServers()[self.comboMetadataServer.currentText()] if self.isMetadataPublished[name] else None
+                server = None
+                if metadataServer:
+                    self.isMetadataPublished[name] = self.isMetadataOnServer(name)
+                    server = metadataServer if self.isMetadataPublished[name] else None
                 widget.setMetadataPublished(server)
 
     def unpublishAll(self):
