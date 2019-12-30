@@ -16,41 +16,35 @@ How to publish
 
 In the Bridge dialog, move to the *Publish* section.
 
-.. image:: ./img/publish_layers1.png
+.. image:: ./img/publish_section.png
 
 You can select the layers from the list to publish:
 
-.. image:: ./img/publish_layers2.png
+.. image:: ./img/publish_layers_list.png
 
-An icon |published| is shown next to the layer name
-if the layer\'s metadata and/or map data is published in the currently
-selected server(s).
 
-.. |published| image:: ./img/published.png
-
-Edit metadata and select attributes
-***********************************
-
-In the *Layer panel* the user can for each layer:
+In the *Layer panel*, for each layer you can:
 
 -   Edit the metadata (see :ref:`MetadataEditing`)
 
 -   Select the attributes to publish as part of the map service.
     Attributes can only be selected for vector data.
 
-.. image:: ./img/publish_layers3.png
+.. image:: ./img/publish_metadata.png
 
-.. image:: ./img/publish_layers4.png
+.. image:: ./img/publish_fields.png
 
-
-Publishing
-**********
 
 When you have finished configuring the properties for all map layers, select the destinations server(s) that you want to use.
 
 You can publish your layers to a geodata server, or their metadata to a metadata server, or both. Those servers must be selected from the two available drop-down lists. Servers in this list are added using the *Servers* section on the Bridge dialog. See :ref:`ServerConnections` for more information about how to add new servers.
 
-Once you have selected the data to publish and the destination servers, click
+When a data or metadata server is selected and there are issues connecting to it, the server
+box appears framed in a red box.
+
+.. image:: ./img/publish_server_error.png
+
+Once you have selected what to publish and the destination servers, click
 on the *Publish* button to start the publishing process. During this
 process, a progress bar is shown to indicate the status of the
 publication process:
@@ -89,10 +83,6 @@ published data on the server(s):
 
 .. image:: ./img/preview_layers.png
 
-When a data or metadata server is selected and there are issues connecting to it, the server
-box appears framed in a red box.
-
-.. image:: ./img/retrievingFailed.png
 
 Unpublish data and metadata
 ===========================
