@@ -8,7 +8,6 @@ from qgis.core import (
     QgsApplication
 )
 
-
 class ServerBase():
 
     def __init__(self):
