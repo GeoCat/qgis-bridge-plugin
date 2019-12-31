@@ -17,7 +17,7 @@ def iconPath(icon):
 DATA_ICON = QIcon(iconPath("geoserver.png"))
 METADATA_ICON = QIcon(iconPath("geonetwork.png"))
 SYMBOLOGY_ICON = QIcon(iconPath("symbology.png"))
-GROUPS_ICON = QIcon(iconPath("groups.gif"))
+GROUPS_ICON = QIcon(iconPath("group.gif"))
 CHECK_ICON = QIcon(iconPath("checkmark.png"))
 
 class ProgressDialog(BASE, WIDGET):
