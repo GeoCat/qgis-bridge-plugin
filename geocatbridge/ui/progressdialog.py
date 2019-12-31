@@ -3,13 +3,22 @@ import os
 from qgis.PyQt import uic
 
 from qgis.PyQt.QtCore import Qt, QCoreApplication
-from qgis.PyQt.QtGui import QBrush
+from qgis.PyQt.QtGui import QBrush, QIcon
 from qgis.PyQt.QtWidgets import QTreeWidgetItem
 
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'progressdialog.ui'))
 
 SYMBOLOGY, DATA, METADATA, GROUPS = range(4)
+
+def iconPath(icon):
+    return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
+
+DATA_ICON = QIcon(iconPath("geoserver.png"))
+METADATA_ICON = QIcon(iconPath("geonetwork.png"))
+SYMBOLOGY_ICON = QIcon(iconPath("symbology.png"))
+GROUPS_ICON = QIcon(iconPath("groups.gif"))
+CHECK_ICON = QIcon(iconPath("checkmark.png"))
 
 class ProgressDialog(BASE, WIDGET):
 
@@ -25,17 +34,21 @@ class ProgressDialog(BASE, WIDGET):
             item.setText(0, layer)
             subitem = QTreeWidgetItem()
             subitem.setText(0, "Publish symbology")
+            subitem.setIcon(0, SYMBOLOGY_ICON)
             item.addChild(subitem)
             subitem = QTreeWidgetItem()
             subitem.setText(0, "Publish data")
+            subitem.setIcon(0, DATA_ICON)
             item.addChild(subitem)            
             subitem = QTreeWidgetItem()
             subitem.setText(0, "Publish metadata")
+            subitem.setIcon(0, METADATA_ICON)
             item.addChild(subitem)            
             self.treeWidget.addTopLevelItem(item)
             item.setExpanded(False)
         item = QTreeWidgetItem()
         item.setText(0, "Create layer groups")
+        item.setIcon(0, GROUPS_ICON)
         self.treeWidget.addTopLevelItem(item)
         QCoreApplication.processEvents()
 
@@ -53,8 +66,8 @@ class ProgressDialog(BASE, WIDGET):
         subitem.setBackground(1, QBrush(Qt.white))
         if category == METADATA:
             item.setForeground(1, QBrush(Qt.blue))
-            item.setText(1, "Done")
-            item.setExpanded(False)
+            item.setIcon(1, CHECK_ICON)
+            #item.setExpanded(False)
         QCoreApplication.processEvents()
 
     def setSkipped(self, layer, category):
@@ -69,8 +82,8 @@ class ProgressDialog(BASE, WIDGET):
         subitem.setText(1, "Skipped")
         if category == METADATA:
             item.setForeground(1, QBrush(Qt.blue))
-            item.setText(1, "Done")
-            item.setExpanded(False)
+            item.setIcon(1, CHECK_ICON)
+            #item.setExpanded(False)
         QCoreApplication.processEvents()
 
     def setInProgress(self, layer, category):
