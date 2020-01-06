@@ -42,7 +42,6 @@ class GeoserverServer(ServerBase):
         self.postgisdb = postgisdb
         self._isMetadataCatalog = False
         self._isDataCatalog = True
-        user, password = self.getCredentials()
         self.setupForProject()
 
     def setupForProject(self):
