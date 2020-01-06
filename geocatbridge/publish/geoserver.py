@@ -51,7 +51,6 @@ class GeoserverServer(ServerBase):
         else:
             self._workspace = "bridge_%s" % secrets.token_hex(nbytes=8)
 
-    
     def prepareForPublishing(self, onlySymbology):
         self.setupForProject()
         if not onlySymbology:
@@ -75,6 +74,7 @@ class GeoserverServer(ServerBase):
         return styleFilename
 
     def publishLayer(self, layer, fields=None):
+        self.publishStyle(layer)
         if layer.type() == layer.VectorLayer:
             if self.storage in [self.FILE_BASED, self.POSTGIS_MANAGED_BY_GEOSERVER]:
                 if layer.source() not in self.exportedLayers:

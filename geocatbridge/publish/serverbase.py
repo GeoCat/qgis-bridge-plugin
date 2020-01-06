@@ -13,8 +13,8 @@ class ServerBase():
     def __init__(self):
         self._warnings = []
         self._errors = []
-        self.username = None
-        self.password = None
+        self._username = None
+        self._password = None
 
     def logInfo(self, text):
         QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
@@ -35,18 +35,18 @@ class ServerBase():
         return self._warnings, self._errors
 
     def setBasicAuthCredentials(self, username, password):
-        self.username = username
-        self.password = password
+        self._username = username
+        self._password = password
 
     def getCredentials(self):
-        if self.username is None or self.password is None:            
+        if self._username is None or self._password is None:
             authConfig = QgsAuthMethodConfig()
             QgsApplication.authManager().loadAuthenticationConfig(self.authid, authConfig, True)
             username = authConfig.config('username')
             password = authConfig.config('password')
             return username, password
         else:
-            return self.username, self.password
+            return self._username, self._password
 
     def request(self, url, data=None, method="get", headers=None, files=None):
         headers = headers or {}

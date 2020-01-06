@@ -23,7 +23,6 @@ def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None):
     apiUrl = apiUrl or ""
     transformedFilename = transformMetadata(filename, apiUrl, uuid, wms)
     mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
-    print (mefFilename)
     createMef(uuid, transformedFilename, mefFilename, thumbnail)
     return mefFilename
 
