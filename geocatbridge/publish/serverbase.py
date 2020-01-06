@@ -50,3 +50,6 @@ class ServerBase():
         r = req_method(url, headers=headers, files=files, data=data, auth=(username, password))
         r.raise_for_status()
         return r
+
+    def validateBeforePublication(self, errors):
+        pass
