@@ -125,8 +125,8 @@ def create_images(folder, url, layer, group):
     with open(filename_sld, "w") as f:
         f.write(sld)    
     s = ('<p><b>%s</b></p><ul><li><p>QGIS</p><p><img src="%s"></p></li>'
-        '<li><p>GeoServer <a href="%">[SLD]</a></p>'
-        '<p><img src="%s"></p></li></ul>' % (layer.name(), filename, filename_wms, filename_sld))
+        '<li><p>GeoServer <a href="%s">[SLD]</a></p>'
+        '<p><img src="%s"></p></li></ul>' % (layer.name(), filename, filename_sld, filename_wms))
     return s
 
 def save_wms_image(filename, url, layer, extent):
