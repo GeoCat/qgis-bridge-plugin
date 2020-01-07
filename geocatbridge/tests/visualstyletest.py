@@ -1,6 +1,48 @@
+'''
+The create_styles_visual_test_page function in this file creates a webpage
+with a set of test styles, as represented by QGIS and GeoServer, so visual
+inspection is easy and can be used to check that conversion from QGIS style 
+into SLD and later parsing by GeoServer is done correctly. 
+
+Test styles are taken from the underlying bridge-style library, and follow
+these rules:
+
+- Styles are grouped in folders, each of them defining a group
+- All styles in the same group use the same data source. 
+
+To add new tests, just add data and style files to the bridge-style library,
+following the above rules
+
+In the webpage created by this script, there will be a tab for each of the 
+groups. Within that tab, all test styles are displayed, with a pair of images
+for each of them.
+
+A link to the SLD file is also available for each test style, so the SLD code
+can be inspected as well.
+
+To run this script, use the following code from the QGIS Python console:
+
+>>> from geocatbridge.tests.visualstyletest import create_styles_visual_test_page
+>>> create_styles_visual_test_page("path/to/outut/folder")
+
+The script assumes a standard GeoServer instance reachable at 
+
+http://localhost:8080/geoserver
+
+with default admin credentials (admin/geoserver). If you want to test against
+a different configuration, pass the url and the corresponing credentials when
+calling the main function:
+
+>>> create_styles_visual_test_page("path/to/outut/folder", 
+        url="my/url/to/geoserver", username="user", password="pass")
+
+
+'''
+
 import os
 
 import bridgestyle
+from bridgestyle.qgis import layerStyleAsSld
 
 from geocatbridge.publish.geoserver import GeoserverServer
 
@@ -34,14 +76,19 @@ def load_layer(file):
         _layers[file] = layer
     return _layers[file]
 
-def create_styles_visual_test_page(folder, url = "http://localhost:8080/geoserver", username="admin", password="geoserver"):
+def create_styles_visual_test_page(folder, url = "http://localhost:8080/geoserver", 
+                                    username="admin", password="geoserver"):
     server = TestGeoserverServer("testserver", url)
     server.setBasicAuthCredentials(username, password)
     server.setupForProject()
     server.prepareForPublishing(False)
     main_folder = os.path.join(os.path.dirname(bridgestyle.__file__), "test", "data", "qgis")
-    s = ""
+    tabshtml = '<div class="tab">'
+  
+    contenthtml = ""
     for subfolder in os.listdir(main_folder):
+        tabshtml += '<button class="tablinks" onclick="openTab(event, \'%s\')">%s</button>' % (subfolder, subfolder)
+        contenthtml += '<div id="%s" class="tabcontent">' % subfolder
         datafile = os.path.join(main_folder, subfolder, "testlayer.gpkg")
         layer = load_layer(datafile)
         if not os.path.exists(datafile):
@@ -54,7 +101,12 @@ def create_styles_visual_test_page(folder, url = "http://localhost:8080/geoserve
                 layer.setName(name)              
                 layer.loadNamedStyle(stylefile)
                 server.publishLayer(layer)
-                s = s + create_images(folder, url, layer)
+                contenthtml += create_images(folder, url, layer, subfolder)
+        contenthtml += "</div>"
+
+    tabshtml += "</div>"
+    s = template.replace("[tabs]", tabshtml)
+    s = s.replace("[content]", contenthtml)
     indexfilename = os.path.join(folder, "index.html")
     with open(indexfilename, "w") as f:
         f.write(s)
@@ -62,14 +114,19 @@ def create_styles_visual_test_page(folder, url = "http://localhost:8080/geoserve
 
 WIDTH = 500.0
 
-def create_images(folder, url, layer):
+def create_images(folder, url, layer, group):
     extent = layer.extent()  
-    filename = os.path.join(folder, "%s_qgis.png" % layer.name())
+    filename = os.path.join(folder, "%s_%s_qgis.png" % (group, layer.name()))
     save_layer_image(filename, layer, extent)
-    filename_wms = os.path.join(folder, "%s_geoserver.png" % layer.name())
+    filename_wms = os.path.join(folder, "%s_%s_geoserver.png" % (group, layer.name()))
     save_wms_image(filename_wms, url, layer, extent)
-    s = '<p><b>%s</b></p><ul><li><p>QGIS</p><p><img src="%s"></p></li>'
-        '</li><p>GeoServer</p><p><img src="%s"></p></li></ul>' % (layer.name(), filename, filename_wms)
+    filename_sld = os.path.join(folder, "%s_%s.sld" % (group, layer.name()))
+    sld, _, _ = layerStyleAsSld(layer)
+    with open(filename_sld, "w") as f:
+        f.write(sld)    
+    s = ('<p><b>%s</b></p><ul><li><p>QGIS</p><p><img src="%s"></p></li>'
+        '<li><p>GeoServer <a href="%">[SLD]</a></p>'
+        '<p><img src="%s"></p></li></ul>' % (layer.name(), filename, filename_wms, filename_sld))
     return s
 
 def save_wms_image(filename, url, layer, extent):
@@ -104,4 +161,84 @@ def save_layer_image(filename, layer, extent):
     render.start()
     render.waitForFinished()
     p.end()
-    img.save(filename)    
+    img.save(filename)
+
+template = '''<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {box-sizing: border-box}
+body {font-family: "Lato", sans-serif;}
+
+/* Style the tab */
+.tab {
+  float: left;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+  width: 30%;
+  height: 100%;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  display: block;
+  background-color: inherit;
+  color: black;
+  padding: 22px 16px;
+  width: 100%;
+  border: none;
+  outline: none;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current "tab button" class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  float: left;
+  padding: 0px 12px;
+  border: 1px solid #ccc;
+  width: 70%;
+  border-left: none;
+  height: 100%;
+}
+</style>
+</head>
+<body>
+
+[tabs]
+[content]
+
+<script>
+function openTab(evt, tabName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+
+// Get the element with id="defaultOpen" and click on it
+//document.getElementById("defaultOpen").click();
+</script>
+   
+</body>'''
+
