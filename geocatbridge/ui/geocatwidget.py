@@ -1,10 +1,12 @@
 import os
 import requests
+import webbrowser
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import QWidget, QSizePolicy
 from qgis.PyQt.QtGui import QTextDocument, QPixmap
 from qgis.PyQt.QtCore import QUrl, QSize
+from qgis.PyQt.QtWebKitWidgets import QWebPage
 from qgis.core import Qgis, QgsApplication
 
 from geocatbridge.publish.servers import *
@@ -35,6 +37,9 @@ class GeoCatWidget(WIDGET, BASE):
         path = os.path.join(rootFolder, "resources", "geocatlivepage", "index.html")
         url = QUrl.fromLocalFile(path)
         self.txtAbout.load(url)
+        self.txtAbout.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
+        self.txtAbout.linkClicked.connect(lambda url: webbrowser.open_new_tab(url.toString()))
+
 
         self.bar = QgsMessageBar()
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
