@@ -89,10 +89,10 @@ def create_styles_visual_test_page(folder, url = "http://localhost:8080/geoserve
     for subfolder in os.listdir(main_folder):
         tabshtml += '<button class="tablinks" onclick="openTab(event, \'%s\')">%s</button>' % (subfolder, subfolder)
         contenthtml += '<div id="%s" class="tabcontent">' % subfolder
-        datafile = os.path.join(main_folder, subfolder, "testlayer.gpkg")
-        layer = load_layer(datafile)
+        datafile = os.path.join(main_folder, subfolder, "testlayer.gpkg")        
         if not os.path.exists(datafile):
             datafile = os.path.join(main_folder, subfolder, "testlayer.tiff")        
+        layer = load_layer(datafile)
         subfolder_path = os.path.join(main_folder, subfolder)
         for style in os.listdir(subfolder_path):
             if style.lower().endswith("qml"):
@@ -107,6 +107,7 @@ def create_styles_visual_test_page(folder, url = "http://localhost:8080/geoserve
     tabshtml += "</div>"
     s = template.replace("[tabs]", tabshtml)
     s = s.replace("[content]", contenthtml)
+    s = s.replace("[default]", os.listdir(main_folder)[0])
     indexfilename = os.path.join(folder, "index.html")
     with open(indexfilename, "w") as f:
         f.write(s)
@@ -236,8 +237,7 @@ function openTab(evt, tabName) {
   evt.currentTarget.className += " active";
 }
 
-// Get the element with id="defaultOpen" and click on it
-//document.getElementById("defaultOpen").click();
+document.getElementById("[default]").click();
 </script>
    
 </body>'''
