@@ -1,5 +1,7 @@
 import os
+import sys
 import webbrowser
+import traceback
 from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication
@@ -12,6 +14,9 @@ from .ui.bridgedialog import BridgeDialog
 from .ui.multistylerdialog import MultistylerDialog
 from .publish.servers import readServers
 from .processing.bridgeprovider import BridgeProvider
+from .errorhandler import handleError
+
+PLUGIN_NAMESPACE = "geocatbridge"
 
 class GeocatBridge:
     def __init__(self, iface):
@@ -40,6 +45,21 @@ class GeocatBridge:
         if os.path.exists(localePath):
             self.translator.load(localePath)
             QCoreApplication.installTranslator(self.translator)
+
+        self.qgis_hook = sys.excepthook
+
+        def plugin_hook(t, value, tb):
+            errorList = traceback.format_exception(t, value, tb)
+            trace = "".join(errorList)            
+            if PLUGIN_NAMESPACE in trace.lower():
+                try:
+                    handleError(errorList)
+                except:
+                    pass #we swallow all exceptions here, to avoid entering an endless loop
+            else:
+                self.qgis_hook(t, value, tb)          
+        
+        sys.excepthook = plugin_hook
 
 
     def initGui(self):
@@ -89,6 +109,8 @@ class GeocatBridge:
         self.iface.removePluginWebMenu("GeoCatBridge", self.actionHelp)
 
         QgsApplication.processingRegistry().removeProvider(self.provider)
+
+        sys.excepthook = self.qgis_hook
 
     _layerSignals = {}
 
