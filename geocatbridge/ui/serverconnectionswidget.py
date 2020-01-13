@@ -69,6 +69,8 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.comboMetadataProfile.currentIndexChanged.connect(self._setCurrentServerHasChanges)
         self.comboGeoserverDatabase.currentIndexChanged.connect(self._setCurrentServerHasChanges)
 
+        self.radioLocalPath.toggled.connect(self.mapserverStorageChanged)
+
         self.fileMapserver.setStorageMode(QgsFileWidget.GetDirectory)
 
         self.btnSaveServers.clicked.connect(self.saveServers)

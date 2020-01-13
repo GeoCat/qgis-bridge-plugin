@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>627</width>
+    <height>378</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Publishing progress</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTreeWidget" name="treeWidget">
+     <attribute name="headerVisible">
+      <bool>false</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>1</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>2</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

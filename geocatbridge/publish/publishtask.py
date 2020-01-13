@@ -12,10 +12,13 @@ from qgis.core import (
     QgsLayerMetadata,
     QgsBox3d,
     QgsCoordinateTransform,
-    QgsCoordinateReferenceSystem
+    QgsCoordinateReferenceSystem    
 )
 
+from qgis.PyQt.QtCore import pyqtSignal
+
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
+from geocatbridge.ui.progressdialog import DATA, METADATA, SYMBOLOGY, GROUPS
 
 from bridgestyle.qgis import saveLayerStyleAsZippedSld
 
@@ -24,6 +27,10 @@ from .exporter import exportLayer
 from .metadata import uuidForLayer, saveMetadata
 
 class PublishTask(QgsTask):
+
+    stepFinished = pyqtSignal(str, int)
+    stepStarted = pyqtSignal(str, int)
+    stepSkipped = pyqtSignal(str, int)
 
     def __init__(self, layers, fields, onlySymbology, geodataServer, metadataServer, parent):
         super().__init__("Publish from GeoCat Bridge", QgsTask.CanCancel)
@@ -95,17 +102,25 @@ class PublishTask(QgsTask):
                 if self.isCanceled():
                     return False
                 warnings, errors = [], []
-                self.setProgress(i * 100 / len(self.layers))
-                try:                       
-                    layer = self.layerFromName(name)
-                    warnings.extend(self.validateLayer(layer))
-                    validates, _ = validator.validate(layer.metadata())
-                    validates = True
-                    if self.geodataServer is not None:
+                self.setProgress(i * 100 / len(self.layers))                
+                layer = self.layerFromName(name)
+                warnings.extend(self.validateLayer(layer))
+                validates, _ = validator.validate(layer.metadata())
+                validates = True
+                if self.geodataServer is not None:
+                    try:
                         self.geodataServer.resetLog()
+                        self.stepStarted.emit(name, SYMBOLOGY)
+                        self.geodataServer.publishStyle(layer)
+                        self.stepFinished.emit(name, SYMBOLOGY)
+                    except:
+                        self.stepFinished.emit(name, SYMBOLOGY)
+                        errors.append(traceback.format_exc())
+                    try:
                         if self.onlySymbology:
-                            self.geodataServer.publishStyle(layer)
+                            self.stepSkipped.emit(name, DATA)
                         else:
+                            self.stepStarted.emit(name, DATA)
                             if validates or allowWithoutMetadata in [ALLOW, ALLOWONLYDATA]:
                                 fields = None
                                 if layer.type() == layer.VectorLayer:
@@ -117,7 +132,16 @@ class PublishTask(QgsTask):
                                     self.geodataServer.setLayerMetadataLink(name, url)
                             else:
                                 self.geodataServer.logError(self.tr("Layer '%s' has invalid metadata. Layer was not published") % layer.name())
-                    if self.metadataServer is not None:
+                            self.stepFinished.emit(name, DATA)
+                    except:
+                        self.stepFinished.emit(name, DATA)
+                        errors.append(traceback.format_exc())
+                else:
+                    self.stepSkipped.emit(name, SYMBOLOGY)
+                    self.stepSkipped.emit(name, DATA)
+
+                if self.metadataServer is not None:
+                    try:
                         self.metadataServer.resetLog()
                         if validates or allowWithoutMetadata == ALLOW:
                             if self.geodataServer is not None:
@@ -128,8 +152,11 @@ class PublishTask(QgsTask):
                             self.metadataServer.publishLayerMetadata(layer, wms)
                         else:
                             self.metadataServer.logError(self.tr("Layer '%s' has invalid metadata. Metadata was not published") % layer.name())
-                except:
-                    errors.append(traceback.format_exc())
+                    except:                    
+                        errors.append(traceback.format_exc())
+                else:
+                    self.stepSkipped.emit(name, METADATA)
+
                 if self.geodataServer is not None:
                     w, e = self.geodataServer.loggedInfo()
                     warnings.extend(w)
@@ -140,13 +167,18 @@ class PublishTask(QgsTask):
                     errors.extend(e)
                 self.results[name] = (set(warnings), set(errors))
 
-            if self.geodataServer is not None:            
+            if self.geodataServer is not None:
+                self.stepStarted.emit(None, GROUPS)
                 groups = self._layerGroups(self.layers)                            
                 self.geodataServer.createGroups(groups)
                 self.geodataServer.closePublishing()
+                self.stepFinished.emit(None, GROUPS)
+            else:
+                self.stepSkipped.emit(None, GROUPS)
 
             return True
         except Exception as e:
+            print(22)
             self.exception = traceback.format_exc()
             return False
 

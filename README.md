@@ -16,7 +16,7 @@ To install the latest version from this repository, follow these steps:
 
 - Run `git submodule update --init` to fetch the code of the dependencies that are used by the plugin, which are contained in other repos that are declared as submodules of this one.
 
-- Run `paver install` in the repo root to copy the `geocatbridge` folder in your QGIS 3 plugins folder (it will create a symlink if possible). You will need to have `paver` installed.
+- Copy the `geocatbridge` folder in your QGIS 3 plugins folder
 
 - Start QGIS and you will find the Geocat Bridge plugin in the plugins menu. If it's not available yet, activate it in the QGIS Plugin Manager.
 
@@ -26,20 +26,13 @@ This plugin is compatible with QGIS 3.4 or later.
 
 ## Documentation
 
-The documentation is found in the `docs` folder.
+The documentation is found in the `docs` folder. Documentation is based on [Sphinx](https://www.sphinx-doc.org).
 
-To build it, run `paver builddocs`. Documentation is based on [Sphinx](https://www.sphinx-doc.org). Docs are written in markdown. To render markdown in Sphinx, install these plugins:
-
-* [Recommonmark](https://github.com/readthedocs/recommonmark)
-* [Sphinx-markdown-tables](https://github.com/ryanfox/sphinx-markdown-tables)
-
-```
-pip install recommonmark,sphinx-markdown-tables
-```
+A script named `builddocs.py` allows to build the documentation for different versions of the plugin. See the [comments in the script](https://github.com/GeoCat/qgis-bridge-plugin/blob/master/docs/builddocs.py#L7-L20) to know more about the options and modifiers it accepts
 
 ## Packaging
 
-To package the plugin, run `paver package`. The package task builds the documentation and zips it along with the plugin code.
+To package the plugin, run the `build.py` script. It builds the documentation and zips it along with the plugin code.
 
 A `geocatbridge.zip` file is generated in the repo root.
 

@@ -9,6 +9,4 @@ In settings of the plugin repository, enable experimental plugins. Then look for
 
 Bridge plugin requires the `lxml <https://lxml.de/>`_ library. The Windows version of the library is shipped with the plugin package. On Linux and MacOS, you must install it using `pip <https://pypi.org/project/pip/>`_.
 
-```
-pip install lxml
-```
+``pip install lxml``

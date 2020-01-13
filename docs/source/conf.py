@@ -28,7 +28,7 @@ import os
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['recommonmark','sphinx_markdown_tables']
+extensions = []
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'GeoCatBridge'
-copyright = u'2019, [author]'
+copyright = u'2019, GeoCat'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -200,7 +200,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'geocatbridge.tex', u'GeoCatBridge QGIS Plugin Documentation', u'[author]', 'manual')
+  ('index', 'geocatbridge.tex', u'GeoCatBridge QGIS Plugin Documentation', u'GeoCat', 'manual')
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -235,10 +235,10 @@ rst_epilog = """
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', '[pluginshortname]', u'GeoCatBridge QGIS Plugin Documentation', [u'[author]'], 1),
-    ('2_background_and_requirements', '[pluginshortname]', u'GeoCatBridge QGIS Plugin Documentation', [u'[author]'], 1),
-    ('3_installation', '[pluginshortname]', u'GeoCatBridge QGIS Plugin Documentation', [u'[author]'], 1),
-    ('4_configuration', '[pluginshortname]', u'GeoCatBridge QGIS Plugin Documentation', [u'[author]'], 1),
+    ('index', '[pluginshortname]', u'GeoCatBridge QGIS Plugin Documentation', [u'GeoCat'], 1),
+    ('2_background_and_requirements', '[pluginshortname]', u'GeoCatBridge QGIS Plugin Documentation', [u'GeoCat'], 1),
+    ('3_installation', '[pluginshortname]', u'GeoCatBridge QGIS Plugin Documentation', [u'GeoCat'], 1),
+    ('4_configuration', '[pluginshortname]', u'GeoCatBridge QGIS Plugin Documentation', [u'GeoCat'], 1),
     
 ]
 
@@ -253,7 +253,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'geocatbridge', u'GeoCatBridge QGIS Plugin Documentation',
-   u'[author]', u'geocatbridgeQGISPlugin', 'One line description of project.',
+   u'GeoCat', u'geocatbridgeQGISPlugin', 'One line description of project.',
    'Miscellaneous'),
 ]
 

@@ -74,14 +74,7 @@ class GeoserverServer(ServerBase):
                      % (layer.name(), styleFilename))
         self._publishStyle(layer.name(), styleFilename)
 
-    def publishLayer(self, layer, fields=None):
-        self.publishStyle(layer)
-        styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
-        warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
-        for w in warnings:
-            self.logWarning(w)
-        self.logInfo(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s")
-                     % (layer.name(), styleFilename))        
+    def publishLayer(self, layer, fields=None):      
         if layer.type() == layer.VectorLayer:
             if self.storage in [self.FILE_BASED, self.POSTGIS_MANAGED_BY_GEOSERVER]:
                 if layer.source() not in self.exportedLayers:
@@ -99,9 +92,9 @@ class GeoserverServer(ServerBase):
                         self.exportedLayers[layer.source()] = path
                 filename = self.exportedLayers[layer.source()]
                 if self.storage == self.FILE_BASED:
-                    self._publishVectorLayerFromFile(layer, filename, styleFilename)
+                    self._publishVectorLayerFromFile(layer, filename)
                 else:
-                    self._publishVectorLayerFromFileToPostgis(layer, filename, styleFilename)
+                    self._publishVectorLayerFromFileToPostgis(layer, filename)
             elif self.storage == self.POSTGIS_MANAGED_BY_BRIDGE:            
                 try:
                     from .servers import allServers
@@ -109,13 +102,13 @@ class GeoserverServer(ServerBase):
                 except KeyError:
                     raise Exception(QCoreApplication.translate("GeocatBridge", "Cannot find the selected PostGIS database"))
                 db.importLayer(layer, fields)                
-                self._publishVectorLayerFromPostgis(layer, styleFilename)            
+                self._publishVectorLayerFromPostgis(layer)            
         elif layer.type() == layer.RasterLayer:
             if layer.source() not in self.exportedLayers:
                 path = exportLayer(layer, fields, log=self)
                 self.exportedLayers[layer.source()] = path
             filename = self.exportedLayers[layer.source()]
-            self._publishRasterLayer(filename, styleFilename, layer.name(), layer.name())
+            self._publishRasterLayer(filename, layer.name())
 
 
     def createPostgisDatastore(self):
@@ -146,11 +139,10 @@ class GeoserverServer(ServerBase):
     def baseUrl(self):
         return "/".join(self.url.split("/")[:-1])
 
-    def _publishVectorLayerFromFile(self, layer, filename, styleFilename):
+    def _publishVectorLayerFromFile(self, layer, filename):
         self.logInfo("Publishing layer from file: %s" % filename)
         name = layer.name()
         self.deleteLayer(name)
-        self._publishStyle(name, styleFilename)
         isDataUploaded = filename in self.uploadedDatasets        
         if not isDataUploaded:
             with open(filename, "rb") as f:
@@ -176,10 +168,9 @@ class GeoserverServer(ServerBase):
         self.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
         self._setLayerStyle(name, name)
 
-    def _publishVectorLayerFromPostgis(self, layer, styleFilename):
+    def _publishVectorLayerFromPostgis(self, layer):
         name = layer.name()
         self.deleteLayer(name)
-        self._publishStyle(name, styleFilename)
         db = allServers()[self.postgisdb]
         username, password = db.getCredentials()
         def _entry(k, v):
@@ -214,13 +205,12 @@ class GeoserverServer(ServerBase):
         self.request(ftUrl, data=ft, method="post")             
         self._setLayerStyle(name, name)
 
-    def _publishVectorLayerFromFileToPostgis(self, layer, filename, styleFilename):
+    def _publishVectorLayerFromFileToPostgis(self, layer, filename):
         self.logInfo("Publishing layer from file: %s" % filename)
         self.createPostgisDatastore()
         ws, datastoreName = self.postgisdb.split(":")
         name = layer.name()
         self.deleteLayer(name)
-        self._publishStyle(name, styleFilename)
         isDataUploaded = filename in self.uploadedDatasets        
         if not isDataUploaded:
             _import = {
@@ -269,15 +259,14 @@ class GeoserverServer(ServerBase):
         self.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
         self._setLayerStyle(name, name)
 
-    def _publishRasterLayer(self, filename, style, layername, stylename):
+    def _publishRasterLayer(self, filename, layername):
         #feedback.setText("Publishing data for layer %s" % layername)
         self._ensureWorkspaceExists()
-        self._publishStyle(stylename, style)
         with open(filename, "rb") as f:
             url = "%s/workspaces/%s/coveragestores/%s/file.geotiff" % (self.url, self._workspace, layername)
             self.request(url, f.read(), "put")
         self.logInfo("Feature type correctly created from Tiff file '%s'" % filename)
-        self._setLayerStyle(layername, stylename)
+        self._setLayerStyle(layername, layername)
 
     def createGroups(self, groups):      
         for group in groups:
