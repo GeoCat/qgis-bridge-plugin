@@ -22,7 +22,8 @@ convert the metadata to ISO19139 format.
 
 You can edit the metadata fields directly or click on the buttons beside each parameter to open the QGIS metadata editor.
 
-## Preview metadata
+Preview metadata
+----------------
 
 To show a preview of the metadata of the selected layer, click on the |previewmetadata| button
 
@@ -33,7 +34,8 @@ You will see the metadata in a new dialog
 .. image:: ./img/metadata_preview.png
 
 
-## Metadata validation
+Metadata validation
+-------------------
 
 Bridge can use QGIS built-in validation tools and display the result of metadata validation. Click on the |validatemetadata| button to validate your metadata.
 

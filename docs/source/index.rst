@@ -11,7 +11,7 @@ This plugin has been developed by `GeoCat <http://geocat.net.>`_. GeoCat focuses
 customization and support of cutting-edge geospatial software,
 especially geospatial catalog software on both server and desktop.
 GeoCat provides all-in-one solutions for the Spatial Data Infrastructure
-(SDI>`_ that offer a geospatial catalog, map server and map client. The
+(SDI) that offer a geospatial catalog, map server and map client. The
 solutions are based on established Free and Open Source Software (FOSS)
 projects, open standard protocols and will be customized to the needs of
 different clients.
