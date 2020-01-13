@@ -44,7 +44,7 @@ class GeocatLiveServer(ServerBase):
                 self._geoserverUrl = ""
         if self._geoserverServer is None:            
             self._geoserverServer = GeoserverServer("GeoServer", self._geoserverUrl, 
-                                                self.geoserverAuthid, workspace="geocatlive")
+                                                    self.geoserverAuthid)
         return self._geoserverServer
 
     def geonetworkServer(self):
@@ -54,7 +54,8 @@ class GeocatLiveServer(ServerBase):
             except:
                 self._geonetworkUrl = ""
         if self._geonetworkServer is None:
-            self._geonetworkServer = GeonetworkServer("GeoNetwork", self._geonetworkUrl, self.geonetworkAuthid)
+            self._geonetworkServer = GeonetworkServer("GeoNetwork", self._geonetworkUrl, 
+                                                    self.geonetworkAuthid)
             self.addOGCServers()
         return self._geonetworkServer
 
