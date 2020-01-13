@@ -1,12 +1,137 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Frameset//EN">
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-
-<title>GeoCat</title>
-
+<html>
+<head>
+  <style>
+    body {
+      font-family: 'Open Sans',Helvetica,Arial,Lucida,sans-serif;
+      line-height: 1.6;
+      font-size: 14px;
+      background-color: #f9f9f9;
+      margin: 0;
+    }
+    h1 {
+      font-weight: 500;
+      font-size: 24px;
+    }
+    h2 {
+      font-weight: 100;
+      font-size: 20px;
+      margin: 10px 0;
+    }
+    h3 {
+      color: #999;
+      text-transform: uppercase;
+      font-size: 16px;
+      font-weight: 500;
+    }
+    p {
+      margin: 10px 0;
+      line-height: 1.7;
+      columns: #373737;
+    }
+    a {
+      color: #0366d6;
+      text-decoration: none;
+    }
+    a:hover, a:focus, a:visited {
+      color: #0366d6;
+      text-decoration: underline;
+    }
+    /* columns */
+    .gc-columns {
+      height: 100%;
+    }
+    .gc-left-column {
+      vertical-align: top;
+      padding: 15px;
+      width: 80%;
+    }
+    .gc-right-column {
+      vertical-align: top;
+      width: 300px;
+      padding: 15px;
+      background-color: #fff;
+      border-left: 1px solid #ddd;
+    }
+    .gc-right-column ul {
+      list-style: none;
+      padding: 0;
+    }
+    .gc-right-column ul li {
+      padding: 5px 0;
+      font-size: 14px;
+    }
+    .gc-logo {
+      height: 50px;
+    }
+    .gc-logo-bridge {
+      padding: 15px 30px;
+    }
+    .gc-intro {
+      padding: 0 85px;
+      padding-bottom: 15px;
+    }
+    .gc-logo-geocat {
+      padding: 15px 30px;
+    }
+    .gc-about {
+      padding: 0 85px;
+    }
+    /* buttons */
+    .gc-btn {
+      display: block;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: 300;
+      text-decoration: none;
+      color: #fff;
+      font-size: 16px;
+      margin: 15px 0;
+      border: 0;
+      cursor: pointer;
+    }
+    .gc-btn-bridge {
+      background-color: #ffd400;
+      display: inline-block;
+      margin-left: 0;
+    }
+    .gc-btn-live {
+      background-color: #ff9900;
+      min-width: 200px;
+    }
+   </style>
+</head>
 <body>
-
-<h1>Here goes the landing page</h1>
-
-<p>bla bla bla</p>
-
+  <table class="gc-columns">
+    <tr>
+      <td class="gc-left-column">
+        <div class="gc-logo-bridge">
+          <img src="img/gc_bridge_logo_text.svg" alt="GeoCat Bridge: One Click data publishing for ArcGIS">
+        </div>
+        <div class="gc-intro">
+          <p>
+            GeoCat Bridge, our plugin for QGIS, has been designed to make the process of publishing geospatial data on the internet as easy as hitting the Publish button.
+            From your project in QGIS, you are literally only one click away from publishing your geographic data and metadata on the Internet using an open source server platform.
+          </p>
+          <a href="https://www.geocat.net/bridge/" data-icon="$">Learn more &rarr;</a>
+        </div>
+        <div class="gc-logo-geocat">
+          <img class="gc-logo" src="img/gc_geocat_logo_text.svg" alt="GeoCat">
+        </div>
+        <div class="gc-about">
+          <p>
+            Established in the Netherlands in 2007, GeoCat offers cutting-edge customized software and services that make publishing geospatial data on the Internet easier and more efficient. Operating in the fast growing market of Spatial Data Infrastructures (SDI) and geospatial-enabled technologies. GeoCat builds sustainable applications following the Free and Open Source Software (FOSS) philosophy and open standards.
+          </p>
+          <p>
+            <a href="https://www.geocat.net">www.geocat.net &rarr;</a><br>
+          </p>
+        </div>
+      </td>
+      <td class="gc-right-column">
+        <h3>Live</h3>
+        <p>Try GeoCat Live hosting of GeoNetwork, GeoServer and PostGIS today!</p>
+        <button class="gc-btn gc-btn-live" href="https://www.geocat.net/live/">Sign up here</button>
+      </td>
+    </tr>
+  </table>
 </body>
+</html>
