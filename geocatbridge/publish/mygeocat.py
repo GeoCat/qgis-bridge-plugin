@@ -6,8 +6,6 @@ from geocatbridge.publish.servers import *
 
 class MyGeoCatClient():
 
-    BASE_URL = "https://live-services.geocat.net/geocat-live/api/1.0/order"
-
     def __init__(self):
         self.logout()
 
@@ -16,7 +14,7 @@ class MyGeoCatClient():
             self.user = user
             self.password = password
             self.server = GeocatLiveServer("GeoCat Live - " + self.user, self.user, "", "")
-            url = "%s/%s" % (self.BASE_URL, self.user)
+            url = "%s/%s" % (GeocatLiveServer.BASE_URL, self.user)
             response = execute(lambda: requests.get(url))
             responsejson = response.json()
             for serv in responsejson["services"]:

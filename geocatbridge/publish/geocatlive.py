@@ -1,5 +1,6 @@
 import requests
 
+from ..utils.gui import execute
 from .serverbase import ServerBase
 from .geoserver import GeoserverServer
 from .geonetwork import GeonetworkServer
@@ -28,13 +29,15 @@ class GeocatLiveServer(ServerBase):
         return "GeocatLive server"
         
     def _getUrls(self):
-        url = "%s/%s" % (self.BASE_URL, self.userid)
-        response = requests.get(url).json()
-        for serv in response["services"]:
-            if serv["application"] == "geoserver":
-                self._geoserverUrl = serv["url"] + "/rest"
-            if serv["application"] == "geonetwork":
-                self._geonetworkUrl = serv["url"]
+        def f():
+            url = "%s/%s" % (self.BASE_URL, self.userid)
+            response = requests.get(url).json()
+            for serv in response["services"]:
+                if serv["application"] == "geoserver":
+                    self._geoserverUrl = serv["url"] + "/rest"
+                if serv["application"] == "geonetwork":
+                    self._geonetworkUrl = serv["url"]
+        execute(f)
 
     def geoserverServer(self):
         if self._geoserverUrl is None:

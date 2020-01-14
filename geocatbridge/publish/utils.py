@@ -21,25 +21,25 @@ def publishLayerToCatalogUsingPostgis(connection, catalog, layer, fields):
     exporter = QgsVectorLayerExporter(uri.uri(), providerName, fields, 
                                         layer.geometryType(), layer.crs(), True, options)
     for feature in layer.getFeatures():
-    	exporter.addFeature(feature)
+        exporter.addFeature(feature)
     exporter.flushBuffer()
     if exporter.errorCount():
-    	raise Exception(exporter.errorMessage())
+        raise Exception(exporter.errorMessage())
     zipfile = getCompatibleSldAsZip(layer)
     catalog.publish_vector_layer_from_postgis(connection.host, str(connection.port), connection.dbname, 
-    											connection.schema, layer.name(), connection.user, 
-    											connection.passwd, layer.crs().authid(), layer.name(), 
-    											zipfile, layer.name())
+                                                connection.schema, layer.name(), connection.user, 
+                                                connection.passwd, layer.crs().authid(), layer.name(), 
+                                                zipfile, layer.name())
 
 def publishLayerToCatalogWithDirectUpload(catalog, layer):
     filename = exportLayer(layer)    
     if layer.type() == layer.VectorLayer:
-    	zipfile = getCompatibleSldAsZip(layer)
+        zipfile = getCompatibleSldAsZip(layer)
         catalog.publish_vector_layer_from_file(filename, zipfile, 
                                                 layer.name(), layer.name())
     elif layer.type() == layer.RasterLayer:
-    	sld = getStyleAsSld(layer)
-		catalog.publish_raster_layer(filename, sld, layer.name(), layer.name())
+        sld = getStyleAsSld(layer)
+        catalog.publish_raster_layer(filename, sld, layer.name(), layer.name())
 
 
 def publishMetadata(catalog, layer, metadata):
