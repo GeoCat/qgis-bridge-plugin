@@ -43,4 +43,4 @@ Bridge can use QGIS built-in validation tools and display the result of metadata
 
 After validation a dialog with validation results is displayed.
 
-.. image:: ./img/schematron_metadata.png
+.. image:: ./img/metadata_validation.png

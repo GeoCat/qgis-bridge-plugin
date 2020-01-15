@@ -33,4 +33,5 @@ implementations.
     publish
     server_configuration
     metadata_editing
+    mygeocat
     supported_symbology

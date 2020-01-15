@@ -75,6 +75,8 @@ Finally, you must select how data will be stored in the server. Three different 
 
 - Import into a PostGIS DB (handled by GeoServer): Layer data is uploaded to GeoServer, and GeoServer itself takes care of importing into the DB. A PostGIS DB must be selected from the datastores available in the GeoServer instance. If you want to add a new one, use the *Add datastore* button.
 
+When you add a new GeoServer server, Bridge will automatically add the corresponding WMS and WFS endpoints to QGIS, so you can easily add to your project the layers that are available in the server.
+
 Bridge and GeoServer workspaces
 *******************************
 
