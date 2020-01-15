@@ -9,10 +9,9 @@ class MyGeoCatClient():
     def __init__(self):
         self.logout()
 
-    def login(self, user, password):
+    def login(self, user):
         try:
             self.user = user
-            self.password = password
             self.server = GeocatLiveServer("GeoCat Live - " + self.user, self.user, "", "")
             url = "%s/%s" % (GeocatLiveServer.BASE_URL, self.user)
             response = execute(lambda: requests.get(url))
@@ -34,11 +33,10 @@ class MyGeoCatClient():
         self.geonetworkUrl = ""
         self.geonetworkStatus = ""
         self.user = None
-        self.password = None
         self.server = None
 
     def isLoggedIn(self):
-        return self.user is not None and self.password is not None
+        return self.user is not None
 
     def addLiveServer(self):
         for server in allServers().values():

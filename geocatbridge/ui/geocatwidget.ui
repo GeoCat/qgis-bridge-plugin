@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabAbout">
       <attribute name="title">
@@ -44,7 +44,7 @@
        <item>
         <widget class="QStackedWidget" name="stackedWidget">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="pageLogin">
           <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -77,30 +77,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QgsPasswordLineEdit" name="txtPassword">
-               <property name="placeholderText">
-                <string>Password</string>
-               </property>
-               <property name="clearButtonEnabled">
-                <bool>true</bool>
-               </property>
-               <property name="showLockIcon" stdset="0">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
               <layout class="QHBoxLayout" name="horizontalLayout">
-               <item>
-                <widget class="QCheckBox" name="chkSaveCredentials">
-                 <property name="toolTip">
-                  <string>Store credentials in QGIS authentication database</string>
-                 </property>
-                 <property name="text">
-                  <string>Save credentials</string>
-                 </property>
-                </widget>
-               </item>
                <item>
                 <spacer name="horizontalSpacer">
                  <property name="orientation">
@@ -170,22 +147,6 @@
                 </size>
                </property>
               </spacer>
-             </item>
-             <item>
-              <widget class="QLabel" name="labelForgotPass">
-               <property name="text">
-                <string>&lt;a href=&quot;https://my.geocat.net/pwreset.php&quot;&gt;Forgot password?&lt;/a&gt;</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-               <property name="openExternalLinks">
-                <bool>true</bool>
-               </property>
-               <property name="textInteractionFlags">
-                <set>Qt::TextBrowserInteraction</set>
-               </property>
-              </widget>
              </item>
              <item>
               <spacer name="verticalSpacer">
@@ -460,11 +421,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>QgsPasswordLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>qgspasswordlineedit.h</header>
-  </customwidget>
   <customwidget>
    <class>QWebView</class>
    <extends>QWidget</extends>

@@ -111,7 +111,7 @@ def create_styles_visual_test_page(folder, url = "http://localhost:8080/geoserve
     indexfilename = os.path.join(folder, "index.html")
     with open(indexfilename, "w") as f:
         f.write(s)
-    server.deleteWorkspace()
+    #server.deleteWorkspace()
 
 WIDTH = 500.0
 

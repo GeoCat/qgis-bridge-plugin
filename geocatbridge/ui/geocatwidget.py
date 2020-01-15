@@ -43,7 +43,6 @@ class GeoCatWidget(WIDGET, BASE):
 
         self.tabWidget.setCurrentIndex(0)
         self.stackedWidget.setCurrentIndex(0)
-        self.retrieveCredentials()
 
     def sendReport(self):
         pass
@@ -64,10 +63,9 @@ class GeoCatWidget(WIDGET, BASE):
         return texts.get(status, "Error")
 
     def login(self):
-        user = self.txtUsername.text()
-        password = self.txtPassword.text()                
+        user = self.txtUsername.text()             
         try:
-            mygeocat.client.login(user, password)
+            mygeocat.client.login(user)
             self.labelLoggedInAs.setText("Logged in as <b>%s</b>" % user)
             self.labelUrlGeoserver.setText("<a href='{0}'>{0}</a>".format(mygeocat.client.geoserverUrl))
             self.labelUrlGeonetwork.setText("<a href='{0}'>{0}</a>".format(mygeocat.client.geonetworkUrl))
@@ -76,30 +74,15 @@ class GeoCatWidget(WIDGET, BASE):
             self.labelStatusGeonetwork.setText(self._statusText(mygeocat.client.geonetworkStatus))
             self.labelStatusGeonetwork.setStyleSheet(self._statusCss(mygeocat.client.geonetworkStatus))
             self.stackedWidget.setCurrentIndex(1)
-            mygeocat.client.addLiveServer()            
+            mygeocat.client.addLiveServer()
         except:
             self.bar.pushMessage(self.tr("Login"), self.tr("Could not log in"), level=Qgis.Warning, duration=5)
             return
 
-        if self.chkSaveCredentials.isChecked():
-            auth = "{}/{}".format(user, password)
-            QgsApplication.authManager().storeAuthSetting(GEOCAT_AUTH_KEY, auth, True)
-        else:
-            QgsApplication.authManager().removeAuthSetting(GEOCAT_AUTH_KEY)
-
     def logout(self):
         mygeocat.client.logout()
         self.stackedWidget.setCurrentIndex(0)
-        self.retrieveCredentials()
-
-    def retrieveCredentials(self):
-        auth = QgsApplication.authManager().authSetting(GEOCAT_AUTH_KEY, defaultValue='', decrypt=True)
-        if auth:
-            username, password = auth.split("/")            
-        else:
-            username, password = "", ""
-        self.txtUsername.setText(username)
-        self.txtPassword.setText(password)
+        self.txtUsername.setText("")
 
 
 
