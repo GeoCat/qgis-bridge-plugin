@@ -30,7 +30,7 @@
     }
     a {
       color: #0366d6;
-      text-decoration: none;
+      /* text-decoration: none; */
     }
     a:hover, a:focus, a:visited {
       color: #0366d6;
@@ -70,11 +70,74 @@
       padding: 0 85px;
       padding-bottom: 15px;
     }
-    .gc-logo-geocat {
-      padding: 15px 30px;
-    }
     .gc-about {
       padding: 0 85px;
+    }
+    .gc-about table {
+      margin-top: 35px;
+      margin-bottom: 15px;
+      width: 100%;
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+    .gc-about td {
+      width: 23%;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      vertical-align: top;
+      text-align: center;
+    }
+    .gc-about td h2 {
+      text-align: center;
+    }
+    .gc-about td a {
+      padding: 15px 10px;
+      display: block;
+      font-size: 15px;
+      color: #373737;
+      text-decoration: none;
+    }
+    .gc-about a:hover {
+      color: #000;
+    }
+    .gc-about a img {
+      max-height: 70px;
+      margin-top: -50px;
+      transition: 0.70s;
+      -webkit-transition: 0.70s;
+      -moz-transition: 0.70s;
+      -ms-transition: 0.70s;
+      -o-transition: 0.70s;
+    }
+    .gc-about a:hover img {
+      color: #000;
+      transition: 0.70s;
+      -webkit-transition: 0.70s;
+      -moz-transition: 0.70s;
+      -ms-transition: 0.70s;
+      -o-transition: 0.70s;
+      -webkit-transform: rotate(180deg);
+      -moz-transform: rotate(180deg);
+      -o-transform: rotate(180deg);
+      -ms-transform: rotate(180deg);
+      transform: rotate(180deg);
+    }
+    .gc-about .gc-column {
+      width: 2%;
+      background-color: #f9f9f9;
+      border: 0 !important;
+    }
+    .gc-footer {
+      padding: 10px 85px;
+    }    
+    .gc-footer p {
+      margin-bottom: 5px;
+    }
+    .gc-logo-geocat a {
+      display: block;
+    }
+    .gc-logo-geocat .gc-logo {
+      height: 35px;
     }
     /* buttons */
     .gc-btn {
@@ -116,18 +179,46 @@
             GeoCat Bridge, our plugin for QGIS, has been designed to make the process of publishing geospatial data on the internet as easy as hitting the Publish button.
             From your project in QGIS, you are literally only one click away from publishing your geographic data and metadata on the Internet using an open source server platform.
           </p>
-          <a href="https://www.geocat.net/bridge/" data-icon="$">Learn more &rarr;</a>
-        </div>
-        <div class="gc-logo-geocat">
-          <img class="gc-logo" src="img/gc_geocat_logo_text.svg" alt="GeoCat">
         </div>
         <div class="gc-about">
-          <p>
-            Established in the Netherlands in 2007, GeoCat offers cutting-edge customized software and services that make publishing geospatial data on the Internet easier and more efficient. Operating in the fast growing market of Spatial Data Infrastructures (SDI) and geospatial-enabled technologies. GeoCat builds sustainable applications following the Free and Open Source Software (FOSS) philosophy and open standards.
-          </p>
-          <p>
-            <a href="https://www.geocat.net">www.geocat.net &rarr;</a><br>
-          </p>
+          <table>
+            <tr>
+              <td>
+                <a href="https://www.geocat.net/geonetwork/">
+                  <img src="img/gc_enterprise_logo_500x500.png">
+                  <h2>GeoNetwork Enterprise</h2>
+                </a>
+              </td>
+              <td class="gc-column"></td class="gc-column">
+              <td>
+                <a href="https://www.geocat.net/geoserver/">
+                  <img src="img/gc_geoserver_logo_500x500.png">
+                  <h2>GeoServer Enterprise</h2>
+                </a>
+              </td>
+              <td class="gc-column"></td class="gc-column">
+              <td>
+                <a href="https://www.geocat.net/live/">
+                  <img src="img/gc_live_logo_500x500.png">
+                  <h2>GeoCat Live</h2>
+                </a>
+              </td>
+              <td class="gc-column"></td class="gc-column">
+              <td>
+                <a href="https://www.geocat.net/services/">
+                  <img src="img/gc_services_logo_500x500.png">
+                   <h2>Services</h2>
+                </a>
+              </td>
+            </tr>
+          </table>
+          <a href="https://www.geocat.net/" data-icon="$">Learn more &rarr;</a>
+        </div>
+        <div class="gc-footer">
+          <p>Products made with &#9829; by</p>
+          <div class="gc-logo-geocat">
+            <a href="https://www.geocat.net"><img class="gc-logo" src="img/gc_geocat_logo_text.svg" alt="GeoCat"></a>
+          </div>
         </div>
       </td>
       <td class="gc-right-column">
