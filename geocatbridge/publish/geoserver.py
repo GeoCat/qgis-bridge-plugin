@@ -57,9 +57,9 @@ class GeoserverServer(ServerBase):
         if not onlySymbology:
             self.deleteWorkspace()
         self._ensureWorkspaceExists()
-        self.uploadedDatasets = {}
-        self.exportedLayers = {}
-        self.postgisDatastoreExists = False
+        self._uploadedDatasets = {}
+        self._exportedLayers = {}
+        self._postgisDatastoreExists = False
 
     def closePublishing(self):
         pass
@@ -78,7 +78,7 @@ class GeoserverServer(ServerBase):
         self.publishStyle(layer)
         if layer.type() == layer.VectorLayer:
             if self.storage in [self.FILE_BASED, self.POSTGIS_MANAGED_BY_GEOSERVER]:
-                if layer.source() not in self.exportedLayers:
+                if layer.source() not in self._exportedLayers:
                     if self.storage == self.POSTGIS_MANAGED_BY_GEOSERVER:                    
                         path = exportLayer(layer, fields, toShapefile=True, force=True, log=self)
                         basename = os.path.splitext(path)[0]
@@ -87,11 +87,11 @@ class GeoserverServer(ServerBase):
                             for ext in [".shp", ".shx", ".prj", ".dbf"]:
                                 filetozip = basename + ext
                                 z.write(filetozip, arcname=os.path.basename(filetozip))
-                        self.exportedLayers[layer.source()] = zipfilename
+                        self._exportedLayers[layer.source()] = zipfilename
                     else:
                         path = exportLayer(layer, fields, log=self)
-                        self.exportedLayers[layer.source()] = path
-                filename = self.exportedLayers[layer.source()]
+                        self._exportedLayers[layer.source()] = path
+                filename = self._exportedLayers[layer.source()]
                 if self.storage == self.FILE_BASED:
                     self._publishVectorLayerFromFile(layer, filename)
                 else:
@@ -105,10 +105,10 @@ class GeoserverServer(ServerBase):
                 db.importLayer(layer, fields)                
                 self._publishVectorLayerFromPostgis(layer)            
         elif layer.type() == layer.RasterLayer:
-            if layer.source() not in self.exportedLayers:
+            if layer.source() not in self._exportedLayers:
                 path = exportLayer(layer, fields, log=self)
-                self.exportedLayers[layer.source()] = path
-            filename = self.exportedLayers[layer.source()]
+                self._exportedLayers[layer.source()] = path
+            filename = self._exportedLayers[layer.source()]
             self._publishRasterLayer(filename, layer.name())
 
     def createPostgisDatastore(self):
@@ -143,7 +143,7 @@ class GeoserverServer(ServerBase):
         self.logInfo("Publishing layer from file: %s" % filename)
         name = layer.name()
         self.deleteLayer(name)
-        isDataUploaded = filename in self.uploadedDatasets        
+        isDataUploaded = filename in self._uploadedDatasets        
         if not isDataUploaded:
             with open(filename, "rb") as f:
                 self._deleteDatastore(name)
@@ -153,8 +153,8 @@ class GeoserverServer(ServerBase):
             cursor = conn.cursor()
             cursor.execute("SELECT table_name FROM gpkg_geometry_columns")
             tablename = cursor.fetchall()[0][0]
-            self.uploadedDatasets[filename] = (name, tablename)
-        datasetName, geoserverLayerName = self.uploadedDatasets[filename]
+            self._uploadedDatasets[filename] = (name, tablename)
+        datasetName, geoserverLayerName = self._uploadedDatasets[filename]
         url = "%s/workspaces/%s/datastores/%s/featuretypes/%s.json" % (self.url, self._workspace, datasetName, geoserverLayerName)
         r = self.request(url)
         ft = r.json()
@@ -211,7 +211,7 @@ class GeoserverServer(ServerBase):
         ws, datastoreName = self.postgisdb.split(":")
         name = layer.name()
         self.deleteLayer(name)
-        isDataUploaded = filename in self.uploadedDatasets        
+        isDataUploaded = filename in self._uploadedDatasets        
         if not isDataUploaded:
             _import = {
               "import": {
@@ -244,8 +244,8 @@ class GeoserverServer(ServerBase):
             url = "%s/imports/%s" % (self.url, importId)
             self.request(url, method="post")
             layername = os.path.splitext(os.path.basename(filename))[0]
-            self.uploadedDatasets[filename] = (datastoreName, layername)
-        datasetName, geoserverLayerName = self.uploadedDatasets[filename]
+            self._uploadedDatasets[filename] = (datastoreName, layername)
+        datasetName, geoserverLayerName = self._uploadedDatasets[filename]
         url = "%s/workspaces/%s/datastores/%s/featuretypes/%s.json" % (self.url, self._workspace, datasetName, geoserverLayerName)
         r = self.request(url)
         ft = r.json()
