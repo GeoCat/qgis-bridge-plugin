@@ -49,7 +49,7 @@ on the *Publish* button to start the publishing process. During this
 process, a progress bar is shown to indicate the status of the
 publication process:
 
-.. image:: ./img/publish_layers5.png
+.. image:: ./img/publish_layers_progress.png
 
 When the publication process is finished, a summary of the result is
 shown:
@@ -116,7 +116,7 @@ use the context menu in the layers list.
     catalogue server.
 -   *Unpublish data*: remove the map data from the selected map server.
 
-.. image:: ./img/publish_layers_context_menu.png
+.. image:: ./img/publish_layers_unpublish_data.png
 
 Export files
 ************

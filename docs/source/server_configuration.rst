@@ -47,23 +47,21 @@ You don't need to supply the URLs of those servers (as it would be the case if y
 GeoNetwork server
 -----------------
 
-Configure a GeoNetwork connection to publish your
-metadata to an online catalogue. 
+Configure a GeoNetwork connection to publish your metadata to an online catalogue. 
 
-.. image:: ./img/publish_servers1.png
+.. image:: ./img/servers_geonetwork.png
 
 You must enter a name the URL of the server and the corresponding credentials (with publish permission)
 
 Click *Connect* to test the server connection.
 
-![Server connection test](./img/publish_servers5.png)
 
 GeoServer connection
 --------------------
 
 Configure a GeoServer connection to publish your data to GeoServer.
 
-.. image:: ./img/publish_servers3.png
+.. image:: ./img/servers_geonetwork.png
 
 Provide a name for the server, its URL and the corresponding credentials. 
 
@@ -80,7 +78,7 @@ Finally, you must select how data will be stored in the server. Three different 
 Bridge and GeoServer workspaces
 *******************************
 
-Layers will be published to a workspace with the name of the current QGIS project. If you are trying to publish layers and your current project is not saved yet, you won't be able to start the publication process. A Warning message will be shown.
+Layers will be published to a workspace with the name of the current QGIS project. If you are trying to publish layers and your current project is not saved yet, you won't be able to start the publication process. A warning message will be shown.
 
 .. image:: ./img/publish_projects_not_saved.png
 
@@ -98,7 +96,7 @@ PostGIS connection can be used in two different publish scenarios:
     using a direct database connection (as explained in `GeoServer connection`_)
 
 
-.. image:: ./img/publish_server_postgis.png
+.. image:: ./img/servers_postgis.png
 
 MapServer connection
 --------------------
@@ -108,11 +106,11 @@ endpoint (mapfile) is created for each QGIS project.
 
 In the *MapServer details* enter the information about your MapServer instance, to which you want to publish.
 
-.. image:: ./img/publish_servers6.png
+.. image:: ./img/servers_mapserver.png
 
 In the *Uploading data* tab configure how Bridge stores data for your
 MapServer connection. Choose *Local path* to store the files in a
 location on the local file system. Choose *FTP service* to transmit the
 files over FTP to the MapServer server. Depending on which option is selected, you will see additional parameters to configure
 
-.. image:: ./img/publish_servers8.png
+.. image:: ./img/servers_mapserver2.png
