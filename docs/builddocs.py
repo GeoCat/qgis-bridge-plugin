@@ -7,7 +7,7 @@ import argparse
 This script generates documentation based on the content of the current
 repo, for the current master HEAD (if run with '--version dev' argument or
 without arguments), all available tags (if run with the '--version all' argument), 
-or the latest available tag (if the '--version latest' argument is used)
+or the latest available tag (if the '--version stable' argument is used)
 
 The script file should be located in the documentation folder (with sphinx files
 under ./source folder)
@@ -20,7 +20,7 @@ You can specify the output folder in which docs are to be produced, by using the
 ./build folder. 
 '''
 
-NAME = "bridge"
+NAME = "bridge4"
 
 def sh(commands):
     if isinstance(commands, str):
@@ -35,35 +35,35 @@ def builddocs(version, deploy, folder):
     if version == "dev":
         buildref("latest", "master", deploy, folder)
     else:
-        refs = getrefs()
-        if refs:
-            if version == "stable":
-                refs = refs[:1]
-            for refname, ref in refs:
-                buildref(refname, ref, deploy, folder)
+        if version == "stable":
+            refs = getlatest()
+        else:
+            refs = getrefs()
+        if refs: 
+            for ref in refs:
+                buildref(ref, deploy, folder)
 
-def getrefs():
+def getlatest():
     refs = []
     try:
-        tags = sh("git show-ref --tags").splitlines()
-        for line in tags:
-            ref, tag = line.split(" ")
-            refs.append((tag.replace("refs/tags/", ""), ref))
+        description = sh("git describe --tags")
+        tag = description.split("-")[0]
+        refs.append(tag)
     except:
         pass # in case no tags exist yet
     return refs
 
-def buildref(refname, ref, deploy, folder):
-    print("Building project '%s' at version '%s'..." % (NAME, refname)) 
+def buildref(ref, deploy, folder):
+    print("Building project '%s' at version '%s'..." % (NAME, ref)) 
     sh("git checkout {}".format(ref))
     sourcedir = os.path.join(os.getcwd(), "source")
-    builddir = os.path.join(folder, refname)
+    builddir = os.path.join(folder, ref)
     if os.path.exists(builddir):
         shutil.rmtree(builddir)
     os.makedirs(builddir)
     sh("sphinx-build -a {} {}".format(sourcedir, builddir))
     if deploy:
-        deploydocs(refname)
+        deploydocs(ref)
 
 def deploydocs(refname):
     pass
