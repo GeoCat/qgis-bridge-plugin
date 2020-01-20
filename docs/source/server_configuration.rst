@@ -82,7 +82,7 @@ Bridge and GeoServer workspaces
 
 Layers will be published to a workspace with the name of the current QGIS project. If you are trying to publish layers and your current project is not saved yet, you won't be able to start the publication process. A warning message will be shown.
 
-.. image:: ./img/publish_projects_not_saved.png
+.. image:: ./img/project_not_saved.png
 
 If the workspace exists, it will be deleted before publishing, so its content after publishing will be just the selected layers and its symbology. If the *Only symbology* option is selected in the publish section, no data is removed before uploading the symbology of the selected layers.
 
