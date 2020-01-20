@@ -61,7 +61,7 @@ GeoServer connection
 
 Configure a GeoServer connection to publish your data to GeoServer.
 
-.. image:: ./img/servers_geonetwork.png
+.. image:: ./img/servers_geoserver.png
 
 Provide a name for the server, its URL and the corresponding credentials. 
 
