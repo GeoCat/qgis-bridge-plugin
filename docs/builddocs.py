@@ -53,6 +53,17 @@ def getlatest():
         pass # in case no tags exist yet
     return refs
 
+def getrefs():
+    refs = []
+    try:
+        tags = sh("git show-ref --tags").splitlines()
+        for line in tags:
+            ref, tag = line.split(" ")
+            refs.append(tag.replace("refs/tags/", ""))
+    except:
+        pass # in case no tags exist yet
+    return refs
+
 def buildref(ref, deploy, folder):
     print("Building project '%s' at version '%s'..." % (NAME, ref)) 
     sh("git checkout {}".format(ref))
