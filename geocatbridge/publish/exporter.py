@@ -7,11 +7,11 @@ from qgis.PyQt.QtCore import QCoreApplication
 from geocatbridge.utils.files import tempFilenameInTempFolder
 
 def isSingleTableGpkg(layer):
-    ds = gdal.OpenEx(layer.source())
+    ds = gdal.OpenEx(layer)
     return ds.GetLayerCount() == 1
 
 def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False, log=None):
-    filename = layer.source()
+    filename = layer.source().split("|")[0]
     destFilename = layer.name()
     fields = fields or []
     if layer.type() == layer.VectorLayer:
@@ -24,7 +24,7 @@ def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False, l
                     log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
                 return output
         elif (force or os.path.splitext(filename.lower())[1]  != ".gpkg"
-                        or layer.fields().count() != len(fields) or not isSingleTableGpkg(layer)):
+                        or layer.fields().count() != len(fields) or not isSingleTableGpkg(filename)):
             attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
             output = path or tempFilenameInTempFolder(destFilename + ".gpkg")
             QgsVectorFileWriter.writeAsVectorFormat(layer, output, "UTF-8", attributes=attrs)
