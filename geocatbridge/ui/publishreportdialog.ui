@@ -33,34 +33,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="labelPublishMapData">
-       <property name="text">
-        <string>ON</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>URL metadata server</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>URL map server</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QLabel" name="labelUrlMetadataServer">
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="3">
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -74,24 +46,10 @@
        </property>
       </spacer>
      </item>
-     <item row="1" column="2">
-      <widget class="QLabel" name="labelPublishSymbology">
+     <item row="4" column="2">
+      <widget class="QLabel" name="labelUrlMetadataServer">
        <property name="text">
-        <string>ON</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QLabel" name="labelPublishMetadata">
-       <property name="text">
-        <string>ON</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
-      <widget class="QPushButton" name="btnOpenLog">
-       <property name="text">
-        <string>Open log</string>
+        <string>TextLabel</string>
        </property>
       </widget>
      </item>
@@ -102,10 +60,38 @@
        </property>
       </widget>
      </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>URL map server</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLabel" name="labelPublishMetadata">
+       <property name="text">
+        <string>ON</string>
+       </property>
+      </widget>
+     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Publish metadata</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>URL metadata server</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="labelPublishMapData">
+       <property name="text">
+        <string>ON</string>
        </property>
       </widget>
      </item>
@@ -124,6 +110,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="1" column="2">
+      <widget class="QLabel" name="labelPublishSymbology">
+       <property name="text">
+        <string>ON</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
