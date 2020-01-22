@@ -44,7 +44,7 @@
        <item>
         <widget class="QStackedWidget" name="stackedWidget">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="pageLogin">
           <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -220,13 +220,6 @@
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
-              <widget class="QPushButton" name="btnSendReport">
-               <property name="text">
-                <string>Send report</string>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="3">
               <widget class="QLabel" name="labelStatusGeoserver">
                <property name="sizePolicy">
@@ -361,6 +354,16 @@
               <widget class="QLabel" name="label_7">
                <property name="text">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#767676;&quot;&gt;STATUS&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;mailto:support@geocat.net&quot;&gt;Send report&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="openExternalLinks">
+                <bool>true</bool>
                </property>
               </widget>
              </item>

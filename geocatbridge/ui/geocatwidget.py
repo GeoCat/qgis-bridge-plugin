@@ -29,7 +29,6 @@ class GeoCatWidget(WIDGET, BASE):
 
         self.btnLogin.clicked.connect(self.login)
         self.btnLogout.clicked.connect(self.logout)
-        self.btnSendReport.clicked.connect(self.sendReport)
 
         path = os.path.join(rootFolder, "resources", "geocatlivepage", "index.html")
         url = QUrl.fromLocalFile(path)
@@ -43,9 +42,6 @@ class GeoCatWidget(WIDGET, BASE):
 
         self.tabWidget.setCurrentIndex(0)
         self.stackedWidget.setCurrentIndex(0)
-
-    def sendReport(self):
-        pass
 
     def _statusCss(self, status):
         colors = {"SERVICE_RUNNING": "green",
