@@ -16,7 +16,7 @@ To install the latest version from this repository, follow these steps:
 
 - Run `git submodule update --init` to fetch the code of the dependencies that are used by the plugin, which are contained in other repos that are declared as submodules of this one.
 
-- Copy the `geocatbridge` folder in your QGIS 3 plugins folder
+- Copy the `geocatbridge` folder in your QGIS 3 plugins folder.
 
 - Start QGIS and you will find the Geocat Bridge plugin in the plugins menu. If it's not available yet, activate it in the QGIS Plugin Manager.
 
