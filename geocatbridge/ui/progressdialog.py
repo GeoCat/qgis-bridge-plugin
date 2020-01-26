@@ -76,6 +76,8 @@ class ProgressDialog(BASE, WIDGET):
         else:
             idx = self.layers.index(layer)
             item = self.treeWidget.topLevelItem(idx)
+            item.setExpanded(True)
+            self.treeWidget.resizeColumnToContents(0)
             subitem = item.child(category)
         self.treeWidget.scrollToItem(subitem)
         subitem.setForeground(1, QBrush(Qt.gray))
