@@ -369,6 +369,7 @@ class PublishWidget(BASE, WIDGET):
                 widget.setDataPublished(server)
 
     def updateLayersPublicationStatus(self, data=True, metadata=True):
+        canPublish = True
         if data:
             try:
                 dataServer = geodataServers()[self.comboGeodataServer.currentText()]
@@ -377,6 +378,7 @@ class PublishWidget(BASE, WIDGET):
                 else:
                     self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
                     dataServer = None
+                    canPublish = False
             except KeyError:
                 self.comboGeodataServer.setStyleSheet("QComboBox { }")
                 dataServer = None
@@ -389,6 +391,7 @@ class PublishWidget(BASE, WIDGET):
                 else:
                     self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
                     metadataServer = None
+                    canPublish = False
             except KeyError:
                 self.comboMetadataServer.setStyleSheet("QComboBox { }")
                 metadataServer = None
@@ -409,6 +412,9 @@ class PublishWidget(BASE, WIDGET):
                     self.isMetadataPublished[name] = self.isMetadataOnServer(name)
                     server = metadataServer if self.isMetadataPublished[name] else None
                 widget.setMetadataPublished(server)
+
+        self.btnPublish.setEnabled(canPublish)
+        self.btnPublishOnBackground.setEnabled(canPublish)
 
     def unpublishAll(self):
         for name in self.isDataPublished:
