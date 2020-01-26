@@ -254,6 +254,8 @@ class ServerConnectionsWidget(BASE, WIDGET):
         name = self.txtGeoserverName.text().strip()
         url = self.txtGeoserverUrl.text().strip()
         authid = self.geoserverAuth.configId()
+        if not bool(authid):
+            return None
         storage = self.comboGeoserverDataStorage.currentIndex()
         postgisdb = None
         if storage in [GeoserverServer.POSTGIS_MANAGED_BY_BRIDGE, GeoserverServer.POSTGIS_MANAGED_BY_GEOSERVER]:            
@@ -271,7 +273,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         port = self.txtPostgisPort.text()
         schema = self.txtPostgisSchema.text()
         database = self.txtPostgisDatabase.text()
-        authid = self.postgisAuth.configId()
+        authid = self.postgisAuth.configId()                
         server = PostgisServer(name, authid, host, port, schema, database)
         return server
 
@@ -280,10 +282,11 @@ class ServerConnectionsWidget(BASE, WIDGET):
         name = self.txtCswName.text()
         node = self.txtCswNode.text()
         authid = self.cswAuth.configId()
-        url = self.txtCswUrl.text()
-        profile = self.comboMetadataProfile.currentIndex()
-        server = GeonetworkServer(name, url, authid, profile, node)
-        return server
+        if bool(authid):
+            url = self.txtCswUrl.text()
+            profile = self.comboMetadataProfile.currentIndex()
+            server = GeonetworkServer(name, url, authid, profile, node)
+            return server
 
     def createMapserverServer(self):
         ##TODO check validity of name and values        
@@ -309,9 +312,10 @@ class ServerConnectionsWidget(BASE, WIDGET):
         name = self.txtGeocatLiveName.text()        
         geoserverAuthid = self.geocatLiveGeoserverAuth.configId()
         geonetworkAuthid = self.geocatLiveGeonetworkAuth.configId()
-        userid = self.txtGeocatLiveIdentifier.text()        
-        server = GeocatLiveServer(name, userid, geoserverAuthid, geonetworkAuthid)
-        return server
+        if bool(geoserverAuthid) and bool(geonetworkAuthid): 
+            userid = self.txtGeocatLiveIdentifier.text()        
+            server = GeocatLiveServer(name, userid, geoserverAuthid, geonetworkAuthid)
+            return server        
 
     def addAuthWidgets(self):
         self.geoserverAuth = QgsAuthConfigSelect()
@@ -496,18 +500,15 @@ class ServerConnectionsWidget(BASE, WIDGET):
         else:
             self.bar.pushMessage(self.tr("Error"), self.tr("Wrong values in current item"), level=Qgis.Warning, duration=5)    
 
-    def onClose(self, evt):
+    def canClose(self):
         if self.currentServerHasChanges:
             res = QMessageBox.question(self, self.tr("Servers"), self.tr("Do you want to close without saving the current changes?"),
                                 QMessageBox.Cancel | QMessageBox.No | QMessageBox.Yes,
                                 QMessageBox.Yes)
         
-            if res == QMessageBox.Yes:
-                evt.accept()
-            else:
-                evt.ignore()
+            return res == QMessageBox.Yes                
         else:
-            evt.accept()
+            return True
 
 class ServerItemWidget(QWidget):
     def __init__ (self, server, parent = None):

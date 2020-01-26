@@ -46,14 +46,17 @@ class BridgeDialog(BASE, WIDGET):
         self.listWidget.setLineWidth(0)
         self.listWidget.setIconSize(QSize(32, 32))
         self.listWidget.setUniformItemSizes(True)
+        self.item = []
         for i in range(3):
             item = self.listWidget.item(i)
             item.setIcon(QIcon(iconPath('preview.png')))
         self.listWidget.currentRowChanged.connect(self.sectionChanged)
         if self.isFirstTime():
+            self.currentIdx = 2
             self.listWidget.setCurrentRow(2) 
         else:
-            self.listWidget.setCurrentRow(0) 
+            self.currentIdx = 0
+            self.listWidget.setCurrentRow(0)
 
     def isFirstTime(self):        
         if QSettings().contains(FIRSTTIME_SETTING):
@@ -63,10 +66,18 @@ class BridgeDialog(BASE, WIDGET):
             return True
 
     def sectionChanged(self):
-        idx = self.listWidget.currentRow()
+        if self.currentIdx  == 1:
+            if not self.serversWidget.canClose():
+                self.listWidget.blockSignals(True)
+                self.listWidget.item(1).setSelected(True)
+                self.listWidget.setCurrentRow(1)
+                self.listWidget.blockSignals(False)
+                return
+        idx = self.listWidget.currentRow()                
         self.setCurrentPanel(idx)
 
     def setCurrentPanel(self, idx):
+        self.currentIdx = idx
         if idx == 0:
             self.stackedWidget.setCurrentWidget(self.publishWidget)
             self.publishWidget.updateServers()
@@ -77,5 +88,8 @@ class BridgeDialog(BASE, WIDGET):
             self.stackedWidget.setCurrentWidget(self.geocatWidget)
 
     def closeEvent(self, evt):
-        self.publishWidget.storeMetadata() 
-        evt.accept()
+        self.publishWidget.storeMetadata()
+        if self.serversWidget.canClose():
+            evt.accept()
+        else:
+            evt.ignore()
