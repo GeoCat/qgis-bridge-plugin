@@ -120,6 +120,9 @@ class GeocatLiveServer(ServerBase):
     def metadataExists(self, uuid):
         return self.geonetworkServer().metadataExists(uuid)
 
+    def openMetadata(self, uuid):
+        self.geonetworkServer().openMetadata(uuid)
+
     def getMetadata(self, uuid):
         return self.geonetworkServer().getMetadata(uuid)
 

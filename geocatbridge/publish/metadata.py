@@ -22,7 +22,7 @@ def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None):
     layer.saveNamedMetadata(filename)
     thumbnail = saveLayerThumbnail(layer)
     apiUrl = apiUrl or ""
-    transformedFilename = transformMetadata(filename, apiUrl, uuid, wms)
+    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms)
     mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
     createMef(uuid, transformedFilename, mefFilename, thumbnail)
     return mefFilename
@@ -89,7 +89,6 @@ def createMef(uuid, metadataFilename, mefFilename, thumbnailFilename):
     info = getInfoXmlContent(uuid, thumbnailFilename)
     z.writestr(os.path.join(uuid, "info.xml"), info)
     z.close()
-    #logInfo("MEF file written to %s" % mefFilename)
 
 def _addSubElement(parent, tag, value=None, attrib=None):
     sub = SubElement(parent, tag, attrib=attrib or {})

@@ -70,7 +70,7 @@ class GeonetworkServer(ServerBase):
         self._nam = TokenNetworkAccessManager(self.url, user, password)
 
 
-    def request(self, url, data=None, method="put", headers={}):
+    def request(self, url, data=None, method="get", headers={}):
         return self._nam.request(url, data, method, headers)
 
     def publishLayerMetadata(self, layer, wms):
@@ -103,11 +103,14 @@ class GeonetworkServer(ServerBase):
 
     def publishMetadata(self, metadata):
         self._nam.setTokenInHeader()
-        url = self.xmlServicesUrl() + "/mef.import?uuidAction=overwrite"
+        url = self.apiUrl() + "/records"
+        headers = {"Accept": "application/json"}
+        params = {"uuidProcessing", "OVERWRITE"}
+
         with open(metadata, "rb") as f:
-            files = {'mefFile': f}
-            r = self._nam.session.post(url, files=files)
-        r.raise_for_status()
+            files = {'file': f}
+            r = self._nam.session.post(url, files=files, headers=headers)
+            r.raise_for_status()
 
     def deleteMetadata(self, uuid):
         url = self.apiUrl() + "/records/" + uuid
