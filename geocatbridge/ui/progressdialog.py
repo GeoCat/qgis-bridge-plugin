@@ -14,10 +14,10 @@ SYMBOLOGY, DATA, METADATA, GROUPS = range(4)
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
 
-DATA_ICON = QIcon(iconPath("geoserver.png"))
-METADATA_ICON = QIcon(iconPath("geonetwork.png"))
+DATA_ICON = QIcon(iconPath("layer.png"))
+METADATA_ICON = QIcon(iconPath("metadata.png"))
 SYMBOLOGY_ICON = QIcon(iconPath("symbology.png"))
-GROUPS_ICON = QIcon(iconPath("group.gif"))
+GROUPS_ICON = QIcon(iconPath("group.png"))
 CHECK_ICON = QIcon(iconPath("checkmark.png"))
 
 class ProgressDialog(BASE, WIDGET):
