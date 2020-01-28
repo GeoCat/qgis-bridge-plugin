@@ -1,0 +1,55 @@
+Publish tab
+-------------
+
+- Publish project to GeoServer and Geonetwork
+
+- Publish using "Publish in background" button
+
+- Publish project using "only symbology" option
+
+- Publish layer using only a reduced number of its fields
+
+- Test that metadata can be modified and edited from the metadata tab, and that it's saved to the layer metadata
+
+- Test that, if layers are published to data or metadata servers, the corresponding icons appear in the layers row.
+
+- Test elements in layer context menu, when data and metadata are published (open WMS, view metadata, etc)
+
+- Test "remove from server" button correctly removes data and metadata for all layers, and icons are correctly removed
+
+ - Test offline export
+
+Servers tab
+------------
+
+- Test that servers can be added and removed
+
+- Test that, if a server has been modified and is not saved, Bridge shows a warning before moving to the "Publish tab", to a different server, or closing the dialog.
+
+- Test that Bridge complains when a new server is added and you try to save it with no auth configured
+
+- Test that, when server is wrong or cannot connect to it, a red frame is shown in the server selector, and the Publish buttons are disabled.
+
+- Test opening and saving server configuration.
+ 	- Save your current configuration
+ 	- Delete servers manually in Bridge interface
+ 	- Load configuration from file
+
+- Test that, when a GeoServer server is added, the corresponding WMS and WFS endpoints are added to QGIS
+
+GeoCat tab
+------------
+
+- Test GeoCat welcome page is shown at first start when opening Bridge dialog
+  (delete setting under geocatbridge/firstRun to force it, and then restart QGIS)
+
+- Test that user can log to Live account and server urls are shown
+
+- Test that, when the user logs to the Live account, a GeoCat Live server is added to the Servers tab automatically, only if a Live server for that user does not exist already
+
+
+
+ 
+
+
+
