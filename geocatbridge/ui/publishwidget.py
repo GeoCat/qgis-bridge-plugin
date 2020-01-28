@@ -35,7 +35,8 @@ from qgis.core import (
     QgsMapLayer,
     QgsProject,
     Qgis,
-    QgsApplication
+    QgsApplication,
+    QgsRectangle
 )
 from qgis.gui import QgsMessageBar, QgsMetadataWidget
 from qgis.utils import iface
