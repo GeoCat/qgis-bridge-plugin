@@ -149,7 +149,9 @@ class PublishTask(QgsTask):
                             else:
                                 wms = None
                             self.autofillMetadata(layer)
+                            self.stepStarted.emit(name, METADATA)
                             self.metadataServer.publishLayerMetadata(layer, wms)
+                            self.stepFinished.emit(name, METADATA)
                         else:
                             self.metadataServer.logError(self.tr("Layer '%s' has invalid metadata. Metadata was not published") % layer.name())
                     except:                    
