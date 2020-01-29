@@ -1,0 +1,30 @@
+# from - https://www.hatarilabs.com/ih-en/clip-multiple-layers-in-qgis-with-pyqgis-tutorial
+
+import os
+
+mainLayerFolder = '/Users/ddd/Downloads/british-columbia-latest-free.shp/'
+
+listFilterShapes = []
+for item in os.listdir(mainLayerFolder):
+    if item[-3:]=='shp':
+        listFilterShapes.append(item)
+
+print(listFilterShapes)
+
+dictFilterShapes = {}
+
+for shape in listFilterShapes:
+    dictFilterShapes[shape[:-4]] = iface.addVectorLayer(mainLayerFolder  + shape,shape[:-4],"ogr")
+    
+areaOfInterest = iface.addVectorLayer('/Users/ddd/delme/aoi.shp' ,'aoi',"ogr")
+
+from processing.tools import *
+
+processing.algorithmHelp("qgis:clip")
+for layer in dictFilterShapes.keys():
+    parameters = {'INPUT': dictFilterShapes[layer],
+                'OVERLAY': areaOfInterest,
+                'OUTPUT': mainLayerFolder + '/OutputShp/'+layer+'_Clip.shp'}
+    processing.run ("qgis:clip",parameters)
+    iface.addVectorLayer(mainLayerFolder + '/OutputShp/'+layer+'_Clip.shp',layer+'_Clip',"ogr")
+  
