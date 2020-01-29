@@ -466,15 +466,6 @@ class PublishWidget(BASE, WIDGET):
 
     def publish(self):
         if self.validateBeforePublication():
-            '''
-            progressMessageBar = self.bar.createMessage(self.tr("Publishing layers"))
-            progress = QProgressBar()
-            progress.setMaximum(100) 
-            progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
-            progressMessageBar.layout().addWidget(progress)            
-            self.bar.pushWidget(progressMessageBar, Qgis.Info)
-            QCoreApplication.processEvents()
-            '''
             toPublish = self._toPublish()
             progressDialog = ProgressDialog(toPublish, self.parent)
             task = self.getPublishTask(self.parent)
