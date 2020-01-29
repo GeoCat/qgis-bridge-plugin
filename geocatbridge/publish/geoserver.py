@@ -159,7 +159,16 @@ class GeoserverServer(ServerBase):
         r = self.request(url)
         ft = r.json()
         ft["featureType"]["name"] = name
-        ft["featureType"]["title"] = name    
+        ft["featureType"]["title"] = name
+        ext = layer.extent()
+        ft["featureType"]["nativeBoundingBox"] = {
+            "minx": ext.xMinimum(),
+            "maxx": ext.xMaximum(),
+            "miny": ext.yMinimum(),
+            "maxy": ext.yMaximum(),
+            "srs": layer.crs().authid()
+        }
+        print (ft)
         if isDataUploaded:
             url = "%s/workspaces/%s/datastores/%s/featuretypes" % (self.url, self._workspace, datasetName)
             r = self.request(url, ft, "post")
