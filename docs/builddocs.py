@@ -33,7 +33,7 @@ def builddocs(version, deploy, folder):
     if folder is None:
         folder = os.path.join(os.getcwd(), "build")
     if version == "dev":
-        buildref("latest", "master", deploy, folder)
+        buildref("master", deploy, folder)
     else:
         if version == "stable":
             refs = getlatest()
