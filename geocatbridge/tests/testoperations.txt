@@ -3,6 +3,14 @@ Publish tab
 
 - Publish project to GeoServer and Geonetwork
 
+- Verify the following points:
+	- Data is published correctly
+	- Style is correctly published
+	- Layer preview shows style as expected
+	- Layer In GeoServer has correct pointer to GeoNetwork metadata url
+	- Metadata in GeoNetwork correctly points at GeoServer data
+	- Layers "original" and "sameorigin" use the same datastore (data is not uploaded twice and only one datastore is created)
+
 - Publish using "Publish in background" button
 
 - Publish project using "only symbology" option
