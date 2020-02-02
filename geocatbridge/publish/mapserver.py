@@ -55,9 +55,6 @@ class MapserverServer(ServerBase):
     def testConnection(self):
         return True
 
-    def setupForProject(self):
-        pass
-
     def prepareForPublishing(self, onlySymbology):
         self._layers = []
         self._metadataLinks = {}

@@ -63,8 +63,10 @@ from qgis.PyQt.QtNetwork import (
 
 class TestGeoserverServer(GeoserverServer):
 
-    def setupForProject(self):
-        self._workspace = "visualtests"   
+    @property
+    def _workspace(self):
+      return "visualtests"
+          
     
 _layers = {}
 def load_layer(file):    
@@ -80,7 +82,6 @@ def create_styles_visual_test_page(folder, url = "http://localhost:8080/geoserve
                                     username="admin", password="geoserver"):
     server = TestGeoserverServer("testserver", url)
     server.setBasicAuthCredentials(username, password)
-    server.setupForProject()
     server.prepareForPublishing(False)
     main_folder = os.path.join(os.path.dirname(bridgestyle.__file__), "test", "data", "qgis")
     tabshtml = '<div class="tab">'

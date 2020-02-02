@@ -43,17 +43,16 @@ class GeoserverServer(ServerBase):
         self.postgisdb = postgisdb
         self._isMetadataCatalog = False
         self._isDataCatalog = True
-        self.setupForProject()
 
-    def setupForProject(self):
+    @property
+    def _workspace(self):
         path = QgsProject.instance().absoluteFilePath()
         if path:
-            self._workspace = os.path.splitext(os.path.basename(path))[0]
+            return os.path.splitext(os.path.basename(path))[0]
         else:
-            self._workspace = "bridge_%s" % secrets.token_hex(nbytes=8)
+            return ""
 
     def prepareForPublishing(self, onlySymbology):
-        self.setupForProject()
         if not onlySymbology:
             self.deleteWorkspace()
         self._ensureWorkspaceExists()

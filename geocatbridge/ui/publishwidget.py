@@ -79,9 +79,6 @@ class PublishWidget(BASE, WIDGET):
         self.metadata = {}
         execute(self._setupUi)
 
-        for s in geodataServers().values():
-            s.setupForProject()
-
     def _setupUi(self):
         self.setupUi(self)    
         self.bar = QgsMessageBar()
