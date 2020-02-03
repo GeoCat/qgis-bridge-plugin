@@ -140,3 +140,6 @@ class GeocatLiveServer(ServerBase):
                 return
         baseurl = "/".join(self._geoserverUrl.split("/")[:-1])
         addServicesForGeodataServer("GeoCat Live Geoserver - " + self.userid, baseurl, self.geoserverAuthid)
+
+    def validateBeforePublication(self, errors):
+        return self.geoserverServer().validateBeforePublication(errors)
