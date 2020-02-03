@@ -43,7 +43,7 @@ def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False, l
             writer.writeRaster(layer.pipe(), layer.width(), layer.height(), layer.extent(), layer.crs())
             del writer
             if log is not None:
-                log.logInfo("GeocatBridge", QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
+                log.logInfo(QCoreApplication.translate("GeocatBridge", "Layer %s exported to %s") % (destFilename, output))
             return output
         else:
             if log is not None:
