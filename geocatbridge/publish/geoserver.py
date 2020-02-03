@@ -43,6 +43,7 @@ class GeoserverServer(ServerBase):
         self.postgisdb = postgisdb
         self._isMetadataCatalog = False
         self._isDataCatalog = True
+        self._layersCache = {}
 
     @property
     def _workspace(self):
@@ -109,6 +110,7 @@ class GeoserverServer(ServerBase):
                 self._exportedLayers[layer.source()] = path
             filename = self._exportedLayers[layer.source()]
             self._publishRasterLayer(filename, layer.name())
+        self._clearCache()
 
     def createPostgisDatastore(self):
         ws, name = self.postgisdb.split(":")
@@ -307,27 +309,31 @@ class GeoserverServer(ServerBase):
             url = "%s/workspaces/%s/styles/%s?purge=true&recurse=true" % (self.url, self._workspace, name)        
             r = self.request(url, method="delete")
 
+    def _clearCache(self):
+        self._layersCache = None
+
     def _exists(self, url, category, name):
-        try:
-            r = self.request(url)
-            root = r.json()["%ss" % category]
-            if category in root:            
-                items = [s["name"] for s in root[category]]
-                return name in items
-            else:
-                return False
+        try:            
+            if category != "layer" or self._layersCache is None:
+                r = self.request(url)
+                root = r.json()["%ss" % category]
+                if category in root:            
+                    items = [s["name"] for s in root[category]]
+                    if category == "layer":
+                        self._layersCache = items
+                else:
+                    return False
+            else: 
+                items = self._layersCache
+            return name in items
         except:
             return False            
 
     def layerExists(self, name):
-        if not self.workspaceExists():
-            return False
         url = "%s/workspaces/%s/layers.json" % (self.url, self._workspace)
         return self._exists(url, "layer", name)
 
     def styleExists(self, name):
-        if not self.workspaceExists():
-            return False
         url = "%s/workspaces/%s/styles.json" % (self.url, self._workspace)
         return self._exists(url, "style", name)
 
@@ -416,12 +422,11 @@ class GeoserverServer(ServerBase):
                 }
         r = self.request(url, data=layer, method="put")
 
-    def _ensureWorkspaceExists(self):
+    def _ensureWorkspaceExists(self):        
         if not self.workspaceExists():
             url = "%s/workspaces" % self.url
             ws = {"workspace": {"name": self._workspace}}
             self.request(url, data=ws, method="post")
-
             
     def postgisDatastores(self):
         url = "%s/workspaces.json" % (self.url)
