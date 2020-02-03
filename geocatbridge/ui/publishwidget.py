@@ -456,7 +456,7 @@ class PublishWidget(BASE, WIDGET):
         dlg.showMessage()
 
     def viewMetadata(self, name):
-        server = geodataServers()[self.comboMetadataServer.currentText()]
+        server = metadataServers()[self.comboMetadataServer.currentText()]
         layer = self.layerFromName(name)
         uuid = uuidForLayer(layer)
         server.openMetadata(uuid)
