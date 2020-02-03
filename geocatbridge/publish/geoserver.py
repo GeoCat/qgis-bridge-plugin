@@ -142,7 +142,7 @@ class GeoserverServer(ServerBase):
         self.logInfo("Publishing layer from file: %s" % filename)
         name = layer.name()
         self.deleteLayer(name)
-        isDataUploaded = filename in self._uploadedDatasets        
+        isDataUploaded = filename in self._uploadedDatasets
         if not isDataUploaded:
             with open(filename, "rb") as f:
                 self._deleteDatastore(name)
@@ -167,7 +167,6 @@ class GeoserverServer(ServerBase):
             "maxy": ext.yMaximum(),
             "srs": layer.crs().authid()
         }
-        print (ft)
         if isDataUploaded:
             url = "%s/workspaces/%s/datastores/%s/featuretypes" % (self.url, self._workspace, datasetName)
             r = self.request(url, ft, "post")

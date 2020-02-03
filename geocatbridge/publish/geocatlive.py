@@ -29,8 +29,6 @@ class GeocatLiveServer(ServerBase):
         return "GeocatLive server"
         
     def _getUrls(self):
-        import traceback
-        traceback.print_stack()
         def f():
             url = "%s/%s" % (self.BASE_URL, self.userid)
             response = requests.get(url).json()
