@@ -174,9 +174,14 @@ class PublishTask(QgsTask):
             if self.geodataServer is not None:
                 self.stepStarted.emit(None, GROUPS)
                 groups = self._layerGroups(self.layers)                            
-                self.geodataServer.createGroups(groups)
-                self.geodataServer.closePublishing()
-                self.stepFinished.emit(None, GROUPS)
+                try:
+                    self.geodataServer.createGroups(groups)
+                except:
+                    #TODO: figure out where to put a warning or error message for this
+                    pass
+                finally:
+                    self.geodataServer.closePublishing()
+                    self.stepFinished.emit(None, GROUPS)
             else:
                 self.stepSkipped.emit(None, GROUPS)
 
