@@ -372,7 +372,8 @@ class GeoserverServer(ServerBase):
         resourceUrl = r.json()["layer"]["resource"]["href"]
         r = self.request(resourceUrl)
         layer = r.json()
-        layer["featureType"]["metadataLinks"] = {
+        key = "featureType" if "featureType" in layer else "coverage"
+        layer[key]["metadataLinks"] = {
             "metadataLink": [
                 {
                     "type": "text/html",
