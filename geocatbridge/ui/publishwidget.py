@@ -237,7 +237,8 @@ class PublishWidget(BASE, WIDGET):
 
     def publishableLayers(self):
         layers = [layer for layer in QgsProject.instance().mapLayers().values() 
-                if layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]]
+                if layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]
+                and layer.dataProvider().name() != "wms"]
         return layers
 
     def populateLayers(self):
