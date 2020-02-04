@@ -463,3 +463,5 @@ class GeoserverServer(ServerBase):
         path = QgsProject.instance().absoluteFilePath()
         if not path:
             errors.add("QGIS Project is not saved. Project must be saved before publishing layers to GeoServer")
+        if "." in path:
+            errors.add("QGIS project name contains unsupported characters ('.'). Save with a different name and try again")
