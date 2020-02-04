@@ -7,7 +7,7 @@ about=GeoCat is pleased to offer the Bridge plugin to its customers using QGIS.
  opensource metadata catalog. Your data is uploaded as a GeoPackage or shared PostGIS database. GeoCat Bridge brings our celebrated symbology output to the QGIS Desktop to share
  your cartography online.
  
-
+experimental=False
 category=Web
 qgisMinimumVersion=3.6
 version=4.0
