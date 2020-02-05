@@ -26,12 +26,13 @@ def sh(commands):
     stdout, stderr = out.communicate()
     return stdout.decode("utf-8")
 
+def clean(folder):
+    shutil.rmtree(folder)
+
 def builddocs(version, folder):
-    if folder is None:
-        folder = os.path.join(os.getcwd(), "build")
-    if version == "dev":
+    if version in ["dev", "all"]:
         buildref("master", folder, versionname="latest")
-    else:
+    if version != "dev":
         if version == "stable":
             refs = getlatest()
         else:
@@ -80,9 +81,17 @@ def main():
     parser.add_argument('--output',
                         help='Output folder to save documentation')
 
+    parser.add_argument('--clean', dest='clean', action='store_true', help='Clean output folder')
+    parser.set_defaults(clean=False)
+
     args = parser.parse_args()
 
-    builddocs(args.version, args.output)
+    folder = args.output or os.path.join(os.getcwd(), "build")
+
+    if args.clean:
+        clean(folder)
+
+    builddocs(args.version, folder)
     sh("git checkout master")
 
 if __name__ == "__main__":
