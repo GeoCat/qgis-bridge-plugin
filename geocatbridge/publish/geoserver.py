@@ -143,7 +143,7 @@ class GeoserverServer(ServerBase):
     def _publishVectorLayerFromFile(self, layer, filename):
         self.logInfo("Publishing layer from file: %s" % filename)
         name = layer.name()
-        self.deleteLayer(name)
+        #self.deleteLayer(name)
         isDataUploaded = filename in self._uploadedDatasets
         if not isDataUploaded:
             with open(filename, "rb") as f:
@@ -179,7 +179,7 @@ class GeoserverServer(ServerBase):
 
     def _publishVectorLayerFromPostgis(self, layer):
         name = layer.name()
-        self.deleteLayer(name)
+        #self.deleteLayer(name)
         db = allServers()[self.postgisdb]
         username, password = db.getCredentials()
         def _entry(k, v):
@@ -219,7 +219,7 @@ class GeoserverServer(ServerBase):
         self.createPostgisDatastore()
         ws, datastoreName = self.postgisdb.split(":")
         name = layer.name()
-        self.deleteLayer(name)
+        #self.deleteLayer(name)
         isDataUploaded = filename in self._uploadedDatasets        
         if not isDataUploaded:
             _import = {
@@ -348,7 +348,7 @@ class GeoserverServer(ServerBase):
     def _deleteDatastore(self, name):
         url = "%s/workspaces/%s/datastores/%s?recurse=true" % (self.url, self._workspace, name)
         try:
-            r = self.request(url, method="delete")
+            r = self.request(url, method="delete")            
         except:
             pass
 
@@ -394,6 +394,7 @@ class GeoserverServer(ServerBase):
         if self.workspaceExists():
             url = "%s/workspaces/%s?recurse=true" % (self.url, self._workspace)
             r = self.request(url, method="delete")
+            self._clearCache()
 
     def _publishStyle(self, name, styleFilename):
         #feedback.setText("Publishing style for layer %s" % name)
