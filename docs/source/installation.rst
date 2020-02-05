@@ -23,12 +23,12 @@ To install the Bridge plugin for QGIS, follow these steps:
 
 	.. image:: ./img/pluginmanagerbridge.png
 
-- Click on Install plugin to install the plugin.
+- Click on `Install` to install the plugin.
 
 - Once the plugin is installed, close the Plugin Manager and you will find a new menu entry under the `Web` menu, which contains the menus from the Bridge plugin.
 
 	.. image:: ./img/bridgemenuentry.png
 
-- You will also find a new toobar button
+- You will also find a new toolbar button
 
 	.. image:: ./img/bridgetoolbarbutton.png
