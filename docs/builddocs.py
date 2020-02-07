@@ -27,6 +27,7 @@ def sh(commands):
     return stdout.decode("utf-8")
 
 def clean(folder):
+    print("Cleaning output folder")
     shutil.rmtree(folder)
 
 def builddocs(version, folder):
