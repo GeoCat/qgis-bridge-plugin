@@ -32,7 +32,7 @@ def clean(folder):
 
 def builddocs(version, folder):
     if version in ["dev", "all"]:
-        buildref("master", folder, versionname="latest")
+        buildref(None, folder, versionname="latest")
     if version != "dev":
         if version == "stable":
             refs = getlatest()
@@ -64,8 +64,9 @@ def getrefs():
     return refs
 
 def buildref(ref, folder, versionname=None):
-    print("Building project '%s' at version '%s'..." % (NAME, ref)) 
-    sh("git checkout {}".format(ref))
+    print("Building project '%s' at version '%s'..." % (NAME, versionname or ref)) 
+    if ref is not None:
+        sh("git checkout {}".format(ref))
     sourcedir = os.path.join(os.getcwd(), "source")
     builddir = os.path.join(folder, versionname or ref)
     if os.path.exists(builddir):
