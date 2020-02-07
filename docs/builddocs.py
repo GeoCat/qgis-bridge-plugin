@@ -28,7 +28,7 @@ def sh(commands):
 
 def clean(folder):
     print("Cleaning output folder")
-    shutil.rmtree(folder)
+    shutil.rmtree(folder, ignore_errors=True)
 
 def builddocs(version, folder):
     if version in ["dev", "all"]:
