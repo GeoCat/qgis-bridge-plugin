@@ -12,6 +12,11 @@ Common settings
 
 This section describes general elements that are common to most types of layers and symbologies
 
+Drawing order (symbol levels)
+-------------------------------
+
+You can use symbol levels in QGIS to define the order used to render symbol layers, and they will be correctly converted to z-levels in SLD.
+
 Size units
 ----------------
 
@@ -22,9 +27,14 @@ Notice that it's, however, a safer option to use pixels instead of milimeters (w
 Expressions
 -------------
 
-Expression are supported wherever QGIS allows to use data-defined values. They must be created using QGIS expression language (Python custom functions are not supported). Not all functions available in QGIS can be used, since there's not an equivalent for all of them in GeoServer. The following is a list of the QGIS functions that can be used:
+Expression are supported wherever QGIS allows to use data-defined values. They must be created using QGIS expression language (Python custom functions are not supported). Not all functions available in QGIS can be used, since there's not an equivalent for all of them in GeoServer. The following is a list of the QGIS functions that can be used::
 
-	- ``radians, degrees, floor, ceil, area, buffer, centroid, if, bounds, distance, convex_hull, end_point, start_point, x, y, concat, substr, lower, upper, replace, exterior_ring, intersects, overlaps, touches, within, relates, crosses, disjoint, geom_from_wkt, perimeter, union, acos, asin, atan, atan2, sin, cos, tan, ln, title, translate, min, max`` 
+		radians, degrees, floor, ceil, area, buffer, centroid, 
+		if, bounds, distance, convex_hull, end_point, start_point, 
+		x, y, concat, substr, lower, upper, replace, exterior_ring, 
+		intersects, overlaps, touches, within, relates, crosses, 
+		disjoint, geom_from_wkt, perimeter, union, acos, asin, atan,
+		atan2, sin, cos, tan, ln, title, translate, min, max 
 
 Certain parameters accept expressions, but those are not supported by Bridge when converting to SLD:
 
