@@ -18,7 +18,7 @@ Drawing order (symbol levels)
 You can use symbol levels in QGIS to define the order used to render symbol layers, and they will be correctly converted to z-levels in SLD.
 
 Size units
-----------------
+-----------
 
 Size values can be used in milimeters, pixels, points, or real world meters. In this last case, expressions cannot be used, only fixed values.
 
@@ -274,7 +274,7 @@ The folowing options from the :guilabel:`Text` group of parameters are supported
 
 	
 Buffer options for labels
------------------------
+--------------------------
 
 The folowing options from the :guilabel:`Buffer` group of parameters are supported:
 
@@ -286,7 +286,7 @@ The folowing options from the :guilabel:`Buffer` group of parameters are support
 
 	
 Background options for labels
------------------------
+-----------------------------
 
 The folowing options from the :guilabel:`Background` group of parameters are supported:
 
@@ -304,7 +304,7 @@ The folowing options from the :guilabel:`Background` group of parameters are sup
 
 	
 Placement options for labels
------------------------
+----------------------------
 
 The folowing options from the :guilabel:`Placement` group of parameters are supported:
 
