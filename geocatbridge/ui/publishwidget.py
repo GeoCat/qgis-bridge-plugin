@@ -236,7 +236,17 @@ class PublishWidget(BASE, WIDGET):
         menu.exec_(self.listLayers.mapToGlobal(pos))
 
     def publishableLayers(self):
-        layers = [layer for layer in QgsProject.instance().mapLayers().values() 
+        def _layersFromTree(layerTreeGroup):
+            _layers = []
+            for child in layerTreeGroup.children():                    
+                if isinstance(child, QgsLayerTreeLayer):
+                    _layers.append(child.layer())            
+                elif isinstance(child, QgsLayerTreeGroup):
+                    _layers.extend(_layersFromTree(child))
+
+            return _layers
+        root = QgsProject.instance().layerTreeRoot()                
+        layers = [layer for layer in _layersFromTree(root) 
                 if layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]
                 and layer.dataProvider().name() != "wms"]
         return layers
