@@ -237,3 +237,102 @@ The following symbol layer types are supported for rendering polygons:
 		See the section on supported symbology for marker lines
 
 	- Geometry generator
+
+Labeling
+==========
+
+The following labeling modes are supported for vector layer labels.
+
+	- No labels
+
+	- Single labels
+
+	- Rule-based labeling
+
+Text options for labels
+-----------------------
+
+The folowwing options from the :guilabel:`Text` group of parameters are supported:
+
+	- Size
+
+	- Font family
+
+	- Rotation
+
+
+Text options for labels
+-----------------------
+
+The folowing options from the :guilabel:`Text` group of parameters are supported:
+
+	- Size
+
+	- Font family
+
+	- Rotation
+
+	
+Buffer options for labels
+-----------------------
+
+The folowing options from the :guilabel:`Buffer` group of parameters are supported:
+
+	- Size
+
+	- Color
+
+	- Opacity
+
+	
+Background options for labels
+-----------------------
+
+The folowing options from the :guilabel:`Background` group of parameters are supported:
+
+	- Size X
+
+	- Size Y
+
+	- Size type
+
+	- Shape type
+
+	- Stroke color
+
+	- Fill color
+
+	
+Placement options for labels
+-----------------------
+
+The folowing options from the :guilabel:`Placement` group of parameters are supported:
+
+	- The only supported :guilabel:`Placement` option is: :guilabel:`Offset from centroid`, with the following parameters
+
+	
+		- Quadrant
+
+		- Offset
+
+		- Rotation
+
+
+Raster Layers
+==============
+
+
+The supported elements for styling raster layers are detailed in this section.
+
+Supported renderers
+---------------------
+
+	- Single band gray
+
+	- Single band color
+	
+	- Single band pseudo color
+
+	- Multi band color
+
+	- Paletted
