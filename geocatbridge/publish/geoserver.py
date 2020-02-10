@@ -163,10 +163,10 @@ class GeoserverServer(ServerBase):
         ft["featureType"]["title"] = name
         ext = layer.extent()
         ft["featureType"]["nativeBoundingBox"] = {
-            "minx": ext.xMinimum(),
-            "maxx": ext.xMaximum(),
-            "miny": ext.yMinimum(),
-            "maxy": ext.yMaximum(),
+            "minx": round(ext.xMinimum(), 5),
+            "maxx": round(ext.xMaximum(), 5),
+            "miny": round(ext.yMinimum(),5),
+            "maxy": round(ext.yMaximum(), 5),
             "srs": layer.crs().authid()
         }
         if isDataUploaded:
