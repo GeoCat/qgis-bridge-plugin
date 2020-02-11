@@ -47,7 +47,9 @@ class PublishTask(QgsTask):
     def _layerGroups(self, toPublish):
         def _addGroup(layerTreeGroup):
             layers = []
-            for child in layerTreeGroup.children():                    
+            children = layerTreeGroup.children()
+            children.reverse()  # GS and QGIS have opposite ordering
+            for child in children:
                 if isinstance(child, QgsLayerTreeLayer):
                     name = child.layer().name() 
                     if name in toPublish:
