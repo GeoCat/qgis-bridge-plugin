@@ -1,5 +1,5 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis version="3.8.3-Zanzibar" projectname="">
+<qgis projectname="" version="3.10.1-A Coruña">
   <homePath path=""/>
   <title></title>
   <autotransaction active="0"/>
@@ -19,33 +19,38 @@
   </projectCrs>
   <layer-tree-group>
     <customproperties/>
-    <layer-tree-group name="group1" expanded="1" checked="Qt::Checked">
+    <layer-tree-group name="group1" checked="Qt::Checked" expanded="1">
       <customproperties/>
-      <layer-tree-layer providerKey="ogr" name="original" expanded="0" id="worldcountries_029e25b3_55c8_4902_9c5f_da51f783a197" checked="Qt::Checked" source="./worldcountries.shp">
+      <layer-tree-layer providerKey="ogr" id="worldcountries_029e25b3_55c8_4902_9c5f_da51f783a197" name="original" source="./worldcountries.shp" checked="Qt::Checked" expanded="0">
         <customproperties/>
       </layer-tree-layer>
-      <layer-tree-layer providerKey="ogr" name="sameorigin" expanded="1" id="original_23df0129_00a3_4971_8317_e4ae790b2a79" checked="Qt::Checked" source="./worldcountries.shp">
+      <layer-tree-layer providerKey="ogr" id="original_23df0129_00a3_4971_8317_e4ae790b2a79" name="sameorigin" source="./worldcountries.shp" checked="Qt::Checked" expanded="1">
         <customproperties/>
       </layer-tree-layer>
     </layer-tree-group>
-    <layer-tree-layer providerKey="ogr" name="fromshp" expanded="1" id="worldcountries_0bbefbf9_dbc5_404d_a586_eda804dc455e" checked="Qt::Unchecked" source="./worldcountries.gpkg|layername=worldcountries">
+    <layer-tree-layer providerKey="ogr" id="worldcountries_0bbefbf9_dbc5_404d_a586_eda804dc455e" name="fromshp" source="./worldcountries.gpkg|layername=worldcountries" checked="Qt::Unchecked" expanded="1">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer providerKey="ogr" id="emptylayer_e0cf2357_2655_4a7e_a947_4c7a72eedf76" name="emptylayer" source="./emptylayer.gpkg|layername=emptylayer" checked="Qt::Checked" expanded="1">
       <customproperties/>
     </layer-tree-layer>
     <custom-order enabled="0">
       <item>worldcountries_029e25b3_55c8_4902_9c5f_da51f783a197</item>
       <item>worldcountries_0bbefbf9_dbc5_404d_a586_eda804dc455e</item>
       <item>original_23df0129_00a3_4971_8317_e4ae790b2a79</item>
+      <item>emptylayer_e0cf2357_2655_4a7e_a947_4c7a72eedf76</item>
     </custom-order>
   </layer-tree-group>
-  <snapping-settings mode="2" type="1" enabled="0" tolerance="0" unit="2" intersection-snapping="0">
+  <snapping-settings type="1" mode="2" unit="2" tolerance="0" enabled="0" intersection-snapping="0">
     <individual-layer-settings>
-      <layer-setting type="1" enabled="0" units="2" tolerance="0" id="worldcountries_029e25b3_55c8_4902_9c5f_da51f783a197"/>
-      <layer-setting type="1" enabled="0" units="2" tolerance="0" id="original_23df0129_00a3_4971_8317_e4ae790b2a79"/>
-      <layer-setting type="1" enabled="0" units="2" tolerance="0" id="worldcountries_0bbefbf9_dbc5_404d_a586_eda804dc455e"/>
+      <layer-setting type="1" id="original_23df0129_00a3_4971_8317_e4ae790b2a79" tolerance="0" units="2" enabled="0"/>
+      <layer-setting type="1" id="worldcountries_0bbefbf9_dbc5_404d_a586_eda804dc455e" tolerance="0" units="2" enabled="0"/>
+      <layer-setting type="1" id="emptylayer_e0cf2357_2655_4a7e_a947_4c7a72eedf76" tolerance="12" units="1" enabled="0"/>
+      <layer-setting type="1" id="worldcountries_029e25b3_55c8_4902_9c5f_da51f783a197" tolerance="0" units="2" enabled="0"/>
     </individual-layer-settings>
   </snapping-settings>
   <relations/>
-  <mapcanvas name="theMapCanvas" annotationsVisible="1">
+  <mapcanvas annotationsVisible="1" name="theMapCanvas">
     <units>degrees</units>
     <extent>
       <xmin>-150.91316215943373891</xmin>
@@ -71,28 +76,193 @@
   </mapcanvas>
   <projectModels/>
   <legend updateDrawingOrder="true">
-    <legendgroup name="group1" checked="Qt::Checked" open="true">
-      <legendlayer name="original" showFeatureCount="0" drawingOrder="-1" checked="Qt::Checked" open="false">
-        <filegroup hidden="false" open="false">
+    <legendgroup open="true" name="group1" checked="Qt::Checked">
+      <legendlayer open="false" name="original" checked="Qt::Checked" drawingOrder="-1" showFeatureCount="0">
+        <filegroup open="false" hidden="false">
           <legendlayerfile visible="1" layerid="worldcountries_029e25b3_55c8_4902_9c5f_da51f783a197" isInOverview="0"/>
         </filegroup>
       </legendlayer>
-      <legendlayer name="sameorigin" showFeatureCount="0" drawingOrder="-1" checked="Qt::Checked" open="true">
-        <filegroup hidden="false" open="true">
+      <legendlayer open="true" name="sameorigin" checked="Qt::Checked" drawingOrder="-1" showFeatureCount="0">
+        <filegroup open="true" hidden="false">
           <legendlayerfile visible="1" layerid="original_23df0129_00a3_4971_8317_e4ae790b2a79" isInOverview="0"/>
         </filegroup>
       </legendlayer>
     </legendgroup>
-    <legendlayer name="fromshp" showFeatureCount="0" drawingOrder="-1" checked="Qt::Unchecked" open="true">
-      <filegroup hidden="false" open="true">
+    <legendlayer open="true" name="fromshp" checked="Qt::Unchecked" drawingOrder="-1" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
         <legendlayerfile visible="0" layerid="worldcountries_0bbefbf9_dbc5_404d_a586_eda804dc455e" isInOverview="0"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer open="true" name="emptylayer" checked="Qt::Checked" drawingOrder="-1" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile visible="1" layerid="emptylayer_e0cf2357_2655_4a7e_a947_4c7a72eedf76" isInOverview="0"/>
       </filegroup>
     </legendlayer>
   </legend>
   <mapViewDocks/>
   <mapViewDocks3D/>
   <projectlayers>
-    <maplayer wkbType="MultiPolygon" minScale="0" refreshOnNotifyEnabled="0" hasScaleBasedVisibilityFlag="0" maxScale="0" refreshOnNotifyMessage="" simplifyMaxScale="1" styleCategories="AllStyleCategories" type="vector" autoRefreshTime="0" simplifyAlgorithm="0" autoRefreshEnabled="0" simplifyDrawingHints="1" labelsEnabled="1" simplifyLocal="1" geometry="Polygon" readOnly="0" simplifyDrawingTol="1">
+    <maplayer refreshOnNotifyMessage="" wkbType="LineString" simplifyMaxScale="1" refreshOnNotifyEnabled="0" autoRefreshEnabled="0" geometry="Line" minScale="1e+08" simplifyDrawingTol="1" maxScale="0" simplifyAlgorithm="0" autoRefreshTime="0" type="vector" readOnly="0" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" simplifyDrawingHints="1" labelsEnabled="0" styleCategories="AllStyleCategories">
+      <id>emptylayer_e0cf2357_2655_4a7e_a947_4c7a72eedf76</id>
+      <datasource>./emptylayer.gpkg|layername=emptylayer</datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>emptylayer</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=utm +zone=29 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs</proj4>
+          <srsid>2102</srsid>
+          <srid>25829</srid>
+          <authid>EPSG:25829</authid>
+          <description>ETRS89 / UTM zone 29N</description>
+          <projectionacronym>utm</projectionacronym>
+          <ellipsoidacronym>GRS80</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <resourceMetadata>
+        <identifier></identifier>
+        <parentidentifier></parentidentifier>
+        <language></language>
+        <type>dataset</type>
+        <title></title>
+        <abstract></abstract>
+        <links/>
+        <fees></fees>
+        <encoding></encoding>
+        <crs>
+          <spatialrefsys>
+            <proj4></proj4>
+            <srsid>0</srsid>
+            <srid>0</srid>
+            <authid></authid>
+            <description></description>
+            <projectionacronym></projectionacronym>
+            <ellipsoidacronym></ellipsoidacronym>
+            <geographicflag>false</geographicflag>
+          </spatialrefsys>
+        </crs>
+        <extent/>
+      </resourceMetadata>
+      <provider encoding="UTF-8">ogr</provider>
+      <vectorjoins/>
+      <layerDependencies/>
+      <dataDependencies/>
+      <legend type="default-vector"/>
+      <expressionfields/>
+      <map-layer-style-manager current="default">
+        <map-layer-style name="default"/>
+      </map-layer-style-manager>
+      <auxiliaryLayer/>
+      <flags>
+        <Identifiable>1</Identifiable>
+        <Removable>1</Removable>
+        <Searchable>1</Searchable>
+      </flags>
+      <renderer-v2 type="singleSymbol" symbollevels="0" enableorderby="0" forceraster="0">
+        <symbols>
+          <symbol type="line" clip_to_extent="1" name="0" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="SimpleLine" pass="0">
+              <prop k="capstyle" v="square"/>
+              <prop k="customdash" v="5;2"/>
+              <prop k="customdash_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+              <prop k="customdash_unit" v="MM"/>
+              <prop k="draw_inside_polygon" v="0"/>
+              <prop k="joinstyle" v="bevel"/>
+              <prop k="line_color" v="190,178,151,255"/>
+              <prop k="line_style" v="solid"/>
+              <prop k="line_width" v="0.26"/>
+              <prop k="line_width_unit" v="MM"/>
+              <prop k="offset" v="0"/>
+              <prop k="offset_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+              <prop k="offset_unit" v="MM"/>
+              <prop k="ring_filter" v="0"/>
+              <prop k="use_custom_dash" v="0"/>
+              <prop k="width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+              <data_defined_properties>
+                <Option type="Map">
+                  <Option type="QString" name="name" value=""/>
+                  <Option name="properties"/>
+                  <Option type="QString" name="type" value="collection"/>
+                </Option>
+              </data_defined_properties>
+            </layer>
+          </symbol>
+        </symbols>
+        <rotation/>
+        <sizescale/>
+      </renderer-v2>
+      <customproperties/>
+      <blendMode>0</blendMode>
+      <featureBlendMode>0</featureBlendMode>
+      <layerOpacity>1</layerOpacity>
+      <geometryOptions geometryPrecision="0" removeDuplicateNodes="0">
+        <activeChecks type="StringList">
+          <Option type="QString" value=""/>
+        </activeChecks>
+        <checkConfiguration/>
+      </geometryOptions>
+      <fieldConfiguration>
+        <field name="fid">
+          <editWidget type="">
+            <config>
+              <Option/>
+            </config>
+          </editWidget>
+        </field>
+        <field name="text">
+          <editWidget type="">
+            <config>
+              <Option/>
+            </config>
+          </editWidget>
+        </field>
+      </fieldConfiguration>
+      <aliases>
+        <alias index="0" name="" field="fid"/>
+        <alias index="1" name="" field="text"/>
+      </aliases>
+      <excludeAttributesWMS/>
+      <excludeAttributesWFS/>
+      <defaults>
+        <default field="fid" applyOnUpdate="0" expression=""/>
+        <default field="text" applyOnUpdate="0" expression=""/>
+      </defaults>
+      <constraints>
+        <constraint exp_strength="0" notnull_strength="1" field="fid" constraints="3" unique_strength="1"/>
+        <constraint exp_strength="0" notnull_strength="0" field="text" constraints="0" unique_strength="0"/>
+      </constraints>
+      <constraintExpressions>
+        <constraint exp="" field="fid" desc=""/>
+        <constraint exp="" field="text" desc=""/>
+      </constraintExpressions>
+      <expressionfields/>
+      <attributeactions>
+        <defaultAction key="Canvas" value="{00000000-0000-0000-0000-000000000000}"/>
+      </attributeactions>
+      <attributetableconfig sortOrder="0" actionWidgetStyle="dropDown" sortExpression="">
+        <columns/>
+      </attributetableconfig>
+      <conditionalstyles>
+        <rowstyles/>
+        <fieldstyles/>
+      </conditionalstyles>
+      <storedexpressions/>
+      <editform tolerant="1"></editform>
+      <editforminit/>
+      <editforminitcodesource>0</editforminitcodesource>
+      <editforminitfilepath></editforminitfilepath>
+      <editforminitcode><![CDATA[]]></editforminitcode>
+      <featformsuppress>0</featformsuppress>
+      <editorlayout>generatedlayout</editorlayout>
+      <editable/>
+      <labelOnTop/>
+      <widgets/>
+      <previewExpression></previewExpression>
+      <mapTip></mapTip>
+    </maplayer>
+    <maplayer refreshOnNotifyMessage="" wkbType="MultiPolygon" simplifyMaxScale="1" refreshOnNotifyEnabled="0" autoRefreshEnabled="0" geometry="Polygon" minScale="0" simplifyDrawingTol="1" maxScale="0" simplifyAlgorithm="0" autoRefreshTime="0" type="vector" readOnly="0" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" simplifyDrawingHints="1" labelsEnabled="1" styleCategories="AllStyleCategories">
       <extent>
         <xmin>-179.99999999999988631</xmin>
         <ymin>-90</ymin>
@@ -145,11 +315,11 @@
             <description></description>
             <projectionacronym></projectionacronym>
             <ellipsoidacronym></ellipsoidacronym>
-            <geographicflag>true</geographicflag>
+            <geographicflag>false</geographicflag>
           </spatialrefsys>
         </crs>
         <extent>
-          <spatial miny="0" crs="" minz="0" dimensions="2" maxx="0" maxz="0" minx="0" maxy="0"/>
+          <spatial miny="0" maxy="0" minx="0" crs="" maxx="0" dimensions="2" minz="0" maxz="0"/>
           <temporal>
             <period>
               <start></start>
@@ -175,8 +345,8 @@
       </flags>
       <renderer-v2 type="singleSymbol" symbollevels="0" enableorderby="0" forceraster="0">
         <symbols>
-          <symbol type="fill" name="0" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="SimpleLine" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="0" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="SimpleLine" pass="0">
               <prop k="capstyle" v="square"/>
               <prop k="customdash" v="5;2"/>
               <prop k="customdash_map_unit_scale" v="3x:0,0,0,0,0,0"/>
@@ -207,16 +377,23 @@
         <sizescale/>
       </renderer-v2>
       <labeling type="simple">
-        <settings>
-          <text-style textColor="0,0,0,255" fontSizeMapUnitScale="3x:0,0,0,0,0,0" fieldName="NAME_LONG" fontSize="10" fontWeight="50" textOpacity="1" blendMode="0" namedStyle="Regular" multilineHeight="1" fontUnderline="0" fontFamily="MS Shell Dlg 2" isExpression="0" fontStrikeout="0" useSubstitutions="0" fontItalic="0" fontWordSpacing="0" fontSizeUnit="Point" previewBkgrdColor="#ffffff" fontLetterSpacing="0" fontCapitals="0">
-            <text-buffer bufferColor="255,255,255,255" bufferBlendMode="0" bufferDraw="0" bufferNoFill="1" bufferJoinStyle="128" bufferSize="1" bufferOpacity="1" bufferSizeMapUnitScale="3x:0,0,0,0,0,0" bufferSizeUnits="MM"/>
-            <background shapeRadiiY="0" shapeBorderWidthUnit="MM" shapeRotationType="0" shapeJoinStyle="64" shapeBorderWidth="0" shapeBlendMode="0" shapeFillColor="255,255,255,255" shapeDraw="0" shapeSizeUnit="MM" shapeRadiiMapUnitScale="3x:0,0,0,0,0,0" shapeRotation="0" shapeType="0" shapeOffsetX="0" shapeRadiiUnit="MM" shapeSizeY="0" shapeSizeType="0" shapeSizeMapUnitScale="3x:0,0,0,0,0,0" shapeBorderColor="128,128,128,255" shapeOffsetY="0" shapeSizeX="0" shapeOffsetMapUnitScale="3x:0,0,0,0,0,0" shapeOffsetUnit="MM" shapeBorderWidthMapUnitScale="3x:0,0,0,0,0,0" shapeOpacity="1" shapeSVGFile="" shapeRadiiX="0"/>
-            <shadow shadowDraw="0" shadowRadius="1.5" shadowOffsetDist="1" shadowOffsetUnit="MM" shadowRadiusUnit="MM" shadowOffsetMapUnitScale="3x:0,0,0,0,0,0" shadowRadiusAlphaOnly="0" shadowOffsetGlobal="1" shadowScale="100" shadowUnder="0" shadowRadiusMapUnitScale="3x:0,0,0,0,0,0" shadowOffsetAngle="135" shadowBlendMode="6" shadowColor="0,0,0,255" shadowOpacity="0.7"/>
+        <settings calloutType="simple">
+          <text-style textOrientation="horizontal" isExpression="0" fontWeight="50" fontUnderline="0" fontFamily="MS Shell Dlg 2" multilineHeight="1" namedStyle="Regular" previewBkgrdColor="255,255,255,255" blendMode="0" fieldName="NAME_LONG" fontSizeMapUnitScale="3x:0,0,0,0,0,0" fontCapitals="0" fontItalic="0" fontSize="10" fontStrikeout="0" textOpacity="1" fontLetterSpacing="0" fontSizeUnit="Point" textColor="0,0,0,255" fontWordSpacing="0" useSubstitutions="0" fontKerning="1">
+            <text-buffer bufferJoinStyle="128" bufferSize="1" bufferBlendMode="0" bufferNoFill="1" bufferDraw="0" bufferSizeUnits="MM" bufferSizeMapUnitScale="3x:0,0,0,0,0,0" bufferColor="255,255,255,255" bufferOpacity="1"/>
+            <background shapeSVGFile="" shapeBorderWidth="0" shapeDraw="0" shapeOffsetUnit="MM" shapeBorderWidthUnit="MM" shapeRadiiUnit="MM" shapeSizeUnit="MM" shapeRadiiY="0" shapeSizeType="0" shapeOpacity="1" shapeRotationType="0" shapeBorderWidthMapUnitScale="3x:0,0,0,0,0,0" shapeFillColor="255,255,255,255" shapeOffsetMapUnitScale="3x:0,0,0,0,0,0" shapeRadiiMapUnitScale="3x:0,0,0,0,0,0" shapeOffsetX="0" shapeBlendMode="0" shapeType="0" shapeRadiiX="0" shapeBorderColor="128,128,128,255" shapeSizeMapUnitScale="3x:0,0,0,0,0,0" shapeOffsetY="0" shapeSizeY="0" shapeSizeX="0" shapeJoinStyle="64" shapeRotation="0"/>
+            <shadow shadowRadiusUnit="MM" shadowRadiusAlphaOnly="0" shadowUnder="0" shadowOffsetMapUnitScale="3x:0,0,0,0,0,0" shadowRadiusMapUnitScale="3x:0,0,0,0,0,0" shadowOffsetAngle="135" shadowOpacity="0.7" shadowScale="100" shadowOffsetDist="1" shadowOffsetUnit="MM" shadowDraw="0" shadowColor="0,0,0,255" shadowOffsetGlobal="1" shadowRadius="1.5" shadowBlendMode="6"/>
+            <dd_properties>
+              <Option type="Map">
+                <Option type="QString" name="name" value=""/>
+                <Option name="properties"/>
+                <Option type="QString" name="type" value="collection"/>
+              </Option>
+            </dd_properties>
             <substitutions/>
           </text-style>
-          <text-format addDirectionSymbol="0" leftDirectionSymbol="&lt;" autoWrapLength="0" useMaxLineLengthForAutoWrap="1" decimals="3" placeDirectionSymbol="0" wrapChar="" multilineAlign="0" reverseDirectionSymbol="0" plussign="0" formatNumbers="0" rightDirectionSymbol=">"/>
-          <placement distUnits="MM" fitInPolygonOnly="0" geometryGeneratorEnabled="0" yOffset="0" geometryGeneratorType="PointGeometry" geometryGenerator="" placementFlags="10" repeatDistance="0" xOffset="0" predefinedPositionOrder="TR,TL,BR,BL,R,L,TSR,BSR" labelOffsetMapUnitScale="3x:0,0,0,0,0,0" offsetType="0" distMapUnitScale="3x:0,0,0,0,0,0" offsetUnits="MM" maxCurvedCharAngleOut="-25" priority="5" dist="0" repeatDistanceUnits="MM" rotationAngle="0" centroidWhole="0" quadOffset="4" maxCurvedCharAngleIn="25" preserveRotation="1" centroidInside="0" repeatDistanceMapUnitScale="3x:0,0,0,0,0,0" placement="0"/>
-          <rendering upsidedownLabels="0" maxNumLabels="2000" obstacle="1" minFeatureSize="0" scaleVisibility="0" drawLabels="1" limitNumLabels="0" scaleMin="0" obstacleType="0" displayAll="0" scaleMax="0" obstacleFactor="1" labelPerPart="0" fontLimitPixelSize="0" mergeLines="0" zIndex="0" fontMinPixelSize="3" fontMaxPixelSize="10000"/>
+          <text-format wrapChar="" placeDirectionSymbol="0" formatNumbers="0" useMaxLineLengthForAutoWrap="1" autoWrapLength="0" leftDirectionSymbol="&lt;" rightDirectionSymbol=">" multilineAlign="0" plussign="0" addDirectionSymbol="0" reverseDirectionSymbol="0" decimals="3"/>
+          <placement repeatDistanceMapUnitScale="3x:0,0,0,0,0,0" overrunDistanceUnit="MM" geometryGenerator="" rotationAngle="0" yOffset="0" centroidWhole="0" geometryGeneratorEnabled="0" offsetUnits="MM" distMapUnitScale="3x:0,0,0,0,0,0" placementFlags="10" xOffset="0" priority="5" geometryGeneratorType="PointGeometry" dist="0" distUnits="MM" preserveRotation="1" maxCurvedCharAngleIn="25" labelOffsetMapUnitScale="3x:0,0,0,0,0,0" quadOffset="4" fitInPolygonOnly="0" overrunDistanceMapUnitScale="3x:0,0,0,0,0,0" centroidInside="0" maxCurvedCharAngleOut="-25" repeatDistance="0" repeatDistanceUnits="MM" layerType="UnknownGeometry" overrunDistance="0" offsetType="0" placement="0" predefinedPositionOrder="TR,TL,BR,BL,R,L,TSR,BSR"/>
+          <rendering scaleMax="0" upsidedownLabels="0" obstacleFactor="1" displayAll="0" obstacleType="0" fontMaxPixelSize="10000" limitNumLabels="0" mergeLines="0" minFeatureSize="0" zIndex="0" scaleVisibility="0" scaleMin="0" obstacle="1" fontLimitPixelSize="0" maxNumLabels="2000" drawLabels="1" labelPerPart="0" fontMinPixelSize="3"/>
           <dd_properties>
             <Option type="Map">
               <Option type="QString" name="name" value=""/>
@@ -224,6 +401,28 @@
               <Option type="QString" name="type" value="collection"/>
             </Option>
           </dd_properties>
+          <callout type="simple">
+            <Option type="Map">
+              <Option type="QString" name="anchorPoint" value="pole_of_inaccessibility"/>
+              <Option type="Map" name="ddProperties">
+                <Option type="QString" name="name" value=""/>
+                <Option name="properties"/>
+                <Option type="QString" name="type" value="collection"/>
+              </Option>
+              <Option type="bool" name="drawToAllParts" value="false"/>
+              <Option type="QString" name="enabled" value="0"/>
+              <Option type="QString" name="lineSymbol" value="&lt;symbol type=&quot;line&quot; clip_to_extent=&quot;1&quot; name=&quot;symbol&quot; force_rhr=&quot;0&quot; alpha=&quot;1&quot;>&lt;layer locked=&quot;0&quot; enabled=&quot;1&quot; class=&quot;SimpleLine&quot; pass=&quot;0&quot;>&lt;prop k=&quot;capstyle&quot; v=&quot;square&quot;/>&lt;prop k=&quot;customdash&quot; v=&quot;5;2&quot;/>&lt;prop k=&quot;customdash_map_unit_scale&quot; v=&quot;3x:0,0,0,0,0,0&quot;/>&lt;prop k=&quot;customdash_unit&quot; v=&quot;MM&quot;/>&lt;prop k=&quot;draw_inside_polygon&quot; v=&quot;0&quot;/>&lt;prop k=&quot;joinstyle&quot; v=&quot;bevel&quot;/>&lt;prop k=&quot;line_color&quot; v=&quot;60,60,60,255&quot;/>&lt;prop k=&quot;line_style&quot; v=&quot;solid&quot;/>&lt;prop k=&quot;line_width&quot; v=&quot;0.3&quot;/>&lt;prop k=&quot;line_width_unit&quot; v=&quot;MM&quot;/>&lt;prop k=&quot;offset&quot; v=&quot;0&quot;/>&lt;prop k=&quot;offset_map_unit_scale&quot; v=&quot;3x:0,0,0,0,0,0&quot;/>&lt;prop k=&quot;offset_unit&quot; v=&quot;MM&quot;/>&lt;prop k=&quot;ring_filter&quot; v=&quot;0&quot;/>&lt;prop k=&quot;use_custom_dash&quot; v=&quot;0&quot;/>&lt;prop k=&quot;width_map_unit_scale&quot; v=&quot;3x:0,0,0,0,0,0&quot;/>&lt;data_defined_properties>&lt;Option type=&quot;Map&quot;>&lt;Option type=&quot;QString&quot; name=&quot;name&quot; value=&quot;&quot;/>&lt;Option name=&quot;properties&quot;/>&lt;Option type=&quot;QString&quot; name=&quot;type&quot; value=&quot;collection&quot;/>&lt;/Option>&lt;/data_defined_properties>&lt;/layer>&lt;/symbol>"/>
+              <Option type="double" name="minLength" value="0"/>
+              <Option type="QString" name="minLengthMapUnitScale" value="3x:0,0,0,0,0,0"/>
+              <Option type="QString" name="minLengthUnit" value="MM"/>
+              <Option type="double" name="offsetFromAnchor" value="0"/>
+              <Option type="QString" name="offsetFromAnchorMapUnitScale" value="3x:0,0,0,0,0,0"/>
+              <Option type="QString" name="offsetFromAnchorUnit" value="MM"/>
+              <Option type="double" name="offsetFromLabel" value="0"/>
+              <Option type="QString" name="offsetFromLabelMapUnitScale" value="3x:0,0,0,0,0,0"/>
+              <Option type="QString" name="offsetFromLabelUnit" value="MM"/>
+            </Option>
+          </callout>
         </settings>
       </labeling>
       <customproperties>
@@ -235,12 +434,12 @@
       <featureBlendMode>0</featureBlendMode>
       <layerOpacity>1</layerOpacity>
       <SingleCategoryDiagramRenderer attributeLegend="1" diagramType="Histogram">
-        <DiagramCategory sizeType="MM" lineSizeScale="3x:0,0,0,0,0,0" minimumSize="0" minScaleDenominator="0" lineSizeType="MM" rotationOffset="270" height="15" scaleBasedVisibility="0" penAlpha="255" maxScaleDenominator="1e+08" scaleDependency="Area" enabled="0" sizeScale="3x:0,0,0,0,0,0" backgroundAlpha="255" backgroundColor="#ffffff" penWidth="0" opacity="1" diagramOrientation="Up" width="15" penColor="#000000" labelPlacementMethod="XHeight" barWidth="5">
-          <fontProperties style="" description="Cantarell,11,-1,5,50,0,0,0,0,0"/>
-          <attribute color="#000000" label="" field=""/>
+        <DiagramCategory penAlpha="255" backgroundAlpha="255" minScaleDenominator="0" opacity="1" penWidth="0" lineSizeScale="3x:0,0,0,0,0,0" minimumSize="0" maxScaleDenominator="1e+08" scaleBasedVisibility="0" barWidth="5" labelPlacementMethod="XHeight" height="15" width="15" penColor="#000000" scaleDependency="Area" lineSizeType="MM" diagramOrientation="Up" sizeType="MM" backgroundColor="#ffffff" sizeScale="3x:0,0,0,0,0,0" enabled="0" rotationOffset="270">
+          <fontProperties description="Cantarell,11,-1,5,50,0,0,0,0,0" style=""/>
+          <attribute color="#000000" field="" label=""/>
         </DiagramCategory>
       </SingleCategoryDiagramRenderer>
-      <DiagramLayerSettings placement="0" zIndex="0" linePlacementFlags="18" obstacle="0" dist="0" showAll="1" priority="0">
+      <DiagramLayerSettings linePlacementFlags="18" showAll="1" zIndex="0" priority="0" dist="0" placement="0" obstacle="0">
         <properties>
           <Option type="Map">
             <Option type="QString" name="name" value=""/>
@@ -249,7 +448,7 @@
           </Option>
         </properties>
       </DiagramLayerSettings>
-      <geometryOptions removeDuplicateNodes="0" geometryPrecision="0">
+      <geometryOptions geometryPrecision="0" removeDuplicateNodes="0">
         <activeChecks/>
         <checkConfiguration/>
       </geometryOptions>
@@ -718,358 +917,359 @@
         </field>
       </fieldConfiguration>
       <aliases>
-        <alias name="" field="fid" index="0"/>
-        <alias name="" field="ABBREV" index="1"/>
-        <alias name="" field="ABBREV_LEN" index="2"/>
-        <alias name="" field="ADM0_A3" index="3"/>
-        <alias name="" field="ADM0_A3_IS" index="4"/>
-        <alias name="" field="ADM0_A3_UN" index="5"/>
-        <alias name="" field="ADM0_A3_US" index="6"/>
-        <alias name="" field="ADM0_A3_WB" index="7"/>
-        <alias name="" field="ADM0_DIF" index="8"/>
-        <alias name="" field="ADMIN" index="9"/>
-        <alias name="" field="BRK_A3" index="10"/>
-        <alias name="" field="BRK_DIFF" index="11"/>
-        <alias name="" field="BRK_GROUP" index="12"/>
-        <alias name="" field="BRK_NAME" index="13"/>
-        <alias name="" field="CONTINENT" index="14"/>
-        <alias name="" field="ECONOMY" index="15"/>
-        <alias name="" field="FIPS_10_" index="16"/>
-        <alias name="" field="FORMAL_EN" index="17"/>
-        <alias name="" field="FORMAL_FR" index="18"/>
-        <alias name="" field="GDP_MD_EST" index="19"/>
-        <alias name="" field="GDP_YEAR" index="20"/>
-        <alias name="" field="GEOUNIT" index="21"/>
-        <alias name="" field="GEOU_DIF" index="22"/>
-        <alias name="" field="GU_A3" index="23"/>
-        <alias name="" field="HOMEPART" index="24"/>
-        <alias name="" field="INCOME_GRP" index="25"/>
-        <alias name="" field="ISO_A2" index="26"/>
-        <alias name="" field="ISO_A3" index="27"/>
-        <alias name="" field="ISO_N3" index="28"/>
-        <alias name="" field="LABELRANK" index="29"/>
-        <alias name="" field="LASTCENSUS" index="30"/>
-        <alias name="" field="LEVEL" index="31"/>
-        <alias name="" field="LONG_LEN" index="32"/>
-        <alias name="" field="MAPCOLOR13" index="33"/>
-        <alias name="" field="MAPCOLOR7" index="34"/>
-        <alias name="" field="MAPCOLOR8" index="35"/>
-        <alias name="" field="MAPCOLOR9" index="36"/>
-        <alias name="" field="NAME" index="37"/>
-        <alias name="" field="NAME_ALT" index="38"/>
-        <alias name="" field="NAME_LEN" index="39"/>
-        <alias name="" field="NAME_LONG" index="40"/>
-        <alias name="" field="NAME_SORT" index="41"/>
-        <alias name="" field="NOTE_ADM0" index="42"/>
-        <alias name="" field="NOTE_BRK" index="43"/>
-        <alias name="" field="POP_EST" index="44"/>
-        <alias name="" field="POP_YEAR" index="45"/>
-        <alias name="" field="POSTAL" index="46"/>
-        <alias name="" field="REGION_UN" index="47"/>
-        <alias name="" field="REGION_WB" index="48"/>
-        <alias name="" field="SOVEREIGNT" index="49"/>
-        <alias name="" field="SOV_A3" index="50"/>
-        <alias name="" field="SUBREGION" index="51"/>
-        <alias name="" field="SUBUNIT" index="52"/>
-        <alias name="" field="SU_A3" index="53"/>
-        <alias name="" field="SU_DIF" index="54"/>
-        <alias name="" field="TINY" index="55"/>
-        <alias name="" field="TYPE" index="56"/>
-        <alias name="" field="UN_A3" index="57"/>
-        <alias name="" field="WB_A2" index="58"/>
-        <alias name="" field="WB_A3" index="59"/>
-        <alias name="" field="WIKIPEDIA" index="60"/>
-        <alias name="" field="WOE_ID" index="61"/>
-        <alias name="" field="WOE_ID_EH" index="62"/>
-        <alias name="" field="WOE_NOTE" index="63"/>
-        <alias name="" field="featurecla" index="64"/>
-        <alias name="" field="scalerank" index="65"/>
+        <alias index="0" name="" field="fid"/>
+        <alias index="1" name="" field="ABBREV"/>
+        <alias index="2" name="" field="ABBREV_LEN"/>
+        <alias index="3" name="" field="ADM0_A3"/>
+        <alias index="4" name="" field="ADM0_A3_IS"/>
+        <alias index="5" name="" field="ADM0_A3_UN"/>
+        <alias index="6" name="" field="ADM0_A3_US"/>
+        <alias index="7" name="" field="ADM0_A3_WB"/>
+        <alias index="8" name="" field="ADM0_DIF"/>
+        <alias index="9" name="" field="ADMIN"/>
+        <alias index="10" name="" field="BRK_A3"/>
+        <alias index="11" name="" field="BRK_DIFF"/>
+        <alias index="12" name="" field="BRK_GROUP"/>
+        <alias index="13" name="" field="BRK_NAME"/>
+        <alias index="14" name="" field="CONTINENT"/>
+        <alias index="15" name="" field="ECONOMY"/>
+        <alias index="16" name="" field="FIPS_10_"/>
+        <alias index="17" name="" field="FORMAL_EN"/>
+        <alias index="18" name="" field="FORMAL_FR"/>
+        <alias index="19" name="" field="GDP_MD_EST"/>
+        <alias index="20" name="" field="GDP_YEAR"/>
+        <alias index="21" name="" field="GEOUNIT"/>
+        <alias index="22" name="" field="GEOU_DIF"/>
+        <alias index="23" name="" field="GU_A3"/>
+        <alias index="24" name="" field="HOMEPART"/>
+        <alias index="25" name="" field="INCOME_GRP"/>
+        <alias index="26" name="" field="ISO_A2"/>
+        <alias index="27" name="" field="ISO_A3"/>
+        <alias index="28" name="" field="ISO_N3"/>
+        <alias index="29" name="" field="LABELRANK"/>
+        <alias index="30" name="" field="LASTCENSUS"/>
+        <alias index="31" name="" field="LEVEL"/>
+        <alias index="32" name="" field="LONG_LEN"/>
+        <alias index="33" name="" field="MAPCOLOR13"/>
+        <alias index="34" name="" field="MAPCOLOR7"/>
+        <alias index="35" name="" field="MAPCOLOR8"/>
+        <alias index="36" name="" field="MAPCOLOR9"/>
+        <alias index="37" name="" field="NAME"/>
+        <alias index="38" name="" field="NAME_ALT"/>
+        <alias index="39" name="" field="NAME_LEN"/>
+        <alias index="40" name="" field="NAME_LONG"/>
+        <alias index="41" name="" field="NAME_SORT"/>
+        <alias index="42" name="" field="NOTE_ADM0"/>
+        <alias index="43" name="" field="NOTE_BRK"/>
+        <alias index="44" name="" field="POP_EST"/>
+        <alias index="45" name="" field="POP_YEAR"/>
+        <alias index="46" name="" field="POSTAL"/>
+        <alias index="47" name="" field="REGION_UN"/>
+        <alias index="48" name="" field="REGION_WB"/>
+        <alias index="49" name="" field="SOVEREIGNT"/>
+        <alias index="50" name="" field="SOV_A3"/>
+        <alias index="51" name="" field="SUBREGION"/>
+        <alias index="52" name="" field="SUBUNIT"/>
+        <alias index="53" name="" field="SU_A3"/>
+        <alias index="54" name="" field="SU_DIF"/>
+        <alias index="55" name="" field="TINY"/>
+        <alias index="56" name="" field="TYPE"/>
+        <alias index="57" name="" field="UN_A3"/>
+        <alias index="58" name="" field="WB_A2"/>
+        <alias index="59" name="" field="WB_A3"/>
+        <alias index="60" name="" field="WIKIPEDIA"/>
+        <alias index="61" name="" field="WOE_ID"/>
+        <alias index="62" name="" field="WOE_ID_EH"/>
+        <alias index="63" name="" field="WOE_NOTE"/>
+        <alias index="64" name="" field="featurecla"/>
+        <alias index="65" name="" field="scalerank"/>
       </aliases>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
       <defaults>
-        <default applyOnUpdate="0" field="fid" expression=""/>
-        <default applyOnUpdate="0" field="ABBREV" expression=""/>
-        <default applyOnUpdate="0" field="ABBREV_LEN" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_IS" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_UN" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_US" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_WB" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_DIF" expression=""/>
-        <default applyOnUpdate="0" field="ADMIN" expression=""/>
-        <default applyOnUpdate="0" field="BRK_A3" expression=""/>
-        <default applyOnUpdate="0" field="BRK_DIFF" expression=""/>
-        <default applyOnUpdate="0" field="BRK_GROUP" expression=""/>
-        <default applyOnUpdate="0" field="BRK_NAME" expression=""/>
-        <default applyOnUpdate="0" field="CONTINENT" expression=""/>
-        <default applyOnUpdate="0" field="ECONOMY" expression=""/>
-        <default applyOnUpdate="0" field="FIPS_10_" expression=""/>
-        <default applyOnUpdate="0" field="FORMAL_EN" expression=""/>
-        <default applyOnUpdate="0" field="FORMAL_FR" expression=""/>
-        <default applyOnUpdate="0" field="GDP_MD_EST" expression=""/>
-        <default applyOnUpdate="0" field="GDP_YEAR" expression=""/>
-        <default applyOnUpdate="0" field="GEOUNIT" expression=""/>
-        <default applyOnUpdate="0" field="GEOU_DIF" expression=""/>
-        <default applyOnUpdate="0" field="GU_A3" expression=""/>
-        <default applyOnUpdate="0" field="HOMEPART" expression=""/>
-        <default applyOnUpdate="0" field="INCOME_GRP" expression=""/>
-        <default applyOnUpdate="0" field="ISO_A2" expression=""/>
-        <default applyOnUpdate="0" field="ISO_A3" expression=""/>
-        <default applyOnUpdate="0" field="ISO_N3" expression=""/>
-        <default applyOnUpdate="0" field="LABELRANK" expression=""/>
-        <default applyOnUpdate="0" field="LASTCENSUS" expression=""/>
-        <default applyOnUpdate="0" field="LEVEL" expression=""/>
-        <default applyOnUpdate="0" field="LONG_LEN" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR13" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR7" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR8" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR9" expression=""/>
-        <default applyOnUpdate="0" field="NAME" expression=""/>
-        <default applyOnUpdate="0" field="NAME_ALT" expression=""/>
-        <default applyOnUpdate="0" field="NAME_LEN" expression=""/>
-        <default applyOnUpdate="0" field="NAME_LONG" expression=""/>
-        <default applyOnUpdate="0" field="NAME_SORT" expression=""/>
-        <default applyOnUpdate="0" field="NOTE_ADM0" expression=""/>
-        <default applyOnUpdate="0" field="NOTE_BRK" expression=""/>
-        <default applyOnUpdate="0" field="POP_EST" expression=""/>
-        <default applyOnUpdate="0" field="POP_YEAR" expression=""/>
-        <default applyOnUpdate="0" field="POSTAL" expression=""/>
-        <default applyOnUpdate="0" field="REGION_UN" expression=""/>
-        <default applyOnUpdate="0" field="REGION_WB" expression=""/>
-        <default applyOnUpdate="0" field="SOVEREIGNT" expression=""/>
-        <default applyOnUpdate="0" field="SOV_A3" expression=""/>
-        <default applyOnUpdate="0" field="SUBREGION" expression=""/>
-        <default applyOnUpdate="0" field="SUBUNIT" expression=""/>
-        <default applyOnUpdate="0" field="SU_A3" expression=""/>
-        <default applyOnUpdate="0" field="SU_DIF" expression=""/>
-        <default applyOnUpdate="0" field="TINY" expression=""/>
-        <default applyOnUpdate="0" field="TYPE" expression=""/>
-        <default applyOnUpdate="0" field="UN_A3" expression=""/>
-        <default applyOnUpdate="0" field="WB_A2" expression=""/>
-        <default applyOnUpdate="0" field="WB_A3" expression=""/>
-        <default applyOnUpdate="0" field="WIKIPEDIA" expression=""/>
-        <default applyOnUpdate="0" field="WOE_ID" expression=""/>
-        <default applyOnUpdate="0" field="WOE_ID_EH" expression=""/>
-        <default applyOnUpdate="0" field="WOE_NOTE" expression=""/>
-        <default applyOnUpdate="0" field="featurecla" expression=""/>
-        <default applyOnUpdate="0" field="scalerank" expression=""/>
+        <default field="fid" applyOnUpdate="0" expression=""/>
+        <default field="ABBREV" applyOnUpdate="0" expression=""/>
+        <default field="ABBREV_LEN" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_IS" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_UN" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_US" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_WB" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_DIF" applyOnUpdate="0" expression=""/>
+        <default field="ADMIN" applyOnUpdate="0" expression=""/>
+        <default field="BRK_A3" applyOnUpdate="0" expression=""/>
+        <default field="BRK_DIFF" applyOnUpdate="0" expression=""/>
+        <default field="BRK_GROUP" applyOnUpdate="0" expression=""/>
+        <default field="BRK_NAME" applyOnUpdate="0" expression=""/>
+        <default field="CONTINENT" applyOnUpdate="0" expression=""/>
+        <default field="ECONOMY" applyOnUpdate="0" expression=""/>
+        <default field="FIPS_10_" applyOnUpdate="0" expression=""/>
+        <default field="FORMAL_EN" applyOnUpdate="0" expression=""/>
+        <default field="FORMAL_FR" applyOnUpdate="0" expression=""/>
+        <default field="GDP_MD_EST" applyOnUpdate="0" expression=""/>
+        <default field="GDP_YEAR" applyOnUpdate="0" expression=""/>
+        <default field="GEOUNIT" applyOnUpdate="0" expression=""/>
+        <default field="GEOU_DIF" applyOnUpdate="0" expression=""/>
+        <default field="GU_A3" applyOnUpdate="0" expression=""/>
+        <default field="HOMEPART" applyOnUpdate="0" expression=""/>
+        <default field="INCOME_GRP" applyOnUpdate="0" expression=""/>
+        <default field="ISO_A2" applyOnUpdate="0" expression=""/>
+        <default field="ISO_A3" applyOnUpdate="0" expression=""/>
+        <default field="ISO_N3" applyOnUpdate="0" expression=""/>
+        <default field="LABELRANK" applyOnUpdate="0" expression=""/>
+        <default field="LASTCENSUS" applyOnUpdate="0" expression=""/>
+        <default field="LEVEL" applyOnUpdate="0" expression=""/>
+        <default field="LONG_LEN" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR13" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR7" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR8" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR9" applyOnUpdate="0" expression=""/>
+        <default field="NAME" applyOnUpdate="0" expression=""/>
+        <default field="NAME_ALT" applyOnUpdate="0" expression=""/>
+        <default field="NAME_LEN" applyOnUpdate="0" expression=""/>
+        <default field="NAME_LONG" applyOnUpdate="0" expression=""/>
+        <default field="NAME_SORT" applyOnUpdate="0" expression=""/>
+        <default field="NOTE_ADM0" applyOnUpdate="0" expression=""/>
+        <default field="NOTE_BRK" applyOnUpdate="0" expression=""/>
+        <default field="POP_EST" applyOnUpdate="0" expression=""/>
+        <default field="POP_YEAR" applyOnUpdate="0" expression=""/>
+        <default field="POSTAL" applyOnUpdate="0" expression=""/>
+        <default field="REGION_UN" applyOnUpdate="0" expression=""/>
+        <default field="REGION_WB" applyOnUpdate="0" expression=""/>
+        <default field="SOVEREIGNT" applyOnUpdate="0" expression=""/>
+        <default field="SOV_A3" applyOnUpdate="0" expression=""/>
+        <default field="SUBREGION" applyOnUpdate="0" expression=""/>
+        <default field="SUBUNIT" applyOnUpdate="0" expression=""/>
+        <default field="SU_A3" applyOnUpdate="0" expression=""/>
+        <default field="SU_DIF" applyOnUpdate="0" expression=""/>
+        <default field="TINY" applyOnUpdate="0" expression=""/>
+        <default field="TYPE" applyOnUpdate="0" expression=""/>
+        <default field="UN_A3" applyOnUpdate="0" expression=""/>
+        <default field="WB_A2" applyOnUpdate="0" expression=""/>
+        <default field="WB_A3" applyOnUpdate="0" expression=""/>
+        <default field="WIKIPEDIA" applyOnUpdate="0" expression=""/>
+        <default field="WOE_ID" applyOnUpdate="0" expression=""/>
+        <default field="WOE_ID_EH" applyOnUpdate="0" expression=""/>
+        <default field="WOE_NOTE" applyOnUpdate="0" expression=""/>
+        <default field="featurecla" applyOnUpdate="0" expression=""/>
+        <default field="scalerank" applyOnUpdate="0" expression=""/>
       </defaults>
       <constraints>
-        <constraint unique_strength="0" field="fid" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ABBREV" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ABBREV_LEN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_IS" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_UN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_US" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_WB" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_DIF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADMIN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_DIFF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_GROUP" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_NAME" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="CONTINENT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ECONOMY" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="FIPS_10_" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="FORMAL_EN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="FORMAL_FR" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GDP_MD_EST" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GDP_YEAR" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GEOUNIT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GEOU_DIF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GU_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="HOMEPART" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="INCOME_GRP" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ISO_A2" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ISO_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ISO_N3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LABELRANK" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LASTCENSUS" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LEVEL" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LONG_LEN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR13" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR7" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR8" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR9" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_ALT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_LEN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_LONG" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_SORT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NOTE_ADM0" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NOTE_BRK" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="POP_EST" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="POP_YEAR" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="POSTAL" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="REGION_UN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="REGION_WB" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SOVEREIGNT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SOV_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SUBREGION" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SUBUNIT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SU_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SU_DIF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="TINY" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="TYPE" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="UN_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WB_A2" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WB_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WIKIPEDIA" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WOE_ID" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WOE_ID_EH" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WOE_NOTE" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="featurecla" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="scalerank" exp_strength="0" constraints="0" notnull_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="fid" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ABBREV" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ABBREV_LEN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_IS" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_UN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_US" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_WB" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_DIF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADMIN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_DIFF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_GROUP" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_NAME" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="CONTINENT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ECONOMY" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="FIPS_10_" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="FORMAL_EN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="FORMAL_FR" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GDP_MD_EST" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GDP_YEAR" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GEOUNIT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GEOU_DIF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GU_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="HOMEPART" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="INCOME_GRP" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ISO_A2" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ISO_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ISO_N3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LABELRANK" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LASTCENSUS" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LEVEL" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LONG_LEN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR13" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR7" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR8" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR9" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_ALT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_LEN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_LONG" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_SORT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NOTE_ADM0" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NOTE_BRK" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="POP_EST" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="POP_YEAR" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="POSTAL" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="REGION_UN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="REGION_WB" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SOVEREIGNT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SOV_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SUBREGION" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SUBUNIT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SU_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SU_DIF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="TINY" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="TYPE" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="UN_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WB_A2" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WB_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WIKIPEDIA" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WOE_ID" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WOE_ID_EH" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WOE_NOTE" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="featurecla" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="scalerank" constraints="0" unique_strength="0"/>
       </constraints>
       <constraintExpressions>
-        <constraint field="fid" exp="" desc=""/>
-        <constraint field="ABBREV" exp="" desc=""/>
-        <constraint field="ABBREV_LEN" exp="" desc=""/>
-        <constraint field="ADM0_A3" exp="" desc=""/>
-        <constraint field="ADM0_A3_IS" exp="" desc=""/>
-        <constraint field="ADM0_A3_UN" exp="" desc=""/>
-        <constraint field="ADM0_A3_US" exp="" desc=""/>
-        <constraint field="ADM0_A3_WB" exp="" desc=""/>
-        <constraint field="ADM0_DIF" exp="" desc=""/>
-        <constraint field="ADMIN" exp="" desc=""/>
-        <constraint field="BRK_A3" exp="" desc=""/>
-        <constraint field="BRK_DIFF" exp="" desc=""/>
-        <constraint field="BRK_GROUP" exp="" desc=""/>
-        <constraint field="BRK_NAME" exp="" desc=""/>
-        <constraint field="CONTINENT" exp="" desc=""/>
-        <constraint field="ECONOMY" exp="" desc=""/>
-        <constraint field="FIPS_10_" exp="" desc=""/>
-        <constraint field="FORMAL_EN" exp="" desc=""/>
-        <constraint field="FORMAL_FR" exp="" desc=""/>
-        <constraint field="GDP_MD_EST" exp="" desc=""/>
-        <constraint field="GDP_YEAR" exp="" desc=""/>
-        <constraint field="GEOUNIT" exp="" desc=""/>
-        <constraint field="GEOU_DIF" exp="" desc=""/>
-        <constraint field="GU_A3" exp="" desc=""/>
-        <constraint field="HOMEPART" exp="" desc=""/>
-        <constraint field="INCOME_GRP" exp="" desc=""/>
-        <constraint field="ISO_A2" exp="" desc=""/>
-        <constraint field="ISO_A3" exp="" desc=""/>
-        <constraint field="ISO_N3" exp="" desc=""/>
-        <constraint field="LABELRANK" exp="" desc=""/>
-        <constraint field="LASTCENSUS" exp="" desc=""/>
-        <constraint field="LEVEL" exp="" desc=""/>
-        <constraint field="LONG_LEN" exp="" desc=""/>
-        <constraint field="MAPCOLOR13" exp="" desc=""/>
-        <constraint field="MAPCOLOR7" exp="" desc=""/>
-        <constraint field="MAPCOLOR8" exp="" desc=""/>
-        <constraint field="MAPCOLOR9" exp="" desc=""/>
-        <constraint field="NAME" exp="" desc=""/>
-        <constraint field="NAME_ALT" exp="" desc=""/>
-        <constraint field="NAME_LEN" exp="" desc=""/>
-        <constraint field="NAME_LONG" exp="" desc=""/>
-        <constraint field="NAME_SORT" exp="" desc=""/>
-        <constraint field="NOTE_ADM0" exp="" desc=""/>
-        <constraint field="NOTE_BRK" exp="" desc=""/>
-        <constraint field="POP_EST" exp="" desc=""/>
-        <constraint field="POP_YEAR" exp="" desc=""/>
-        <constraint field="POSTAL" exp="" desc=""/>
-        <constraint field="REGION_UN" exp="" desc=""/>
-        <constraint field="REGION_WB" exp="" desc=""/>
-        <constraint field="SOVEREIGNT" exp="" desc=""/>
-        <constraint field="SOV_A3" exp="" desc=""/>
-        <constraint field="SUBREGION" exp="" desc=""/>
-        <constraint field="SUBUNIT" exp="" desc=""/>
-        <constraint field="SU_A3" exp="" desc=""/>
-        <constraint field="SU_DIF" exp="" desc=""/>
-        <constraint field="TINY" exp="" desc=""/>
-        <constraint field="TYPE" exp="" desc=""/>
-        <constraint field="UN_A3" exp="" desc=""/>
-        <constraint field="WB_A2" exp="" desc=""/>
-        <constraint field="WB_A3" exp="" desc=""/>
-        <constraint field="WIKIPEDIA" exp="" desc=""/>
-        <constraint field="WOE_ID" exp="" desc=""/>
-        <constraint field="WOE_ID_EH" exp="" desc=""/>
-        <constraint field="WOE_NOTE" exp="" desc=""/>
-        <constraint field="featurecla" exp="" desc=""/>
-        <constraint field="scalerank" exp="" desc=""/>
+        <constraint exp="" field="fid" desc=""/>
+        <constraint exp="" field="ABBREV" desc=""/>
+        <constraint exp="" field="ABBREV_LEN" desc=""/>
+        <constraint exp="" field="ADM0_A3" desc=""/>
+        <constraint exp="" field="ADM0_A3_IS" desc=""/>
+        <constraint exp="" field="ADM0_A3_UN" desc=""/>
+        <constraint exp="" field="ADM0_A3_US" desc=""/>
+        <constraint exp="" field="ADM0_A3_WB" desc=""/>
+        <constraint exp="" field="ADM0_DIF" desc=""/>
+        <constraint exp="" field="ADMIN" desc=""/>
+        <constraint exp="" field="BRK_A3" desc=""/>
+        <constraint exp="" field="BRK_DIFF" desc=""/>
+        <constraint exp="" field="BRK_GROUP" desc=""/>
+        <constraint exp="" field="BRK_NAME" desc=""/>
+        <constraint exp="" field="CONTINENT" desc=""/>
+        <constraint exp="" field="ECONOMY" desc=""/>
+        <constraint exp="" field="FIPS_10_" desc=""/>
+        <constraint exp="" field="FORMAL_EN" desc=""/>
+        <constraint exp="" field="FORMAL_FR" desc=""/>
+        <constraint exp="" field="GDP_MD_EST" desc=""/>
+        <constraint exp="" field="GDP_YEAR" desc=""/>
+        <constraint exp="" field="GEOUNIT" desc=""/>
+        <constraint exp="" field="GEOU_DIF" desc=""/>
+        <constraint exp="" field="GU_A3" desc=""/>
+        <constraint exp="" field="HOMEPART" desc=""/>
+        <constraint exp="" field="INCOME_GRP" desc=""/>
+        <constraint exp="" field="ISO_A2" desc=""/>
+        <constraint exp="" field="ISO_A3" desc=""/>
+        <constraint exp="" field="ISO_N3" desc=""/>
+        <constraint exp="" field="LABELRANK" desc=""/>
+        <constraint exp="" field="LASTCENSUS" desc=""/>
+        <constraint exp="" field="LEVEL" desc=""/>
+        <constraint exp="" field="LONG_LEN" desc=""/>
+        <constraint exp="" field="MAPCOLOR13" desc=""/>
+        <constraint exp="" field="MAPCOLOR7" desc=""/>
+        <constraint exp="" field="MAPCOLOR8" desc=""/>
+        <constraint exp="" field="MAPCOLOR9" desc=""/>
+        <constraint exp="" field="NAME" desc=""/>
+        <constraint exp="" field="NAME_ALT" desc=""/>
+        <constraint exp="" field="NAME_LEN" desc=""/>
+        <constraint exp="" field="NAME_LONG" desc=""/>
+        <constraint exp="" field="NAME_SORT" desc=""/>
+        <constraint exp="" field="NOTE_ADM0" desc=""/>
+        <constraint exp="" field="NOTE_BRK" desc=""/>
+        <constraint exp="" field="POP_EST" desc=""/>
+        <constraint exp="" field="POP_YEAR" desc=""/>
+        <constraint exp="" field="POSTAL" desc=""/>
+        <constraint exp="" field="REGION_UN" desc=""/>
+        <constraint exp="" field="REGION_WB" desc=""/>
+        <constraint exp="" field="SOVEREIGNT" desc=""/>
+        <constraint exp="" field="SOV_A3" desc=""/>
+        <constraint exp="" field="SUBREGION" desc=""/>
+        <constraint exp="" field="SUBUNIT" desc=""/>
+        <constraint exp="" field="SU_A3" desc=""/>
+        <constraint exp="" field="SU_DIF" desc=""/>
+        <constraint exp="" field="TINY" desc=""/>
+        <constraint exp="" field="TYPE" desc=""/>
+        <constraint exp="" field="UN_A3" desc=""/>
+        <constraint exp="" field="WB_A2" desc=""/>
+        <constraint exp="" field="WB_A3" desc=""/>
+        <constraint exp="" field="WIKIPEDIA" desc=""/>
+        <constraint exp="" field="WOE_ID" desc=""/>
+        <constraint exp="" field="WOE_ID_EH" desc=""/>
+        <constraint exp="" field="WOE_NOTE" desc=""/>
+        <constraint exp="" field="featurecla" desc=""/>
+        <constraint exp="" field="scalerank" desc=""/>
       </constraintExpressions>
       <expressionfields/>
       <attributeactions>
         <defaultAction key="Canvas" value="{00000000-0000-0000-0000-000000000000}"/>
       </attributeactions>
-      <attributetableconfig actionWidgetStyle="dropDown" sortOrder="0" sortExpression="">
+      <attributetableconfig sortOrder="0" actionWidgetStyle="dropDown" sortExpression="">
         <columns>
-          <column type="field" width="-1" name="scalerank" hidden="0"/>
-          <column type="field" width="-1" name="featurecla" hidden="0"/>
-          <column type="field" width="-1" name="LABELRANK" hidden="0"/>
-          <column type="field" width="-1" name="SOVEREIGNT" hidden="0"/>
-          <column type="field" width="-1" name="SOV_A3" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_DIF" hidden="0"/>
-          <column type="field" width="-1" name="LEVEL" hidden="0"/>
-          <column type="field" width="-1" name="TYPE" hidden="0"/>
-          <column type="field" width="-1" name="ADMIN" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3" hidden="0"/>
-          <column type="field" width="-1" name="GEOU_DIF" hidden="0"/>
-          <column type="field" width="-1" name="GEOUNIT" hidden="0"/>
-          <column type="field" width="-1" name="GU_A3" hidden="0"/>
-          <column type="field" width="-1" name="SU_DIF" hidden="0"/>
-          <column type="field" width="-1" name="SUBUNIT" hidden="0"/>
-          <column type="field" width="-1" name="SU_A3" hidden="0"/>
-          <column type="field" width="-1" name="BRK_DIFF" hidden="0"/>
-          <column type="field" width="-1" name="NAME" hidden="0"/>
-          <column type="field" width="-1" name="NAME_LONG" hidden="0"/>
-          <column type="field" width="-1" name="BRK_A3" hidden="0"/>
-          <column type="field" width="-1" name="BRK_NAME" hidden="0"/>
-          <column type="field" width="-1" name="BRK_GROUP" hidden="0"/>
-          <column type="field" width="-1" name="ABBREV" hidden="0"/>
-          <column type="field" width="-1" name="POSTAL" hidden="0"/>
-          <column type="field" width="-1" name="FORMAL_EN" hidden="0"/>
-          <column type="field" width="-1" name="FORMAL_FR" hidden="0"/>
-          <column type="field" width="-1" name="NOTE_ADM0" hidden="0"/>
-          <column type="field" width="-1" name="NOTE_BRK" hidden="0"/>
-          <column type="field" width="-1" name="NAME_SORT" hidden="0"/>
-          <column type="field" width="-1" name="NAME_ALT" hidden="0"/>
-          <column type="field" width="-1" name="MAPCOLOR7" hidden="0"/>
-          <column type="field" width="-1" name="MAPCOLOR8" hidden="0"/>
-          <column type="field" width="-1" name="MAPCOLOR9" hidden="0"/>
-          <column type="field" width="-1" name="MAPCOLOR13" hidden="0"/>
-          <column type="field" width="-1" name="POP_EST" hidden="0"/>
-          <column type="field" width="-1" name="GDP_MD_EST" hidden="0"/>
-          <column type="field" width="-1" name="POP_YEAR" hidden="0"/>
-          <column type="field" width="-1" name="LASTCENSUS" hidden="0"/>
-          <column type="field" width="-1" name="GDP_YEAR" hidden="0"/>
-          <column type="field" width="-1" name="ECONOMY" hidden="0"/>
-          <column type="field" width="-1" name="INCOME_GRP" hidden="0"/>
-          <column type="field" width="-1" name="WIKIPEDIA" hidden="0"/>
-          <column type="field" width="-1" name="FIPS_10_" hidden="0"/>
-          <column type="field" width="-1" name="ISO_A2" hidden="0"/>
-          <column type="field" width="-1" name="ISO_A3" hidden="0"/>
-          <column type="field" width="-1" name="ISO_N3" hidden="0"/>
-          <column type="field" width="-1" name="UN_A3" hidden="0"/>
-          <column type="field" width="-1" name="WB_A2" hidden="0"/>
-          <column type="field" width="-1" name="WB_A3" hidden="0"/>
-          <column type="field" width="-1" name="WOE_ID" hidden="0"/>
-          <column type="field" width="-1" name="WOE_ID_EH" hidden="0"/>
-          <column type="field" width="-1" name="WOE_NOTE" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3_IS" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3_US" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3_UN" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3_WB" hidden="0"/>
-          <column type="field" width="-1" name="CONTINENT" hidden="0"/>
-          <column type="field" width="-1" name="REGION_UN" hidden="0"/>
-          <column type="field" width="-1" name="SUBREGION" hidden="0"/>
-          <column type="field" width="-1" name="REGION_WB" hidden="0"/>
-          <column type="field" width="-1" name="NAME_LEN" hidden="0"/>
-          <column type="field" width="-1" name="LONG_LEN" hidden="0"/>
-          <column type="field" width="-1" name="ABBREV_LEN" hidden="0"/>
-          <column type="field" width="-1" name="TINY" hidden="0"/>
-          <column type="field" width="-1" name="HOMEPART" hidden="0"/>
+          <column type="field" name="scalerank" width="-1" hidden="0"/>
+          <column type="field" name="featurecla" width="-1" hidden="0"/>
+          <column type="field" name="LABELRANK" width="-1" hidden="0"/>
+          <column type="field" name="SOVEREIGNT" width="-1" hidden="0"/>
+          <column type="field" name="SOV_A3" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_DIF" width="-1" hidden="0"/>
+          <column type="field" name="LEVEL" width="-1" hidden="0"/>
+          <column type="field" name="TYPE" width="-1" hidden="0"/>
+          <column type="field" name="ADMIN" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3" width="-1" hidden="0"/>
+          <column type="field" name="GEOU_DIF" width="-1" hidden="0"/>
+          <column type="field" name="GEOUNIT" width="-1" hidden="0"/>
+          <column type="field" name="GU_A3" width="-1" hidden="0"/>
+          <column type="field" name="SU_DIF" width="-1" hidden="0"/>
+          <column type="field" name="SUBUNIT" width="-1" hidden="0"/>
+          <column type="field" name="SU_A3" width="-1" hidden="0"/>
+          <column type="field" name="BRK_DIFF" width="-1" hidden="0"/>
+          <column type="field" name="NAME" width="-1" hidden="0"/>
+          <column type="field" name="NAME_LONG" width="-1" hidden="0"/>
+          <column type="field" name="BRK_A3" width="-1" hidden="0"/>
+          <column type="field" name="BRK_NAME" width="-1" hidden="0"/>
+          <column type="field" name="BRK_GROUP" width="-1" hidden="0"/>
+          <column type="field" name="ABBREV" width="-1" hidden="0"/>
+          <column type="field" name="POSTAL" width="-1" hidden="0"/>
+          <column type="field" name="FORMAL_EN" width="-1" hidden="0"/>
+          <column type="field" name="FORMAL_FR" width="-1" hidden="0"/>
+          <column type="field" name="NOTE_ADM0" width="-1" hidden="0"/>
+          <column type="field" name="NOTE_BRK" width="-1" hidden="0"/>
+          <column type="field" name="NAME_SORT" width="-1" hidden="0"/>
+          <column type="field" name="NAME_ALT" width="-1" hidden="0"/>
+          <column type="field" name="MAPCOLOR7" width="-1" hidden="0"/>
+          <column type="field" name="MAPCOLOR8" width="-1" hidden="0"/>
+          <column type="field" name="MAPCOLOR9" width="-1" hidden="0"/>
+          <column type="field" name="MAPCOLOR13" width="-1" hidden="0"/>
+          <column type="field" name="POP_EST" width="-1" hidden="0"/>
+          <column type="field" name="GDP_MD_EST" width="-1" hidden="0"/>
+          <column type="field" name="POP_YEAR" width="-1" hidden="0"/>
+          <column type="field" name="LASTCENSUS" width="-1" hidden="0"/>
+          <column type="field" name="GDP_YEAR" width="-1" hidden="0"/>
+          <column type="field" name="ECONOMY" width="-1" hidden="0"/>
+          <column type="field" name="INCOME_GRP" width="-1" hidden="0"/>
+          <column type="field" name="WIKIPEDIA" width="-1" hidden="0"/>
+          <column type="field" name="FIPS_10_" width="-1" hidden="0"/>
+          <column type="field" name="ISO_A2" width="-1" hidden="0"/>
+          <column type="field" name="ISO_A3" width="-1" hidden="0"/>
+          <column type="field" name="ISO_N3" width="-1" hidden="0"/>
+          <column type="field" name="UN_A3" width="-1" hidden="0"/>
+          <column type="field" name="WB_A2" width="-1" hidden="0"/>
+          <column type="field" name="WB_A3" width="-1" hidden="0"/>
+          <column type="field" name="WOE_ID" width="-1" hidden="0"/>
+          <column type="field" name="WOE_ID_EH" width="-1" hidden="0"/>
+          <column type="field" name="WOE_NOTE" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3_IS" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3_US" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3_UN" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3_WB" width="-1" hidden="0"/>
+          <column type="field" name="CONTINENT" width="-1" hidden="0"/>
+          <column type="field" name="REGION_UN" width="-1" hidden="0"/>
+          <column type="field" name="SUBREGION" width="-1" hidden="0"/>
+          <column type="field" name="REGION_WB" width="-1" hidden="0"/>
+          <column type="field" name="NAME_LEN" width="-1" hidden="0"/>
+          <column type="field" name="LONG_LEN" width="-1" hidden="0"/>
+          <column type="field" name="ABBREV_LEN" width="-1" hidden="0"/>
+          <column type="field" name="TINY" width="-1" hidden="0"/>
+          <column type="field" name="HOMEPART" width="-1" hidden="0"/>
           <column type="actions" width="-1" hidden="1"/>
-          <column type="field" width="-1" name="fid" hidden="0"/>
+          <column type="field" name="fid" width="-1" hidden="0"/>
         </columns>
       </attributetableconfig>
       <conditionalstyles>
         <rowstyles/>
         <fieldstyles/>
       </conditionalstyles>
+      <storedexpressions/>
       <editform tolerant="1"></editform>
       <editforminit/>
       <editforminitcodesource>0</editforminitcodesource>
@@ -1233,7 +1433,7 @@ def my_form_open(dialog, layer, feature):
       <previewExpression>NAME</previewExpression>
       <mapTip></mapTip>
     </maplayer>
-    <maplayer wkbType="MultiPolygon" minScale="0" refreshOnNotifyEnabled="0" hasScaleBasedVisibilityFlag="0" maxScale="0" refreshOnNotifyMessage="" simplifyMaxScale="1" styleCategories="AllStyleCategories" type="vector" autoRefreshTime="0" simplifyAlgorithm="0" autoRefreshEnabled="0" simplifyDrawingHints="1" labelsEnabled="1" simplifyLocal="1" geometry="Polygon" readOnly="0" simplifyDrawingTol="1">
+    <maplayer refreshOnNotifyMessage="" wkbType="MultiPolygon" simplifyMaxScale="1" refreshOnNotifyEnabled="0" autoRefreshEnabled="0" geometry="Polygon" minScale="0" simplifyDrawingTol="1" maxScale="0" simplifyAlgorithm="0" autoRefreshTime="0" type="vector" readOnly="0" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" simplifyDrawingHints="1" labelsEnabled="1" styleCategories="AllStyleCategories">
       <extent>
         <xmin>-179.99999999999988631</xmin>
         <ymin>-90</ymin>
@@ -1290,11 +1490,11 @@ def my_form_open(dialog, layer, feature):
             <description></description>
             <projectionacronym></projectionacronym>
             <ellipsoidacronym></ellipsoidacronym>
-            <geographicflag>true</geographicflag>
+            <geographicflag>false</geographicflag>
           </spatialrefsys>
         </crs>
         <extent>
-          <spatial miny="0" crs="" minz="0" dimensions="2" maxx="0" maxz="0" minx="0" maxy="0"/>
+          <spatial miny="0" maxy="0" minx="0" crs="" maxx="0" dimensions="2" minz="0" maxz="0"/>
           <temporal>
             <period>
               <start></start>
@@ -1320,18 +1520,18 @@ def my_form_open(dialog, layer, feature):
       </flags>
       <renderer-v2 type="RuleRenderer" symbollevels="0" enableorderby="0" forceraster="0">
         <rules key="{f214a072-fe85-45c8-9725-be1926a6ced6}">
-          <rule label="Africa" symbol="0" key="{dd068656-dca0-4c3d-85ae-697bdab9125e}" filter="&quot;CONTINENT&quot; = 'Africa'"/>
-          <rule label="Antarctica" symbol="1" key="{efadee11-4b88-475f-8594-5ea73639c2e5}" filter="&quot;CONTINENT&quot; = 'Antarctica'"/>
-          <rule label="Asia" symbol="2" key="{a2d944c8-b945-4a9a-8e9d-40d8bd10cbc7}" filter="&quot;CONTINENT&quot; = 'Asia'"/>
-          <rule label="Europe" symbol="3" key="{1467627c-3323-4562-9e11-622716845e28}" filter="&quot;CONTINENT&quot; = 'Europe'"/>
-          <rule label="North America" symbol="4" key="{cb08c95a-877c-4c34-a022-1ad176176a36}" filter="&quot;CONTINENT&quot; = 'North America'"/>
-          <rule label="Oceania" symbol="5" key="{5ffa7d80-a019-4c4b-adc5-b627b234e77d}" filter="&quot;CONTINENT&quot; = 'Oceania'"/>
-          <rule label="Seven seas (open ocean)" symbol="6" key="{4e8374ff-d275-46e6-accb-29c8718ce6b0}" filter="&quot;CONTINENT&quot; = 'Seven seas (open ocean)'"/>
-          <rule label="South America" symbol="7" key="{e986924f-e802-4226-b136-22e5ff491827}" filter="&quot;CONTINENT&quot; = 'South America'"/>
+          <rule key="{dd068656-dca0-4c3d-85ae-697bdab9125e}" filter="&quot;CONTINENT&quot; = 'Africa'" label="Africa" symbol="0"/>
+          <rule key="{efadee11-4b88-475f-8594-5ea73639c2e5}" filter="&quot;CONTINENT&quot; = 'Antarctica'" label="Antarctica" symbol="1"/>
+          <rule key="{a2d944c8-b945-4a9a-8e9d-40d8bd10cbc7}" filter="&quot;CONTINENT&quot; = 'Asia'" label="Asia" symbol="2"/>
+          <rule key="{1467627c-3323-4562-9e11-622716845e28}" filter="&quot;CONTINENT&quot; = 'Europe'" label="Europe" symbol="3"/>
+          <rule key="{cb08c95a-877c-4c34-a022-1ad176176a36}" filter="&quot;CONTINENT&quot; = 'North America'" label="North America" symbol="4"/>
+          <rule key="{5ffa7d80-a019-4c4b-adc5-b627b234e77d}" filter="&quot;CONTINENT&quot; = 'Oceania'" label="Oceania" symbol="5"/>
+          <rule key="{4e8374ff-d275-46e6-accb-29c8718ce6b0}" filter="&quot;CONTINENT&quot; = 'Seven seas (open ocean)'" label="Seven seas (open ocean)" symbol="6"/>
+          <rule key="{e986924f-e802-4226-b136-22e5ff491827}" filter="&quot;CONTINENT&quot; = 'South America'" label="South America" symbol="7"/>
         </rules>
         <symbols>
-          <symbol type="fill" name="0" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="SimpleFill" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="0" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="SimpleFill" pass="0">
               <prop k="border_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="color" v="129,240,153,255"/>
               <prop k="joinstyle" v="bevel"/>
@@ -1352,8 +1552,8 @@ def my_form_open(dialog, layer, feature):
               </data_defined_properties>
             </layer>
           </symbol>
-          <symbol type="fill" name="1" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="SimpleFill" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="1" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="SimpleFill" pass="0">
               <prop k="border_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="color" v="0,0,255,255"/>
               <prop k="joinstyle" v="bevel"/>
@@ -1373,7 +1573,7 @@ def my_form_open(dialog, layer, feature):
                 </Option>
               </data_defined_properties>
             </layer>
-            <layer class="PointPatternFill" enabled="1" pass="0" locked="0">
+            <layer locked="0" enabled="1" class="PointPatternFill" pass="0">
               <prop k="displacement_x" v="0"/>
               <prop k="displacement_x_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="displacement_x_unit" v="MM"/>
@@ -1401,8 +1601,8 @@ def my_form_open(dialog, layer, feature):
                   <Option type="QString" name="type" value="collection"/>
                 </Option>
               </data_defined_properties>
-              <symbol type="marker" name="@1@1" force_rhr="0" clip_to_extent="1" alpha="1">
-                <layer class="SimpleMarker" enabled="1" pass="0" locked="0">
+              <symbol type="marker" clip_to_extent="1" name="@1@1" force_rhr="0" alpha="1">
+                <layer locked="0" enabled="1" class="SimpleMarker" pass="0">
                   <prop k="angle" v="0"/>
                   <prop k="color" v="255,0,0,255"/>
                   <prop k="horizontal_anchor_point" v="1"/>
@@ -1432,8 +1632,8 @@ def my_form_open(dialog, layer, feature):
               </symbol>
             </layer>
           </symbol>
-          <symbol type="fill" name="2" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="SimpleFill" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="2" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="SimpleFill" pass="0">
               <prop k="border_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="color" v="96,201,189,255"/>
               <prop k="joinstyle" v="bevel"/>
@@ -1454,8 +1654,8 @@ def my_form_open(dialog, layer, feature):
               </data_defined_properties>
             </layer>
           </symbol>
-          <symbol type="fill" name="3" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="SimpleFill" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="3" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="SimpleFill" pass="0">
               <prop k="border_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="color" v="99,162,233,255"/>
               <prop k="joinstyle" v="bevel"/>
@@ -1475,7 +1675,7 @@ def my_form_open(dialog, layer, feature):
                 </Option>
               </data_defined_properties>
             </layer>
-            <layer class="GeometryGenerator" enabled="1" pass="0" locked="0">
+            <layer locked="0" enabled="1" class="GeometryGenerator" pass="0">
               <prop k="SymbolType" v="Marker"/>
               <prop k="geometryModifier" v="centroid($geometry)"/>
               <data_defined_properties>
@@ -1485,8 +1685,8 @@ def my_form_open(dialog, layer, feature):
                   <Option type="QString" name="type" value="collection"/>
                 </Option>
               </data_defined_properties>
-              <symbol type="marker" name="@3@1" force_rhr="0" clip_to_extent="1" alpha="1">
-                <layer class="SimpleMarker" enabled="1" pass="0" locked="0">
+              <symbol type="marker" clip_to_extent="1" name="@3@1" force_rhr="0" alpha="1">
+                <layer locked="0" enabled="1" class="SimpleMarker" pass="0">
                   <prop k="angle" v="0"/>
                   <prop k="color" v="184,8,8,255"/>
                   <prop k="horizontal_anchor_point" v="1"/>
@@ -1541,7 +1741,7 @@ def my_form_open(dialog, layer, feature):
                     </Option>
                   </data_defined_properties>
                 </layer>
-                <layer class="SimpleMarker" enabled="1" pass="0" locked="0">
+                <layer locked="0" enabled="1" class="SimpleMarker" pass="0">
                   <prop k="angle" v="34"/>
                   <prop k="color" v="255,0,0,255"/>
                   <prop k="horizontal_anchor_point" v="1"/>
@@ -1585,8 +1785,8 @@ def my_form_open(dialog, layer, feature):
               </symbol>
             </layer>
           </symbol>
-          <symbol type="fill" name="4" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="PointPatternFill" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="4" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="PointPatternFill" pass="0">
               <prop k="displacement_x" v="0"/>
               <prop k="displacement_x_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="displacement_x_unit" v="MM"/>
@@ -1614,8 +1814,8 @@ def my_form_open(dialog, layer, feature):
                   <Option type="QString" name="type" value="collection"/>
                 </Option>
               </data_defined_properties>
-              <symbol type="marker" name="@4@0" force_rhr="0" clip_to_extent="1" alpha="1">
-                <layer class="SvgMarker" enabled="1" pass="0" locked="0">
+              <symbol type="marker" clip_to_extent="1" name="@4@0" force_rhr="0" alpha="1">
+                <layer locked="0" enabled="1" class="SvgMarker" pass="0">
                   <prop k="angle" v="45"/>
                   <prop k="color" v="255,0,0,255"/>
                   <prop k="fixedAspectRatio" v="0"/>
@@ -1644,8 +1844,8 @@ def my_form_open(dialog, layer, feature):
               </symbol>
             </layer>
           </symbol>
-          <symbol type="fill" name="5" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="SimpleFill" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="5" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="SimpleFill" pass="0">
               <prop k="border_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="color" v="231,80,39,255"/>
               <prop k="joinstyle" v="bevel"/>
@@ -1666,8 +1866,8 @@ def my_form_open(dialog, layer, feature):
               </data_defined_properties>
             </layer>
           </symbol>
-          <symbol type="fill" name="6" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="SimpleFill" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="6" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="SimpleFill" pass="0">
               <prop k="border_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="color" v="183,44,201,255"/>
               <prop k="joinstyle" v="bevel"/>
@@ -1688,8 +1888,8 @@ def my_form_open(dialog, layer, feature):
               </data_defined_properties>
             </layer>
           </symbol>
-          <symbol type="fill" name="7" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="MarkerLine" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="7" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="MarkerLine" pass="0">
               <prop k="average_angle_length" v="4"/>
               <prop k="average_angle_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="average_angle_unit" v="MM"/>
@@ -1712,8 +1912,8 @@ def my_form_open(dialog, layer, feature):
                   <Option type="QString" name="type" value="collection"/>
                 </Option>
               </data_defined_properties>
-              <symbol type="marker" name="@7@0" force_rhr="0" clip_to_extent="1" alpha="1">
-                <layer class="SimpleMarker" enabled="1" pass="0" locked="0">
+              <symbol type="marker" clip_to_extent="1" name="@7@0" force_rhr="0" alpha="1">
+                <layer locked="0" enabled="1" class="SimpleMarker" pass="0">
                   <prop k="angle" v="0"/>
                   <prop k="color" v="255,0,0,255"/>
                   <prop k="horizontal_anchor_point" v="1"/>
@@ -1746,16 +1946,23 @@ def my_form_open(dialog, layer, feature):
         </symbols>
       </renderer-v2>
       <labeling type="simple">
-        <settings>
-          <text-style textColor="0,0,0,255" fontSizeMapUnitScale="3x:0,0,0,0,0,0" fieldName="NAME_LONG" fontSize="10" fontWeight="50" textOpacity="1" blendMode="0" namedStyle="Regular" multilineHeight="1" fontUnderline="0" fontFamily="MS Shell Dlg 2" isExpression="0" fontStrikeout="0" useSubstitutions="0" fontItalic="0" fontWordSpacing="0" fontSizeUnit="Point" previewBkgrdColor="#ffffff" fontLetterSpacing="0" fontCapitals="0">
-            <text-buffer bufferColor="255,255,255,255" bufferBlendMode="0" bufferDraw="0" bufferNoFill="1" bufferJoinStyle="128" bufferSize="1" bufferOpacity="1" bufferSizeMapUnitScale="3x:0,0,0,0,0,0" bufferSizeUnits="MM"/>
-            <background shapeRadiiY="0" shapeBorderWidthUnit="MM" shapeRotationType="0" shapeJoinStyle="64" shapeBorderWidth="0" shapeBlendMode="0" shapeFillColor="255,255,255,255" shapeDraw="0" shapeSizeUnit="MM" shapeRadiiMapUnitScale="3x:0,0,0,0,0,0" shapeRotation="0" shapeType="0" shapeOffsetX="0" shapeRadiiUnit="MM" shapeSizeY="0" shapeSizeType="0" shapeSizeMapUnitScale="3x:0,0,0,0,0,0" shapeBorderColor="128,128,128,255" shapeOffsetY="0" shapeSizeX="0" shapeOffsetMapUnitScale="3x:0,0,0,0,0,0" shapeOffsetUnit="MM" shapeBorderWidthMapUnitScale="3x:0,0,0,0,0,0" shapeOpacity="1" shapeSVGFile="" shapeRadiiX="0"/>
-            <shadow shadowDraw="0" shadowRadius="1.5" shadowOffsetDist="1" shadowOffsetUnit="MM" shadowRadiusUnit="MM" shadowOffsetMapUnitScale="3x:0,0,0,0,0,0" shadowRadiusAlphaOnly="0" shadowOffsetGlobal="1" shadowScale="100" shadowUnder="0" shadowRadiusMapUnitScale="3x:0,0,0,0,0,0" shadowOffsetAngle="135" shadowBlendMode="6" shadowColor="0,0,0,255" shadowOpacity="0.7"/>
+        <settings calloutType="simple">
+          <text-style textOrientation="horizontal" isExpression="0" fontWeight="50" fontUnderline="0" fontFamily="MS Shell Dlg 2" multilineHeight="1" namedStyle="Regular" previewBkgrdColor="255,255,255,255" blendMode="0" fieldName="NAME_LONG" fontSizeMapUnitScale="3x:0,0,0,0,0,0" fontCapitals="0" fontItalic="0" fontSize="10" fontStrikeout="0" textOpacity="1" fontLetterSpacing="0" fontSizeUnit="Point" textColor="0,0,0,255" fontWordSpacing="0" useSubstitutions="0" fontKerning="1">
+            <text-buffer bufferJoinStyle="128" bufferSize="1" bufferBlendMode="0" bufferNoFill="1" bufferDraw="0" bufferSizeUnits="MM" bufferSizeMapUnitScale="3x:0,0,0,0,0,0" bufferColor="255,255,255,255" bufferOpacity="1"/>
+            <background shapeSVGFile="" shapeBorderWidth="0" shapeDraw="0" shapeOffsetUnit="MM" shapeBorderWidthUnit="MM" shapeRadiiUnit="MM" shapeSizeUnit="MM" shapeRadiiY="0" shapeSizeType="0" shapeOpacity="1" shapeRotationType="0" shapeBorderWidthMapUnitScale="3x:0,0,0,0,0,0" shapeFillColor="255,255,255,255" shapeOffsetMapUnitScale="3x:0,0,0,0,0,0" shapeRadiiMapUnitScale="3x:0,0,0,0,0,0" shapeOffsetX="0" shapeBlendMode="0" shapeType="0" shapeRadiiX="0" shapeBorderColor="128,128,128,255" shapeSizeMapUnitScale="3x:0,0,0,0,0,0" shapeOffsetY="0" shapeSizeY="0" shapeSizeX="0" shapeJoinStyle="64" shapeRotation="0"/>
+            <shadow shadowRadiusUnit="MM" shadowRadiusAlphaOnly="0" shadowUnder="0" shadowOffsetMapUnitScale="3x:0,0,0,0,0,0" shadowRadiusMapUnitScale="3x:0,0,0,0,0,0" shadowOffsetAngle="135" shadowOpacity="0.7" shadowScale="100" shadowOffsetDist="1" shadowOffsetUnit="MM" shadowDraw="0" shadowColor="0,0,0,255" shadowOffsetGlobal="1" shadowRadius="1.5" shadowBlendMode="6"/>
+            <dd_properties>
+              <Option type="Map">
+                <Option type="QString" name="name" value=""/>
+                <Option name="properties"/>
+                <Option type="QString" name="type" value="collection"/>
+              </Option>
+            </dd_properties>
             <substitutions/>
           </text-style>
-          <text-format addDirectionSymbol="0" leftDirectionSymbol="&lt;" autoWrapLength="0" useMaxLineLengthForAutoWrap="1" decimals="3" placeDirectionSymbol="0" wrapChar="" multilineAlign="0" reverseDirectionSymbol="0" plussign="0" formatNumbers="0" rightDirectionSymbol=">"/>
-          <placement distUnits="MM" fitInPolygonOnly="0" geometryGeneratorEnabled="0" yOffset="0" geometryGeneratorType="PointGeometry" geometryGenerator="" placementFlags="10" repeatDistance="0" xOffset="0" predefinedPositionOrder="TR,TL,BR,BL,R,L,TSR,BSR" labelOffsetMapUnitScale="3x:0,0,0,0,0,0" offsetType="0" distMapUnitScale="3x:0,0,0,0,0,0" offsetUnits="MM" maxCurvedCharAngleOut="-25" priority="5" dist="0" repeatDistanceUnits="MM" rotationAngle="0" centroidWhole="0" quadOffset="4" maxCurvedCharAngleIn="25" preserveRotation="1" centroidInside="0" repeatDistanceMapUnitScale="3x:0,0,0,0,0,0" placement="0"/>
-          <rendering upsidedownLabels="0" maxNumLabels="2000" obstacle="1" minFeatureSize="0" scaleVisibility="0" drawLabels="1" limitNumLabels="0" scaleMin="0" obstacleType="0" displayAll="0" scaleMax="0" obstacleFactor="1" labelPerPart="0" fontLimitPixelSize="0" mergeLines="0" zIndex="0" fontMinPixelSize="3" fontMaxPixelSize="10000"/>
+          <text-format wrapChar="" placeDirectionSymbol="0" formatNumbers="0" useMaxLineLengthForAutoWrap="1" autoWrapLength="0" leftDirectionSymbol="&lt;" rightDirectionSymbol=">" multilineAlign="0" plussign="0" addDirectionSymbol="0" reverseDirectionSymbol="0" decimals="3"/>
+          <placement repeatDistanceMapUnitScale="3x:0,0,0,0,0,0" overrunDistanceUnit="MM" geometryGenerator="" rotationAngle="0" yOffset="0" centroidWhole="0" geometryGeneratorEnabled="0" offsetUnits="MM" distMapUnitScale="3x:0,0,0,0,0,0" placementFlags="10" xOffset="0" priority="5" geometryGeneratorType="PointGeometry" dist="0" distUnits="MM" preserveRotation="1" maxCurvedCharAngleIn="25" labelOffsetMapUnitScale="3x:0,0,0,0,0,0" quadOffset="4" fitInPolygonOnly="0" overrunDistanceMapUnitScale="3x:0,0,0,0,0,0" centroidInside="0" maxCurvedCharAngleOut="-25" repeatDistance="0" repeatDistanceUnits="MM" layerType="UnknownGeometry" overrunDistance="0" offsetType="0" placement="0" predefinedPositionOrder="TR,TL,BR,BL,R,L,TSR,BSR"/>
+          <rendering scaleMax="0" upsidedownLabels="0" obstacleFactor="1" displayAll="0" obstacleType="0" fontMaxPixelSize="10000" limitNumLabels="0" mergeLines="0" minFeatureSize="0" zIndex="0" scaleVisibility="0" scaleMin="0" obstacle="1" fontLimitPixelSize="0" maxNumLabels="2000" drawLabels="1" labelPerPart="0" fontMinPixelSize="3"/>
           <dd_properties>
             <Option type="Map">
               <Option type="QString" name="name" value=""/>
@@ -1763,6 +1970,28 @@ def my_form_open(dialog, layer, feature):
               <Option type="QString" name="type" value="collection"/>
             </Option>
           </dd_properties>
+          <callout type="simple">
+            <Option type="Map">
+              <Option type="QString" name="anchorPoint" value="pole_of_inaccessibility"/>
+              <Option type="Map" name="ddProperties">
+                <Option type="QString" name="name" value=""/>
+                <Option name="properties"/>
+                <Option type="QString" name="type" value="collection"/>
+              </Option>
+              <Option type="bool" name="drawToAllParts" value="false"/>
+              <Option type="QString" name="enabled" value="0"/>
+              <Option type="QString" name="lineSymbol" value="&lt;symbol type=&quot;line&quot; clip_to_extent=&quot;1&quot; name=&quot;symbol&quot; force_rhr=&quot;0&quot; alpha=&quot;1&quot;>&lt;layer locked=&quot;0&quot; enabled=&quot;1&quot; class=&quot;SimpleLine&quot; pass=&quot;0&quot;>&lt;prop k=&quot;capstyle&quot; v=&quot;square&quot;/>&lt;prop k=&quot;customdash&quot; v=&quot;5;2&quot;/>&lt;prop k=&quot;customdash_map_unit_scale&quot; v=&quot;3x:0,0,0,0,0,0&quot;/>&lt;prop k=&quot;customdash_unit&quot; v=&quot;MM&quot;/>&lt;prop k=&quot;draw_inside_polygon&quot; v=&quot;0&quot;/>&lt;prop k=&quot;joinstyle&quot; v=&quot;bevel&quot;/>&lt;prop k=&quot;line_color&quot; v=&quot;60,60,60,255&quot;/>&lt;prop k=&quot;line_style&quot; v=&quot;solid&quot;/>&lt;prop k=&quot;line_width&quot; v=&quot;0.3&quot;/>&lt;prop k=&quot;line_width_unit&quot; v=&quot;MM&quot;/>&lt;prop k=&quot;offset&quot; v=&quot;0&quot;/>&lt;prop k=&quot;offset_map_unit_scale&quot; v=&quot;3x:0,0,0,0,0,0&quot;/>&lt;prop k=&quot;offset_unit&quot; v=&quot;MM&quot;/>&lt;prop k=&quot;ring_filter&quot; v=&quot;0&quot;/>&lt;prop k=&quot;use_custom_dash&quot; v=&quot;0&quot;/>&lt;prop k=&quot;width_map_unit_scale&quot; v=&quot;3x:0,0,0,0,0,0&quot;/>&lt;data_defined_properties>&lt;Option type=&quot;Map&quot;>&lt;Option type=&quot;QString&quot; name=&quot;name&quot; value=&quot;&quot;/>&lt;Option name=&quot;properties&quot;/>&lt;Option type=&quot;QString&quot; name=&quot;type&quot; value=&quot;collection&quot;/>&lt;/Option>&lt;/data_defined_properties>&lt;/layer>&lt;/symbol>"/>
+              <Option type="double" name="minLength" value="0"/>
+              <Option type="QString" name="minLengthMapUnitScale" value="3x:0,0,0,0,0,0"/>
+              <Option type="QString" name="minLengthUnit" value="MM"/>
+              <Option type="double" name="offsetFromAnchor" value="0"/>
+              <Option type="QString" name="offsetFromAnchorMapUnitScale" value="3x:0,0,0,0,0,0"/>
+              <Option type="QString" name="offsetFromAnchorUnit" value="MM"/>
+              <Option type="double" name="offsetFromLabel" value="0"/>
+              <Option type="QString" name="offsetFromLabelMapUnitScale" value="3x:0,0,0,0,0,0"/>
+              <Option type="QString" name="offsetFromLabelUnit" value="MM"/>
+            </Option>
+          </callout>
         </settings>
       </labeling>
       <customproperties>
@@ -1774,12 +2003,12 @@ def my_form_open(dialog, layer, feature):
       <featureBlendMode>0</featureBlendMode>
       <layerOpacity>1</layerOpacity>
       <SingleCategoryDiagramRenderer attributeLegend="1" diagramType="Histogram">
-        <DiagramCategory sizeType="MM" lineSizeScale="3x:0,0,0,0,0,0" minimumSize="0" minScaleDenominator="0" lineSizeType="MM" rotationOffset="270" height="15" scaleBasedVisibility="0" penAlpha="255" maxScaleDenominator="1e+08" scaleDependency="Area" enabled="0" sizeScale="3x:0,0,0,0,0,0" backgroundAlpha="255" backgroundColor="#ffffff" penWidth="0" opacity="1" diagramOrientation="Up" width="15" penColor="#000000" labelPlacementMethod="XHeight" barWidth="5">
-          <fontProperties style="" description="Cantarell,11,-1,5,50,0,0,0,0,0"/>
-          <attribute color="#000000" label="" field=""/>
+        <DiagramCategory penAlpha="255" backgroundAlpha="255" minScaleDenominator="0" opacity="1" penWidth="0" lineSizeScale="3x:0,0,0,0,0,0" minimumSize="0" maxScaleDenominator="1e+08" scaleBasedVisibility="0" barWidth="5" labelPlacementMethod="XHeight" height="15" width="15" penColor="#000000" scaleDependency="Area" lineSizeType="MM" diagramOrientation="Up" sizeType="MM" backgroundColor="#ffffff" sizeScale="3x:0,0,0,0,0,0" enabled="0" rotationOffset="270">
+          <fontProperties description="Cantarell,11,-1,5,50,0,0,0,0,0" style=""/>
+          <attribute color="#000000" field="" label=""/>
         </DiagramCategory>
       </SingleCategoryDiagramRenderer>
-      <DiagramLayerSettings placement="0" zIndex="0" linePlacementFlags="18" obstacle="0" dist="0" showAll="1" priority="0">
+      <DiagramLayerSettings linePlacementFlags="18" showAll="1" zIndex="0" priority="0" dist="0" placement="0" obstacle="0">
         <properties>
           <Option type="Map">
             <Option type="QString" name="name" value=""/>
@@ -1788,7 +2017,7 @@ def my_form_open(dialog, layer, feature):
           </Option>
         </properties>
       </DiagramLayerSettings>
-      <geometryOptions removeDuplicateNodes="0" geometryPrecision="0">
+      <geometryOptions geometryPrecision="0" removeDuplicateNodes="0">
         <activeChecks/>
         <checkConfiguration/>
       </geometryOptions>
@@ -2257,358 +2486,359 @@ def my_form_open(dialog, layer, feature):
         </field>
       </fieldConfiguration>
       <aliases>
-        <alias name="" field="fid" index="0"/>
-        <alias name="" field="ABBREV" index="1"/>
-        <alias name="" field="ABBREV_LEN" index="2"/>
-        <alias name="" field="ADM0_A3" index="3"/>
-        <alias name="" field="ADM0_A3_IS" index="4"/>
-        <alias name="" field="ADM0_A3_UN" index="5"/>
-        <alias name="" field="ADM0_A3_US" index="6"/>
-        <alias name="" field="ADM0_A3_WB" index="7"/>
-        <alias name="" field="ADM0_DIF" index="8"/>
-        <alias name="" field="ADMIN" index="9"/>
-        <alias name="" field="BRK_A3" index="10"/>
-        <alias name="" field="BRK_DIFF" index="11"/>
-        <alias name="" field="BRK_GROUP" index="12"/>
-        <alias name="" field="BRK_NAME" index="13"/>
-        <alias name="" field="CONTINENT" index="14"/>
-        <alias name="" field="ECONOMY" index="15"/>
-        <alias name="" field="FIPS_10_" index="16"/>
-        <alias name="" field="FORMAL_EN" index="17"/>
-        <alias name="" field="FORMAL_FR" index="18"/>
-        <alias name="" field="GDP_MD_EST" index="19"/>
-        <alias name="" field="GDP_YEAR" index="20"/>
-        <alias name="" field="GEOUNIT" index="21"/>
-        <alias name="" field="GEOU_DIF" index="22"/>
-        <alias name="" field="GU_A3" index="23"/>
-        <alias name="" field="HOMEPART" index="24"/>
-        <alias name="" field="INCOME_GRP" index="25"/>
-        <alias name="" field="ISO_A2" index="26"/>
-        <alias name="" field="ISO_A3" index="27"/>
-        <alias name="" field="ISO_N3" index="28"/>
-        <alias name="" field="LABELRANK" index="29"/>
-        <alias name="" field="LASTCENSUS" index="30"/>
-        <alias name="" field="LEVEL" index="31"/>
-        <alias name="" field="LONG_LEN" index="32"/>
-        <alias name="" field="MAPCOLOR13" index="33"/>
-        <alias name="" field="MAPCOLOR7" index="34"/>
-        <alias name="" field="MAPCOLOR8" index="35"/>
-        <alias name="" field="MAPCOLOR9" index="36"/>
-        <alias name="" field="NAME" index="37"/>
-        <alias name="" field="NAME_ALT" index="38"/>
-        <alias name="" field="NAME_LEN" index="39"/>
-        <alias name="" field="NAME_LONG" index="40"/>
-        <alias name="" field="NAME_SORT" index="41"/>
-        <alias name="" field="NOTE_ADM0" index="42"/>
-        <alias name="" field="NOTE_BRK" index="43"/>
-        <alias name="" field="POP_EST" index="44"/>
-        <alias name="" field="POP_YEAR" index="45"/>
-        <alias name="" field="POSTAL" index="46"/>
-        <alias name="" field="REGION_UN" index="47"/>
-        <alias name="" field="REGION_WB" index="48"/>
-        <alias name="" field="SOVEREIGNT" index="49"/>
-        <alias name="" field="SOV_A3" index="50"/>
-        <alias name="" field="SUBREGION" index="51"/>
-        <alias name="" field="SUBUNIT" index="52"/>
-        <alias name="" field="SU_A3" index="53"/>
-        <alias name="" field="SU_DIF" index="54"/>
-        <alias name="" field="TINY" index="55"/>
-        <alias name="" field="TYPE" index="56"/>
-        <alias name="" field="UN_A3" index="57"/>
-        <alias name="" field="WB_A2" index="58"/>
-        <alias name="" field="WB_A3" index="59"/>
-        <alias name="" field="WIKIPEDIA" index="60"/>
-        <alias name="" field="WOE_ID" index="61"/>
-        <alias name="" field="WOE_ID_EH" index="62"/>
-        <alias name="" field="WOE_NOTE" index="63"/>
-        <alias name="" field="featurecla" index="64"/>
-        <alias name="" field="scalerank" index="65"/>
+        <alias index="0" name="" field="fid"/>
+        <alias index="1" name="" field="ABBREV"/>
+        <alias index="2" name="" field="ABBREV_LEN"/>
+        <alias index="3" name="" field="ADM0_A3"/>
+        <alias index="4" name="" field="ADM0_A3_IS"/>
+        <alias index="5" name="" field="ADM0_A3_UN"/>
+        <alias index="6" name="" field="ADM0_A3_US"/>
+        <alias index="7" name="" field="ADM0_A3_WB"/>
+        <alias index="8" name="" field="ADM0_DIF"/>
+        <alias index="9" name="" field="ADMIN"/>
+        <alias index="10" name="" field="BRK_A3"/>
+        <alias index="11" name="" field="BRK_DIFF"/>
+        <alias index="12" name="" field="BRK_GROUP"/>
+        <alias index="13" name="" field="BRK_NAME"/>
+        <alias index="14" name="" field="CONTINENT"/>
+        <alias index="15" name="" field="ECONOMY"/>
+        <alias index="16" name="" field="FIPS_10_"/>
+        <alias index="17" name="" field="FORMAL_EN"/>
+        <alias index="18" name="" field="FORMAL_FR"/>
+        <alias index="19" name="" field="GDP_MD_EST"/>
+        <alias index="20" name="" field="GDP_YEAR"/>
+        <alias index="21" name="" field="GEOUNIT"/>
+        <alias index="22" name="" field="GEOU_DIF"/>
+        <alias index="23" name="" field="GU_A3"/>
+        <alias index="24" name="" field="HOMEPART"/>
+        <alias index="25" name="" field="INCOME_GRP"/>
+        <alias index="26" name="" field="ISO_A2"/>
+        <alias index="27" name="" field="ISO_A3"/>
+        <alias index="28" name="" field="ISO_N3"/>
+        <alias index="29" name="" field="LABELRANK"/>
+        <alias index="30" name="" field="LASTCENSUS"/>
+        <alias index="31" name="" field="LEVEL"/>
+        <alias index="32" name="" field="LONG_LEN"/>
+        <alias index="33" name="" field="MAPCOLOR13"/>
+        <alias index="34" name="" field="MAPCOLOR7"/>
+        <alias index="35" name="" field="MAPCOLOR8"/>
+        <alias index="36" name="" field="MAPCOLOR9"/>
+        <alias index="37" name="" field="NAME"/>
+        <alias index="38" name="" field="NAME_ALT"/>
+        <alias index="39" name="" field="NAME_LEN"/>
+        <alias index="40" name="" field="NAME_LONG"/>
+        <alias index="41" name="" field="NAME_SORT"/>
+        <alias index="42" name="" field="NOTE_ADM0"/>
+        <alias index="43" name="" field="NOTE_BRK"/>
+        <alias index="44" name="" field="POP_EST"/>
+        <alias index="45" name="" field="POP_YEAR"/>
+        <alias index="46" name="" field="POSTAL"/>
+        <alias index="47" name="" field="REGION_UN"/>
+        <alias index="48" name="" field="REGION_WB"/>
+        <alias index="49" name="" field="SOVEREIGNT"/>
+        <alias index="50" name="" field="SOV_A3"/>
+        <alias index="51" name="" field="SUBREGION"/>
+        <alias index="52" name="" field="SUBUNIT"/>
+        <alias index="53" name="" field="SU_A3"/>
+        <alias index="54" name="" field="SU_DIF"/>
+        <alias index="55" name="" field="TINY"/>
+        <alias index="56" name="" field="TYPE"/>
+        <alias index="57" name="" field="UN_A3"/>
+        <alias index="58" name="" field="WB_A2"/>
+        <alias index="59" name="" field="WB_A3"/>
+        <alias index="60" name="" field="WIKIPEDIA"/>
+        <alias index="61" name="" field="WOE_ID"/>
+        <alias index="62" name="" field="WOE_ID_EH"/>
+        <alias index="63" name="" field="WOE_NOTE"/>
+        <alias index="64" name="" field="featurecla"/>
+        <alias index="65" name="" field="scalerank"/>
       </aliases>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
       <defaults>
-        <default applyOnUpdate="0" field="fid" expression=""/>
-        <default applyOnUpdate="0" field="ABBREV" expression=""/>
-        <default applyOnUpdate="0" field="ABBREV_LEN" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_IS" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_UN" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_US" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_WB" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_DIF" expression=""/>
-        <default applyOnUpdate="0" field="ADMIN" expression=""/>
-        <default applyOnUpdate="0" field="BRK_A3" expression=""/>
-        <default applyOnUpdate="0" field="BRK_DIFF" expression=""/>
-        <default applyOnUpdate="0" field="BRK_GROUP" expression=""/>
-        <default applyOnUpdate="0" field="BRK_NAME" expression=""/>
-        <default applyOnUpdate="0" field="CONTINENT" expression=""/>
-        <default applyOnUpdate="0" field="ECONOMY" expression=""/>
-        <default applyOnUpdate="0" field="FIPS_10_" expression=""/>
-        <default applyOnUpdate="0" field="FORMAL_EN" expression=""/>
-        <default applyOnUpdate="0" field="FORMAL_FR" expression=""/>
-        <default applyOnUpdate="0" field="GDP_MD_EST" expression=""/>
-        <default applyOnUpdate="0" field="GDP_YEAR" expression=""/>
-        <default applyOnUpdate="0" field="GEOUNIT" expression=""/>
-        <default applyOnUpdate="0" field="GEOU_DIF" expression=""/>
-        <default applyOnUpdate="0" field="GU_A3" expression=""/>
-        <default applyOnUpdate="0" field="HOMEPART" expression=""/>
-        <default applyOnUpdate="0" field="INCOME_GRP" expression=""/>
-        <default applyOnUpdate="0" field="ISO_A2" expression=""/>
-        <default applyOnUpdate="0" field="ISO_A3" expression=""/>
-        <default applyOnUpdate="0" field="ISO_N3" expression=""/>
-        <default applyOnUpdate="0" field="LABELRANK" expression=""/>
-        <default applyOnUpdate="0" field="LASTCENSUS" expression=""/>
-        <default applyOnUpdate="0" field="LEVEL" expression=""/>
-        <default applyOnUpdate="0" field="LONG_LEN" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR13" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR7" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR8" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR9" expression=""/>
-        <default applyOnUpdate="0" field="NAME" expression=""/>
-        <default applyOnUpdate="0" field="NAME_ALT" expression=""/>
-        <default applyOnUpdate="0" field="NAME_LEN" expression=""/>
-        <default applyOnUpdate="0" field="NAME_LONG" expression=""/>
-        <default applyOnUpdate="0" field="NAME_SORT" expression=""/>
-        <default applyOnUpdate="0" field="NOTE_ADM0" expression=""/>
-        <default applyOnUpdate="0" field="NOTE_BRK" expression=""/>
-        <default applyOnUpdate="0" field="POP_EST" expression=""/>
-        <default applyOnUpdate="0" field="POP_YEAR" expression=""/>
-        <default applyOnUpdate="0" field="POSTAL" expression=""/>
-        <default applyOnUpdate="0" field="REGION_UN" expression=""/>
-        <default applyOnUpdate="0" field="REGION_WB" expression=""/>
-        <default applyOnUpdate="0" field="SOVEREIGNT" expression=""/>
-        <default applyOnUpdate="0" field="SOV_A3" expression=""/>
-        <default applyOnUpdate="0" field="SUBREGION" expression=""/>
-        <default applyOnUpdate="0" field="SUBUNIT" expression=""/>
-        <default applyOnUpdate="0" field="SU_A3" expression=""/>
-        <default applyOnUpdate="0" field="SU_DIF" expression=""/>
-        <default applyOnUpdate="0" field="TINY" expression=""/>
-        <default applyOnUpdate="0" field="TYPE" expression=""/>
-        <default applyOnUpdate="0" field="UN_A3" expression=""/>
-        <default applyOnUpdate="0" field="WB_A2" expression=""/>
-        <default applyOnUpdate="0" field="WB_A3" expression=""/>
-        <default applyOnUpdate="0" field="WIKIPEDIA" expression=""/>
-        <default applyOnUpdate="0" field="WOE_ID" expression=""/>
-        <default applyOnUpdate="0" field="WOE_ID_EH" expression=""/>
-        <default applyOnUpdate="0" field="WOE_NOTE" expression=""/>
-        <default applyOnUpdate="0" field="featurecla" expression=""/>
-        <default applyOnUpdate="0" field="scalerank" expression=""/>
+        <default field="fid" applyOnUpdate="0" expression=""/>
+        <default field="ABBREV" applyOnUpdate="0" expression=""/>
+        <default field="ABBREV_LEN" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_IS" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_UN" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_US" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_WB" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_DIF" applyOnUpdate="0" expression=""/>
+        <default field="ADMIN" applyOnUpdate="0" expression=""/>
+        <default field="BRK_A3" applyOnUpdate="0" expression=""/>
+        <default field="BRK_DIFF" applyOnUpdate="0" expression=""/>
+        <default field="BRK_GROUP" applyOnUpdate="0" expression=""/>
+        <default field="BRK_NAME" applyOnUpdate="0" expression=""/>
+        <default field="CONTINENT" applyOnUpdate="0" expression=""/>
+        <default field="ECONOMY" applyOnUpdate="0" expression=""/>
+        <default field="FIPS_10_" applyOnUpdate="0" expression=""/>
+        <default field="FORMAL_EN" applyOnUpdate="0" expression=""/>
+        <default field="FORMAL_FR" applyOnUpdate="0" expression=""/>
+        <default field="GDP_MD_EST" applyOnUpdate="0" expression=""/>
+        <default field="GDP_YEAR" applyOnUpdate="0" expression=""/>
+        <default field="GEOUNIT" applyOnUpdate="0" expression=""/>
+        <default field="GEOU_DIF" applyOnUpdate="0" expression=""/>
+        <default field="GU_A3" applyOnUpdate="0" expression=""/>
+        <default field="HOMEPART" applyOnUpdate="0" expression=""/>
+        <default field="INCOME_GRP" applyOnUpdate="0" expression=""/>
+        <default field="ISO_A2" applyOnUpdate="0" expression=""/>
+        <default field="ISO_A3" applyOnUpdate="0" expression=""/>
+        <default field="ISO_N3" applyOnUpdate="0" expression=""/>
+        <default field="LABELRANK" applyOnUpdate="0" expression=""/>
+        <default field="LASTCENSUS" applyOnUpdate="0" expression=""/>
+        <default field="LEVEL" applyOnUpdate="0" expression=""/>
+        <default field="LONG_LEN" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR13" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR7" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR8" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR9" applyOnUpdate="0" expression=""/>
+        <default field="NAME" applyOnUpdate="0" expression=""/>
+        <default field="NAME_ALT" applyOnUpdate="0" expression=""/>
+        <default field="NAME_LEN" applyOnUpdate="0" expression=""/>
+        <default field="NAME_LONG" applyOnUpdate="0" expression=""/>
+        <default field="NAME_SORT" applyOnUpdate="0" expression=""/>
+        <default field="NOTE_ADM0" applyOnUpdate="0" expression=""/>
+        <default field="NOTE_BRK" applyOnUpdate="0" expression=""/>
+        <default field="POP_EST" applyOnUpdate="0" expression=""/>
+        <default field="POP_YEAR" applyOnUpdate="0" expression=""/>
+        <default field="POSTAL" applyOnUpdate="0" expression=""/>
+        <default field="REGION_UN" applyOnUpdate="0" expression=""/>
+        <default field="REGION_WB" applyOnUpdate="0" expression=""/>
+        <default field="SOVEREIGNT" applyOnUpdate="0" expression=""/>
+        <default field="SOV_A3" applyOnUpdate="0" expression=""/>
+        <default field="SUBREGION" applyOnUpdate="0" expression=""/>
+        <default field="SUBUNIT" applyOnUpdate="0" expression=""/>
+        <default field="SU_A3" applyOnUpdate="0" expression=""/>
+        <default field="SU_DIF" applyOnUpdate="0" expression=""/>
+        <default field="TINY" applyOnUpdate="0" expression=""/>
+        <default field="TYPE" applyOnUpdate="0" expression=""/>
+        <default field="UN_A3" applyOnUpdate="0" expression=""/>
+        <default field="WB_A2" applyOnUpdate="0" expression=""/>
+        <default field="WB_A3" applyOnUpdate="0" expression=""/>
+        <default field="WIKIPEDIA" applyOnUpdate="0" expression=""/>
+        <default field="WOE_ID" applyOnUpdate="0" expression=""/>
+        <default field="WOE_ID_EH" applyOnUpdate="0" expression=""/>
+        <default field="WOE_NOTE" applyOnUpdate="0" expression=""/>
+        <default field="featurecla" applyOnUpdate="0" expression=""/>
+        <default field="scalerank" applyOnUpdate="0" expression=""/>
       </defaults>
       <constraints>
-        <constraint unique_strength="0" field="fid" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ABBREV" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ABBREV_LEN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_IS" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_UN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_US" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_WB" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_DIF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADMIN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_DIFF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_GROUP" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_NAME" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="CONTINENT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ECONOMY" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="FIPS_10_" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="FORMAL_EN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="FORMAL_FR" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GDP_MD_EST" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GDP_YEAR" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GEOUNIT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GEOU_DIF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GU_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="HOMEPART" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="INCOME_GRP" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ISO_A2" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ISO_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ISO_N3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LABELRANK" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LASTCENSUS" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LEVEL" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LONG_LEN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR13" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR7" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR8" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR9" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_ALT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_LEN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_LONG" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_SORT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NOTE_ADM0" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NOTE_BRK" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="POP_EST" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="POP_YEAR" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="POSTAL" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="REGION_UN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="REGION_WB" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SOVEREIGNT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SOV_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SUBREGION" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SUBUNIT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SU_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SU_DIF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="TINY" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="TYPE" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="UN_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WB_A2" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WB_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WIKIPEDIA" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WOE_ID" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WOE_ID_EH" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WOE_NOTE" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="featurecla" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="scalerank" exp_strength="0" constraints="0" notnull_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="fid" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ABBREV" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ABBREV_LEN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_IS" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_UN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_US" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_WB" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_DIF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADMIN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_DIFF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_GROUP" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_NAME" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="CONTINENT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ECONOMY" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="FIPS_10_" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="FORMAL_EN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="FORMAL_FR" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GDP_MD_EST" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GDP_YEAR" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GEOUNIT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GEOU_DIF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GU_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="HOMEPART" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="INCOME_GRP" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ISO_A2" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ISO_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ISO_N3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LABELRANK" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LASTCENSUS" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LEVEL" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LONG_LEN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR13" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR7" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR8" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR9" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_ALT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_LEN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_LONG" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_SORT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NOTE_ADM0" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NOTE_BRK" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="POP_EST" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="POP_YEAR" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="POSTAL" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="REGION_UN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="REGION_WB" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SOVEREIGNT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SOV_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SUBREGION" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SUBUNIT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SU_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SU_DIF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="TINY" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="TYPE" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="UN_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WB_A2" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WB_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WIKIPEDIA" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WOE_ID" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WOE_ID_EH" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WOE_NOTE" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="featurecla" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="scalerank" constraints="0" unique_strength="0"/>
       </constraints>
       <constraintExpressions>
-        <constraint field="fid" exp="" desc=""/>
-        <constraint field="ABBREV" exp="" desc=""/>
-        <constraint field="ABBREV_LEN" exp="" desc=""/>
-        <constraint field="ADM0_A3" exp="" desc=""/>
-        <constraint field="ADM0_A3_IS" exp="" desc=""/>
-        <constraint field="ADM0_A3_UN" exp="" desc=""/>
-        <constraint field="ADM0_A3_US" exp="" desc=""/>
-        <constraint field="ADM0_A3_WB" exp="" desc=""/>
-        <constraint field="ADM0_DIF" exp="" desc=""/>
-        <constraint field="ADMIN" exp="" desc=""/>
-        <constraint field="BRK_A3" exp="" desc=""/>
-        <constraint field="BRK_DIFF" exp="" desc=""/>
-        <constraint field="BRK_GROUP" exp="" desc=""/>
-        <constraint field="BRK_NAME" exp="" desc=""/>
-        <constraint field="CONTINENT" exp="" desc=""/>
-        <constraint field="ECONOMY" exp="" desc=""/>
-        <constraint field="FIPS_10_" exp="" desc=""/>
-        <constraint field="FORMAL_EN" exp="" desc=""/>
-        <constraint field="FORMAL_FR" exp="" desc=""/>
-        <constraint field="GDP_MD_EST" exp="" desc=""/>
-        <constraint field="GDP_YEAR" exp="" desc=""/>
-        <constraint field="GEOUNIT" exp="" desc=""/>
-        <constraint field="GEOU_DIF" exp="" desc=""/>
-        <constraint field="GU_A3" exp="" desc=""/>
-        <constraint field="HOMEPART" exp="" desc=""/>
-        <constraint field="INCOME_GRP" exp="" desc=""/>
-        <constraint field="ISO_A2" exp="" desc=""/>
-        <constraint field="ISO_A3" exp="" desc=""/>
-        <constraint field="ISO_N3" exp="" desc=""/>
-        <constraint field="LABELRANK" exp="" desc=""/>
-        <constraint field="LASTCENSUS" exp="" desc=""/>
-        <constraint field="LEVEL" exp="" desc=""/>
-        <constraint field="LONG_LEN" exp="" desc=""/>
-        <constraint field="MAPCOLOR13" exp="" desc=""/>
-        <constraint field="MAPCOLOR7" exp="" desc=""/>
-        <constraint field="MAPCOLOR8" exp="" desc=""/>
-        <constraint field="MAPCOLOR9" exp="" desc=""/>
-        <constraint field="NAME" exp="" desc=""/>
-        <constraint field="NAME_ALT" exp="" desc=""/>
-        <constraint field="NAME_LEN" exp="" desc=""/>
-        <constraint field="NAME_LONG" exp="" desc=""/>
-        <constraint field="NAME_SORT" exp="" desc=""/>
-        <constraint field="NOTE_ADM0" exp="" desc=""/>
-        <constraint field="NOTE_BRK" exp="" desc=""/>
-        <constraint field="POP_EST" exp="" desc=""/>
-        <constraint field="POP_YEAR" exp="" desc=""/>
-        <constraint field="POSTAL" exp="" desc=""/>
-        <constraint field="REGION_UN" exp="" desc=""/>
-        <constraint field="REGION_WB" exp="" desc=""/>
-        <constraint field="SOVEREIGNT" exp="" desc=""/>
-        <constraint field="SOV_A3" exp="" desc=""/>
-        <constraint field="SUBREGION" exp="" desc=""/>
-        <constraint field="SUBUNIT" exp="" desc=""/>
-        <constraint field="SU_A3" exp="" desc=""/>
-        <constraint field="SU_DIF" exp="" desc=""/>
-        <constraint field="TINY" exp="" desc=""/>
-        <constraint field="TYPE" exp="" desc=""/>
-        <constraint field="UN_A3" exp="" desc=""/>
-        <constraint field="WB_A2" exp="" desc=""/>
-        <constraint field="WB_A3" exp="" desc=""/>
-        <constraint field="WIKIPEDIA" exp="" desc=""/>
-        <constraint field="WOE_ID" exp="" desc=""/>
-        <constraint field="WOE_ID_EH" exp="" desc=""/>
-        <constraint field="WOE_NOTE" exp="" desc=""/>
-        <constraint field="featurecla" exp="" desc=""/>
-        <constraint field="scalerank" exp="" desc=""/>
+        <constraint exp="" field="fid" desc=""/>
+        <constraint exp="" field="ABBREV" desc=""/>
+        <constraint exp="" field="ABBREV_LEN" desc=""/>
+        <constraint exp="" field="ADM0_A3" desc=""/>
+        <constraint exp="" field="ADM0_A3_IS" desc=""/>
+        <constraint exp="" field="ADM0_A3_UN" desc=""/>
+        <constraint exp="" field="ADM0_A3_US" desc=""/>
+        <constraint exp="" field="ADM0_A3_WB" desc=""/>
+        <constraint exp="" field="ADM0_DIF" desc=""/>
+        <constraint exp="" field="ADMIN" desc=""/>
+        <constraint exp="" field="BRK_A3" desc=""/>
+        <constraint exp="" field="BRK_DIFF" desc=""/>
+        <constraint exp="" field="BRK_GROUP" desc=""/>
+        <constraint exp="" field="BRK_NAME" desc=""/>
+        <constraint exp="" field="CONTINENT" desc=""/>
+        <constraint exp="" field="ECONOMY" desc=""/>
+        <constraint exp="" field="FIPS_10_" desc=""/>
+        <constraint exp="" field="FORMAL_EN" desc=""/>
+        <constraint exp="" field="FORMAL_FR" desc=""/>
+        <constraint exp="" field="GDP_MD_EST" desc=""/>
+        <constraint exp="" field="GDP_YEAR" desc=""/>
+        <constraint exp="" field="GEOUNIT" desc=""/>
+        <constraint exp="" field="GEOU_DIF" desc=""/>
+        <constraint exp="" field="GU_A3" desc=""/>
+        <constraint exp="" field="HOMEPART" desc=""/>
+        <constraint exp="" field="INCOME_GRP" desc=""/>
+        <constraint exp="" field="ISO_A2" desc=""/>
+        <constraint exp="" field="ISO_A3" desc=""/>
+        <constraint exp="" field="ISO_N3" desc=""/>
+        <constraint exp="" field="LABELRANK" desc=""/>
+        <constraint exp="" field="LASTCENSUS" desc=""/>
+        <constraint exp="" field="LEVEL" desc=""/>
+        <constraint exp="" field="LONG_LEN" desc=""/>
+        <constraint exp="" field="MAPCOLOR13" desc=""/>
+        <constraint exp="" field="MAPCOLOR7" desc=""/>
+        <constraint exp="" field="MAPCOLOR8" desc=""/>
+        <constraint exp="" field="MAPCOLOR9" desc=""/>
+        <constraint exp="" field="NAME" desc=""/>
+        <constraint exp="" field="NAME_ALT" desc=""/>
+        <constraint exp="" field="NAME_LEN" desc=""/>
+        <constraint exp="" field="NAME_LONG" desc=""/>
+        <constraint exp="" field="NAME_SORT" desc=""/>
+        <constraint exp="" field="NOTE_ADM0" desc=""/>
+        <constraint exp="" field="NOTE_BRK" desc=""/>
+        <constraint exp="" field="POP_EST" desc=""/>
+        <constraint exp="" field="POP_YEAR" desc=""/>
+        <constraint exp="" field="POSTAL" desc=""/>
+        <constraint exp="" field="REGION_UN" desc=""/>
+        <constraint exp="" field="REGION_WB" desc=""/>
+        <constraint exp="" field="SOVEREIGNT" desc=""/>
+        <constraint exp="" field="SOV_A3" desc=""/>
+        <constraint exp="" field="SUBREGION" desc=""/>
+        <constraint exp="" field="SUBUNIT" desc=""/>
+        <constraint exp="" field="SU_A3" desc=""/>
+        <constraint exp="" field="SU_DIF" desc=""/>
+        <constraint exp="" field="TINY" desc=""/>
+        <constraint exp="" field="TYPE" desc=""/>
+        <constraint exp="" field="UN_A3" desc=""/>
+        <constraint exp="" field="WB_A2" desc=""/>
+        <constraint exp="" field="WB_A3" desc=""/>
+        <constraint exp="" field="WIKIPEDIA" desc=""/>
+        <constraint exp="" field="WOE_ID" desc=""/>
+        <constraint exp="" field="WOE_ID_EH" desc=""/>
+        <constraint exp="" field="WOE_NOTE" desc=""/>
+        <constraint exp="" field="featurecla" desc=""/>
+        <constraint exp="" field="scalerank" desc=""/>
       </constraintExpressions>
       <expressionfields/>
       <attributeactions>
         <defaultAction key="Canvas" value="{00000000-0000-0000-0000-000000000000}"/>
       </attributeactions>
-      <attributetableconfig actionWidgetStyle="dropDown" sortOrder="0" sortExpression="">
+      <attributetableconfig sortOrder="0" actionWidgetStyle="dropDown" sortExpression="">
         <columns>
-          <column type="field" width="-1" name="scalerank" hidden="0"/>
-          <column type="field" width="-1" name="featurecla" hidden="0"/>
-          <column type="field" width="-1" name="LABELRANK" hidden="0"/>
-          <column type="field" width="-1" name="SOVEREIGNT" hidden="0"/>
-          <column type="field" width="-1" name="SOV_A3" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_DIF" hidden="0"/>
-          <column type="field" width="-1" name="LEVEL" hidden="0"/>
-          <column type="field" width="-1" name="TYPE" hidden="0"/>
-          <column type="field" width="-1" name="ADMIN" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3" hidden="0"/>
-          <column type="field" width="-1" name="GEOU_DIF" hidden="0"/>
-          <column type="field" width="-1" name="GEOUNIT" hidden="0"/>
-          <column type="field" width="-1" name="GU_A3" hidden="0"/>
-          <column type="field" width="-1" name="SU_DIF" hidden="0"/>
-          <column type="field" width="-1" name="SUBUNIT" hidden="0"/>
-          <column type="field" width="-1" name="SU_A3" hidden="0"/>
-          <column type="field" width="-1" name="BRK_DIFF" hidden="0"/>
-          <column type="field" width="-1" name="NAME" hidden="0"/>
-          <column type="field" width="-1" name="NAME_LONG" hidden="0"/>
-          <column type="field" width="-1" name="BRK_A3" hidden="0"/>
-          <column type="field" width="-1" name="BRK_NAME" hidden="0"/>
-          <column type="field" width="-1" name="BRK_GROUP" hidden="0"/>
-          <column type="field" width="-1" name="ABBREV" hidden="0"/>
-          <column type="field" width="-1" name="POSTAL" hidden="0"/>
-          <column type="field" width="-1" name="FORMAL_EN" hidden="0"/>
-          <column type="field" width="-1" name="FORMAL_FR" hidden="0"/>
-          <column type="field" width="-1" name="NOTE_ADM0" hidden="0"/>
-          <column type="field" width="-1" name="NOTE_BRK" hidden="0"/>
-          <column type="field" width="-1" name="NAME_SORT" hidden="0"/>
-          <column type="field" width="-1" name="NAME_ALT" hidden="0"/>
-          <column type="field" width="-1" name="MAPCOLOR7" hidden="0"/>
-          <column type="field" width="-1" name="MAPCOLOR8" hidden="0"/>
-          <column type="field" width="-1" name="MAPCOLOR9" hidden="0"/>
-          <column type="field" width="-1" name="MAPCOLOR13" hidden="0"/>
-          <column type="field" width="-1" name="POP_EST" hidden="0"/>
-          <column type="field" width="-1" name="GDP_MD_EST" hidden="0"/>
-          <column type="field" width="-1" name="POP_YEAR" hidden="0"/>
-          <column type="field" width="-1" name="LASTCENSUS" hidden="0"/>
-          <column type="field" width="-1" name="GDP_YEAR" hidden="0"/>
-          <column type="field" width="-1" name="ECONOMY" hidden="0"/>
-          <column type="field" width="-1" name="INCOME_GRP" hidden="0"/>
-          <column type="field" width="-1" name="WIKIPEDIA" hidden="0"/>
-          <column type="field" width="-1" name="FIPS_10_" hidden="0"/>
-          <column type="field" width="-1" name="ISO_A2" hidden="0"/>
-          <column type="field" width="-1" name="ISO_A3" hidden="0"/>
-          <column type="field" width="-1" name="ISO_N3" hidden="0"/>
-          <column type="field" width="-1" name="UN_A3" hidden="0"/>
-          <column type="field" width="-1" name="WB_A2" hidden="0"/>
-          <column type="field" width="-1" name="WB_A3" hidden="0"/>
-          <column type="field" width="-1" name="WOE_ID" hidden="0"/>
-          <column type="field" width="-1" name="WOE_ID_EH" hidden="0"/>
-          <column type="field" width="-1" name="WOE_NOTE" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3_IS" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3_US" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3_UN" hidden="0"/>
-          <column type="field" width="-1" name="ADM0_A3_WB" hidden="0"/>
-          <column type="field" width="-1" name="CONTINENT" hidden="0"/>
-          <column type="field" width="-1" name="REGION_UN" hidden="0"/>
-          <column type="field" width="-1" name="SUBREGION" hidden="0"/>
-          <column type="field" width="-1" name="REGION_WB" hidden="0"/>
-          <column type="field" width="-1" name="NAME_LEN" hidden="0"/>
-          <column type="field" width="-1" name="LONG_LEN" hidden="0"/>
-          <column type="field" width="-1" name="ABBREV_LEN" hidden="0"/>
-          <column type="field" width="-1" name="TINY" hidden="0"/>
-          <column type="field" width="-1" name="HOMEPART" hidden="0"/>
+          <column type="field" name="scalerank" width="-1" hidden="0"/>
+          <column type="field" name="featurecla" width="-1" hidden="0"/>
+          <column type="field" name="LABELRANK" width="-1" hidden="0"/>
+          <column type="field" name="SOVEREIGNT" width="-1" hidden="0"/>
+          <column type="field" name="SOV_A3" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_DIF" width="-1" hidden="0"/>
+          <column type="field" name="LEVEL" width="-1" hidden="0"/>
+          <column type="field" name="TYPE" width="-1" hidden="0"/>
+          <column type="field" name="ADMIN" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3" width="-1" hidden="0"/>
+          <column type="field" name="GEOU_DIF" width="-1" hidden="0"/>
+          <column type="field" name="GEOUNIT" width="-1" hidden="0"/>
+          <column type="field" name="GU_A3" width="-1" hidden="0"/>
+          <column type="field" name="SU_DIF" width="-1" hidden="0"/>
+          <column type="field" name="SUBUNIT" width="-1" hidden="0"/>
+          <column type="field" name="SU_A3" width="-1" hidden="0"/>
+          <column type="field" name="BRK_DIFF" width="-1" hidden="0"/>
+          <column type="field" name="NAME" width="-1" hidden="0"/>
+          <column type="field" name="NAME_LONG" width="-1" hidden="0"/>
+          <column type="field" name="BRK_A3" width="-1" hidden="0"/>
+          <column type="field" name="BRK_NAME" width="-1" hidden="0"/>
+          <column type="field" name="BRK_GROUP" width="-1" hidden="0"/>
+          <column type="field" name="ABBREV" width="-1" hidden="0"/>
+          <column type="field" name="POSTAL" width="-1" hidden="0"/>
+          <column type="field" name="FORMAL_EN" width="-1" hidden="0"/>
+          <column type="field" name="FORMAL_FR" width="-1" hidden="0"/>
+          <column type="field" name="NOTE_ADM0" width="-1" hidden="0"/>
+          <column type="field" name="NOTE_BRK" width="-1" hidden="0"/>
+          <column type="field" name="NAME_SORT" width="-1" hidden="0"/>
+          <column type="field" name="NAME_ALT" width="-1" hidden="0"/>
+          <column type="field" name="MAPCOLOR7" width="-1" hidden="0"/>
+          <column type="field" name="MAPCOLOR8" width="-1" hidden="0"/>
+          <column type="field" name="MAPCOLOR9" width="-1" hidden="0"/>
+          <column type="field" name="MAPCOLOR13" width="-1" hidden="0"/>
+          <column type="field" name="POP_EST" width="-1" hidden="0"/>
+          <column type="field" name="GDP_MD_EST" width="-1" hidden="0"/>
+          <column type="field" name="POP_YEAR" width="-1" hidden="0"/>
+          <column type="field" name="LASTCENSUS" width="-1" hidden="0"/>
+          <column type="field" name="GDP_YEAR" width="-1" hidden="0"/>
+          <column type="field" name="ECONOMY" width="-1" hidden="0"/>
+          <column type="field" name="INCOME_GRP" width="-1" hidden="0"/>
+          <column type="field" name="WIKIPEDIA" width="-1" hidden="0"/>
+          <column type="field" name="FIPS_10_" width="-1" hidden="0"/>
+          <column type="field" name="ISO_A2" width="-1" hidden="0"/>
+          <column type="field" name="ISO_A3" width="-1" hidden="0"/>
+          <column type="field" name="ISO_N3" width="-1" hidden="0"/>
+          <column type="field" name="UN_A3" width="-1" hidden="0"/>
+          <column type="field" name="WB_A2" width="-1" hidden="0"/>
+          <column type="field" name="WB_A3" width="-1" hidden="0"/>
+          <column type="field" name="WOE_ID" width="-1" hidden="0"/>
+          <column type="field" name="WOE_ID_EH" width="-1" hidden="0"/>
+          <column type="field" name="WOE_NOTE" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3_IS" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3_US" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3_UN" width="-1" hidden="0"/>
+          <column type="field" name="ADM0_A3_WB" width="-1" hidden="0"/>
+          <column type="field" name="CONTINENT" width="-1" hidden="0"/>
+          <column type="field" name="REGION_UN" width="-1" hidden="0"/>
+          <column type="field" name="SUBREGION" width="-1" hidden="0"/>
+          <column type="field" name="REGION_WB" width="-1" hidden="0"/>
+          <column type="field" name="NAME_LEN" width="-1" hidden="0"/>
+          <column type="field" name="LONG_LEN" width="-1" hidden="0"/>
+          <column type="field" name="ABBREV_LEN" width="-1" hidden="0"/>
+          <column type="field" name="TINY" width="-1" hidden="0"/>
+          <column type="field" name="HOMEPART" width="-1" hidden="0"/>
           <column type="actions" width="-1" hidden="1"/>
-          <column type="field" width="-1" name="fid" hidden="0"/>
+          <column type="field" name="fid" width="-1" hidden="0"/>
         </columns>
       </attributetableconfig>
       <conditionalstyles>
         <rowstyles/>
         <fieldstyles/>
       </conditionalstyles>
+      <storedexpressions/>
       <editform tolerant="1"></editform>
       <editforminit/>
       <editforminitcodesource>0</editforminitcodesource>
@@ -2772,7 +3002,7 @@ def my_form_open(dialog, layer, feature):
       <previewExpression>NAME</previewExpression>
       <mapTip></mapTip>
     </maplayer>
-    <maplayer wkbType="MultiPolygon" minScale="1e+08" refreshOnNotifyEnabled="0" hasScaleBasedVisibilityFlag="0" maxScale="0" refreshOnNotifyMessage="" simplifyMaxScale="1" styleCategories="AllStyleCategories" type="vector" autoRefreshTime="0" simplifyAlgorithm="0" autoRefreshEnabled="0" simplifyDrawingHints="1" labelsEnabled="0" simplifyLocal="1" geometry="Polygon" readOnly="0" simplifyDrawingTol="1">
+    <maplayer refreshOnNotifyMessage="" wkbType="MultiPolygon" simplifyMaxScale="1" refreshOnNotifyEnabled="0" autoRefreshEnabled="0" geometry="Polygon" minScale="1e+08" simplifyDrawingTol="1" maxScale="0" simplifyAlgorithm="0" autoRefreshTime="0" type="vector" readOnly="0" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" simplifyDrawingHints="1" labelsEnabled="0" styleCategories="AllStyleCategories">
       <extent>
         <xmin>-180</xmin>
         <ymin>-90</ymin>
@@ -2820,7 +3050,7 @@ def my_form_open(dialog, layer, feature):
           </spatialrefsys>
         </crs>
         <extent>
-          <spatial miny="-90" crs="EPSG:4326" minz="0" dimensions="2" maxx="180" maxz="0" minx="-180" maxy="83.61350000000000193"/>
+          <spatial miny="-90" maxy="83.61350000000000193" minx="-180" crs="EPSG:4326" maxx="180" dimensions="2" minz="0" maxz="0"/>
         </extent>
       </resourceMetadata>
       <provider encoding="UTF-8">ogr</provider>
@@ -2840,8 +3070,8 @@ def my_form_open(dialog, layer, feature):
       </flags>
       <renderer-v2 type="singleSymbol" symbollevels="0" enableorderby="0" forceraster="0">
         <symbols>
-          <symbol type="fill" name="0" force_rhr="0" clip_to_extent="1" alpha="1">
-            <layer class="SimpleFill" enabled="1" pass="0" locked="0">
+          <symbol type="fill" clip_to_extent="1" name="0" force_rhr="0" alpha="1">
+            <layer locked="0" enabled="1" class="SimpleFill" pass="0">
               <prop k="border_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
               <prop k="color" v="190,207,80,255"/>
               <prop k="joinstyle" v="bevel"/>
@@ -2870,7 +3100,7 @@ def my_form_open(dialog, layer, feature):
       <blendMode>0</blendMode>
       <featureBlendMode>0</featureBlendMode>
       <layerOpacity>1</layerOpacity>
-      <geometryOptions removeDuplicateNodes="0" geometryPrecision="0">
+      <geometryOptions geometryPrecision="0" removeDuplicateNodes="0">
         <activeChecks type="StringList">
           <Option type="QString" value=""/>
         </activeChecks>
@@ -3341,290 +3571,291 @@ def my_form_open(dialog, layer, feature):
         </field>
       </fieldConfiguration>
       <aliases>
-        <alias name="" field="fid" index="0"/>
-        <alias name="" field="ABBREV" index="1"/>
-        <alias name="" field="ABBREV_LEN" index="2"/>
-        <alias name="" field="ADM0_A3" index="3"/>
-        <alias name="" field="ADM0_A3_IS" index="4"/>
-        <alias name="" field="ADM0_A3_UN" index="5"/>
-        <alias name="" field="ADM0_A3_US" index="6"/>
-        <alias name="" field="ADM0_A3_WB" index="7"/>
-        <alias name="" field="ADM0_DIF" index="8"/>
-        <alias name="" field="ADMIN" index="9"/>
-        <alias name="" field="BRK_A3" index="10"/>
-        <alias name="" field="BRK_DIFF" index="11"/>
-        <alias name="" field="BRK_GROUP" index="12"/>
-        <alias name="" field="BRK_NAME" index="13"/>
-        <alias name="" field="CONTINENT" index="14"/>
-        <alias name="" field="ECONOMY" index="15"/>
-        <alias name="" field="FIPS_10_" index="16"/>
-        <alias name="" field="FORMAL_EN" index="17"/>
-        <alias name="" field="FORMAL_FR" index="18"/>
-        <alias name="" field="GDP_MD_EST" index="19"/>
-        <alias name="" field="GDP_YEAR" index="20"/>
-        <alias name="" field="GEOUNIT" index="21"/>
-        <alias name="" field="GEOU_DIF" index="22"/>
-        <alias name="" field="GU_A3" index="23"/>
-        <alias name="" field="HOMEPART" index="24"/>
-        <alias name="" field="INCOME_GRP" index="25"/>
-        <alias name="" field="ISO_A2" index="26"/>
-        <alias name="" field="ISO_A3" index="27"/>
-        <alias name="" field="ISO_N3" index="28"/>
-        <alias name="" field="LABELRANK" index="29"/>
-        <alias name="" field="LASTCENSUS" index="30"/>
-        <alias name="" field="LEVEL" index="31"/>
-        <alias name="" field="LONG_LEN" index="32"/>
-        <alias name="" field="MAPCOLOR13" index="33"/>
-        <alias name="" field="MAPCOLOR7" index="34"/>
-        <alias name="" field="MAPCOLOR8" index="35"/>
-        <alias name="" field="MAPCOLOR9" index="36"/>
-        <alias name="" field="NAME" index="37"/>
-        <alias name="" field="NAME_ALT" index="38"/>
-        <alias name="" field="NAME_LEN" index="39"/>
-        <alias name="" field="NAME_LONG" index="40"/>
-        <alias name="" field="NAME_SORT" index="41"/>
-        <alias name="" field="NOTE_ADM0" index="42"/>
-        <alias name="" field="NOTE_BRK" index="43"/>
-        <alias name="" field="POP_EST" index="44"/>
-        <alias name="" field="POP_YEAR" index="45"/>
-        <alias name="" field="POSTAL" index="46"/>
-        <alias name="" field="REGION_UN" index="47"/>
-        <alias name="" field="REGION_WB" index="48"/>
-        <alias name="" field="SOVEREIGNT" index="49"/>
-        <alias name="" field="SOV_A3" index="50"/>
-        <alias name="" field="SUBREGION" index="51"/>
-        <alias name="" field="SUBUNIT" index="52"/>
-        <alias name="" field="SU_A3" index="53"/>
-        <alias name="" field="SU_DIF" index="54"/>
-        <alias name="" field="TINY" index="55"/>
-        <alias name="" field="TYPE" index="56"/>
-        <alias name="" field="UN_A3" index="57"/>
-        <alias name="" field="WB_A2" index="58"/>
-        <alias name="" field="WB_A3" index="59"/>
-        <alias name="" field="WIKIPEDIA" index="60"/>
-        <alias name="" field="WOE_ID" index="61"/>
-        <alias name="" field="WOE_ID_EH" index="62"/>
-        <alias name="" field="WOE_NOTE" index="63"/>
-        <alias name="" field="featurecla" index="64"/>
-        <alias name="" field="scalerank" index="65"/>
+        <alias index="0" name="" field="fid"/>
+        <alias index="1" name="" field="ABBREV"/>
+        <alias index="2" name="" field="ABBREV_LEN"/>
+        <alias index="3" name="" field="ADM0_A3"/>
+        <alias index="4" name="" field="ADM0_A3_IS"/>
+        <alias index="5" name="" field="ADM0_A3_UN"/>
+        <alias index="6" name="" field="ADM0_A3_US"/>
+        <alias index="7" name="" field="ADM0_A3_WB"/>
+        <alias index="8" name="" field="ADM0_DIF"/>
+        <alias index="9" name="" field="ADMIN"/>
+        <alias index="10" name="" field="BRK_A3"/>
+        <alias index="11" name="" field="BRK_DIFF"/>
+        <alias index="12" name="" field="BRK_GROUP"/>
+        <alias index="13" name="" field="BRK_NAME"/>
+        <alias index="14" name="" field="CONTINENT"/>
+        <alias index="15" name="" field="ECONOMY"/>
+        <alias index="16" name="" field="FIPS_10_"/>
+        <alias index="17" name="" field="FORMAL_EN"/>
+        <alias index="18" name="" field="FORMAL_FR"/>
+        <alias index="19" name="" field="GDP_MD_EST"/>
+        <alias index="20" name="" field="GDP_YEAR"/>
+        <alias index="21" name="" field="GEOUNIT"/>
+        <alias index="22" name="" field="GEOU_DIF"/>
+        <alias index="23" name="" field="GU_A3"/>
+        <alias index="24" name="" field="HOMEPART"/>
+        <alias index="25" name="" field="INCOME_GRP"/>
+        <alias index="26" name="" field="ISO_A2"/>
+        <alias index="27" name="" field="ISO_A3"/>
+        <alias index="28" name="" field="ISO_N3"/>
+        <alias index="29" name="" field="LABELRANK"/>
+        <alias index="30" name="" field="LASTCENSUS"/>
+        <alias index="31" name="" field="LEVEL"/>
+        <alias index="32" name="" field="LONG_LEN"/>
+        <alias index="33" name="" field="MAPCOLOR13"/>
+        <alias index="34" name="" field="MAPCOLOR7"/>
+        <alias index="35" name="" field="MAPCOLOR8"/>
+        <alias index="36" name="" field="MAPCOLOR9"/>
+        <alias index="37" name="" field="NAME"/>
+        <alias index="38" name="" field="NAME_ALT"/>
+        <alias index="39" name="" field="NAME_LEN"/>
+        <alias index="40" name="" field="NAME_LONG"/>
+        <alias index="41" name="" field="NAME_SORT"/>
+        <alias index="42" name="" field="NOTE_ADM0"/>
+        <alias index="43" name="" field="NOTE_BRK"/>
+        <alias index="44" name="" field="POP_EST"/>
+        <alias index="45" name="" field="POP_YEAR"/>
+        <alias index="46" name="" field="POSTAL"/>
+        <alias index="47" name="" field="REGION_UN"/>
+        <alias index="48" name="" field="REGION_WB"/>
+        <alias index="49" name="" field="SOVEREIGNT"/>
+        <alias index="50" name="" field="SOV_A3"/>
+        <alias index="51" name="" field="SUBREGION"/>
+        <alias index="52" name="" field="SUBUNIT"/>
+        <alias index="53" name="" field="SU_A3"/>
+        <alias index="54" name="" field="SU_DIF"/>
+        <alias index="55" name="" field="TINY"/>
+        <alias index="56" name="" field="TYPE"/>
+        <alias index="57" name="" field="UN_A3"/>
+        <alias index="58" name="" field="WB_A2"/>
+        <alias index="59" name="" field="WB_A3"/>
+        <alias index="60" name="" field="WIKIPEDIA"/>
+        <alias index="61" name="" field="WOE_ID"/>
+        <alias index="62" name="" field="WOE_ID_EH"/>
+        <alias index="63" name="" field="WOE_NOTE"/>
+        <alias index="64" name="" field="featurecla"/>
+        <alias index="65" name="" field="scalerank"/>
       </aliases>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
       <defaults>
-        <default applyOnUpdate="0" field="fid" expression=""/>
-        <default applyOnUpdate="0" field="ABBREV" expression=""/>
-        <default applyOnUpdate="0" field="ABBREV_LEN" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_IS" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_UN" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_US" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_A3_WB" expression=""/>
-        <default applyOnUpdate="0" field="ADM0_DIF" expression=""/>
-        <default applyOnUpdate="0" field="ADMIN" expression=""/>
-        <default applyOnUpdate="0" field="BRK_A3" expression=""/>
-        <default applyOnUpdate="0" field="BRK_DIFF" expression=""/>
-        <default applyOnUpdate="0" field="BRK_GROUP" expression=""/>
-        <default applyOnUpdate="0" field="BRK_NAME" expression=""/>
-        <default applyOnUpdate="0" field="CONTINENT" expression=""/>
-        <default applyOnUpdate="0" field="ECONOMY" expression=""/>
-        <default applyOnUpdate="0" field="FIPS_10_" expression=""/>
-        <default applyOnUpdate="0" field="FORMAL_EN" expression=""/>
-        <default applyOnUpdate="0" field="FORMAL_FR" expression=""/>
-        <default applyOnUpdate="0" field="GDP_MD_EST" expression=""/>
-        <default applyOnUpdate="0" field="GDP_YEAR" expression=""/>
-        <default applyOnUpdate="0" field="GEOUNIT" expression=""/>
-        <default applyOnUpdate="0" field="GEOU_DIF" expression=""/>
-        <default applyOnUpdate="0" field="GU_A3" expression=""/>
-        <default applyOnUpdate="0" field="HOMEPART" expression=""/>
-        <default applyOnUpdate="0" field="INCOME_GRP" expression=""/>
-        <default applyOnUpdate="0" field="ISO_A2" expression=""/>
-        <default applyOnUpdate="0" field="ISO_A3" expression=""/>
-        <default applyOnUpdate="0" field="ISO_N3" expression=""/>
-        <default applyOnUpdate="0" field="LABELRANK" expression=""/>
-        <default applyOnUpdate="0" field="LASTCENSUS" expression=""/>
-        <default applyOnUpdate="0" field="LEVEL" expression=""/>
-        <default applyOnUpdate="0" field="LONG_LEN" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR13" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR7" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR8" expression=""/>
-        <default applyOnUpdate="0" field="MAPCOLOR9" expression=""/>
-        <default applyOnUpdate="0" field="NAME" expression=""/>
-        <default applyOnUpdate="0" field="NAME_ALT" expression=""/>
-        <default applyOnUpdate="0" field="NAME_LEN" expression=""/>
-        <default applyOnUpdate="0" field="NAME_LONG" expression=""/>
-        <default applyOnUpdate="0" field="NAME_SORT" expression=""/>
-        <default applyOnUpdate="0" field="NOTE_ADM0" expression=""/>
-        <default applyOnUpdate="0" field="NOTE_BRK" expression=""/>
-        <default applyOnUpdate="0" field="POP_EST" expression=""/>
-        <default applyOnUpdate="0" field="POP_YEAR" expression=""/>
-        <default applyOnUpdate="0" field="POSTAL" expression=""/>
-        <default applyOnUpdate="0" field="REGION_UN" expression=""/>
-        <default applyOnUpdate="0" field="REGION_WB" expression=""/>
-        <default applyOnUpdate="0" field="SOVEREIGNT" expression=""/>
-        <default applyOnUpdate="0" field="SOV_A3" expression=""/>
-        <default applyOnUpdate="0" field="SUBREGION" expression=""/>
-        <default applyOnUpdate="0" field="SUBUNIT" expression=""/>
-        <default applyOnUpdate="0" field="SU_A3" expression=""/>
-        <default applyOnUpdate="0" field="SU_DIF" expression=""/>
-        <default applyOnUpdate="0" field="TINY" expression=""/>
-        <default applyOnUpdate="0" field="TYPE" expression=""/>
-        <default applyOnUpdate="0" field="UN_A3" expression=""/>
-        <default applyOnUpdate="0" field="WB_A2" expression=""/>
-        <default applyOnUpdate="0" field="WB_A3" expression=""/>
-        <default applyOnUpdate="0" field="WIKIPEDIA" expression=""/>
-        <default applyOnUpdate="0" field="WOE_ID" expression=""/>
-        <default applyOnUpdate="0" field="WOE_ID_EH" expression=""/>
-        <default applyOnUpdate="0" field="WOE_NOTE" expression=""/>
-        <default applyOnUpdate="0" field="featurecla" expression=""/>
-        <default applyOnUpdate="0" field="scalerank" expression=""/>
+        <default field="fid" applyOnUpdate="0" expression=""/>
+        <default field="ABBREV" applyOnUpdate="0" expression=""/>
+        <default field="ABBREV_LEN" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_IS" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_UN" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_US" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_A3_WB" applyOnUpdate="0" expression=""/>
+        <default field="ADM0_DIF" applyOnUpdate="0" expression=""/>
+        <default field="ADMIN" applyOnUpdate="0" expression=""/>
+        <default field="BRK_A3" applyOnUpdate="0" expression=""/>
+        <default field="BRK_DIFF" applyOnUpdate="0" expression=""/>
+        <default field="BRK_GROUP" applyOnUpdate="0" expression=""/>
+        <default field="BRK_NAME" applyOnUpdate="0" expression=""/>
+        <default field="CONTINENT" applyOnUpdate="0" expression=""/>
+        <default field="ECONOMY" applyOnUpdate="0" expression=""/>
+        <default field="FIPS_10_" applyOnUpdate="0" expression=""/>
+        <default field="FORMAL_EN" applyOnUpdate="0" expression=""/>
+        <default field="FORMAL_FR" applyOnUpdate="0" expression=""/>
+        <default field="GDP_MD_EST" applyOnUpdate="0" expression=""/>
+        <default field="GDP_YEAR" applyOnUpdate="0" expression=""/>
+        <default field="GEOUNIT" applyOnUpdate="0" expression=""/>
+        <default field="GEOU_DIF" applyOnUpdate="0" expression=""/>
+        <default field="GU_A3" applyOnUpdate="0" expression=""/>
+        <default field="HOMEPART" applyOnUpdate="0" expression=""/>
+        <default field="INCOME_GRP" applyOnUpdate="0" expression=""/>
+        <default field="ISO_A2" applyOnUpdate="0" expression=""/>
+        <default field="ISO_A3" applyOnUpdate="0" expression=""/>
+        <default field="ISO_N3" applyOnUpdate="0" expression=""/>
+        <default field="LABELRANK" applyOnUpdate="0" expression=""/>
+        <default field="LASTCENSUS" applyOnUpdate="0" expression=""/>
+        <default field="LEVEL" applyOnUpdate="0" expression=""/>
+        <default field="LONG_LEN" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR13" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR7" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR8" applyOnUpdate="0" expression=""/>
+        <default field="MAPCOLOR9" applyOnUpdate="0" expression=""/>
+        <default field="NAME" applyOnUpdate="0" expression=""/>
+        <default field="NAME_ALT" applyOnUpdate="0" expression=""/>
+        <default field="NAME_LEN" applyOnUpdate="0" expression=""/>
+        <default field="NAME_LONG" applyOnUpdate="0" expression=""/>
+        <default field="NAME_SORT" applyOnUpdate="0" expression=""/>
+        <default field="NOTE_ADM0" applyOnUpdate="0" expression=""/>
+        <default field="NOTE_BRK" applyOnUpdate="0" expression=""/>
+        <default field="POP_EST" applyOnUpdate="0" expression=""/>
+        <default field="POP_YEAR" applyOnUpdate="0" expression=""/>
+        <default field="POSTAL" applyOnUpdate="0" expression=""/>
+        <default field="REGION_UN" applyOnUpdate="0" expression=""/>
+        <default field="REGION_WB" applyOnUpdate="0" expression=""/>
+        <default field="SOVEREIGNT" applyOnUpdate="0" expression=""/>
+        <default field="SOV_A3" applyOnUpdate="0" expression=""/>
+        <default field="SUBREGION" applyOnUpdate="0" expression=""/>
+        <default field="SUBUNIT" applyOnUpdate="0" expression=""/>
+        <default field="SU_A3" applyOnUpdate="0" expression=""/>
+        <default field="SU_DIF" applyOnUpdate="0" expression=""/>
+        <default field="TINY" applyOnUpdate="0" expression=""/>
+        <default field="TYPE" applyOnUpdate="0" expression=""/>
+        <default field="UN_A3" applyOnUpdate="0" expression=""/>
+        <default field="WB_A2" applyOnUpdate="0" expression=""/>
+        <default field="WB_A3" applyOnUpdate="0" expression=""/>
+        <default field="WIKIPEDIA" applyOnUpdate="0" expression=""/>
+        <default field="WOE_ID" applyOnUpdate="0" expression=""/>
+        <default field="WOE_ID_EH" applyOnUpdate="0" expression=""/>
+        <default field="WOE_NOTE" applyOnUpdate="0" expression=""/>
+        <default field="featurecla" applyOnUpdate="0" expression=""/>
+        <default field="scalerank" applyOnUpdate="0" expression=""/>
       </defaults>
       <constraints>
-        <constraint unique_strength="1" field="fid" exp_strength="0" constraints="3" notnull_strength="1"/>
-        <constraint unique_strength="0" field="ABBREV" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ABBREV_LEN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_IS" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_UN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_US" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_A3_WB" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADM0_DIF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ADMIN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_DIFF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_GROUP" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="BRK_NAME" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="CONTINENT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ECONOMY" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="FIPS_10_" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="FORMAL_EN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="FORMAL_FR" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GDP_MD_EST" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GDP_YEAR" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GEOUNIT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GEOU_DIF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="GU_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="HOMEPART" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="INCOME_GRP" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ISO_A2" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ISO_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="ISO_N3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LABELRANK" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LASTCENSUS" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LEVEL" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="LONG_LEN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR13" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR7" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR8" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="MAPCOLOR9" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_ALT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_LEN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_LONG" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NAME_SORT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NOTE_ADM0" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="NOTE_BRK" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="POP_EST" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="POP_YEAR" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="POSTAL" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="REGION_UN" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="REGION_WB" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SOVEREIGNT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SOV_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SUBREGION" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SUBUNIT" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SU_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="SU_DIF" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="TINY" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="TYPE" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="UN_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WB_A2" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WB_A3" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WIKIPEDIA" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WOE_ID" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WOE_ID_EH" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="WOE_NOTE" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="featurecla" exp_strength="0" constraints="0" notnull_strength="0"/>
-        <constraint unique_strength="0" field="scalerank" exp_strength="0" constraints="0" notnull_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="1" field="fid" constraints="3" unique_strength="1"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ABBREV" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ABBREV_LEN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_IS" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_UN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_US" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_A3_WB" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADM0_DIF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ADMIN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_DIFF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_GROUP" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="BRK_NAME" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="CONTINENT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ECONOMY" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="FIPS_10_" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="FORMAL_EN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="FORMAL_FR" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GDP_MD_EST" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GDP_YEAR" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GEOUNIT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GEOU_DIF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="GU_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="HOMEPART" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="INCOME_GRP" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ISO_A2" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ISO_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="ISO_N3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LABELRANK" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LASTCENSUS" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LEVEL" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="LONG_LEN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR13" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR7" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR8" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="MAPCOLOR9" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_ALT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_LEN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_LONG" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NAME_SORT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NOTE_ADM0" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="NOTE_BRK" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="POP_EST" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="POP_YEAR" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="POSTAL" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="REGION_UN" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="REGION_WB" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SOVEREIGNT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SOV_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SUBREGION" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SUBUNIT" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SU_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="SU_DIF" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="TINY" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="TYPE" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="UN_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WB_A2" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WB_A3" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WIKIPEDIA" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WOE_ID" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WOE_ID_EH" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="WOE_NOTE" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="featurecla" constraints="0" unique_strength="0"/>
+        <constraint exp_strength="0" notnull_strength="0" field="scalerank" constraints="0" unique_strength="0"/>
       </constraints>
       <constraintExpressions>
-        <constraint field="fid" exp="" desc=""/>
-        <constraint field="ABBREV" exp="" desc=""/>
-        <constraint field="ABBREV_LEN" exp="" desc=""/>
-        <constraint field="ADM0_A3" exp="" desc=""/>
-        <constraint field="ADM0_A3_IS" exp="" desc=""/>
-        <constraint field="ADM0_A3_UN" exp="" desc=""/>
-        <constraint field="ADM0_A3_US" exp="" desc=""/>
-        <constraint field="ADM0_A3_WB" exp="" desc=""/>
-        <constraint field="ADM0_DIF" exp="" desc=""/>
-        <constraint field="ADMIN" exp="" desc=""/>
-        <constraint field="BRK_A3" exp="" desc=""/>
-        <constraint field="BRK_DIFF" exp="" desc=""/>
-        <constraint field="BRK_GROUP" exp="" desc=""/>
-        <constraint field="BRK_NAME" exp="" desc=""/>
-        <constraint field="CONTINENT" exp="" desc=""/>
-        <constraint field="ECONOMY" exp="" desc=""/>
-        <constraint field="FIPS_10_" exp="" desc=""/>
-        <constraint field="FORMAL_EN" exp="" desc=""/>
-        <constraint field="FORMAL_FR" exp="" desc=""/>
-        <constraint field="GDP_MD_EST" exp="" desc=""/>
-        <constraint field="GDP_YEAR" exp="" desc=""/>
-        <constraint field="GEOUNIT" exp="" desc=""/>
-        <constraint field="GEOU_DIF" exp="" desc=""/>
-        <constraint field="GU_A3" exp="" desc=""/>
-        <constraint field="HOMEPART" exp="" desc=""/>
-        <constraint field="INCOME_GRP" exp="" desc=""/>
-        <constraint field="ISO_A2" exp="" desc=""/>
-        <constraint field="ISO_A3" exp="" desc=""/>
-        <constraint field="ISO_N3" exp="" desc=""/>
-        <constraint field="LABELRANK" exp="" desc=""/>
-        <constraint field="LASTCENSUS" exp="" desc=""/>
-        <constraint field="LEVEL" exp="" desc=""/>
-        <constraint field="LONG_LEN" exp="" desc=""/>
-        <constraint field="MAPCOLOR13" exp="" desc=""/>
-        <constraint field="MAPCOLOR7" exp="" desc=""/>
-        <constraint field="MAPCOLOR8" exp="" desc=""/>
-        <constraint field="MAPCOLOR9" exp="" desc=""/>
-        <constraint field="NAME" exp="" desc=""/>
-        <constraint field="NAME_ALT" exp="" desc=""/>
-        <constraint field="NAME_LEN" exp="" desc=""/>
-        <constraint field="NAME_LONG" exp="" desc=""/>
-        <constraint field="NAME_SORT" exp="" desc=""/>
-        <constraint field="NOTE_ADM0" exp="" desc=""/>
-        <constraint field="NOTE_BRK" exp="" desc=""/>
-        <constraint field="POP_EST" exp="" desc=""/>
-        <constraint field="POP_YEAR" exp="" desc=""/>
-        <constraint field="POSTAL" exp="" desc=""/>
-        <constraint field="REGION_UN" exp="" desc=""/>
-        <constraint field="REGION_WB" exp="" desc=""/>
-        <constraint field="SOVEREIGNT" exp="" desc=""/>
-        <constraint field="SOV_A3" exp="" desc=""/>
-        <constraint field="SUBREGION" exp="" desc=""/>
-        <constraint field="SUBUNIT" exp="" desc=""/>
-        <constraint field="SU_A3" exp="" desc=""/>
-        <constraint field="SU_DIF" exp="" desc=""/>
-        <constraint field="TINY" exp="" desc=""/>
-        <constraint field="TYPE" exp="" desc=""/>
-        <constraint field="UN_A3" exp="" desc=""/>
-        <constraint field="WB_A2" exp="" desc=""/>
-        <constraint field="WB_A3" exp="" desc=""/>
-        <constraint field="WIKIPEDIA" exp="" desc=""/>
-        <constraint field="WOE_ID" exp="" desc=""/>
-        <constraint field="WOE_ID_EH" exp="" desc=""/>
-        <constraint field="WOE_NOTE" exp="" desc=""/>
-        <constraint field="featurecla" exp="" desc=""/>
-        <constraint field="scalerank" exp="" desc=""/>
+        <constraint exp="" field="fid" desc=""/>
+        <constraint exp="" field="ABBREV" desc=""/>
+        <constraint exp="" field="ABBREV_LEN" desc=""/>
+        <constraint exp="" field="ADM0_A3" desc=""/>
+        <constraint exp="" field="ADM0_A3_IS" desc=""/>
+        <constraint exp="" field="ADM0_A3_UN" desc=""/>
+        <constraint exp="" field="ADM0_A3_US" desc=""/>
+        <constraint exp="" field="ADM0_A3_WB" desc=""/>
+        <constraint exp="" field="ADM0_DIF" desc=""/>
+        <constraint exp="" field="ADMIN" desc=""/>
+        <constraint exp="" field="BRK_A3" desc=""/>
+        <constraint exp="" field="BRK_DIFF" desc=""/>
+        <constraint exp="" field="BRK_GROUP" desc=""/>
+        <constraint exp="" field="BRK_NAME" desc=""/>
+        <constraint exp="" field="CONTINENT" desc=""/>
+        <constraint exp="" field="ECONOMY" desc=""/>
+        <constraint exp="" field="FIPS_10_" desc=""/>
+        <constraint exp="" field="FORMAL_EN" desc=""/>
+        <constraint exp="" field="FORMAL_FR" desc=""/>
+        <constraint exp="" field="GDP_MD_EST" desc=""/>
+        <constraint exp="" field="GDP_YEAR" desc=""/>
+        <constraint exp="" field="GEOUNIT" desc=""/>
+        <constraint exp="" field="GEOU_DIF" desc=""/>
+        <constraint exp="" field="GU_A3" desc=""/>
+        <constraint exp="" field="HOMEPART" desc=""/>
+        <constraint exp="" field="INCOME_GRP" desc=""/>
+        <constraint exp="" field="ISO_A2" desc=""/>
+        <constraint exp="" field="ISO_A3" desc=""/>
+        <constraint exp="" field="ISO_N3" desc=""/>
+        <constraint exp="" field="LABELRANK" desc=""/>
+        <constraint exp="" field="LASTCENSUS" desc=""/>
+        <constraint exp="" field="LEVEL" desc=""/>
+        <constraint exp="" field="LONG_LEN" desc=""/>
+        <constraint exp="" field="MAPCOLOR13" desc=""/>
+        <constraint exp="" field="MAPCOLOR7" desc=""/>
+        <constraint exp="" field="MAPCOLOR8" desc=""/>
+        <constraint exp="" field="MAPCOLOR9" desc=""/>
+        <constraint exp="" field="NAME" desc=""/>
+        <constraint exp="" field="NAME_ALT" desc=""/>
+        <constraint exp="" field="NAME_LEN" desc=""/>
+        <constraint exp="" field="NAME_LONG" desc=""/>
+        <constraint exp="" field="NAME_SORT" desc=""/>
+        <constraint exp="" field="NOTE_ADM0" desc=""/>
+        <constraint exp="" field="NOTE_BRK" desc=""/>
+        <constraint exp="" field="POP_EST" desc=""/>
+        <constraint exp="" field="POP_YEAR" desc=""/>
+        <constraint exp="" field="POSTAL" desc=""/>
+        <constraint exp="" field="REGION_UN" desc=""/>
+        <constraint exp="" field="REGION_WB" desc=""/>
+        <constraint exp="" field="SOVEREIGNT" desc=""/>
+        <constraint exp="" field="SOV_A3" desc=""/>
+        <constraint exp="" field="SUBREGION" desc=""/>
+        <constraint exp="" field="SUBUNIT" desc=""/>
+        <constraint exp="" field="SU_A3" desc=""/>
+        <constraint exp="" field="SU_DIF" desc=""/>
+        <constraint exp="" field="TINY" desc=""/>
+        <constraint exp="" field="TYPE" desc=""/>
+        <constraint exp="" field="UN_A3" desc=""/>
+        <constraint exp="" field="WB_A2" desc=""/>
+        <constraint exp="" field="WB_A3" desc=""/>
+        <constraint exp="" field="WIKIPEDIA" desc=""/>
+        <constraint exp="" field="WOE_ID" desc=""/>
+        <constraint exp="" field="WOE_ID_EH" desc=""/>
+        <constraint exp="" field="WOE_NOTE" desc=""/>
+        <constraint exp="" field="featurecla" desc=""/>
+        <constraint exp="" field="scalerank" desc=""/>
       </constraintExpressions>
       <expressionfields/>
       <attributeactions>
         <defaultAction key="Canvas" value="{00000000-0000-0000-0000-000000000000}"/>
       </attributeactions>
-      <attributetableconfig actionWidgetStyle="dropDown" sortOrder="0" sortExpression="">
+      <attributetableconfig sortOrder="0" actionWidgetStyle="dropDown" sortExpression="">
         <columns/>
       </attributetableconfig>
       <conditionalstyles>
         <rowstyles/>
         <fieldstyles/>
       </conditionalstyles>
+      <storedexpressions/>
       <editform tolerant="1"></editform>
       <editforminit/>
       <editforminitcodesource>0</editforminitcodesource>
@@ -3643,6 +3874,7 @@ def my_form_open(dialog, layer, feature):
     <layer id="worldcountries_029e25b3_55c8_4902_9c5f_da51f783a197"/>
     <layer id="worldcountries_0bbefbf9_dbc5_404d_a586_eda804dc455e"/>
     <layer id="original_23df0129_00a3_4971_8317_e4ae790b2a79"/>
+    <layer id="emptylayer_e0cf2357_2655_4a7e_a947_4c7a72eedf76"/>
   </layerorder>
   <properties>
     <Gui>
@@ -3669,11 +3901,13 @@ def my_form_open(dialog, layer, feature):
       <CandidatesPoint type="int">16</CandidatesPoint>
       <CandidatesPolygon type="int">30</CandidatesPolygon>
       <DrawRectOnly type="bool">false</DrawRectOnly>
+      <DrawUnplaced type="bool">false</DrawUnplaced>
       <SearchMethod type="int">0</SearchMethod>
       <ShowingAllLabels type="bool">false</ShowingAllLabels>
       <ShowingCandidates type="bool">false</ShowingCandidates>
       <ShowingPartialsLabels type="bool">true</ShowingPartialsLabels>
       <TextFormat type="int">0</TextFormat>
+      <UnplacedColor type="QString">255,0,0,255</UnplacedColor>
     </PAL>
     <Paths>
       <Absolute type="bool">false</Absolute>
@@ -3701,4 +3935,8 @@ def my_form_open(dialog, layer, feature):
   </projectMetadata>
   <Annotations/>
   <Layouts/>
+  <Bookmarks/>
+  <ProjectViewSettings UseProjectScales="0">
+    <Scales/>
+  </ProjectViewSettings>
 </qgis>

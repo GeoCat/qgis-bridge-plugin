@@ -74,9 +74,12 @@ class GeoserverServer(ServerBase):
         self._publishStyle(layer.name(), styleFilename)
         return styleFilename
 
-    def publishLayer(self, layer, fields=None):
+    def publishLayer(self, layer, fields=None):        
         self.publishStyle(layer)
         if layer.type() == layer.VectorLayer:
+            if layer.featureCount() == 0:
+                self.logError("Layer contains zero features and cannot be published")
+                return
             if self.storage in [self.FILE_BASED, self.POSTGIS_MANAGED_BY_GEOSERVER]:
                 if layer.source() not in self._exportedLayers:
                     if self.storage == self.POSTGIS_MANAGED_BY_GEOSERVER:                    
