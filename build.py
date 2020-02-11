@@ -35,7 +35,6 @@ def make_zip(zipFile):
             zipFile.write(os.path.join(root,  f), os.path.join(relpath, f))
         filter_excludes(dirs)
 
-
     for root, dirs, files in os.walk(docs_dir):
         for f in files:
             relpath = os.path.join("geocatbridge", "docs", os.path.relpath(root, docs_dir))
@@ -53,7 +52,7 @@ def builddocs():
     scriptPath = os.path.join(cwd, "docs")
     buildFolder = os.path.join(scriptPath, "build")
     os.chdir(scriptPath)
-    sh("python builddocs.py --output %s --version dev" % buildFolder)
+    sh("python builddocs.py --output %s --version dev --clean" % buildFolder)
     os.chdir(cwd)
 
 if __name__ == "__main__":
