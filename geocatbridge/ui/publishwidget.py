@@ -427,9 +427,9 @@ class PublishWidget(BASE, WIDGET):
 
     def unpublishAll(self):
         for name in self.isDataPublished:
-            if self.isDataPublished[name]:
+            if self.isDataPublished.get(name, False):
                 self.unpublishData(name)
-            if self.isMetadataPublished[name]:
+            if self.isMetadataPublished.get(name, False):
                 self.unpublishMetadata(name)            
 
     def viewWms(self, name):        
