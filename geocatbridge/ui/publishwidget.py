@@ -590,6 +590,10 @@ class LayerItemWidget(QWidget):
         self.layout = QHBoxLayout()
         self.check = QCheckBox()
         self.check.setText(layer.name())
+        if layer.type() == layer.VectorLayer:
+            self.check.setIcon(QgsApplication.getThemeIcon('/mIconLineLayer.svg'))
+        else:
+            self.check.setIcon(QgsApplication.getThemeIcon('/mIconRaster.svg'))
         self.labelMetadata = QLabel()
         self.labelMetadata.setFixedWidth(50)
         self.labelData = QLabel()
