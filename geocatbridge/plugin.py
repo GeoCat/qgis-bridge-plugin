@@ -71,7 +71,7 @@ class GeocatBridge:
         self.iface.addPluginToWebMenu("GeoCatBridge", self.actionPublish)
         self.iface.addWebToolBarIcon(self.actionPublish)
             
-        helpPath = "file://{}".format(os.path.join(os.path.dirname(__file__), "docs",  "html", "index.html"))
+        helpPath = "file://{}".format(os.path.join(os.path.dirname(__file__), "docs", "index.html"))
         self.actionHelp = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self.iface.mainWindow())
         self.actionHelp.setObjectName("GeocatBridgeHelp")
         self.actionHelp.triggered.connect(lambda: webbrowser.open_new(helpPath))
