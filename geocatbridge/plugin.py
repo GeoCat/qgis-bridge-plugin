@@ -91,14 +91,11 @@ class GeocatBridge:
 
         QgsProject.instance().layerWasAdded.connect(self.layerWasAdded)
 
-        QgsApplication.processingRegistry().addProvider(self.provider)
+        #QgsApplication.processingRegistry().addProvider(self.provider)
 
     def unload(self):
 
-        removeTempFolder()
-                
-        self.iface.removePluginMenu("GeoCatBridge", self.actionPublish)
-        self.iface.removePluginMenu("GeoCatBridge", self.actionMultistyler)
+        removeTempFolder()                        
     
         self.iface.currentLayerChanged.disconnect(self.multistylerDialog.updateForCurrentLayer)
 
@@ -108,8 +105,12 @@ class GeocatBridge:
             layer.styleChanged.disconnect(func)
 
         self.iface.removePluginWebMenu("GeoCatBridge", self.actionHelp)
+        self.iface.removePluginWebMenu("GeoCatBridge", self.actionPublish)
+        self.iface.removePluginWebMenu("GeoCatBridge", self.actionMultistyler)
 
-        QgsApplication.processingRegistry().removeProvider(self.provider)
+        self.iface.removeWebToolBarIcon(self.actionPublish)
+
+        #QgsApplication.processingRegistry().removeProvider(self.provider)
 
         sys.excepthook = self.qgis_hook
 
