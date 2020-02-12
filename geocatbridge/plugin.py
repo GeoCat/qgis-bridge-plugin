@@ -81,7 +81,8 @@ class GeocatBridge:
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
         self.multistylerDialog.hide()        
 
-        self.actionMultistyler = QAction(QCoreApplication.translate("GeocatBridge", "Multistyler"), self.iface.mainWindow())
+        iconMultistyler = QIcon(os.path.join(os.path.dirname(__file__), "icons", "symbology.png"))
+        self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate("GeocatBridge", "Multistyler"), self.iface.mainWindow())
         self.actionMultistyler.setObjectName("multistyler")
         self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
         self.iface.addPluginToWebMenu("GeoCatBridge", self.actionMultistyler)
