@@ -472,8 +472,8 @@ class GeoserverServer(ServerBase):
             if ver is None:
                 return # couldnt find version -- dev GS, lets say its ok
             ver_major,ver_minor,ver_patch = ver.split('.')
-            if (int(ver_minor) < 13) or (int(ver_minor)==13 and int(ver_patch) <2): # old
-                errors.add("Geoserver 2.13.2 or later is required.  Selected Geoserver is version '" +ver + "'.  Please see <a href='https://my.geocat.net/knowledgebase/100/Bridge-4-compatibility-with-Geoserver-2131-and-before.html'>Bridge 4 Compatibility with Geoserver 2.13.1 and before</a>")
+            if int(ver_minor) <= 13: # old
+                errors.add("Geoserver 2.14.0 or later is required.  Selected Geoserver is version '" +ver + "'.  Please see <a href='https://my.geocat.net/knowledgebase/100/Bridge-4-compatibility-with-Geoserver-2134-and-before.html'>Bridge 4 Compatibility with Geoserver 2.13.4 and before</a>")
         except:
             errors.add("Could not connect to Geoserver.  Please check the server settings (including password).")
 
