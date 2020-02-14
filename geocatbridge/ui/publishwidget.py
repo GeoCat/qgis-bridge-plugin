@@ -87,6 +87,8 @@ class PublishWidget(BASE, WIDGET):
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.layout().insertWidget(0, self.bar)
 
+        self.txtNoLayers.setVisible(False)
+
         self.populateComboBoxes()
         self.populateLayers()
         self.listLayers.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -117,6 +119,12 @@ class PublishWidget(BASE, WIDGET):
             item = self.listLayers.item(0)
             self.listLayers.setCurrentItem(item)
             self.currentRowChanged(0)
+        else:
+            self.txtNoLayers.setVisible(True)
+            self.listLayers.setVisible(False)
+            self.labelSelect.setVisible(False)
+            #self.spacerLayerSelect.setVisible(False)
+            self.btnRemoveAll.setVisible(False)
 
         self.metadataServerChanged()
         self.selectLabelClicked("all")
@@ -424,6 +432,7 @@ class PublishWidget(BASE, WIDGET):
                     server = metadataServer if self.isMetadataPublished[name] else None
                 widget.setMetadataPublished(server)
 
+        canPublish = canPublish and self.listLayers.count()
         self.btnPublish.setEnabled(canPublish)
         self.btnPublishOnBackground.setEnabled(canPublish)
 

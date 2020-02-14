@@ -74,6 +74,14 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.btnSaveServers.clicked.connect(self.saveServers)
         self.btnLoadServers.clicked.connect(self.loadServers)
 
+    def checkServersHaveBeenDefined(self):
+        if self.listServers.count():
+            self.txtNoServers.setVisible(False)
+            self.listServers.setVisible(True)
+        else:
+            self.txtNoServers.setVisible(True)
+            self.listServers.setVisible(False)
+
     def saveServers(self):            
         filename = QFileDialog.getSaveFileName(self, self.tr("Save servers"), "", '*.json')[0]        
         if filename:
@@ -378,13 +386,15 @@ class ServerConnectionsWidget(BASE, WIDGET):
         name = self.listServers.itemWidget(item).serverName()
         removeServer(name)
         self.listServers.takeItem(self.listServers.currentRow())
-        self.listServers.setCurrentItem(None)        
+        self.listServers.setCurrentItem(None)
+        self.checkServersHaveBeenDefined()     
 
     def populateServers(self):
         self.listServers.clear()
         servers = allServers().values()      
         for server in servers:
             self.addServerItem(server)
+        self.checkServersHaveBeenDefined()
             
     def addServerItem(self, server):
         widget = ServerItemWidget(server)
@@ -392,6 +402,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
         item.setSizeHint(widget.sizeHint())
         self.listServers.addItem(item)
         self.listServers.setItemWidget(item, widget)
+        self.checkServersHaveBeenDefined()
         return item
 
     def _addServer(self, name, clazz):
