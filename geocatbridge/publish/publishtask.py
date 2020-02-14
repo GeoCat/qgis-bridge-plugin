@@ -1,4 +1,5 @@
 import os
+import sys
 import traceback
 import string
 
@@ -189,6 +190,7 @@ class PublishTask(QgsTask):
 
             return True
         except Exception as e:
+            self.exceptiontype, _, _ = sys.exc_info()
             self.exception = traceback.format_exc()
             return False
 

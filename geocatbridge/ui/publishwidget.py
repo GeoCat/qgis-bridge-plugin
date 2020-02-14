@@ -1,5 +1,6 @@
 import os
 import traceback
+import requests
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import (
@@ -17,7 +18,8 @@ from qgis.PyQt.QtWidgets import (
     QSizePolicy,
     QCheckBox,
     QListWidgetItem,
-    QTableWidgetItem
+    QTableWidgetItem,
+    QMessageBox
 ) 
 from qgis.PyQt.QtGui import (
     QIcon,
@@ -487,8 +489,12 @@ class PublishWidget(BASE, WIDGET):
             #self.bar.clearWidgets()
             task.finished(ret)
             if task.exception is not None:
-                self.bar.clearWidgets()
-                self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
+                if task.exceptiontype == requests.exceptions.ConnectionError:
+                    QMessageBox.warning(self, self.tr("Error while publishing"), 
+                            self.tr("Connection error. Server unavailable.\nSee QGIS log for details"))
+                else:
+                    self.bar.clearWidgets()
+                    self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
                 QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
             if isinstance(task, PublishTask):
                 self.updateLayersPublicationStatus(task.geodataServer is not None, task.metadataServer is not None)
