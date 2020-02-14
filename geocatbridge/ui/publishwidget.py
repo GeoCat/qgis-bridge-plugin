@@ -19,7 +19,8 @@ from qgis.PyQt.QtWidgets import (
     QCheckBox,
     QListWidgetItem,
     QTableWidgetItem,
-    QMessageBox
+    QMessageBox,
+    QFileDialog
 ) 
 from qgis.PyQt.QtGui import (
     QIcon,
@@ -113,7 +114,8 @@ class PublishWidget(BASE, WIDGET):
         self.btnIsoTopic.clicked.connect(lambda: self.openMetadataEditor(CATEGORIES))
         self.btnKeywords.clicked.connect(lambda: self.openMetadataEditor(KEYWORDS))
         self.btnDataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
-        self.btnMetadataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))        
+        self.btnMetadataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
+        self.btnExportFolder.clicked.connect(self.selectExportFolder)    
 
         if self.listLayers.count():
             item = self.listLayers.item(0)
@@ -129,6 +131,10 @@ class PublishWidget(BASE, WIDGET):
         self.metadataServerChanged()
         self.selectLabelClicked("all")
 
+    def selectExportFolder(self):
+        folder = QFileDialog.getExistingDirectory(self, self.tr("Export to folder"))
+        if folder:            
+            self.txtExportFolder.setText(folder)
 
     def geodataServerChanged(self):
         self.updateLayersPublicationStatus(True, False)
