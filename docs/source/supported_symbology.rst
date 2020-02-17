@@ -15,7 +15,7 @@ This section describes general elements that are common to most types of layers 
 Drawing order (symbol levels)
 -------------------------------
 
-You can use symbol levels in QGIS to define the order used to render symbol layers, and they will be correctly converted to z-levels in SLD.
+You can use `symbol levels <https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id95>`_ in QGIS to define the order used to render symbol layers, and they will be correctly converted to z-levels in SLD.
 
 Size units
 -----------
@@ -27,7 +27,7 @@ Notice that it's, however, a safer option to use pixels instead of milimeters (w
 Expressions
 -------------
 
-Expression are supported wherever QGIS allows to use data-defined values. They must be created using QGIS expression language (Python custom functions are not supported). Not all functions available in QGIS can be used, since there's not an equivalent for all of them in GeoServer. The following is a list of the QGIS functions that can be used::
+`Expressions <https://docs.qgis.org/3.4/en/docs/pyqgis_developer_cookbook/expressions.html>`_ are supported wherever QGIS allows to use data-defined values. They must be created using QGIS expression language (Python custom functions are not supported). Not all functions available in QGIS can be used, since there's not an equivalent for all of them in GeoServer. The following is a list of the QGIS functions that can be used::
 
 		radians, degrees, floor, ceil, area, buffer, centroid, 
 		if, bounds, distance, convex_hull, end_point, start_point, 
@@ -62,13 +62,19 @@ Supported renderers
 
 The following renderers are supported for vector layers:
 
-#. Single symbol
+#. `Single symbol <https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id82>`_
 
-#. Categorized
+.. figure:: img/singlesymbolrenderer.png
 
-#. Graduated
+#. `Categorized <https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id84>`_
 
-#. Heatmap
+.. figure:: img/categorizedrenderer.png
+
+#. `Graduated <https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id85>`_
+
+.. figure:: img/graduatedrenderer.png
+
+#. `Heatmap <https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id91>`_
 
 	The following limitation must be considered:
 
@@ -77,7 +83,9 @@ The following renderers are supported for vector layers:
 	- Expression are not supported for the ``weight`` parameter
 
 
-#. Rule-based:
+#. `Rule-based <https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id87>`_
+
+	.. figure:: img/rulebasedrenderer.png
 
 	- Nested rules are supported.
 	
@@ -167,6 +175,8 @@ The following symbol layer types are supported for rendering lines:
 
 - Simple line
 
+	.. figure:: img/simpleline.png
+
 	Below is a list of the parameters that are supported:
 
 	* Color
@@ -182,6 +192,8 @@ The following symbol layer types are supported for rendering lines:
 	* Offset
 
 - Marker line:
+
+	.. figure:: img/markerline.png
 
 	Below is a list of the parameters that are supported:
 
@@ -200,7 +212,9 @@ The following symbol layer types are supported for rendering polygons:
 
 - Simple fill
 
-Below is a list of the parameters that are supported:
+	.. figure:: img/simplefill.png
+
+	Below is a list of the parameters that are supported:
 
 	* Size
 
@@ -220,6 +234,8 @@ Below is a list of the parameters that are supported:
 
 - Point pattern fill
 
+	.. figure:: img/pointpatternfill.png
+
 	Below is a list of the parameters that are supported:
 
 	* Horizontal distance
@@ -229,6 +245,8 @@ Below is a list of the parameters that are supported:
 	As marker, you can use simple markers, SVG markers and raster image markers, with the restrictions mentioned in the corresponding section about supported symbology for point symbols.
 
 - Line pattern fill
+
+	.. figure:: img/linepatternfill.png
 
 	Below is a list of the parameters that are supported:
 
@@ -242,6 +260,8 @@ Below is a list of the parameters that are supported:
 
 - Outline: Marker line
 
+	.. figure:: img/fillmarkeroutline.png
+
 	See the section on supported symbology for marker lines
 
 - Geometry generator
@@ -253,9 +273,9 @@ The following labeling modes are supported for vector layer labels.
 
 - No labels
 
-- Single labels
+- `Single labels <https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id98>`_
 
-- Rule-based labeling
+- `Rule-based labeling <https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id111>`_
 
 Text options for labels
 -----------------------
@@ -268,21 +288,11 @@ The folowwing options from the :guilabel:`Text` group of parameters are supporte
 
 - Rotation
 
-
-Text options for labels
------------------------
-
-The folowing options from the :guilabel:`Text` group of parameters are supported:
-
-- Size
-
-- Font family
-
-- Rotation
-
 	
 Buffer options for labels
 --------------------------
+
+.. figure:: img/labelhalo.png
 
 The folowing options from the :guilabel:`Buffer` group of parameters are supported:
 
@@ -295,6 +305,8 @@ The folowing options from the :guilabel:`Buffer` group of parameters are support
 	
 Background options for labels
 -----------------------------
+
+.. figure:: img/labelbackground.png
 
 The folowing options from the :guilabel:`Background` group of parameters are supported:
 
