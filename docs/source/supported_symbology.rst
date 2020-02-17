@@ -38,13 +38,13 @@ Expression are supported wherever QGIS allows to use data-defined values. They m
 
 Certain parameters accept expressions, but those are not supported by Bridge when converting to SLD:
 
-	- Colors
+- Colors
 
-	- Parameters selected from drop down lists
+- Parameters selected from drop down lists
 
-	- Offset values
+- Offset values
 
-	- Expressions are not supported for size measurements, when those measures are not expressed in pixels or mm (that is, if you are using map units or real word meters for a size that changes with the current map scale)
+- Expressions are not supported for size measurements, when those measures are not expressed in pixels or mm (that is, if you are using map units or real word meters for a size that changes with the current map scale)
 
 Blending modes
 ---------------
@@ -91,65 +91,73 @@ Supported symbology elements for points symbols
 
 The following symbol layer types are supported for rendering points:
 
-	- Simple marker
+- Simple marker
 
-		Below is a list of the parameters that are supported:
+	.. figure:: img/simplemarker.png
 
-		* Size
+	Below is a list of the parameters that are supported:
 
-		* Fill Color
+	* Size
 
-		* Stroke Color
+	* Fill Color
 
-		* Stroke style
+	* Stroke Color
 
-		* Stroke width
+	* Stroke style
 
-		* Join style
+	* Stroke width
 
-		* Rotation
+	* Join style
 
-		* Offset
+	* Rotation
 
-	- SVG marker
+	* Offset
 
-		Below is a list of the parameters that are supported:
+- SVG marker
 
-		* Size
+	.. figure:: img/svgmarker.png
 
-		* Fill Color
+	Below is a list of the parameters that are supported:
 
-		* Stroke Color
+	* Size
 
-		* Stroke width
+	* Fill Color
 
-		* Rotation
+	* Stroke Color
 
-		* Offset
+	* Stroke width
 
-		* SVG image
+	* Rotation
 
-	- Raster image marker
+	* Offset
 
-		Below is a list of the parameters that are supported:
+	* SVG image
 
-		* Size
+- Raster image marker
 
-		* Rotation
+	.. figure:: img/rastermarker.png
 
-		* File
+	Below is a list of the parameters that are supported:
 
-	- Font marker
+	* Size
 
-		Below is a list of the parameters that are supported:
+	* Rotation
 
-		* Size
+	* File
 
-		* Fill Color
+- Font marker
 
-		* Font
+	.. figure:: img/fontmarker.png
 
-	- Geometry generator
+	Below is a list of the parameters that are supported:
+
+	* Size
+
+	* Fill Color
+
+	* Font
+
+- Geometry generator
 
 
 Supported symbology elements for line symbols
@@ -157,108 +165,108 @@ Supported symbology elements for line symbols
 
 The following symbol layer types are supported for rendering lines:
 
-	- Simple line
+- Simple line
 
-		Below is a list of the parameters that are supported:
+	Below is a list of the parameters that are supported:
 
-		* Color
+	* Color
 
-		* Stroke width
+	* Stroke width
 
-		* Stroke style
+	* Stroke style
 
-		* Join style
+	* Join style
 
-		* Cap style
+	* Cap style
 
-		* Offset
+	* Offset
 
-	- Marker line:
+- Marker line:
 
-		Below is a list of the parameters that are supported:
+	Below is a list of the parameters that are supported:
 
-		- Marker placement: only ``with interval`` mode is supported
+	- Marker placement: only ``with interval`` mode is supported
 
-		- Offset along line
+	- Offset along line
 
-		As marker, you can use simple markers, SVG markers and raster image markers, with the restrictions mentioned in the corresponding section about supported symbology for point symbols.
+	As marker, you can use simple markers, SVG markers and raster image markers, with the restrictions mentioned in the corresponding section about supported symbology for point symbols.
 
-	- Geometry generator
+- Geometry generator
 
 Supported symbology elements for polygon symbols
 ------------------------------------------------
 
 The following symbol layer types are supported for rendering polygons:
 
-	- Simple fill
+- Simple fill
+
+Below is a list of the parameters that are supported:
+
+	* Size
+
+	* Fill Color
+
+	* Fill style: only ``solid, no brush, horizontal, vertical, cross``
+
+	* Stroke Color
+
+	* Stroke style
+
+	* Stroke width
+
+	* Join style
+
+	* Rotation
+
+- Point pattern fill
 
 	Below is a list of the parameters that are supported:
 
-		* Size
+	* Horizontal distance
 
-		* Fill Color
+	* Vertical distance
 
-		* Fill style: only ``solid, no brush, horizontal, vertical, cross``
+	As marker, you can use simple markers, SVG markers and raster image markers, with the restrictions mentioned in the corresponding section about supported symbology for point symbols.
 
-		* Stroke Color
+- Line pattern fill
 
-		* Stroke style
+	Below is a list of the parameters that are supported:
 
-		* Stroke width
+	* Rotation: Angle will be rounded to a multiple of 45 degrees
 
-		* Join style
+	* Spacing
 
-		* Rotation
+- Outline: Simple line
 
-	- Point pattern fill
+	See the section on supported symbology for simple lines
 
-		Below is a list of the parameters that are supported:
+- Outline: Marker line
 
-		* Horizontal distance
+	See the section on supported symbology for marker lines
 
-		* Vertical distance
-
-		As marker, you can use simple markers, SVG markers and raster image markers, with the restrictions mentioned in the corresponding section about supported symbology for point symbols.
-
-	- Line pattern fill
-
-		Below is a list of the parameters that are supported:
-
-		* Rotation: Angle will be rounded to a multiple of 45 degrees
-
-		* Spacing
-
-	- Outline: Simple line
-
-		See the section on supported symbology for simple lines
-
-	- Outline: Marker line
-
-		See the section on supported symbology for marker lines
-
-	- Geometry generator
+- Geometry generator
 
 Labeling
 ==========
 
 The following labeling modes are supported for vector layer labels.
 
-	- No labels
+- No labels
 
-	- Single labels
+- Single labels
 
-	- Rule-based labeling
+- Rule-based labeling
 
 Text options for labels
 -----------------------
 
 The folowwing options from the :guilabel:`Text` group of parameters are supported:
 
-	- Size
+- Size
 
-	- Font family
+- Font family
 
-	- Rotation
+- Rotation
 
 
 Text options for labels
@@ -266,11 +274,11 @@ Text options for labels
 
 The folowing options from the :guilabel:`Text` group of parameters are supported:
 
-	- Size
+- Size
 
-	- Font family
+- Font family
 
-	- Rotation
+- Rotation
 
 	
 Buffer options for labels
@@ -278,11 +286,11 @@ Buffer options for labels
 
 The folowing options from the :guilabel:`Buffer` group of parameters are supported:
 
-	- Size
+- Size
 
-	- Color
+- Color
 
-	- Opacity
+- Opacity
 
 	
 Background options for labels
@@ -290,17 +298,17 @@ Background options for labels
 
 The folowing options from the :guilabel:`Background` group of parameters are supported:
 
-	- Size X
+- Size X
 
-	- Size Y
+- Size Y
 
-	- Size type
+- Size type
 
-	- Shape type
+- Shape type
 
-	- Stroke color
+- Stroke color
 
-	- Fill color
+- Fill color
 
 	
 Placement options for labels
@@ -308,31 +316,30 @@ Placement options for labels
 
 The folowing options from the :guilabel:`Placement` group of parameters are supported:
 
-	- The only supported :guilabel:`Placement` option is: :guilabel:`Offset from centroid`, with the following parameters
+- The only supported :guilabel:`Placement` option is: :guilabel:`Offset from centroid`, with the following parameters
 
-	
-		- Quadrant
 
-		- Offset
+	- Quadrant
 
-		- Rotation
+	- Offset
+
+	- Rotation
 
 
 Raster Layers
 ==============
-
 
 The supported elements for styling raster layers are detailed in this section.
 
 Supported renderers
 ---------------------
 
-	- Single band gray
+- Single band gray
 
-	- Single band color
-	
-	- Single band pseudo color
+- Single band color
 
-	- Multi band color
+- Single band pseudo color
 
-	- Paletted
+- Multi band color
+
+- Paletted
