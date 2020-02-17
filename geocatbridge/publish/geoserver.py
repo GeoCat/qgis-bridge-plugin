@@ -106,7 +106,7 @@ class GeoserverServer(ServerBase):
                 except KeyError:
                     raise Exception(QCoreApplication.translate("GeocatBridge", "Cannot find the selected PostGIS database"))
                 db.importLayer(layer, fields)                
-                self._publishVectorLayerFromPostgis(layer)            
+                self._publishVectorLayerFromPostgis(layer, db)            
         elif layer.type() == layer.RasterLayer:
             if layer.source() not in self._exportedLayers:
                 path = exportLayer(layer, fields, log=self)
@@ -146,7 +146,6 @@ class GeoserverServer(ServerBase):
     def _publishVectorLayerFromFile(self, layer, filename):
         self.logInfo("Publishing layer from file: %s" % filename)
         name = layer.name()
-        #self.deleteLayer(name)
         isDataUploaded = filename in self._uploadedDatasets
         if not isDataUploaded:
             with open(filename, "rb") as f:
@@ -180,16 +179,14 @@ class GeoserverServer(ServerBase):
         self.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
         self._setLayerStyle(name, name)
 
-    def _publishVectorLayerFromPostgis(self, layer):
+    def _publishVectorLayerFromPostgis(self, layer, db):
         name = layer.name()
-        #self.deleteLayer(name)
-        db = allServers()[self.postgisdb]
         username, password = db.getCredentials()
         def _entry(k, v):
             return {"@key":k, "$":v}
         ds = {   
             "dataStore": {
-                "name": layername,
+                "name": name,
                 "type": "PostGIS",
                 "enabled": True,
                 "connectionParameters": {
@@ -209,7 +206,7 @@ class GeoserverServer(ServerBase):
         self.request(dsUrl, data=ds, method="post")
         ft = {
             "featureType": {
-                "name": layername,
+                "name": name,
                 "srs": layer.crs().authid()
             }
         }    
@@ -222,7 +219,6 @@ class GeoserverServer(ServerBase):
         self.createPostgisDatastore()
         ws, datastoreName = self.postgisdb.split(":")
         name = layer.name()
-        #self.deleteLayer(name)
         isDataUploaded = filename in self._uploadedDatasets        
         if not isDataUploaded:
             _import = {
