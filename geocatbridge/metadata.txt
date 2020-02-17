@@ -1,7 +1,7 @@
 [general]
 name=GeoCatBridge
 description=Easy publication of data and metadata from QGIS.
-about=GeoCat is pleased to offer the Bridge plugin to its customers using QGIS.
+about=GeoCat is pleased to offer the Bridge plugin to our customers using QGIS.
 
  GeoCat Bridge offers a one-click publishing experience for QGIS Desktop. Create great looking maps and publish them to GeoServer, MapServer and share via GeoNetwork opensource metadata catalog. Your data is uploaded as a GeoPackage or shared PostGIS database. GeoCat Bridge brings our celebrated symbology output to the QGIS Desktop to share your cartography online.
  
