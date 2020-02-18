@@ -15,10 +15,25 @@ from qgis.core import (
 from ..utils.files import tempFilenameInTempFolder
 
 XSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
+INVERSEXSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19139-to-qgis.xsl")
+
+def loadMetadataFromIsoXml(layer, filename):
+    qmdFilename = tempFilenameInTempFolder("fromiso.qmd")    
+    dom = ET.parse(filename)
+    xslt = ET.parse(INVERSEXSLTFILENAME)
+    transform = ET.XSLT(xslt)
+    newdom = transform(dom)
+    s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
+    with open(qmdFilename, "w", encoding="utf8") as f:
+        f.write(s)
+    layer.loadNamedMetadata(qmdFilename)
+    
+def saveMetadataToIsoXml(layer, filename):
+    pass
 
 def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None):
     uuid = uuidForLayer(layer)
-    filename = tempFilenameInTempFolder(layer.name() + ".qmd")
+    filename = tempFilenameInTempFolder(layer.name() + ".qmd")    
     layer.saveNamedMetadata(filename)
     thumbnail = saveLayerThumbnail(layer)
     apiUrl = apiUrl or ""

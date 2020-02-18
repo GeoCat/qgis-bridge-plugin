@@ -134,7 +134,7 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item>
-            <widget class="QToolButton" name="btnSave">
+            <widget class="QToolButton" name="btnImport">
              <property name="toolTip">
               <string>Save metadata</string>
              </property>

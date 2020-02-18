@@ -48,7 +48,7 @@ from geocatbridge.utils.gui import execute
 from geocatbridge.publish.geonetwork import GeonetworkServer
 from geocatbridge.publish.publishtask import PublishTask, ExportTask
 from geocatbridge.publish.servers import geodataServers, metadataServers
-from geocatbridge.publish.metadata import uuidForLayer
+from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromIsoXml
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 from geocatbridge.ui.progressdialog import ProgressDialog
@@ -61,12 +61,11 @@ ERROR_ICON = '<img src="%s">' % iconPath("error-red.png")
 REMOVE_ICON = QIcon(iconPath("remove.png"))
 VALIDATE_ICON = QIcon(iconPath("validation.png"))
 PREVIEW_ICON = QIcon(iconPath("preview.png"))
-SAVE_ICON = QIcon(iconPath("save.png"))
+IMPORT_ICON = QIcon(iconPath("save.png"))
 
 IDENTIFICATION, CATEGORIES, KEYWORDS, ACCESS, EXTENT, CONTACT = range(6)
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishwidget.ui'))
-
 
 class PublishWidget(BASE, WIDGET):
 
@@ -106,8 +105,9 @@ class PublishWidget(BASE, WIDGET):
         self.btnValidate.setIcon(VALIDATE_ICON)
         self.btnPreview.clicked.connect(self.previewMetadata)
         self.btnPreview.setIcon(PREVIEW_ICON)
-        self.btnSave.setIcon(SAVE_ICON)
-        self.btnSave.setVisible(False)
+        self.btnImport.setIcon(IMPORT_ICON)
+        #self.btnImport.setVisible(False)
+        self.btnImport.clicked.connect(self.importMetadata)
         self.btnValidate.clicked.connect(self.validateMetadata)
         self.btnUseConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
         self.btnAccessConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
@@ -336,6 +336,20 @@ class PublishWidget(BASE, WIDGET):
             return False
         except Exception as e:
             return False
+
+    def importMetadata(self):
+        if self.currentLayer is None:
+            return
+        metadataFile = os.path.splitext(self.currentLayer.source())[0] + ".xml"
+        if os.path.exists(metadataFile):
+            loadMetadataFromIsoXml(self.currentLayer, metadataFile)
+            self.metadata[self.currentLayer] = self.currentLayer.metadata().clone()
+            self.populateLayerMetadata()
+            iface.messageBar().pushMessage("", self.tr("Metadata correctly imported"), level=Qgis.Success, duration=5)
+        else:
+            iface.messageBar().pushMessage(self.tr("Error importing metadata"), 
+                    self.tr("Cannot find ISO metadata file for the current layer"), 
+                    level=Qgis.Warning, duration=5)
 
     def validateMetadata(self):
         if self.currentLayer is None:
