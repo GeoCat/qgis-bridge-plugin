@@ -24,7 +24,7 @@ def loadMetadataFromIsoXml(layer, filename):
     transform = ET.XSLT(xslt)
     newdom = transform(dom)
     if newdow is None:
-        raise Exception()
+        raise Exception("Cannot convert metadata")
     s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
     with open(qmdFilename, "w", encoding="utf8") as f:
         f.write(s)
