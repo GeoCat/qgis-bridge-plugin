@@ -349,16 +349,16 @@ class PublishWidget(BASE, WIDGET):
             try:
                 loadMetadataFromIsoXml(self.currentLayer, metadataFile)
             except:
-                iface.messageBar().pushMessage(self.tr("Error importing metadata"), 
+                self.bar.pushMessage(self.tr("Error importing metadata"), 
                     self.tr("Cannot convert the metadata file. Maybe not ISO format?"), 
                     level=Qgis.Warning, duration=5)
                 return
 
             self.metadata[self.currentLayer] = self.currentLayer.metadata().clone()
             self.populateLayerMetadata()
-            iface.messageBar().pushMessage("", self.tr("Metadata correctly imported"), level=Qgis.Success, duration=5)
+            self.bar.pushMessage("", self.tr("Metadata correctly imported"), level=Qgis.Success, duration=5)
         else:
-            iface.messageBar().pushMessage(self.tr("Error importing metadata"), 
+            self.bar.pushMessage(self.tr("Error importing metadata"), 
                     self.tr("Cannot find ISO metadata file for the current layer"), 
                     level=Qgis.Warning, duration=5)
 
