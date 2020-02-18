@@ -345,7 +345,7 @@ class PublishWidget(BASE, WIDGET):
             metadataFile = self.currentLayer.source() + ".xml"
             if not os.path.exists(metadataFile):
                 metadataFile = None
-        if metadataFile is None:
+        if metadataFile is not None:
             try:
                 loadMetadataFromIsoXml(self.currentLayer, metadataFile)
             except:
