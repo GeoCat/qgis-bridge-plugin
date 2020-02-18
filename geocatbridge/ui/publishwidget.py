@@ -341,8 +341,19 @@ class PublishWidget(BASE, WIDGET):
         if self.currentLayer is None:
             return
         metadataFile = os.path.splitext(self.currentLayer.source())[0] + ".xml"
-        if os.path.exists(metadataFile):
-            loadMetadataFromIsoXml(self.currentLayer, metadataFile)
+        if not os.path.exists(metadataFile):
+            metadataFile = self.currentLayer.source() + ".xml"
+            if not os.path.exists(metadataFile):
+                metadataFile = None
+        if metadataFile is None:
+            try:
+                loadMetadataFromIsoXml(self.currentLayer, metadataFile)
+            except:
+                iface.messageBar().pushMessage(self.tr("Error importing metadata"), 
+                    self.tr("Cannot convert the metadata file. Maybe not ISO format?"), 
+                    level=Qgis.Warning, duration=5)
+                return
+
             self.metadata[self.currentLayer] = self.currentLayer.metadata().clone()
             self.populateLayerMetadata()
             iface.messageBar().pushMessage("", self.tr("Metadata correctly imported"), level=Qgis.Success, duration=5)
@@ -360,7 +371,8 @@ class PublishWidget(BASE, WIDGET):
         if result:
             txt = self.tr("No validation errors")
         else:
-            txt = self.tr("The following issues were found:") + "<br>" + "<br>".join(["<b>%s</b>:%s" % (err.section, err.note) for err in errors])
+            txt = (self.tr("The following issues were found:") + "<br>" + 
+                    "<br>".join(["<b>%s</b>:%s" % (err.section, err.note) for err in errors]))
         dlg = QgsMessageOutput.createMessageOutput()
         dlg.setTitle(self.tr("Metadata validation"))
         dlg.setMessage(txt, QgsMessageOutput.MessageHtml)

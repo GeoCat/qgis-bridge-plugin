@@ -23,6 +23,8 @@ def loadMetadataFromIsoXml(layer, filename):
     xslt = ET.parse(INVERSEXSLTFILENAME)
     transform = ET.XSLT(xslt)
     newdom = transform(dom)
+    if newdow is None:
+        raise Exception()
     s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
     with open(qmdFilename, "w", encoding="utf8") as f:
         f.write(s)

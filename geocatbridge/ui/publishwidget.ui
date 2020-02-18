@@ -136,7 +136,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QToolButton" name="btnImport">
              <property name="toolTip">
-              <string>Save metadata</string>
+              <string>Load ISO metadata from file</string>
              </property>
              <property name="text">
               <string/>
