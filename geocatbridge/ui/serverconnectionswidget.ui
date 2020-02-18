@@ -58,7 +58,7 @@ p, li { white-space: pre-wrap; }
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="widgetGeocatLive">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -536,7 +536,7 @@ p, li { white-space: pre-wrap; }
             <widget class="QWidget" name="cswAuthWidget" native="true"/>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_18">
+            <widget class="QLabel" name="labelMetadataProfile">
              <property name="text">
               <string>Metadata profile</string>
              </property>

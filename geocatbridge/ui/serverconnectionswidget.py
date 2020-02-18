@@ -74,6 +74,9 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.btnSaveServers.clicked.connect(self.saveServers)
         self.btnLoadServers.clicked.connect(self.loadServers)
 
+        self.comboMetadataProfile.setVisible(False)
+        self.labelMetadataProfile.setVisible(False)
+
     def checkServersHaveBeenDefined(self):
         if self.listServers.count():
             self.txtNoServers.setVisible(False)
