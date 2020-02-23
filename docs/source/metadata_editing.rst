@@ -29,7 +29,7 @@ To show a preview of the metadata of the selected layer, click on the |previewme
 
 .. |previewmetadata| image:: ./img/preview_metadata_button.png
 
-You will see the metadata in a new dialog
+You will see the metadata in a new dialog formatted as a HTML webpage
 
 .. image:: ./img/metadata_preview.png
 
@@ -48,9 +48,9 @@ After validation a dialog with validation results is displayed.
 Load metadata
 --------------
 
-If your layer has metadata in ISO format, and that metadata is saved in an additional file, QGIS won't read it (QGIS only has native support for its own `qmd` format), but Bridge can import it. Select the layer in the Bridge dialog and then click on the :guilabel:`Load metadata button` |loadmetadata|
+If your layer has metadata in ISO19139 format, and that metadata is available in an additional file stored along with the data file, QGIS will not automatically read it (QGIS only has native support for its own `qmd` format), but Bridge can import it. Select the layer in the Bridge dialog and then click on the :guilabel:`Load metadata button` |loadmetadata|
 
 .. |loadmetadata| image:: ./img/loadmetadata.png 
 
-Bridge will look in the folderwhre the layer file is stored, and it will try to find a metadata file named wether `[layer_filename].[extension].xml` or [layer_filename].xml` (that is, fo ra layer stored in `countries.shp` it will search for both `countries.shp.xml` or `countries.xml`). If such a file exist, it will convert it to the QGIS metadata format and load it.
-
+Bridge will look in the folder where the layer file is stored, and it will try to find a metadata file named either `[layer_filename].[extension].xml` or [layer_filename].xml` (that is, for a layer stored in `countries.shp` it will search for both `countries.shp.xml` or `countries.xml`). If such a file exist, and it is formatted as ISO19139, it will convert it to the QGIS metadata format and load it.
+Note that aspects of the original ISO19139 metadata may get lost in the transformation. Also consider that changes in the metadata will not be automatically stored in the file where the metadata has been imported from.
