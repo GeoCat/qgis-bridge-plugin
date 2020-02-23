@@ -18,6 +18,7 @@ You can specify the output folder in which docs are to be produced, by using the
 '''
 
 NAME = "bridge4"
+DOC_BRANCH_PREFIX = "docs-"
 
 def sh(commands):
     if isinstance(commands, str):
@@ -30,37 +31,21 @@ def clean(folder):
     print("Cleaning output folder")
     shutil.rmtree(folder, ignore_errors=True)
 
-def builddocs(version, folder):
-    if version in ["dev", "all"]:
-        buildref(None, folder, versionname="latest")
-    if version != "dev":
-        if version == "stable":
-            refs = getlatest()
-        else:
-            refs = getrefs()
-        if refs: 
-            for ref in refs:
-                buildref(ref, folder)
-
-def getlatest():
-    refs = []
-    try:
-        description = sh("git describe --tags")
-        tag = description.split("-")[0]
-        refs.append(tag)
-    except:
-        pass # in case no tags exist yet
-    return refs
+def builddocs(addmaster, folder):
+    refs = getrefs()
+    if addmaster:
+    	buildref("master", folder, "latest")
+    for ref in refs:
+        buildref(ref, folder)
 
 def getrefs():
     refs = []
-    try:
-        tags = sh("git show-ref --tags").splitlines()
-        for line in tags:
-            ref, tag = line.split(" ")
-            refs.append(tag.replace("refs/tags/", ""))
-    except:
-        pass # in case no tags exist yet
+    branches = sh("git branch").splitlines()
+    for line in branches:
+        name = line.split(" ")[-1]
+        if name.startswith(DOC_BRANCH_PREFIX):
+        	foldername = name.split(DOC_BRANCH_PREFIX)[-1]
+        	refs.append(foldername)
     return refs
 
 def buildref(ref, folder, versionname=None):
@@ -76,14 +61,9 @@ def buildref(ref, folder, versionname=None):
 
 def main():
     parser = argparse.ArgumentParser(description='Build documentation.')
-    parser.add_argument('--version',
-                        help='Version to build',
-                        choices=["all", "stable", "dev"],
-                        default="dev")
-    parser.add_argument('--output',
-                        help='Output folder to save documentation')
-
+    parser.add_argument('--output', help='Output folder to save documentation')
     parser.add_argument('--clean', dest='clean', action='store_true', help='Clean output folder')
+    parser.add_argument('--addmaster', dest='addmaster', action='store_true', help='Build also master branch')
     parser.set_defaults(clean=False)
 
     args = parser.parse_args()
@@ -93,7 +73,7 @@ def main():
     if args.clean:
         clean(folder)
 
-    builddocs(args.version, folder)
+    builddocs(args.addmaster, folder)
     sh("git checkout master")
 
 if __name__ == "__main__":
