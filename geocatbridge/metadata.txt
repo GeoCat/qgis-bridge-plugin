@@ -15,7 +15,7 @@ email=support@geocat.net
 
 icon=icons/geocat.png
 
-tags=GeoServer, MapServer, GeoNetwork, GeoCat
+tags=Geoserver, MapServer, GeoNetwork, Mapbox style, Geostyler, ISO19139, SLD, GeoPackage, PostGIS
 
 homepage=http://geocat.net/bridge
 tracker=https://github.com/geocat/qgis-bridge-plugin/issues
