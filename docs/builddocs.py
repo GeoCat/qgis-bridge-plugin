@@ -40,19 +40,20 @@ def builddocs(addmaster, folder):
 
 def getrefs():
     refs = []
-    branches = sh("git branch").splitlines()
+    branches = sh("git branch -r").splitlines()
     for line in branches:
-        name = line.split(" ")[-1]
+        fullname = line.strip().split(" ")[0]
+        name = fullname.split("/")[-1]
         if name.startswith(DOC_BRANCH_PREFIX):          
-            refs.append(name)
+            refs.append(fullname)
     return refs
 
 def buildref(ref, folder, versionname=None):
-    versionname = versionname or ref.split(DOC_BRANCH_PREFIX)[-1]
+    versionname = versionname or ref.split("/")[-1].split(DOC_BRANCH_PREFIX)[-1]
     print("Building project '%s' at version '%s'..." % (NAME, versionname))
     if ref is not None:
         sh("git checkout {}".format(ref))
-    sourcedir = os.path.join(os.getcwd(), "source")
+    sourcedir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "source")
     builddir = os.path.join(folder, versionname)
     if os.path.exists(builddir):
         shutil.rmtree(builddir)
@@ -68,7 +69,7 @@ def main():
 
     args = parser.parse_args()
 
-    folder = args.output or os.path.join(os.getcwd(), "build")
+    folder = args.output or os.path.join(os.path.dirname(os.path.abspath(__file__)), "build")
 
     if args.clean:
         clean(folder)
