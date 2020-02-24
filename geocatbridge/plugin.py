@@ -90,6 +90,7 @@ class GeocatBridge:
         self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
 
         QgsProject.instance().layerWasAdded.connect(self.layerWasAdded)
+        QgsProject.instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
 
         #QgsApplication.processingRegistry().addProvider(self.provider)
 
@@ -119,7 +120,13 @@ class GeocatBridge:
     def layerWasAdded(self, layer):
         self._layerSignals[layer] = partial(self.multistylerDialog.updateLayer, layer) 
         layer.styleChanged.connect(self._layerSignals[layer])
-    
+
+    def layerWillBeRemoved(self, layerid):
+        for layer in self._layerSignals.keys():
+            if layer.id() == layerid:
+                del self._layerSignals[layer]
+                return
+
     def publishClicked(self):
         dialog = BridgeDialog(self.iface.mainWindow())
         dialog.exec_()
