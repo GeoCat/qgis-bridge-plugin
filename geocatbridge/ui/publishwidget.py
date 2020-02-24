@@ -569,12 +569,12 @@ class PublishWidget(BASE, WIDGET):
 
         if self.comboGeodataServer.currentIndex() != 0:
             geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
-            geodataServer.validateBeforePublication(errors)
+            geodataServer.validateGeodataBeforePublication(errors)
 
 
         if self.comboMetadataServer.currentIndex() != 0:
             metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
-            metadataServer.validateBeforePublication(errors)
+            metadataServer.validateMetadataBeforePublication(errors)
         
         if errors:
             txt = '''<p><b>Cannot publish data.</b></p>
