@@ -64,8 +64,8 @@ def buildref(ref, folder, versionname=None):
 def main():
     parser = argparse.ArgumentParser(description='Build documentation.')
     parser.add_argument('--output', help='Output folder to save documentation')
-    parser.add_argument('--clean', dest='clean', action='store_false', help='Clean output folder')
-    parser.add_argument('--current', dest='current', action='store_false', help='Build only current branch')
+    parser.add_argument('--clean', dest='clean', action='store_true', help='Clean output folder')
+    parser.add_argument('--current', dest='current', action='store_true', help='Build only current branch')
 
     args = parser.parse_args()
 
