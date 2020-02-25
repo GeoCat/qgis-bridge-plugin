@@ -31,12 +31,13 @@ def clean(folder):
     print("Cleaning output folder")
     shutil.rmtree(folder, ignore_errors=True)
 
-def builddocs(addmaster, folder):
+def builddocs(current, folder):
     refs = getrefs()
-    if addmaster:
-        buildref("master", folder, "latest")
-    for ref in refs:
-        buildref(ref, folder)
+    if current:
+        buildref(None, folder, "latest")
+    else:
+        for ref in refs:
+            buildref(ref, folder)
 
 def getrefs():
     refs = []
@@ -63,9 +64,8 @@ def buildref(ref, folder, versionname=None):
 def main():
     parser = argparse.ArgumentParser(description='Build documentation.')
     parser.add_argument('--output', help='Output folder to save documentation')
-    parser.add_argument('--clean', dest='clean', action='store_true', help='Clean output folder')
-    parser.add_argument('--addmaster', dest='addmaster', action='store_true', help='Build also master branch')
-    parser.set_defaults(clean=False)
+    parser.add_argument('--clean', dest='clean', action='store_false', help='Clean output folder')
+    parser.add_argument('--current', dest='current', action='store_false', help='Build only current branch')
 
     args = parser.parse_args()
 
@@ -74,8 +74,7 @@ def main():
     if args.clean:
         clean(folder)
 
-    builddocs(args.addmaster, folder)
-    sh("git checkout master")
+    builddocs(args.current, folder)
 
 if __name__ == "__main__":
     main()

@@ -52,7 +52,7 @@ def builddocs():
     scriptPath = os.path.join(cwd, "docs")
     buildFolder = os.path.join(scriptPath, "build")
     os.chdir(scriptPath)
-    sh("python builddocs.py --output %s --version dev --clean" % buildFolder)
+    sh("python builddocs.py --output %s --current --clean" % buildFolder)
     os.chdir(cwd)
 
 if __name__ == "__main__":
