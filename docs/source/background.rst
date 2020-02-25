@@ -1,8 +1,5 @@
-Background and Requirements
-############################
-
 Background
-===========
+###########
 
 When publishing data on the Internet it is a common practice to provide
 the data using standardized exchange protocols. Adopting standards
@@ -46,42 +43,4 @@ GeoStyler-style is a styling format used in the `Shogun framework <https://githu
 `Mapbox Style <https://docs.mapbox.com/mapbox-gl-js/style-spec/>`_ is a style format that defines the visual appearance of vector tiles in the `mapbox javascript api <https://docs.mapbox.com/mapbox-gl-js/api/>`_. Bridge is able to generate a mapbox style document.
 
 `PostGIS <http://postgis.org/>`_ is a spatial extension to the popular open source postgres database. Bridge is able to export any local data to a remote (or local) postGIS database. That data can then be used to set up data services.
-
-Requirements
-===============
-
-Client requirements
-********************
-
-Bridge requires QGIS 3.6 or more recent.
-
-Server requirements
-********************
-
-GeoNetwork
------------
-
-GeoCat Bridge is officially supported on any GeoNetwork latest (3.8)_ and
-2 versions before (3.4 and 3.6)_. However most of the functionality will
-be operational from GeoNetwork version 2.6+.
-
-MapServer
----------------
-
-Requirement for MapServer are:
-
--   Officially supported is the latest minor version of Mapserver and 2
-    versions before, currently 7.0, 6.4 and 6.2. However any version
-    from 5.6.0 is expected to operate fine in most of the cases.
--   FTP connection or file write access to MapServer project path
-
-
-GeoServer
-----------
-
-Requirement for GeoServer are:
-
--   Officially supported versions are 2.15, 2.14 and 2.13. However other
-    versions since 2.4 are expected to operate fine in most of the
-    cases.
 

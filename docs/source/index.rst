@@ -27,7 +27,7 @@ implementations.
     :glob:
     :maxdepth: 2
 
-    background_and_requirements
+    background
     installation
     bridge_dialog
     publish
