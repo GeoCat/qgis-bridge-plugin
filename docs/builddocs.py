@@ -5,9 +5,11 @@ import argparse
 
 '''
 This script generates documentation based on the content of the current
-repo, for the current master HEAD (if run with '--version dev' argument or
-without arguments), all available tags (if run with the '--version all' argument), 
-or the latest available tag (if the '--version stable' argument is used)
+repo, for all the documentation branches (named "docs-[version_name]")
+
+If the '--current' option is used, a version corresponding to the current
+development version is generated instead, and created in a folder named 
+"latest"
 
 The script file should be located in the documentation folder (with sphinx files
 under ./source folder)
