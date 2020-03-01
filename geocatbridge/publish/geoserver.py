@@ -474,7 +474,7 @@ class GeoserverServer(ServerBase):
             errors.add("Could not connect to Geoserver.  Please check the server settings (including password).")
 
 
-    def validateBeforePublication(self, errors):
+    def validateGeodataBeforePublication(self, errors):
         path = QgsProject.instance().absoluteFilePath()
         if not path:
             errors.add("QGIS Project is not saved. Project must be saved before publishing layers to GeoServer")

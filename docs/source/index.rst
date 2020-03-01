@@ -1,7 +1,7 @@
-Introduction
-=============
+GeoCat Bridge for QGIS
+=======================
 
-GeoCat Bridge© for  QGIS enables you to publish your
+GeoCat Bridge© for QGIS enables you to publish your
 metadata in a spatial catalogue (CSW), like GeoNetwork opensource, and
 your map as OGC data services (WMS/WMTS/WFS/WCS) in GeoServer or
 MapServer. Bridge also offers the option to export metadata, symbology
@@ -27,7 +27,7 @@ implementations.
     :glob:
     :maxdepth: 1
 
-    background_and_requirements
+    background
     installation
     bridge_dialog
     publish
