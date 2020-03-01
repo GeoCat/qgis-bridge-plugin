@@ -25,7 +25,7 @@ implementations.
 
 .. toctree::
     :glob:
-    :maxdepth: 2
+    :maxdepth: 1
 
     background_and_requirements
     installation
