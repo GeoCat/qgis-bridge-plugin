@@ -33,7 +33,6 @@ class ReplaceAction():
                 for ext in ["*.txt", "*.rst" , "*.py", "*.ui"]:
                     for filename in fnmatch.filter(filenames, ext):
                         files.append(os.path.join(root, filename))
-        print(files)
         return files
 
 brandingActions = [

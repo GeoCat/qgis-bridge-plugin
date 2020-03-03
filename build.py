@@ -65,7 +65,7 @@ def builddocs():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Build documentation.')    
-    parser.add_argument('--Enterprise', dest='clean', action='store_true', help='Build with Enterprise branding')
+    parser.add_argument('--enterprise', dest='enterprise', action='store_true', help='Build with Enterprise branding')
     args = parser.parse_args()
     package(args.enterprise)
     package(True)
