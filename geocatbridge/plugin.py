@@ -68,14 +68,14 @@ class GeocatBridge:
         self.actionPublish.setObjectName("startPublish")
         self.actionPublish.triggered.connect(self.publishClicked)
 
-        self.iface.addPluginToWebMenu("GeoCatBridge", self.actionPublish)
+        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionPublish)
         self.iface.addWebToolBarIcon(self.actionPublish)
             
         helpPath = "file://{}".format(os.path.join(os.path.dirname(__file__), "docs", "index.html"))
         self.actionHelp = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self.iface.mainWindow())
         self.actionHelp.setObjectName("GeocatBridgeHelp")
         self.actionHelp.triggered.connect(lambda: webbrowser.open_new(helpPath))
-        self.iface.addPluginToWebMenu("GeoCatBridge", self.actionHelp)
+        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionHelp)
 
         self.multistylerDialog = MultistylerDialog()
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
@@ -85,7 +85,7 @@ class GeocatBridge:
         self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate("GeocatBridge", "Multistyler"), self.iface.mainWindow())
         self.actionMultistyler.setObjectName("multistyler")
         self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
-        self.iface.addPluginToWebMenu("GeoCatBridge", self.actionMultistyler)
+        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionMultistyler)
 
         self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
 
@@ -105,9 +105,9 @@ class GeocatBridge:
         for layer, func in self._layerSignals.items():
             layer.styleChanged.disconnect(func)
 
-        self.iface.removePluginWebMenu("GeoCatBridge", self.actionHelp)
-        self.iface.removePluginWebMenu("GeoCatBridge", self.actionPublish)
-        self.iface.removePluginWebMenu("GeoCatBridge", self.actionMultistyler)
+        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionHelp)
+        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionPublish)
+        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionMultistyler)
 
         self.iface.removeWebToolBarIcon(self.actionPublish)
 
