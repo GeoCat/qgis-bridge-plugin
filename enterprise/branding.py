@@ -39,8 +39,8 @@ class SetIsEnterpriseAsTrueAction():
 
     def run(self):
         code = "def isEnterprise():\n\treturn True"
-        filepath = os.path.join(DST_DIR, "utils", "enterprise")
-        with open(filepath) as f:
+        filepath = os.path.join(DST_DIR, "utils", "enterprise.py")
+        with open(filepath, "w") as f:
             f.write(code)
 
 brandingActions = [
@@ -48,7 +48,7 @@ brandingActions = [
                     ReplaceAction("GeoCat Bridge", "GeoCat Bridge Enterprise"),
                     ReplaceAction("geocatbridge.", "geocatbridgeenterprise."),
                     ReplaceAction("https://github.com/GeoCat/qgis-bridge-plugin/issues", 
-                                "https://my.geocat.net/submitticket.php?step=2&deptid=1&subject=Bridge")
+                                "https://my.geocat.net/submitticket.php?step=2&deptid=1&subject=Bridge"),
                     SetIsEnterpriseAsTrueAction()
                 ]
 
