@@ -48,7 +48,7 @@ brandingActions = [
                     ReplaceAction("GeoCat Bridge", "GeoCat Bridge Enterprise"),
                     ReplaceAction("geocatbridge.", "geocatbridgeenterprise."),
                     ReplaceAction("https://github.com/GeoCat/qgis-bridge-plugin/issues", 
-                                "https://my.geocat.net/submitticket.php?step=2&deptid=1")
+                                "https://my.geocat.net/submitticket.php?step=2&deptid=1&subject=Bridge")
                     SetIsEnterpriseAsTrueAction()
                 ]
 
