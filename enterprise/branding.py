@@ -30,15 +30,26 @@ class ReplaceAction():
         files = []
         for folder in [DST_DIR, DOCS_DST_DIR]:
             for root, dirnames, filenames in os.walk(folder):
-                for ext in ["*.txt", "*.rst" , "*.py", "*.ui"]:
+                for ext in ["*.txt", "*.rst" , "*.py", "*.ui", "*.html", "*.ui"]:
                     for filename in fnmatch.filter(filenames, ext):
                         files.append(os.path.join(root, filename))
         return files
+
+class SetIsEnterpriseAsTrueAction():
+
+    def run(self):
+        code = "def isEnterprise():\n\treturn True"
+        filepath = os.path.join(DST_DIR, "utils", "enterprise")
+        with open(filepath) as f:
+            f.write(code)
 
 brandingActions = [
                     ReplaceAction(" Bridge ", " Bridge Enterprise "),
                     ReplaceAction("GeoCat Bridge", "GeoCat Bridge Enterprise"),
                     ReplaceAction("geocatbridge.", "geocatbridgeenterprise."),
+                    ReplaceAction("https://github.com/GeoCat/qgis-bridge-plugin/issues", 
+                                "https://my.geocat.net/submitticket.php?step=2&deptid=1")
+                    SetIsEnterpriseAsTrueAction()
                 ]
 
 def doBranding():
