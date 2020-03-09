@@ -19,11 +19,14 @@ def readServers():
         if value is not None:
             storedServers = json.loads(value)            
             for serverDef in storedServers:
-                s = serverFromDefinition(serverDef)
-                _servers[s.name] = s
+                try:
+                    s = serverFromDefinition(serverDef)
+                    _servers[s.name] = s
+                except:
+                    pass
     except KeyError:
         pass
-
+ 
 def serverFromDefinition(defn):
     return globals()[defn[0]](**defn[1])
 
