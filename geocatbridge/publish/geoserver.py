@@ -8,7 +8,7 @@ import secrets
 
 from requests.exceptions import ConnectionError
 
-from qgis.core import QgsProject, QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer, QgsDataSourceUri
 
 from qgis.PyQt.QtCore import QCoreApplication
 
@@ -27,7 +27,7 @@ class GeoserverServer(ServerBase):
     POSTGIS_MANAGED_BY_BRIDGE = 1
     POSTGIS_MANAGED_BY_GEOSERVER = 2
 
-    def __init__(self, name, url="", authid="", storage=0, postgisdb=None):
+    def __init__(self, name, url="", authid="", storage=0, postgisdb=None, useoriginaldatasource=False):
         super().__init__()
         self.name = name
         
@@ -42,6 +42,7 @@ class GeoserverServer(ServerBase):
         self.authid = authid
         self.storage = storage
         self.postgisdb = postgisdb
+        self.useOriginalDataSource = useoriginaldatasource
         self._isMetadataCatalog = False
         self._isDataCatalog = True
         self._layersCache = {}
@@ -81,7 +82,13 @@ class GeoserverServer(ServerBase):
             if layer.featureCount() == 0:
                 self.logError("Layer contains zero features and cannot be published")
                 return
-            if self.storage in [self.FILE_BASED, self.POSTGIS_MANAGED_BY_GEOSERVER]:
+
+            if layer.dataProvider().name() == "postgres" and self.useOriginalDataSource:
+                from .postgis import PostgisServer
+                uri = QgsDataSourceUri(layer.source())
+                db = PostgisServer("temp", uri.authConfigId(), uri.host(), uri.port(), uri.schema(), uri.database())
+                self._publishVectorLayerFromPostgis(layer, db)
+            elif self.storage in [self.FILE_BASED, self.POSTGIS_MANAGED_BY_GEOSERVER]:
                 if layer.source() not in self._exportedLayers:
                     if self.storage == self.POSTGIS_MANAGED_BY_GEOSERVER:                    
                         path = exportLayer(layer, fields, toShapefile=True, force=True, log=self)
