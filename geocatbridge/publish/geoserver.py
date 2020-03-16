@@ -8,9 +8,11 @@ import secrets
 
 from requests.exceptions import ConnectionError
 
-from qgis.core import QgsProject, QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer, QgsDataSourceUri
 
 from qgis.PyQt.QtCore import QCoreApplication
+
+from qgis.PyQt.QtWidgets import QMessageBox
 
 from bridgestyle.qgis import saveLayerStyleAsZippedSld
 
@@ -19,14 +21,13 @@ from .serverbase import ServerBase
 from ..utils.files import tempFilenameInTempFolder
 from ..utils.services import addServicesForGeodataServer
 
-
 class GeoserverServer(ServerBase):
 
     FILE_BASED = 0
     POSTGIS_MANAGED_BY_BRIDGE = 1
     POSTGIS_MANAGED_BY_GEOSERVER = 2
 
-    def __init__(self, name, url="", authid="", storage=0, postgisdb=None):
+    def __init__(self, name, url="", authid="", storage=0, postgisdb=None, useoriginaldatasource=False):
         super().__init__()
         self.name = name
         
@@ -41,6 +42,7 @@ class GeoserverServer(ServerBase):
         self.authid = authid
         self.storage = storage
         self.postgisdb = postgisdb
+        self.useOriginalDataSource = useoriginaldatasource
         self._isMetadataCatalog = False
         self._isDataCatalog = True
         self._layersCache = {}
@@ -80,7 +82,13 @@ class GeoserverServer(ServerBase):
             if layer.featureCount() == 0:
                 self.logError("Layer contains zero features and cannot be published")
                 return
-            if self.storage in [self.FILE_BASED, self.POSTGIS_MANAGED_BY_GEOSERVER]:
+
+            if layer.dataProvider().name() == "postgres" and self.useOriginalDataSource:
+                from .postgis import PostgisServer
+                uri = QgsDataSourceUri(layer.source())
+                db = PostgisServer("temp", uri.authConfigId(), uri.host(), uri.port(), uri.schema(), uri.database())
+                self._publishVectorLayerFromPostgis(layer, db)
+            elif self.storage in [self.FILE_BASED, self.POSTGIS_MANAGED_BY_GEOSERVER]:
                 if layer.source() not in self._exportedLayers:
                     if self.storage == self.POSTGIS_MANAGED_BY_GEOSERVER:                    
                         path = exportLayer(layer, fields, toShapefile=True, force=True, log=self)
@@ -450,7 +458,6 @@ class GeoserverServer(ServerBase):
                         datastores.append("%s:%s" % (ws, datastore["name"]))
         return datastores
         
-
     def addPostgisDatastore(self, datastoreDef):        
         url = "%s/workspaces/%s/datastores/" % (self.url, self._workspace)
         self.request(url, data=datastoreDef, method="post")
@@ -469,7 +476,7 @@ class GeoserverServer(ServerBase):
                 return # couldnt find version -- dev GS, lets say its ok
             ver_major,ver_minor,ver_patch = ver.split('.')
             if int(ver_minor) <= 13: # old
-                errors.add("Geoserver 2.14.0 or later is required.  Selected Geoserver is version '" +ver + "'.  Please see <a href='https://my.geocat.net/knowledgebase/100/Bridge-4-compatibility-with-Geoserver-2134-and-before.html'>Bridge 4 Compatibility with Geoserver 2.13.4 and before</a>")
+                errors.add("Geoserver 2.14.0 or later is required.  Selected Geoserver is version '" + ver + "'.  Please see <a href='https://my.geocat.net/knowledgebase/100/Bridge-4-compatibility-with-Geoserver-2134-and-before.html'>Bridge 4 Compatibility with Geoserver 2.13.4 and before</a>")
         except:
             errors.add("Could not connect to Geoserver.  Please check the server settings (including password).")
 
@@ -480,5 +487,11 @@ class GeoserverServer(ServerBase):
             errors.add("QGIS Project is not saved. Project must be saved before publishing layers to GeoServer")
         if "." in self._workspace:
             errors.add("QGIS project name contains unsupported characters ('.'). Save with a different name and try again")
+        if self.workspaceExists():
+            ret = QMessageBox.question(None, "Workspace",
+                                "A workspace with that name exists and will be deleted.\nDo you want to proceed?",
+                                QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.No:
+                errors.add("Cannot overwrite existing workspace")
         self.checkMinGeoserverVersion(errors)
 
