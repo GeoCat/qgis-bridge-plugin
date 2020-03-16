@@ -19,7 +19,7 @@ To install Bridge Enterprise from the zip package provided by GeoCat, follow the
 
 4. Click on the :guilabel:`Install plugin` button to install the plugin.
 
-5. Click on :guilabel:`Close`button to close 
+5. Click on :guilabel:`Close` button to close 
 
 6. Close the :guilabel:`Plugin Manager` and you will find a new menu entry under the :menuselection:`Web` menu, which contains the menus from the Bridge plugin.
 
