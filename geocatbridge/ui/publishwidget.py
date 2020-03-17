@@ -48,7 +48,7 @@ from geocatbridge.utils.gui import execute
 from geocatbridge.publish.geonetwork import GeonetworkServer
 from geocatbridge.publish.publishtask import PublishTask, ExportTask
 from geocatbridge.publish.servers import geodataServers, metadataServers
-from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromIsoXml
+from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromXml
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 from geocatbridge.ui.progressdialog import ProgressDialog
@@ -347,10 +347,10 @@ class PublishWidget(BASE, WIDGET):
                 metadataFile = None
         if metadataFile is not None:
             try:
-                loadMetadataFromIsoXml(self.currentLayer, metadataFile)
+                loadMetadataFromXml(self.currentLayer, metadataFile)
             except:
                 self.bar.pushMessage(self.tr("Error importing metadata"), 
-                    self.tr("Cannot convert the metadata file. Maybe not ISO format?"), 
+                    self.tr("Cannot convert the metadata file. Maybe not ISO19139 or ESRI-ISO format?"), 
                     level=Qgis.Warning, duration=5)
                 return
 
@@ -359,7 +359,7 @@ class PublishWidget(BASE, WIDGET):
             self.bar.pushMessage("", self.tr("Metadata correctly imported"), level=Qgis.Success, duration=5)
         else:
             self.bar.pushMessage(self.tr("Error importing metadata"), 
-                    self.tr("Cannot find ISO metadata file for the current layer"), 
+                    self.tr("Cannot find metadata file for the current layer"), 
                     level=Qgis.Warning, duration=5)
 
     def validateMetadata(self):
