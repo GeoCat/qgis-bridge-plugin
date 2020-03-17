@@ -14,8 +14,8 @@ from qgis.core import (
 )
 from ..utils.files import tempFilenameInTempFolder
 
-ISO19139_TO_QMD_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
-QMD_TO_ISO19139_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19139-to-qgis.xsl")
+QMD_TO_ISO19139_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
+ISO19139_TO_QMD_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19139-to-qgis.xsl")
 ISO19115_TO_ISO19139_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19115-to-iso19139.xsl")
 
 def loadMetadataFromXml(layer, filename):
@@ -36,10 +36,12 @@ def loadMetadataFromIsoXml(layer, filename):
     s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
     with open(qmdFilename, "w", encoding="utf8") as f:
         f.write(s)
+    print (qmdFilename)
     layer.loadNamedMetadata(qmdFilename)
     
 def loadMetadataFromEsriXml(layer, filename):
-    isoFilename = tempFilenameInTempFolder("fromesri.xml") 
+    isoFilename = tempFilenameInTempFolder("fromesri.xml")
+    print(isoFilename)   
     dom = ET.parse(filename)
     xslt = ET.parse(ISO19115_TO_ISO19139_XSLT)
     transform = ET.XSLT(xslt)
