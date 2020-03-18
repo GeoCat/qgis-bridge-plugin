@@ -345,7 +345,16 @@ class PublishWidget(BASE, WIDGET):
             metadataFile = self.currentLayer.source() + ".xml"
             if not os.path.exists(metadataFile):
                 metadataFile = None
-        if metadataFile is not None:
+        
+        if metadataFile is None:
+            ret = QMessageBox.question(self, self.tr("Metadata file"), 
+                            self.tr("Could not find a suitable metadata file.\nDo you want to select it manually?"))            
+            if ret == QMessageBox.Yes:
+                metadataFile, _ = QFileDialog.getOpenFileName(self, self.tr("Metadata file"), 
+                                    os.path.dirname(self.currentLayer.source()), '*.xml')
+                print(metadataFile)
+        
+        if metadataFile:
             try:
                 loadMetadataFromXml(self.currentLayer, metadataFile)
             except:
@@ -357,11 +366,8 @@ class PublishWidget(BASE, WIDGET):
             self.metadata[self.currentLayer] = self.currentLayer.metadata().clone()
             self.populateLayerMetadata()
             self.bar.pushMessage("", self.tr("Metadata correctly imported"), level=Qgis.Success, duration=5)
-        else:
-            self.bar.pushMessage(self.tr("Error importing metadata"), 
-                    self.tr("Cannot find metadata file for the current layer"), 
-                    level=Qgis.Warning, duration=5)
-
+        
+        
     def validateMetadata(self):
         if self.currentLayer is None:
             return

@@ -36,12 +36,10 @@ def loadMetadataFromIsoXml(layer, filename):
     s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
     with open(qmdFilename, "w", encoding="utf8") as f:
         f.write(s)
-    print (qmdFilename)
     layer.loadNamedMetadata(qmdFilename)
     
 def loadMetadataFromEsriXml(layer, filename):
-    isoFilename = tempFilenameInTempFolder("fromesri.xml")
-    print(isoFilename)   
+    isoFilename = tempFilenameInTempFolder("fromesri.xml") 
     dom = ET.parse(filename)
     xslt = ET.parse(ISO19115_TO_ISO19139_XSLT)
     transform = ET.XSLT(xslt)
