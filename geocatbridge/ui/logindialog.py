@@ -28,7 +28,8 @@ class LoginDialog(QDialog):
             config.setName("GeoCat Bridge Enterprise key")
             config.setMethod("Basic")        
             config.setConfig("username", "")
-            config.setConfig("password", key)
+            config.setConfig("password", "")
+            config.setConfig("licensekey", key)
             authMgr.storeAuthenticationConfig(config)
             self.accept()
         else:
