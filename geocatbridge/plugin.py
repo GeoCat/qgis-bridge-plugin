@@ -143,8 +143,7 @@ class GeocatBridge:
         if KEY_NAME in authManager.configIds():
             authConfig = QgsAuthMethodConfig()
             authManager.loadAuthenticationConfig(KEY_NAME, authConfig, True)            
-            key = authConfig.config('password2')
-            print(key)
+            key = authConfig.config('licensekey')
             if doEnterpriseLogin(key):
                 return True
         dlg = LoginDialog(self.iface.mainWindow())
