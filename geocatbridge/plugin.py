@@ -6,15 +6,17 @@ from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication
+from qgis.PyQt.QtWidgets import QAction, QDialog
+from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication, QgsAuthMethodConfig
 
 from .utils.files import removeTempFolder
 from .ui.bridgedialog import BridgeDialog
 from .ui.multistylerdialog import MultistylerDialog
+from .ui.logindialog import LoginDialog, KEY_NAME, doEnterpriseLogin
 from .publish.servers import readServers
 from .processing.bridgeprovider import BridgeProvider
 from .errorhandler import handleError
+from .utils.enterprise import isEnterprise
 
 PLUGIN_NAMESPACE = "geocatbridge"
 
@@ -127,7 +129,23 @@ class GeocatBridge:
                 del self._layerSignals[layer]
                 return
 
+    isRegistered = False
+
     def publishClicked(self):
+        if isEnterprise() and not self.isRegistered:
+            if not self.login():
+                return
         dialog = BridgeDialog(self.iface.mainWindow())
         dialog.exec_()
+
+    def login(self):
+        authManager = QgsApplication.authManager()
+        if KEY_NAME in authManager.configIds():
+            authConfig = QgsAuthMethodConfig()
+            authManager.loadAuthenticationConfig(KEY_NAME, authConfig, True)            
+            key = authConfig.config('licensekey')
+            if doEnterpriseLogin(key):
+                return True
+        dlg = LoginDialog(self.iface.mainWindow())
+        return dlg.exec_() == QDialog.Accepted
         
