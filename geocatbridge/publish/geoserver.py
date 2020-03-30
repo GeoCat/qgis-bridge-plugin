@@ -340,6 +340,15 @@ class GeoserverServer(ServerBase):
         url = "%s/workspaces/%s/layers.json" % (self.url, self._workspace)
         return self._exists(url, "layer", name)
 
+    def layers(self):
+        url = "%s/workspaces/%s/layers.json" % (self.url, self._workspace)
+        r = self.request(url)
+        root = r.json()["layers"]
+        if "layer" in root:            
+            return [s["name"] for s in root["layer"]]
+        else:
+            return []
+
     def styleExists(self, name):
         url = "%s/workspaces/%s/styles.json" % (self.url, self._workspace)
         return self._exists(url, "style", name)
@@ -347,6 +356,21 @@ class GeoserverServer(ServerBase):
     def workspaceExists(self):
         url = "%s/workspaces.json" % (self.url)
         return self._exists(url, "workspace", self._workspace)
+
+    def willDeleteLayersOnPublication(self, toPublish):
+
+        if self.workspaceExists():
+            print(3)
+            layers = self.layers()
+            toDelete = list(set(layers) - set(toPublish))
+            print(layers)
+            print(toPublish)
+            print(toDelete)
+            return bool(toDelete)
+        else:
+            return False
+
+
 
     def datastoreExists(self, name):
         url = "%s/workspaces%s/datastores.json" % (self.url, self._workspace)
@@ -481,15 +505,15 @@ class GeoserverServer(ServerBase):
             errors.add("Could not connect to Geoserver.  Please check the server settings (including password).")
 
 
-    def validateGeodataBeforePublication(self, errors):
+    def validateGeodataBeforePublication(self, errors, toPublish):
         path = QgsProject.instance().absoluteFilePath()
         if not path:
             errors.add("QGIS Project is not saved. Project must be saved before publishing layers to GeoServer")
         if "." in self._workspace:
             errors.add("QGIS project name contains unsupported characters ('.'). Save with a different name and try again")
-        if self.workspaceExists():
+        if self.willDeleteLayersOnPublication(toPublish):
             ret = QMessageBox.question(None, "Workspace",
-                                "A workspace with that name exists and will be deleted.\nDo you want to proceed?",
+                                "A workspace with that name exists and contains layers that are not going to be published.\nThose layers will be deleted.\nDo you want to proceed?",
                                 QMessageBox.Yes | QMessageBox.No)
             if ret == QMessageBox.No:
                 errors.add("Cannot overwrite existing workspace")

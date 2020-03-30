@@ -522,8 +522,8 @@ class PublishWidget(BASE, WIDGET):
         server.openMetadata(uuid)
 
     def publish(self):
-        if self.validateBeforePublication():
-            toPublish = self._toPublish()
+        toPublish = self._toPublish()
+        if self.validateBeforePublication(toPublish):            
             progressDialog = ProgressDialog(toPublish, self.parent)
             task = self.getPublishTask(self.parent)
             task.stepStarted.connect(progressDialog.setInProgress)
@@ -558,7 +558,7 @@ class PublishWidget(BASE, WIDGET):
             QgsApplication.taskManager().addTask(task)
             QCoreApplication.processEvents()
 
-    def validateBeforePublication(self):
+    def validateBeforePublication(self, toPublish):
         names = []
         errors = set()
         for i in range(self.listLayers.count()):            
@@ -572,10 +572,11 @@ class PublishWidget(BASE, WIDGET):
                 if name in names:
                     errors.add("Several layers with the same name")
                 names.append(name)
-
+        print(0)
         if self.comboGeodataServer.currentIndex() != 0:
+            print("a")
             geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
-            geodataServer.validateGeodataBeforePublication(errors)
+            geodataServer.validateGeodataBeforePublication(errors, toPublish)
 
 
         if self.comboMetadataServer.currentIndex() != 0:

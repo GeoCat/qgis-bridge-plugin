@@ -141,8 +141,8 @@ class GeocatLiveServer(ServerBase):
         baseurl = "/".join(self._geoserverUrl.split("/")[:-1])
         addServicesForGeodataServer("GeoCat Live Geoserver - " + self.userid, baseurl, self.geoserverAuthid)
 
-    def validateGeoDataBeforePublication(self, errors):
-        return self.geoserverServer().validateGeodataBeforePublication(errors)
+    def validateGeodataBeforePublication(self, errors, toPublish):
+        return self.geoserverServer().validateGeodataBeforePublication(errors, toPublish)
 
     def validateMetadataBeforePublication(self, errors):    
         return self.geonetworkServer().validateMetadataBeforePublication(errors)
