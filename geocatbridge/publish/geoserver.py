@@ -27,7 +27,7 @@ class GeoserverServer(ServerBase):
     POSTGIS_MANAGED_BY_BRIDGE = 1
     POSTGIS_MANAGED_BY_GEOSERVER = 2
 
-    def __init__(self, name, url="", authid="", storage=0, postgisdb=None, useoriginaldatasource=False):
+    def __init__(self, name, url="", authid="", storage=0, postgisdb=None, useOriginalDataSource=False):
         super().__init__()
         self.name = name
         
@@ -42,7 +42,7 @@ class GeoserverServer(ServerBase):
         self.authid = authid
         self.storage = storage
         self.postgisdb = postgisdb
-        self.useOriginalDataSource = useoriginaldatasource
+        self.useOriginalDataSource = useOriginalDataSource
         self._isMetadataCatalog = False
         self._isDataCatalog = True
         self._layersCache = {}
@@ -495,14 +495,21 @@ class GeoserverServer(ServerBase):
         try:
             url = "%s/about/version.json" % self.url
             result = self.request(url).json()['about']['resource']
+        except:            
+            errors.add("Could not connect to Geoserver.  Please check the server settings (including password).")
+            return
+        try:
             ver = next((x["Version"] for x in result if x["@name"]=='GeoServer'), None)
             if ver is None:
-                return # couldnt find version -- dev GS, lets say its ok
+                return # couldnt find version -- dev GS, lets say its ok      
             ver_major,ver_minor,ver_patch = ver.split('.')
+            
             if int(ver_minor) <= 13: # old
                 errors.add("Geoserver 2.14.0 or later is required.  Selected Geoserver is version '" + ver + "'.  Please see <a href='https://my.geocat.net/knowledgebase/100/Bridge-4-compatibility-with-Geoserver-2134-and-before.html'>Bridge 4 Compatibility with Geoserver 2.13.4 and before</a>")
         except:
-            errors.add("Could not connect to Geoserver.  Please check the server settings (including password).")
+            #version format might not be the expected. This is usually a RC or dev version, so we consider it ok
+            pass
+        
 
 
     def validateGeodataBeforePublication(self, errors, toPublish):
