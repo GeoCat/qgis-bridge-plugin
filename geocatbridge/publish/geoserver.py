@@ -400,9 +400,11 @@ class GeoserverServer(ServerBase):
                     % (baseurl, self._workspace, names, bbox, srs))
         return url
 
-    def layerWmsUrl(self, name, forPreview = True):
-        request = "GetMap" if forPreview else "GetCapabilities"
-        return "%s/%s/wms?service=WMS&version=1.1.0&request=%s&layers=%s"% (self.baseUrl(), self._workspace, request, name)        
+    def layerWmsUrl(self, name):
+        return "%s/%s/wms?service=WMS&version=1.1.0&request=GetCapabilities&layers=%s"% (self.baseUrl(), self._workspace, name)        
+
+    def layerWfsUrl(self):
+        return "%s/%s/ows?service=WFS&version=2.0.0&request=GetCapabilities"% (self.baseUrl(), self._workspace)        
         
     def setLayerMetadataLink(self, name, url):
         layerUrl = "%s/workspaces/%s/layers/%s.json" % (self.url, self._workspace, name)

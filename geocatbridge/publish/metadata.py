@@ -54,13 +54,13 @@ def loadMetadataFromEsriXml(layer, filename):
 def saveMetadataToIsoXml(layer, filename):
     pass
 
-def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None):
+def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None, wfs=None):
     uuid = uuidForLayer(layer)
     filename = tempFilenameInTempFolder(layer.name() + ".qmd")    
     layer.saveNamedMetadata(filename)
     thumbnail = saveLayerThumbnail(layer)
     apiUrl = apiUrl or ""
-    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms, layer.name())
+    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms, wfs, layer.name())
     mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
     createMef(uuid, transformedFilename, mefFilename, thumbnail)
     return mefFilename
@@ -85,7 +85,7 @@ def saveLayerThumbnail(layer):
     img.save(filename)
     return filename
 
-def transformMetadata(filename, uuid, apiUrl, wms, layerName):
+def transformMetadata(filename, uuid, apiUrl, wms, wfs, layerName):
     def _ns(n):
         return '{http://www.isotc211.org/2005/gmd}' + n
     isoFilename = tempFilenameInTempFolder("metadata.xml")
@@ -108,8 +108,23 @@ def transformMetadata(filename, uuid, apiUrl, wms, layerName):
             cs = ET.SubElement(protocol, '{http://www.isotc211.org/2005/gco}CharacterString')
             cs.text = "OGC:WMS"
             name = ET.SubElement(cionline, _ns('name'))
-            csname = ET.SubElement(name, '{http://www.isotc211.org/2005/gco}CharacterString')
+            csname = ET.SubElement(name, '{http://www.isotc211.org/2005/gco}CharacterString')            
             csname.text = layerName
+    if wfs is not None:
+        for root in newdom.iter(_ns('MD_Distribution')):
+            trans = ET.SubElement(root, _ns('transferOptions'))
+            dtrans = ET.SubElement(trans, _ns('MD_DigitalTransferOptions'))
+            online = ET.SubElement(dtrans, _ns('onLine'))
+            cionline = ET.SubElement(online, _ns('CI_OnlineResource'))
+            linkage = ET.SubElement(cionline, _ns('linkage'))
+            url = ET.SubElement(linkage, _ns('URL'))
+            url.text = wfs
+            protocol = ET.SubElement(cionline, _ns('protocol'))
+            cs = ET.SubElement(protocol, '{http://www.isotc211.org/2005/gco}CharacterString')
+            cs.text = "OGC:WFS"
+            name = ET.SubElement(cionline, _ns('name'))
+            csname = ET.SubElement(name, '{http://www.isotc211.org/2005/gco}CharacterString')            
+            csname.text = layerName            
     for root in newdom.iter(_ns('MD_DataIdentification')):
         overview = ET.SubElement(root, _ns('graphicOverview'))
         browseGraphic = ET.SubElement(overview, _ns('MD_BrowseGraphic'))
