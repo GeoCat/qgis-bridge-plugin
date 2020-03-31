@@ -150,7 +150,7 @@ class PublishTask(QgsTask):
                         self.metadataServer.resetLog()
                         if validates or allowWithoutMetadata == ALLOW:
                             if self.geodataServer is not None:
-                                wms = self.geodataServer.layerWmsUrl(layer.name())
+                                wms = self.geodataServer.layerWmsUrl(layer.name(), False)
                             else:
                                 wms = None
                             self.autofillMetadata(layer)

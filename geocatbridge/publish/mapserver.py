@@ -188,9 +188,10 @@ class MapserverServer(ServerBase):
     def openPreview(self, names, bbox, srs):
         pass
 
-    def layerWmsUrl(self,name):
+    def layerWmsUrl(self, name, forPreview=True):
         project = self.projectName()
-        return "%s?map=%s/maps/%s.map&service=WMS&version=1.1.0&request=GetMap&layers=%s" % (self.url, project, project, name)
+        request = "GetMap" if forPreview else "GetCapabilities"
+        return "%s?map=%s/maps/%s.map&service=WMS&version=1.1.0&request=%s&layers=%s" % (self.url, project, project, request, name)
         
     def setLayerMetadataLink(self, name, url):
         self._metadataLinks[name] = url

@@ -106,10 +106,10 @@ class GeocatLiveServer(ServerBase):
         self.geoserverServer().deleteLayer(name)
     
     def openPreview(self, names, bbox, srs):
-        self.geoserverServer().openPreview(names, bbox, srs)
+        self.geoserverServer().openPreview(names, bbox, srs)    
 
-    def layerWmsUrl(self, name):
-        return self.geoserverServer().layerWmsUrl(name)
+    def layerWmsUrl(self, name, forPreview=True):
+        return self.geoserverServer().layerWmsUrl(name, forPreview)
         
     def setLayerMetadataLink(self, name, url):
         return self.geoserverServer().setLayerMetadataLink(name, url)

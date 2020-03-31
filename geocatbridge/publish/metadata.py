@@ -60,7 +60,7 @@ def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None):
     layer.saveNamedMetadata(filename)
     thumbnail = saveLayerThumbnail(layer)
     apiUrl = apiUrl or ""
-    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms)
+    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms, layer.name())
     mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
     createMef(uuid, transformedFilename, mefFilename, thumbnail)
     return mefFilename
@@ -85,7 +85,7 @@ def saveLayerThumbnail(layer):
     img.save(filename)
     return filename
 
-def transformMetadata(filename, uuid, apiUrl, wms):
+def transformMetadata(filename, uuid, apiUrl, wms, layerName):
     def _ns(n):
         return '{http://www.isotc211.org/2005/gmd}' + n
     isoFilename = tempFilenameInTempFolder("metadata.xml")
@@ -107,6 +107,9 @@ def transformMetadata(filename, uuid, apiUrl, wms):
             protocol = ET.SubElement(cionline, _ns('protocol'))
             cs = ET.SubElement(protocol, '{http://www.isotc211.org/2005/gco}CharacterString')
             cs.text = "OGC:WMS"
+            name = ET.SubElement(cionline, _ns('name'))
+            csname = ET.SubElement(name, '{http://www.isotc211.org/2005/gco}CharacterString')
+            csname.text = layerName
     for root in newdom.iter(_ns('MD_DataIdentification')):
         overview = ET.SubElement(root, _ns('graphicOverview'))
         browseGraphic = ET.SubElement(overview, _ns('MD_BrowseGraphic'))
