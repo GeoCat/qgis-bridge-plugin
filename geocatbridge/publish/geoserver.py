@@ -404,8 +404,8 @@ class GeoserverServer(ServerBase):
         return "%s/%s/wms?service=WMS&version=1.1.0&request=GetMap&layers=%s"% (self.baseUrl(), self._workspace, name)        
         
     def setLayerMetadataLink(self, name, url):
-        url = "%s/workspaces/%s/layers/%s.json" % (self.url, self._workspace, name)
-        r = self.request(url)
+        layerUrl = "%s/workspaces/%s/layers/%s.json" % (self.url, self._workspace, name)
+        r = self.request(layerUrl)
         resourceUrl = r.json()["layer"]["resource"]["href"]
         r = self.request(resourceUrl)
         layer = r.json()
@@ -509,8 +509,6 @@ class GeoserverServer(ServerBase):
         except:
             #version format might not be the expected. This is usually a RC or dev version, so we consider it ok
             pass
-        
-
 
     def validateGeodataBeforePublication(self, errors, toPublish):
         path = QgsProject.instance().absoluteFilePath()
