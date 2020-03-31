@@ -35,7 +35,7 @@
                     <keywords vocabulary="{gmd:MD_Keywords/gmd:thesaurusName/gmd:CI_Citation/gmd:title/gco:CharacterString}">                    
                         <xsl:for-each select="gmd:MD_Keywords/gmd:keyword">
                             <keyword>
-                                <xsl:value-of select="gmd:keyword/gco:CharacterString" />
+                                <xsl:value-of select="gco:CharacterString" />
                             </keyword>
                         </xsl:for-each>
                     </keywords>
