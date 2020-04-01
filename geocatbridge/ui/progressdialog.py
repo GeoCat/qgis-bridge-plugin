@@ -3,7 +3,7 @@ import os
 from qgis.PyQt import uic
 
 from qgis.PyQt.QtCore import Qt, QCoreApplication
-from qgis.PyQt.QtGui import QBrush, QIcon
+from qgis.PyQt.QtGui import QBrush, QIcon, QColor
 from qgis.PyQt.QtWidgets import QTreeWidgetItem
 
 
@@ -60,7 +60,9 @@ class ProgressDialog(BASE, WIDGET):
             item = self.treeWidget.topLevelItem(idx)
             subitem = item.child(category)
         self.treeWidget.scrollToItem(subitem)
-        subitem.setForeground(1, QBrush(Qt.green))
+        green = QColor()
+        green.setNamedColor("#00851F")
+        subitem.setForeground(1, QBrush(green))
         subitem.setText(1, "Finished")
         subitem.setBackground(0, QBrush(Qt.white))
         subitem.setBackground(1, QBrush(Qt.white))
@@ -99,6 +101,8 @@ class ProgressDialog(BASE, WIDGET):
             subitem = item.child(category)
         self.treeWidget.scrollToItem(subitem)
         subitem.setText(1, "In progress...")
-        subitem.setBackground(0, QBrush(Qt.cyan))
-        subitem.setBackground(1, QBrush(Qt.cyan))
+        grey = QColor()
+        grey.setNamedColor("#cccccc")
+        subitem.setBackground(0, QBrush(grey))
+        subitem.setBackground(1, QBrush(grey))
         QCoreApplication.processEvents()
