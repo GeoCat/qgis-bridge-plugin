@@ -54,13 +54,13 @@ def loadMetadataFromEsriXml(layer, filename):
 def saveMetadataToIsoXml(layer, filename):
     pass
 
-def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None, wfs=None):
+def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None, wfs=None, layerName=None):
     uuid = uuidForLayer(layer)
     filename = tempFilenameInTempFolder(layer.name() + ".qmd")    
     layer.saveNamedMetadata(filename)
     thumbnail = saveLayerThumbnail(layer)
     apiUrl = apiUrl or ""
-    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms, wfs, layer.name())
+    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms, wfs, layerName or layer.name())
     mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
     createMef(uuid, transformedFilename, mefFilename, thumbnail)
     return mefFilename

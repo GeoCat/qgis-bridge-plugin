@@ -188,6 +188,9 @@ class MapserverServer(ServerBase):
     def openPreview(self, names, bbox, srs):
         pass
 
+    def fullLayerName(self, layerName):
+        return layerName
+        
     def layerWmsUrl(self, name):
         project = self.projectName()
         return "%s?map=%s/maps/%s.map&service=WMS&version=1.1.0&request=GetCapabilities&layers=%s" % (self.url, project, project, name)

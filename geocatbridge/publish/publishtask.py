@@ -150,6 +150,7 @@ class PublishTask(QgsTask):
                         self.metadataServer.resetLog()
                         if validates or allowWithoutMetadata == ALLOW:
                             if self.geodataServer is not None:
+                                fullName = self.geodataServer.fullLayerName(layer.name())
                                 wms = self.geodataServer.layerWmsUrl(layer.name())
                                 if layer.type() == layer.VectorLayer:
                                     wfs = self.geodataServer.layerWfsUrl() 
@@ -160,7 +161,7 @@ class PublishTask(QgsTask):
                                 wfs = None
                             self.autofillMetadata(layer)
                             self.stepStarted.emit(name, METADATA)
-                            self.metadataServer.publishLayerMetadata(layer, wms, wfs)
+                            self.metadataServer.publishLayerMetadata(layer, wms, wfs, fullName)
                             self.stepFinished.emit(name, METADATA)
                         else:
                             self.metadataServer.logError(self.tr("Layer '%s' has invalid metadata. Metadata was not published") % layer.name())

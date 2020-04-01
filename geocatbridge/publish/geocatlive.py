@@ -108,6 +108,9 @@ class GeocatLiveServer(ServerBase):
     def openPreview(self, names, bbox, srs):
         self.geoserverServer().openPreview(names, bbox, srs)    
 
+    def fullLayerName(self, layerName):
+        return self.geoserverServer().fullLayerName(layerName)
+
     def layerWfsUrl(self):
         return self.geoserverServer().layerWfsUrl()
 
@@ -117,8 +120,8 @@ class GeocatLiveServer(ServerBase):
     def setLayerMetadataLink(self, name, url):
         return self.geoserverServer().setLayerMetadataLink(name, url)
 
-    def publishLayerMetadata(self, layer, wms, wfs):
-        return self.geonetworkServer().publishLayerMetadata(layer, wms, wfs)
+    def publishLayerMetadata(self, layer, wms, wfs, layerName):
+        return self.geonetworkServer().publishLayerMetadata(layer, wms, wfs, layerName)
 
     def metadataExists(self, uuid):
         return self.geonetworkServer().metadataExists(uuid)

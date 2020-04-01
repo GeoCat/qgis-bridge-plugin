@@ -73,8 +73,8 @@ class GeonetworkServer(ServerBase):
     def request(self, url, data=None, method="get", headers={}):
         return self._nam.request(url, data, method, headers)
 
-    def publishLayerMetadata(self, layer, wms, wfs):
-        mefFilename = saveMetadata(layer, None, self.apiUrl(), wms, wfs)            
+    def publishLayerMetadata(self, layer, wms, wfs, layerName):
+        mefFilename = saveMetadata(layer, None, self.apiUrl(), wms, wfs, layerName)
         self.publishMetadata(mefFilename)
 
     def testConnection(self):
