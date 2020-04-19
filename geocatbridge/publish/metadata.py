@@ -14,13 +14,21 @@ from qgis.core import (
 )
 from ..utils.files import tempFilenameInTempFolder
 
-XSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
-INVERSEXSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19139-to-qgis.xsl")
+QMD_TO_ISO19139_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
+ISO19139_TO_QMD_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19139-to-qgis.xsl")
+ISO19115_TO_ISO19139_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19115-to-iso19139.xsl")
+
+def loadMetadataFromXml(layer, filename):
+    root = ElementTree.parse(filename).getroot()
+    if len(root.findall("Esri")):
+        loadMetadataFromEsriXml(layer, filename)
+    else:
+        loadMetadataFromIsoXml(layer, filename)
 
 def loadMetadataFromIsoXml(layer, filename):
     qmdFilename = tempFilenameInTempFolder("fromiso.qmd")    
     dom = ET.parse(filename)
-    xslt = ET.parse(INVERSEXSLTFILENAME)
+    xslt = ET.parse(ISO19139_TO_QMD_XSLT)
     transform = ET.XSLT(xslt)
     newdom = transform(dom)
     if newdom is None:
@@ -30,6 +38,19 @@ def loadMetadataFromIsoXml(layer, filename):
         f.write(s)
     layer.loadNamedMetadata(qmdFilename)
     
+def loadMetadataFromEsriXml(layer, filename):
+    isoFilename = tempFilenameInTempFolder("fromesri.xml") 
+    dom = ET.parse(filename)
+    xslt = ET.parse(ISO19115_TO_ISO19139_XSLT)
+    transform = ET.XSLT(xslt)
+    newdom = transform(dom)
+    if newdom is None:
+        raise Exception("Cannot convert metadata")
+    s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
+    with open(isoFilename, "w", encoding="utf8") as f:
+        f.write(s)
+    loadMetadataFromIsoXml(layer, isoFilename)
+
 def saveMetadataToIsoXml(layer, filename):
     pass
 
@@ -69,7 +90,7 @@ def transformMetadata(filename, uuid, apiUrl, wms):
         return '{http://www.isotc211.org/2005/gmd}' + n
     isoFilename = tempFilenameInTempFolder("metadata.xml")
     dom = ET.parse(filename)
-    xslt = ET.parse(XSLTFILENAME)
+    xslt = ET.parse(QMD_TO_ISO19139_XSLT)
     transform = ET.XSLT(xslt)
     newdom = transform(dom)    
     for ident in newdom.iter(_ns('fileIdentifier')):
