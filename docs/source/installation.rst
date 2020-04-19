@@ -22,7 +22,7 @@ MapServer
 Requirement for MapServer are:
 
 -   Officially supported is the latest minor version of Mapserver and 2
-    versions before, currently 7.0, 6.4 and 6.2. However any version
+    versions before, currently 7.0, 6.4 and 6.2. However, any version
     from 5.6.0 is expected to operate fine in most of the cases.
 -   FTP connection or file write access to MapServer project path
 
