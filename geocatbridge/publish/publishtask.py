@@ -159,6 +159,7 @@ class PublishTask(QgsTask):
                             else:
                                 wms = None
                                 wfs = None
+                                fullName = None
                             self.autofillMetadata(layer)
                             self.stepStarted.emit(name, METADATA)
                             self.metadataServer.publishLayerMetadata(layer, wms, wfs, fullName)
