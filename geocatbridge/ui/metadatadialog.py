@@ -1,16 +1,13 @@
-from qgis.PyQt.QtWidgets import (QDialog,
-                                 QVBoxLayout,
-                                 QDialogButtonBox
-                                )
+from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QDialogButtonBox
 from qgis.gui import QgsMetadataWidget
 
-class MetadataDialog(QDialog):
 
-    def __init__(self, metadata, tab, parent = None):
+class MetadataDialog(QDialog):
+    def __init__(self, metadata, tab, parent=None):
         super(MetadataDialog, self).__init__(parent)
         self.metadata = metadata
-        
-        self.setWindowTitle(self.tr('Metadata'))
+
+        self.setWindowTitle(self.tr("Metadata"))
         layout = QVBoxLayout()
         self.metadataWidget = QgsMetadataWidget()
         self.metadataWidget.setMetadata(metadata)

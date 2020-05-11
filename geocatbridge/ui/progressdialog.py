@@ -7,12 +7,16 @@ from qgis.PyQt.QtGui import QBrush, QIcon, QColor
 from qgis.PyQt.QtWidgets import QTreeWidgetItem
 
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'progressdialog.ui'))
+WIDGET, BASE = uic.loadUiType(
+    os.path.join(os.path.dirname(__file__), "progressdialog.ui")
+)
 
 SYMBOLOGY, DATA, METADATA, GROUPS = range(4)
 
+
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
+
 
 DATA_ICON = QIcon(iconPath("layer.png"))
 METADATA_ICON = QIcon(iconPath("metadata.png"))
@@ -20,8 +24,8 @@ SYMBOLOGY_ICON = QIcon(iconPath("symbology.png"))
 GROUPS_ICON = QIcon(iconPath("group.png"))
 CHECK_ICON = QIcon(iconPath("checkmark.png"))
 
-class ProgressDialog(BASE, WIDGET):
 
+class ProgressDialog(BASE, WIDGET):
     def __init__(self, layers, parent=None):
         super(ProgressDialog, self).__init__(parent)
         self.setupUi(self)
@@ -39,11 +43,11 @@ class ProgressDialog(BASE, WIDGET):
             subitem = QTreeWidgetItem()
             subitem.setText(0, "Publish data")
             subitem.setIcon(0, DATA_ICON)
-            item.addChild(subitem)            
+            item.addChild(subitem)
             subitem = QTreeWidgetItem()
             subitem.setText(0, "Publish metadata")
             subitem.setIcon(0, METADATA_ICON)
-            item.addChild(subitem)            
+            item.addChild(subitem)
             self.treeWidget.addTopLevelItem(item)
             item.setExpanded(False)
         item = QTreeWidgetItem()
@@ -69,7 +73,7 @@ class ProgressDialog(BASE, WIDGET):
         if category == METADATA:
             item.setForeground(1, QBrush(Qt.blue))
             item.setIcon(1, CHECK_ICON)
-            #item.setExpanded(False)
+            # item.setExpanded(False)
         QCoreApplication.processEvents()
 
     def setSkipped(self, layer, category):
@@ -87,7 +91,7 @@ class ProgressDialog(BASE, WIDGET):
         if category == METADATA:
             item.setForeground(1, QBrush(Qt.blue))
             item.setIcon(1, CHECK_ICON)
-            #item.setExpanded(False)
+            # item.setExpanded(False)
         QCoreApplication.processEvents()
 
     def setInProgress(self, layer, category):

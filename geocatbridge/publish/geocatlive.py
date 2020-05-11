@@ -6,11 +6,14 @@ from .geoserver import GeoserverServer
 from .geonetwork import GeonetworkServer
 from ..utils.services import addServicesForGeodataServer
 
-class GeocatLiveServer(ServerBase): 
+
+class GeocatLiveServer(ServerBase):
 
     BASE_URL = "https://live-services.geocat.net/geocat-live/api/1.0/order"
 
-    def __init__(self, name, userid="", geoserverAuthid="", geonetworkAuthid="", profile=0):
+    def __init__(
+        self, name, userid="", geoserverAuthid="", geonetworkAuthid="", profile=0
+    ):
         super().__init__()
         self.name = name
         self.userid = userid
@@ -27,7 +30,7 @@ class GeocatLiveServer(ServerBase):
     @property
     def url(self):
         return "GeocatLive server"
-        
+
     def _getUrls(self):
         def f():
             url = "%s/%s" % (self.BASE_URL, self.userid)
@@ -37,6 +40,7 @@ class GeocatLiveServer(ServerBase):
                     self._geoserverUrl = serv["url"] + "/rest"
                 if serv["application"] == "geonetwork":
                     self._geonetworkUrl = serv["url"]
+
         execute(f)
 
     def geoserverServer(self):
@@ -45,9 +49,10 @@ class GeocatLiveServer(ServerBase):
                 self._getUrls()
             except:
                 self._geoserverUrl = ""
-        if self._geoserverServer is None:            
-            self._geoserverServer = GeoserverServer("GeoServer", self._geoserverUrl, 
-                                                    self.geoserverAuthid)
+        if self._geoserverServer is None:
+            self._geoserverServer = GeoserverServer(
+                "GeoServer", self._geoserverUrl, self.geoserverAuthid
+            )
         return self._geoserverServer
 
     def geonetworkServer(self):
@@ -57,14 +62,15 @@ class GeocatLiveServer(ServerBase):
             except:
                 self._geonetworkUrl = ""
         if self._geonetworkServer is None:
-            self._geonetworkServer = GeonetworkServer("GeoNetwork", self._geonetworkUrl, 
-                                                    self.geonetworkAuthid)
+            self._geonetworkServer = GeonetworkServer(
+                "GeoNetwork", self._geonetworkUrl, self.geonetworkAuthid
+            )
             self.addOGCServers()
         return self._geonetworkServer
 
     def setupForProject(self):
         self.geoserverServer().setupForProject()
-    
+
     def prepareForPublishing(self, onlySymbology):
         self.geoserverServer().prepareForPublishing(onlySymbology)
 
@@ -76,8 +82,8 @@ class GeocatLiveServer(ServerBase):
 
     def publishStyle(self, layer):
         self.geoserverServer().publishStyle(layer)
-        
-    def publishLayer(self, layer, fields): 
+
+    def publishLayer(self, layer, fields):
         self.geoserverServer().publishLayer(layer, fields)
 
     def testConnection(self):
@@ -104,9 +110,9 @@ class GeocatLiveServer(ServerBase):
 
     def deleteLayer(self, name):
         self.geoserverServer().deleteLayer(name)
-    
+
     def openPreview(self, names, bbox, srs):
-        self.geoserverServer().openPreview(names, bbox, srs)    
+        self.geoserverServer().openPreview(names, bbox, srs)
 
     def fullLayerName(self, layerName):
         return self.geoserverServer().fullLayerName(layerName)
@@ -116,7 +122,7 @@ class GeocatLiveServer(ServerBase):
 
     def layerWmsUrl(self, name):
         return self.geoserverServer().layerWmsUrl(name)
-        
+
     def setLayerMetadataLink(self, name, url):
         return self.geoserverServer().setLayerMetadataLink(name, url)
 
@@ -145,10 +151,14 @@ class GeocatLiveServer(ServerBase):
             except:
                 return
         baseurl = "/".join(self._geoserverUrl.split("/")[:-1])
-        addServicesForGeodataServer("GeoCat Live Geoserver - " + self.userid, baseurl, self.geoserverAuthid)
+        addServicesForGeodataServer(
+            "GeoCat Live Geoserver - " + self.userid, baseurl, self.geoserverAuthid
+        )
 
     def validateGeodataBeforePublication(self, errors, toPublish):
-        return self.geoserverServer().validateGeodataBeforePublication(errors, toPublish)
+        return self.geoserverServer().validateGeodataBeforePublication(
+            errors, toPublish
+        )
 
-    def validateMetadataBeforePublication(self, errors):    
+    def validateMetadataBeforePublication(self, errors):
         return self.geonetworkServer().validateMetadataBeforePublication(errors)

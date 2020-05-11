@@ -1,15 +1,10 @@
 import requests
 import json
 
-from qgis.core import (
-    QgsMessageLog,
-    Qgis,
-    QgsAuthMethodConfig,
-    QgsApplication
-)
+from qgis.core import QgsMessageLog, Qgis, QgsAuthMethodConfig, QgsApplication
 
-class ServerBase():
 
+class ServerBase:
     def __init__(self):
         self._warnings = []
         self._errors = []
@@ -17,14 +12,14 @@ class ServerBase():
         self._password = None
 
     def logInfo(self, text):
-        QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
+        QgsMessageLog.logMessage(text, "GeoCat Bridge", level=Qgis.Info)
 
     def logWarning(self, text):
-        QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Warning)
+        QgsMessageLog.logMessage(text, "GeoCat Bridge", level=Qgis.Warning)
         self._warnings.append(text)
 
     def logError(self, text):
-        QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Critical)
+        QgsMessageLog.logMessage(text, "GeoCat Bridge", level=Qgis.Critical)
         self._errors.append(text)
 
     def resetLog(self):
@@ -41,9 +36,11 @@ class ServerBase():
     def getCredentials(self):
         if self._username is None or self._password is None:
             authConfig = QgsAuthMethodConfig()
-            QgsApplication.authManager().loadAuthenticationConfig(self.authid, authConfig, True)
-            username = authConfig.config('username')
-            password = authConfig.config('password')
+            QgsApplication.authManager().loadAuthenticationConfig(
+                self.authid, authConfig, True
+            )
+            username = authConfig.config("username")
+            password = authConfig.config("password")
             return username, password
         else:
             return self._username, self._password
@@ -57,7 +54,9 @@ class ServerBase():
             data = json.dumps(data)
             headers["content-type"] = "application/json"
         self.logInfo("Making %s request to '%s'" % (method, url))
-        r = req_method(url, headers=headers, files=files, data=data, auth=(username, password))
+        r = req_method(
+            url, headers=headers, files=files, data=data, auth=(username, password)
+        )
         r.raise_for_status()
         return r
 

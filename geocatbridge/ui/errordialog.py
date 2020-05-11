@@ -7,17 +7,19 @@ from geocatbridge.publish import mygeocat
 
 rootFolder = os.path.dirname(os.path.dirname(__file__))
 
+
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'errordialog.ui'))
+
+WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), "errordialog.ui"))
+
 
 class ErrorDialog(BASE, WIDGET):
-
     def __init__(self, error, parent=None):
         super(ErrorDialog, self).__init__(parent)
         self.setupUi(self)
-        
+
         pixmap = QPixmap(iconPath("geocatlogo.png"))
         self.labelIcon.setPixmap(pixmap)
 
@@ -25,6 +27,3 @@ class ErrorDialog(BASE, WIDGET):
         self.btnClose.clicked.connect(self.close)
 
         self.btnSendReport.setEnabled(mygeocat.client.isLoggedIn())
-        
-
-    

@@ -13,11 +13,11 @@ from requests.auth import HTTPBasicAuth
 from qgis.PyQt.QtCore import QSize, QCoreApplication
 from qgis.PyQt.QtGui import QImage, QColor, QPainter
 from qgis.core import (
-    QgsMessageLog, 
-    Qgis, 
-    QgsFeatureSink, 
-    QgsMapSettings, 
-    QgsMapRendererCustomPainterJob
+    QgsMessageLog,
+    Qgis,
+    QgsFeatureSink,
+    QgsMapSettings,
+    QgsMapRendererCustomPainterJob,
 )
 
 from .metadata import saveMetadata
@@ -25,20 +25,25 @@ from ..utils.files import tempFilenameInTempFolder
 from .serverbase import ServerBase
 
 
-class TokenNetworkAccessManager():
-    def __init__(self, url, username, password):        
+class TokenNetworkAccessManager:
+    def __init__(self, url, username, password):
         self.url = url.strip("/")
         self.token = None
         self.session = requests.Session()
         self.session.auth = HTTPBasicAuth(username, password)
-    
+
     def setTokenInHeader(self):
         if self.token is None:
             self.getToken()
-        self.session.headers.update({"X-XSRF-TOKEN" : self.token}) 
+        self.session.headers.update({"X-XSRF-TOKEN": self.token})
 
     def request(self, url, data=None, method="get", headers={}):
-        QgsMessageLog.logMessage(QCoreApplication.translate("GeocatBridge", "Making '%s' request to '%s'") % (method, url), 'GeoCat Bridge', level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            QCoreApplication.translate("GeocatBridge", "Making '%s' request to '%s'")
+            % (method, url),
+            "GeoCat Bridge",
+            level=Qgis.Info,
+        )
         self.setTokenInHeader()
         method = getattr(self.session, method.lower())
         resp = method(url, headers=headers, data=data)
@@ -46,10 +51,11 @@ class TokenNetworkAccessManager():
         return resp
 
     def getToken(self):
-        signinUrl = self.url + '/eng/catalog.signin'
+        signinUrl = self.url + "/eng/catalog.signin"
         self.session.post(signinUrl)
-        self.token = self.session.cookies.get('XSRF-TOKEN')
-        self.session.headers.update({"X-XSRF-TOKEN" : self.token})
+        self.token = self.session.cookies.get("XSRF-TOKEN")
+        self.session.headers.update({"X-XSRF-TOKEN": self.token})
+
 
 class GeonetworkServer(ServerBase):
 
@@ -64,11 +70,10 @@ class GeonetworkServer(ServerBase):
         self.authid = authid
         self.profile = profile
         self._isMetadataCatalog = True
-        self._isDataCatalog = False 
+        self._isDataCatalog = False
         self.node = node
         user, password = self.getCredentials()
         self._nam = TokenNetworkAccessManager(self.url, user, password)
-
 
     def request(self, url, data=None, method="get", headers={}):
         return self._nam.request(url, data, method, headers)
@@ -88,7 +93,7 @@ class GeonetworkServer(ServerBase):
         return self.url + "/%s/api" % self.node
 
     def xmlServicesUrl(self):
-        return self.url + "/%s/eng"  % self.node
+        return self.url + "/%s/eng" % self.node
 
     def metadataExists(self, uuid):
         try:
@@ -108,7 +113,7 @@ class GeonetworkServer(ServerBase):
         params = {"uuidProcessing", "OVERWRITE"}
 
         with open(metadata, "rb") as f:
-            files = {'file': f}
+            files = {"file": f}
             r = self._nam.session.post(url, files=files, headers=headers)
             r.raise_for_status()
 
@@ -118,12 +123,11 @@ class GeonetworkServer(ServerBase):
 
     def me(self):
         url = self.apiUrl() + "/info?type=me"
-        ret =  self.request(url)
+        ret = self.request(url)
         return ret
 
     def metadataUrl(self, uuid):
         return self.url + "/%s/api/records/%s" % (self.node, uuid)
 
-    def openMetadata(self, uuid):        
+    def openMetadata(self, uuid):
         webbrowser.open_new_tab(self.metadataUrl(uuid))
-

@@ -11,13 +11,17 @@ from .geocatwidget import GeoCatWidget
 
 FIRSTTIME_SETTING = "geocatbridge/FirstTimeRun"
 
+
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'bridgedialog.ui'))
+
+WIDGET, BASE = uic.loadUiType(
+    os.path.join(os.path.dirname(__file__), "bridgedialog.ui")
+)
+
 
 class BridgeDialog(BASE, WIDGET):
-
     def __init__(self, parent=None):
         super(BridgeDialog, self).__init__(parent)
         self.setupUi(self)
@@ -29,7 +33,8 @@ class BridgeDialog(BASE, WIDGET):
         self.stackedWidget.addWidget(self.geocatWidget)
         self.listWidget.setMinimumSize(QSize(100, 200))
         self.listWidget.setMaximumSize(QSize(153, 16777215))
-        self.listWidget.setStyleSheet("QListWidget{\n"
+        self.listWidget.setStyleSheet(
+            "QListWidget{\n"
             "    background-color: rgb(69, 69, 69, 220);\n"
             "    outline: 0;\n"
             "}\n"
@@ -41,7 +46,8 @@ class BridgeDialog(BASE, WIDGET):
             "    color: black;\n"
             "    background-color:palette(Window);\n"
             "    padding-right: 0px;\n"
-            "}")
+            "}"
+        )
         self.listWidget.setFrameShape(QFrame.Box)
         self.listWidget.setLineWidth(0)
         self.listWidget.setIconSize(QSize(32, 32))
@@ -49,16 +55,16 @@ class BridgeDialog(BASE, WIDGET):
         self.item = []
         for i in range(3):
             item = self.listWidget.item(i)
-            item.setIcon(QIcon(iconPath('preview.png')))
+            item.setIcon(QIcon(iconPath("preview.png")))
         self.listWidget.currentRowChanged.connect(self.sectionChanged)
         if self.isFirstTime():
             self.currentIdx = 2
-            self.listWidget.setCurrentRow(2) 
+            self.listWidget.setCurrentRow(2)
         else:
             self.currentIdx = 0
             self.listWidget.setCurrentRow(0)
 
-    def isFirstTime(self):        
+    def isFirstTime(self):
         if QSettings().contains(FIRSTTIME_SETTING):
             return False
         else:
@@ -66,14 +72,14 @@ class BridgeDialog(BASE, WIDGET):
             return True
 
     def sectionChanged(self):
-        if self.currentIdx  == 1:
+        if self.currentIdx == 1:
             if not self.serversWidget.canClose():
                 self.listWidget.blockSignals(True)
                 self.listWidget.item(1).setSelected(True)
                 self.listWidget.setCurrentRow(1)
                 self.listWidget.blockSignals(False)
                 return
-        idx = self.listWidget.currentRow()                
+        idx = self.listWidget.currentRow()
         self.setCurrentPanel(idx)
 
     def setCurrentPanel(self, idx):

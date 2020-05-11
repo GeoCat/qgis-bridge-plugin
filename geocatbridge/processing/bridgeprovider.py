@@ -5,32 +5,36 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import QgsProcessingProvider
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
 
-from . publishtogeonetwork import PublishToGeonetworkAlgorithm
-from . publishtogeoserver import PublishToGeoserverAlgorithm
+from .publishtogeonetwork import PublishToGeonetworkAlgorithm
+from .publishtogeoserver import PublishToGeoserverAlgorithm
+
 
 class BridgeProvider(QgsProcessingProvider):
 
-    BRIDGE_ACTIVE = 'BRIDGE_ACTIVE'
+    BRIDGE_ACTIVE = "BRIDGE_ACTIVE"
 
     def __init__(self):
         super().__init__()
         self.algs = []
 
     def id(self):
-        return 'geocatbridge'
+        return "geocatbridge"
 
     def name(self):
-        return self.tr('GeoCat Bridge')
+        return self.tr("GeoCat Bridge")
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'icons', 'geocat.png'))
+        return QIcon(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), "icons", "geocat.png"
+            )
+        )
 
     def load(self):
         ProcessingConfig.settingIcons[self.name()] = self.icon()
-        ProcessingConfig.addSetting(Setting(self.name(),
-                                    self.BRIDGE_ACTIVE,
-                                    self.tr('Activate'),
-                                    False))    
+        ProcessingConfig.addSetting(
+            Setting(self.name(), self.BRIDGE_ACTIVE, self.tr("Activate"), False)
+        )
         ProcessingConfig.readSettings()
         self.refreshAlgorithms()
         return True
@@ -45,9 +49,7 @@ class BridgeProvider(QgsProcessingProvider):
         return False
 
     def getAlgs(self):
-        algs = [PublishToGeonetworkAlgorithm(),
-                PublishToGeoserverAlgorithm()
-               ]
+        algs = [PublishToGeonetworkAlgorithm(), PublishToGeoserverAlgorithm()]
 
         return algs
 
@@ -56,7 +58,7 @@ class BridgeProvider(QgsProcessingProvider):
         for a in self.algs:
             self.addAlgorithm(a)
 
-    def tr(self, string, context=''):
-        if context == '':
-            context = 'GeocatBridge'
+    def tr(self, string, context=""):
+        if context == "":
+            context = "GeocatBridge"
         return QCoreApplication.translate(context, string)

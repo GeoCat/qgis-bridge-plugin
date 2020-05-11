@@ -4,15 +4,17 @@ from geocatbridge.publish.geocatlive import GeocatLiveServer
 from geocatbridge.utils.gui import execute
 from geocatbridge.publish.servers import *
 
-class MyGeoCatClient():
 
+class MyGeoCatClient:
     def __init__(self):
         self.logout()
 
     def login(self, user):
         try:
             self.user = user
-            self.server = GeocatLiveServer("GeoCat Live - " + self.user, self.user, "", "")
+            self.server = GeocatLiveServer(
+                "GeoCat Live - " + self.user, self.user, "", ""
+            )
             url = "%s/%s" % (GeocatLiveServer.BASE_URL, self.user)
             response = execute(lambda: requests.get(url))
             responsejson = response.json()
@@ -42,7 +44,8 @@ class MyGeoCatClient():
         for server in allServers().values():
             if isinstance(server, GeocatLiveServer):
                 if server.userid == self.user:
-                    return        
+                    return
         addServer(self.server)
+
 
 client = MyGeoCatClient()
