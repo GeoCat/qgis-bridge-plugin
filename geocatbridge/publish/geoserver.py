@@ -1,5 +1,4 @@
 import os
-import psycopg2
 import json
 import webbrowser
 from zipfile import ZipFile
@@ -8,7 +7,7 @@ import secrets
 
 from requests.exceptions import ConnectionError
 
-from qgis.core import QgsProject, QgsVectorLayer, QgsDataSourceUri
+from qgis.core import QgsProject, QgsDataSourceUri
 
 from qgis.PyQt.QtCore import QCoreApplication
 
@@ -313,7 +312,7 @@ class GeoserverServer(ServerBase):
                 self._workspace,
                 datasetName,
             )
-            r = self.request(ftpUrl, ft, "post")
+            r = self.request(ftUrl, ft, "post")
         except:
             r = self.request(url, ft, "put")
         self.logInfo("Feature type correctly created from GPKG file '%s'" % filename)

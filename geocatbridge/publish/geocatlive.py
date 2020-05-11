@@ -77,9 +77,6 @@ class GeocatLiveServer(ServerBase):
     def closePublishing(self):
         self.geoserverServer().closePublishing()
 
-    def publishLayerMetadata(self, layer, wms):
-        self.geonetworkServer().publishLayerMetadata(layer, wms)
-
     def publishStyle(self, layer):
         self.geoserverServer().publishStyle(layer)
 

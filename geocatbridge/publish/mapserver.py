@@ -1,7 +1,6 @@
 import os
 import shutil
 
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsProject,
     QgsRectangle,
@@ -62,7 +61,7 @@ class MapserverServer(ServerBase):
         )
 
     def uploadFolder(self, folder):
-        username, password = getCredentials()
+        username, password = self.getCredentials()
         uploadFolder(folder, self.host, self.port, self.folder, username, password)
 
     def testConnection(self):
@@ -219,7 +218,7 @@ class MapserverServer(ServerBase):
         shutil.copy2(src, dst)
 
         if not self.useLocalFolder:
-            self.uploadFolder(folder)
+            self.uploadFolder(dst)
 
     def styleExists(self, name):
         return False

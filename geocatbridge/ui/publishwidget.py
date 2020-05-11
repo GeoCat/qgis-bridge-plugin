@@ -249,7 +249,6 @@ class PublishWidget(BASE, WIDGET):
         item = self.listLayers.itemAt(pos)
         if item is None:
             return
-        row = self.listLayers.row(item)
         name = self.listLayers.itemWidget(item).name()
         menu = QMenu()
         if self.isDataPublished.get(name):

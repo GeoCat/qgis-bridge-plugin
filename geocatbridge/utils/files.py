@@ -6,10 +6,10 @@ from qgis.PyQt.QtCore import QDir
 
 
 def tempFolder():
-    tempDir = os.path.join(unicode(QDir.tempPath()), "geocatbridge")
+    tempDir = os.path.join(QDir.tempPath(), "geocatbridge")
     if not QDir(tempDir).exists():
         QDir().mkpath(tempDir)
-    return unicode(os.path.abspath(tempDir))
+    return os.path.abspath(tempDir)
 
 
 def tempFilenameInTempFolder(basename):
