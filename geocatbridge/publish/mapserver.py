@@ -49,9 +49,6 @@ class MapserverServer(ServerBase):
     def publishStyle(self, layer):
         self._layers.append(layer)
 
-        # self.logInfo(QCoreApplication.translate("GeocatBridge",
-        #                        "Style for layer %s exported to %s") % (layer.name(), self.mapsFolder()))
-
     def publishLayer(self, layer, fields=None):
         self.publishStyle(layer)
         layerFilename = layer.name() + ".shp"

@@ -13,11 +13,11 @@ from qgis.PyQt.QtCore import QCoreApplication
 
 from qgis.PyQt.QtWidgets import QMessageBox
 
-from bridgestyle.qgis import saveLayerStyleAsZippedSld
+from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStylesAsMapboxFolder
 
 from .exporter import exportLayer
 from .serverbase import ServerBase
-from ..utils.files import tempFilenameInTempFolder
+from ..utils.files import tempFilenameInTempFolder, tempFolderInTempFolder
 from ..utils.services import addServicesForGeodataServer
 
 
@@ -35,6 +35,7 @@ class GeoserverServer(ServerBase):
         storage=0,
         postgisdb=None,
         useOriginalDataSource=False,
+        useVectorTiles=False
     ):
         super().__init__()
         self.name = name
@@ -51,6 +52,7 @@ class GeoserverServer(ServerBase):
         self.storage = storage
         self.postgisdb = postgisdb
         self.useOriginalDataSource = useOriginalDataSource
+        self.useVectorTiles = useVectorTiles
         self._isMetadataCatalog = False
         self._isDataCatalog = True
         self._layersCache = {}
@@ -70,11 +72,18 @@ class GeoserverServer(ServerBase):
         self._uploadedDatasets = {}
         self._exportedLayers = {}
         self._postgisDatastoreExists = False
+        self._publishedLayers = set()
 
-    def closePublishing(self):
-        pass
+    def closePublishing(self):        
+        if self.useVectorTiles:
+            folder = tempFolderInTempFolder()            
+            warnings = layerStylesAsMapboxFolder(self._publishedLayers, folder)
+            for w in warnings:
+                self.logWarning(w)
+            #TODO: publish style
 
     def publishStyle(self, layer):
+        self._publishedLayers.add(layer)
         styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
         for w in warnings:
@@ -89,7 +98,7 @@ class GeoserverServer(ServerBase):
         return styleFilename
 
     def publishLayer(self, layer, fields=None):
-        self.publishStyle(layer)
+        #self.publishStyle(layer)
         if layer.type() == layer.VectorLayer:
             if layer.featureCount() == 0:
                 self.logError("Layer contains zero features and cannot be published")
@@ -422,12 +431,8 @@ class GeoserverServer(ServerBase):
     def willDeleteLayersOnPublication(self, toPublish):
 
         if self.workspaceExists():
-            print(3)
             layers = self.layers()
             toDelete = list(set(layers) - set(toPublish))
-            print(layers)
-            print(toPublish)
-            print(toDelete)
             return bool(toDelete)
         else:
             return False

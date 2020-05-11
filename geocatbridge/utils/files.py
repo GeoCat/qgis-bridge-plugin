@@ -11,12 +11,15 @@ def tempFolder():
         QDir().mkpath(tempDir)
     return os.path.abspath(tempDir)
 
-
-def tempFilenameInTempFolder(basename):
+def tempFolderInTempFolder():
     path = tempFolder()
     folder = os.path.join(path, str(uuid.uuid4()).replace("-", ""))
     if not QDir(folder).exists():
         QDir().mkpath(folder)
+    return folder
+
+def tempFilenameInTempFolder(basename):
+    folder = tempFolderInTempFolder()    
     filename = os.path.join(folder, basename)
     return filename
 

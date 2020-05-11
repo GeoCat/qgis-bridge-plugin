@@ -327,11 +327,13 @@ class ServerConnectionsWidget(BASE, WIDGET):
         ]:
             postgisdb = self.comboGeoserverDatabase.currentText()
         useOriginalDataSource = self.chkUseOriginalDataSource.isChecked()
+        useVectorTiles = self.chkUseVectorTiles.isChecked()
 
         if "" in [name, url]:
             return None
         server = GeoserverServer(
-            name, url, authid, storage, postgisdb, useOriginalDataSource
+            name, url, authid, storage, postgisdb, useOriginalDataSource, 
+            useVectorTiles
         )
         return server
 
@@ -552,6 +554,7 @@ class ServerConnectionsWidget(BASE, WIDGET):
             if server.postgisdb is not None:
                 self.comboGeoserverDatabase.setCurrentText(server.postgisdb)
             self.chkUseOriginalDataSource.setChecked(server.useOriginalDataSource)
+            self.chkUseVectorTiles.setChecked(server.useVectorTiles)
             self.comboGeoserverDataStorage.blockSignals(False)
         elif isinstance(server, MapserverServer):
             self.stackedWidget.setCurrentWidget(self.widgetMapserver)
