@@ -82,7 +82,7 @@ class GeoserverServer(ServerBase):
             for w in warnings:
                 self.logWarning(w)
             self._editMapboxFiles(folder)
-            #self.publishMapboxGLStyle(folder)
+            self.publishMapboxGLStyle(folder)
             self._publishOpenLayersPreview(folder)
 
     def _publishOpenLayersPreview(self, folder):
@@ -99,7 +99,6 @@ class GeoserverServer(ServerBase):
         shutil.copyfile(src, dst)
         self.uploadResource("%s/index.html" % self._workspace, src)
         self.uploadResource("%s/mapbox.js" % self._workspace, jsFilename)
-        
 
     def uploadResource(self, path, file):
         with open(file) as f:
@@ -578,7 +577,7 @@ class GeoserverServer(ServerBase):
                 )
             )
         elif ext.lower() == ".mapbox":
-            headers = {"Content-type": "application/json"}
+            headers = {"Content-type": "application/vnd.geoserver.mbstyle+json"}
             with open(styleFilename) as f:
                 self.request(url, f.read(), method, headers)
             self.logInfo(
