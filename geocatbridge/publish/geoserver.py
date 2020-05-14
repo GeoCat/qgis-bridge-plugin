@@ -5,6 +5,7 @@ import webbrowser
 from zipfile import ZipFile 
 import sqlite3
 import secrets
+from bridgestyle import mapboxgl
 
 from requests.exceptions import ConnectionError
 
@@ -284,11 +285,47 @@ class GeoserverServer(ServerBase):
         self.logInfo("Feature type correctly created from Tiff file '%s'" % filename)
         self._setLayerStyle(layername, layername)
 
-    def createGroups(self, groups):      
+    def createGroups(self, groups, qgis_layers):
         for group in groups:
-            self._publishGroup(group)
+            self._publishGroup(group, qgis_layers)
 
-    def _publishGroup(self, group):
+    def _publishGroupMapBox(self, group, qgis_layers):
+        name = group["name"]
+        # compute actual style
+        mbstylestring, warnings, obj = mapboxgl.fromgeostyler.convertGroup(group, qgis_layers, self.baseUrl(), self._workspace,group["name"])
+
+        # publish to geoserver
+        self._ensureWorkspaceExists()
+        styleExists = self.styleExists(name)
+        if styleExists:
+            self.deleteStyle(name)
+
+        xml = "<style>" \
+            + "<name>{0}</name>".format(name) \
+            + "<workspace>{0}</workspace>".format(self._workspace) \
+            + "<format>" \
+            + "mbstyle" \
+            + "</format>" \
+            + "<filename>{0}.json</filename>".format(name) \
+            + "</style>"
+
+        url = self.url + "/workspaces/%s/styles" % (self._workspace)
+
+        response = self.request(url, xml, "POST",{"Content-Type":"text/xml"})
+        url = self.url + "/workspaces/%s/styles/%s?raw=true" % (self._workspace, name)
+
+        headers = {"Content-Type": "application/vnd.geoserver.mbstyle+json"}
+        response = self.request(url, mbstylestring, "PUT", headers)
+
+
+        a=1
+
+
+
+
+
+    def _publishGroup(self, group, qgis_layers):
+        self._publishGroupMapBox(group, qgis_layers)
         layers = []
         for layer in group["layers"]:
             if isinstance(layer, dict):
