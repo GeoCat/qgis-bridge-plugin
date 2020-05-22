@@ -59,7 +59,7 @@ class MultistylerDialog(BASE, WIDGET):
             if (isinstance(layer, QgsRasterLayer) or
                     (isinstance(layer, QgsVectorLayer) and layer.isSpatial())):
                 sld, _, sldWarnings = layerStyleAsSld(layer)
-                geostyler, _, geostylerWarnings = convert(layer)
+                geostyler, icons, sprites, geostylerWarnings = convert(layer)
                 geostyler = json.dumps(geostyler, indent=4)
                 mapbox, _, mapboxWarnings = layerStyleAsMapbox(layer)
                 mapserver, _, _, mapserverWarnings = layerStyleAsMapfile(layer)
