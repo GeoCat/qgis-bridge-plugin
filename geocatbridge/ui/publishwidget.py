@@ -3,7 +3,11 @@ import traceback
 import requests
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import Qt, QSize, QCoreApplication
+from qgis.PyQt.QtCore import (
+    Qt,
+    QSize,
+    QCoreApplication
+)
 from qgis.PyQt.QtWidgets import (
     QProgressBar,
     QLabel,
@@ -16,23 +20,26 @@ from qgis.PyQt.QtWidgets import (
     QListWidgetItem,
     QTableWidgetItem,
     QMessageBox,
-    QFileDialog,
+    QFileDialog
+) 
+from qgis.PyQt.QtGui import (
+    QIcon,
+    QPixmap
 )
-from qgis.PyQt.QtGui import QIcon, QPixmap
 
 from qgis.core import (
     QgsCoordinateTransform,
     QgsMessageOutput,
     QgsMapLayer,
     QgsMessageLog,
-    QgsNativeMetadataValidator,
+    QgsNativeMetadataValidator, 
     QgsLayerTreeGroup,
     QgsLayerTreeLayer,
     QgsMapLayer,
     QgsProject,
     Qgis,
     QgsApplication,
-    QgsRectangle,
+    QgsRectangle
 )
 from qgis.gui import QgsMessageBar, QgsMetadataWidget
 from qgis.utils import iface
@@ -46,10 +53,8 @@ from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 from geocatbridge.ui.progressdialog import ProgressDialog
 
-
 def iconPath(icon):
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
-
 
 PUBLISHED_ICON = QIcon(iconPath("published.png"))
 ERROR_ICON = '<img src="%s">' % iconPath("error-red.png")
@@ -60,12 +65,10 @@ IMPORT_ICON = QIcon(iconPath("save.png"))
 
 IDENTIFICATION, CATEGORIES, KEYWORDS, ACCESS, EXTENT, CONTACT = range(6)
 
-WIDGET, BASE = uic.loadUiType(
-    os.path.join(os.path.dirname(__file__), "publishwidget.ui")
-)
-
+WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishwidget.ui'))
 
 class PublishWidget(BASE, WIDGET):
+
     def __init__(self, parent):
         super(PublishWidget, self).__init__()
         self.isMetadataPublished = {}
@@ -79,7 +82,7 @@ class PublishWidget(BASE, WIDGET):
         execute(self._setupUi)
 
     def _setupUi(self):
-        self.setupUi(self)
+        self.setupUi(self)    
         self.bar = QgsMessageBar()
         self.bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.layout().insertWidget(0, self.bar)
@@ -103,20 +106,16 @@ class PublishWidget(BASE, WIDGET):
         self.btnPreview.clicked.connect(self.previewMetadata)
         self.btnPreview.setIcon(PREVIEW_ICON)
         self.btnImport.setIcon(IMPORT_ICON)
-        # self.btnImport.setVisible(False)
+        #self.btnImport.setVisible(False)
         self.btnImport.clicked.connect(self.importMetadata)
         self.btnValidate.clicked.connect(self.validateMetadata)
         self.btnUseConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
-        self.btnAccessConstraints.clicked.connect(
-            lambda: self.openMetadataEditor(ACCESS)
-        )
+        self.btnAccessConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
         self.btnIsoTopic.clicked.connect(lambda: self.openMetadataEditor(CATEGORIES))
         self.btnKeywords.clicked.connect(lambda: self.openMetadataEditor(KEYWORDS))
         self.btnDataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
-        self.btnMetadataContact.clicked.connect(
-            lambda: self.openMetadataEditor(CONTACT)
-        )
-        self.btnExportFolder.clicked.connect(self.selectExportFolder)
+        self.btnMetadataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
+        self.btnExportFolder.clicked.connect(self.selectExportFolder)    
 
         if self.listLayers.count():
             item = self.listLayers.item(0)
@@ -126,7 +125,7 @@ class PublishWidget(BASE, WIDGET):
             self.txtNoLayers.setVisible(True)
             self.listLayers.setVisible(False)
             self.labelSelect.setVisible(False)
-            # self.spacerLayerSelect.setVisible(False)
+            #self.spacerLayerSelect.setVisible(False)
             self.btnRemoveAll.setVisible(False)
 
         self.metadataServerChanged()
@@ -134,7 +133,7 @@ class PublishWidget(BASE, WIDGET):
 
     def selectExportFolder(self):
         folder = QFileDialog.getExistingDirectory(self, self.tr("Export to folder"))
-        if folder:
+        if folder:            
             self.txtExportFolder.setText(folder)
 
     def geodataServerChanged(self):
@@ -152,18 +151,14 @@ class PublishWidget(BASE, WIDGET):
                 self.tabWidgetMetadata.removeTab(1)
         else:
             if self.tabWidgetMetadata.count() == 1:
-                title = (
-                    "Dutch geography"
-                    if profile == GeonetworkServer.PROFILE_DUTCH
-                    else "INSPIRE"
-                )
+                title = "Dutch geography" if profile == GeonetworkServer.PROFILE_DUTCH else "INSPIRE"
                 self.tabWidgetMetadata.addTab(self.tabInspire, title)
                 self.tabWidgetMetadata.addTab(self.tabTemporal, self.tr("Temporal"))
             self.comboStatus.setVisible(profile == GeonetworkServer.PROFILE_DUTCH)
-
+        
     def selectLabelClicked(self, url):
         state = Qt.Unchecked if url == "none" else Qt.Checked
-        for i in range(self.listLayers.count()):
+        for i in range (self.listLayers.count()):
             item = self.listLayers.item(i)
             widget = self.listLayers.itemWidget(item).setCheckState(state)
 
@@ -186,7 +181,7 @@ class PublishWidget(BASE, WIDGET):
         self.txtMetadataTitle.setText(metadata.title())
         self.txtAbstract.setPlainText(metadata.abstract())
         isoTopics = ",".join(metadata.keywords().get("gmd:topicCategory", []))
-        self.txtIsoTopic.setText(isoTopics)
+        self.txtIsoTopic.setText(isoTopics)        
         keywords = []
         for group in metadata.keywords().values():
             keywords.extend(group)
@@ -201,21 +196,17 @@ class PublishWidget(BASE, WIDGET):
         else:
             self.txtAccessConstraints.setText("")
         self.comboLanguage.setCurrentText(metadata.language())
-        # TODO: Use default values if no values in QGIS metadata object
+        #TODO: Use default values if no values in QGIS metadata object
 
     def populateLayerFields(self):
         if self.currentLayer.type() == self.currentLayer.VectorLayer:
             fields = [f.name() for f in self.currentLayer.fields()]
-            self.tabLayerInfo.setTabEnabled(1, True)
+            self.tabLayerInfo.setTabEnabled(1, True)            
             self.tableFields.setRowCount(len(fields))
             for i, field in enumerate(fields):
                 item = QTableWidgetItem()
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-                check = (
-                    Qt.Checked
-                    if self.fieldsToPublish[self.currentLayer][field]
-                    else Qt.Unchecked
-                )
+                check = Qt.Checked if self.fieldsToPublish[self.currentLayer][field] else Qt.Unchecked
                 item.setCheckState(check)
                 self.tableFields.setItem(i, 0, item)
                 item = QTableWidgetItem(field)
@@ -240,9 +231,7 @@ class PublishWidget(BASE, WIDGET):
                 for i in range(fields.count()):
                     chkItem = self.tableFields.item(i, 0)
                     nameItem = self.tableFields.item(i, 1)
-                    fieldsToPublish[nameItem.text()] = (
-                        chkItem.checkState() == Qt.Checked
-                    )
+                    fieldsToPublish[nameItem.text()] = chkItem.checkState() == Qt.Checked
                 self.fieldsToPublish[self.currentLayer] = fieldsToPublish
 
     def showContextMenu(self, pos):
@@ -251,15 +240,13 @@ class PublishWidget(BASE, WIDGET):
             return
         row = self.listLayers.row(item)
         name = self.listLayers.itemWidget(item).name()
-        menu = QMenu()
+        menu = QMenu()        
         if self.isDataPublished.get(name):
             menu.addAction(self.tr("View WMS layer"), lambda: self.viewWms(name))
             menu.addAction(self.tr("Unpublish data"), lambda: self.unpublishData(name))
         if self.isMetadataPublished.get(name):
-            menu.addAction(self.tr("View metadata"), lambda: self.viewMetadata(name))
-            menu.addAction(
-                self.tr("Unpublish metadata"), lambda: self.unpublishMetadata(name)
-            )
+            menu.addAction(self.tr("View metadata"), lambda: self.viewMetadata(name))  
+            menu.addAction(self.tr("Unpublish metadata"), lambda: self.unpublishMetadata(name))
         if any(self.isDataPublished.values()):
             menu.addAction(self.tr("View all WMS layers"), self.viewAllWms)
         menu.exec_(self.listLayers.mapToGlobal(pos))
@@ -267,32 +254,24 @@ class PublishWidget(BASE, WIDGET):
     def publishableLayers(self):
         def _layersFromTree(layerTreeGroup):
             _layers = []
-            for child in layerTreeGroup.children():
+            for child in layerTreeGroup.children():                    
                 if isinstance(child, QgsLayerTreeLayer):
-                    _layers.append(child.layer())
+                    _layers.append(child.layer())            
                 elif isinstance(child, QgsLayerTreeGroup):
                     _layers.extend(_layersFromTree(child))
 
             return _layers
-
-        root = QgsProject.instance().layerTreeRoot()
-        layers = [
-            layer
-            for layer in _layersFromTree(root)
-            if layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]
-            and layer.dataProvider().name() != "wms"
-        ]
+        root = QgsProject.instance().layerTreeRoot()                
+        layers = [layer for layer in _layersFromTree(root) 
+                if layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]
+                and layer.dataProvider().name() != "wms"]
         return layers
 
     def populateLayers(self):
         layers = self.publishableLayers()
         for i, layer in enumerate(layers):
-            fields = (
-                [f.name() for f in layer.fields()]
-                if layer.type() == layer.VectorLayer
-                else []
-            )
-            self.fieldsToPublish[layer] = {f: True for f in fields}
+            fields = [f.name() for f in layer.fields()] if layer.type() == layer.VectorLayer else []
+            self.fieldsToPublish[layer] = {f:True for f in fields}
             self.metadata[layer] = layer.metadata().clone()
             self.addLayerListItem(layer)
         self.updateLayersPublicationStatus()
@@ -304,7 +283,7 @@ class PublishWidget(BASE, WIDGET):
         self.listLayers.addItem(item)
         self.listLayers.setItemWidget(item, widget)
         return item
-
+        
     def populateComboBoxes(self):
         self.populatecomboMetadataServer()
         self.populatecomboGeodataServer()
@@ -323,13 +302,9 @@ class PublishWidget(BASE, WIDGET):
         self.comboMetadataServer.addItems(metadataServers().keys())
 
     def updateServers(self):
-        # TODO: do not call updateLayersPublicationStatus if not really needed
-        self.comboGeodataServer.currentIndexChanged.disconnect(
-            self.geodataServerChanged
-        )
-        self.comboMetadataServer.currentIndexChanged.disconnect(
-            self.metadataServerChanged
-        )
+        #TODO: do not call updateLayersPublicationStatus if not really needed
+        self.comboGeodataServer.currentIndexChanged.disconnect(self.geodataServerChanged)
+        self.comboMetadataServer.currentIndexChanged.disconnect(self.metadataServerChanged)
         self.populatecomboMetadataServer()
         current = self.comboGeodataServer.currentText()
         self.populatecomboGeodataServer()
@@ -355,9 +330,9 @@ class PublishWidget(BASE, WIDGET):
 
     def isDataOnServer(self, layer):
         try:
-            server = geodataServers()[self.comboGeodataServer.currentText()]
-            return server.layerExists(layer)
-        except KeyError:
+            server = geodataServers()[self.comboGeodataServer.currentText()] 
+            return server.layerExists(layer)            
+        except KeyError:            
             return False
         except Exception as e:
             return False
@@ -370,47 +345,29 @@ class PublishWidget(BASE, WIDGET):
             metadataFile = self.currentLayer.source() + ".xml"
             if not os.path.exists(metadataFile):
                 metadataFile = None
-
+        
         if metadataFile is None:
-            ret = QMessageBox.question(
-                self,
-                self.tr("Metadata file"),
-                self.tr(
-                    "Could not find a suitable metadata file.\nDo you want to select it manually?"
-                ),
-            )
+            ret = QMessageBox.question(self, self.tr("Metadata file"), 
+                            self.tr("Could not find a suitable metadata file.\nDo you want to select it manually?"))            
             if ret == QMessageBox.Yes:
-                metadataFile, _ = QFileDialog.getOpenFileName(
-                    self,
-                    self.tr("Metadata file"),
-                    os.path.dirname(self.currentLayer.source()),
-                    "*.xml",
-                )
+                metadataFile, _ = QFileDialog.getOpenFileName(self, self.tr("Metadata file"), 
+                                    os.path.dirname(self.currentLayer.source()), '*.xml')
                 print(metadataFile)
-
+        
         if metadataFile:
             try:
                 loadMetadataFromXml(self.currentLayer, metadataFile)
             except:
-                self.bar.pushMessage(
-                    self.tr("Error importing metadata"),
-                    self.tr(
-                        "Cannot convert the metadata file. Maybe not ISO19139 or ESRI-ISO format?"
-                    ),
-                    level=Qgis.Warning,
-                    duration=5,
-                )
+                self.bar.pushMessage(self.tr("Error importing metadata"), 
+                    self.tr("Cannot convert the metadata file. Maybe not ISO19139 or ESRI-ISO format?"), 
+                    level=Qgis.Warning, duration=5)
                 return
 
             self.metadata[self.currentLayer] = self.currentLayer.metadata().clone()
             self.populateLayerMetadata()
-            self.bar.pushMessage(
-                "",
-                self.tr("Metadata correctly imported"),
-                level=Qgis.Success,
-                duration=5,
-            )
-
+            self.bar.pushMessage("", self.tr("Metadata correctly imported"), level=Qgis.Success, duration=5)
+        
+        
     def validateMetadata(self):
         if self.currentLayer is None:
             return
@@ -420,13 +377,8 @@ class PublishWidget(BASE, WIDGET):
         if result:
             txt = self.tr("No validation errors")
         else:
-            txt = (
-                self.tr("The following issues were found:")
-                + "<br>"
-                + "<br>".join(
-                    ["<b>%s</b>:%s" % (err.section, err.note) for err in errors]
-                )
-            )
+            txt = (self.tr("The following issues were found:") + "<br>" + 
+                    "<br>".join(["<b>%s</b>:%s" % (err.section, err.note) for err in errors]))
         dlg = QgsMessageOutput.createMessageOutput()
         dlg.setTitle(self.tr("Metadata validation"))
         dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
@@ -434,14 +386,14 @@ class PublishWidget(BASE, WIDGET):
 
     def openMetadataEditor(self, tab):
         if self.currentLayer is None:
-            return
+            return        
         self.storeMetadata()
         metadata = self.metadata[self.currentLayer].clone()
         w = MetadataDialog(metadata, tab, self)
         w.exec_()
         if w.metadata is not None:
             self.metadata[self.currentLayer] = w.metadata
-            self.populateLayerMetadata()
+            self.populateLayerMetadata()          
 
     def unpublishData(self, name):
         server = geodataServers()[self.comboGeodataServer.currentText()]
@@ -461,11 +413,7 @@ class PublishWidget(BASE, WIDGET):
             item = self.listLayers.item(i)
             widget = self.listLayers.itemWidget(item)
             if widget.name() == name:
-                server = (
-                    metadataServers()[self.comboMetadataServer.currentText()]
-                    if value
-                    else None
-                )
+                server = metadataServers()[self.comboMetadataServer.currentText()] if value else None
                 widget.setMetadataPublished(server)
 
     def updateLayerIsDataPublished(self, name, value):
@@ -474,11 +422,7 @@ class PublishWidget(BASE, WIDGET):
             item = self.listLayers.item(i)
             widget = self.listLayers.itemWidget(item)
             if widget.name() == name:
-                server = (
-                    geodataServers()[self.comboGeodataServer.currentText()]
-                    if value
-                    else None
-                )
+                server = geodataServers()[self.comboGeodataServer.currentText()] if value else None
                 widget.setDataPublished(server)
 
     def updateLayersPublicationStatus(self, data=True, metadata=True):
@@ -489,26 +433,20 @@ class PublishWidget(BASE, WIDGET):
                 if dataServer.testConnection():
                     self.comboGeodataServer.setStyleSheet("QComboBox { }")
                 else:
-                    self.comboGeodataServer.setStyleSheet(
-                        "QComboBox { border: 2px solid red; }"
-                    )
+                    self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
                     dataServer = None
                     canPublish = False
             except KeyError:
                 self.comboGeodataServer.setStyleSheet("QComboBox { }")
                 dataServer = None
-
+            
         if metadata:
             try:
-                metadataServer = metadataServers()[
-                    self.comboMetadataServer.currentText()
-                ]
+                metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
                 if metadataServer.testConnection():
                     self.comboMetadataServer.setStyleSheet("QComboBox { }")
                 else:
-                    self.comboMetadataServer.setStyleSheet(
-                        "QComboBox { border: 2px solid red; }"
-                    )
+                    self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
                     metadataServer = None
                     canPublish = False
             except KeyError:
@@ -541,25 +479,15 @@ class PublishWidget(BASE, WIDGET):
             if self.isDataPublished.get(name, False):
                 self.unpublishData(name)
             if self.isMetadataPublished.get(name, False):
-                self.unpublishMetadata(name)
+                self.unpublishMetadata(name)            
 
-    def viewWms(self, name):
+    def viewWms(self, name):        
         layer = self.layerFromName(name)
-        names = [layer.name()]
+        names = [layer.name()]        
         bbox = layer.extent()
         if bbox.isEmpty():
             bbox.grow(1)
-        sbbox = ",".join(
-            [
-                str(v)
-                for v in [
-                    bbox.xMinimum(),
-                    bbox.yMinimum(),
-                    bbox.xMaximum(),
-                    bbox.yMaximum(),
-                ]
-            ]
-        )
+        sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])        
         server = geodataServers()[self.comboGeodataServer.currentText()]
         server.openPreview(names, sbbox, layer.crs().authid())
 
@@ -571,28 +499,16 @@ class PublishWidget(BASE, WIDGET):
         names = []
         for layer in layers:
             if self.isDataPublished[layer.name()]:
-                names.append(layer.name())
-                xform = QgsCoordinateTransform(
-                    layer.crs(), canvasCrs, QgsProject.instance()
-                )
+                names.append(layer.name())                
+                xform = QgsCoordinateTransform(layer.crs(), canvasCrs, QgsProject.instance())
                 extent = xform.transform(layer.extent())
                 bbox.combineExtentWith(extent)
-        sbbox = ",".join(
-            [
-                str(v)
-                for v in [
-                    bbox.xMinimum(),
-                    bbox.yMinimum(),
-                    bbox.xMaximum(),
-                    bbox.yMaximum(),
-                ]
-            ]
-        )
+        sbbox = ",".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()]])
         server.openPreview(names, sbbox, canvasCrs.authid())
 
     def previewMetadata(self):
         if self.currentLayer is None:
-            return
+            return        
         html = self.currentLayer.htmlMetadata()
         dlg = QgsMessageOutput.createMessageOutput()
         dlg.setTitle("Layer metadata")
@@ -607,60 +523,37 @@ class PublishWidget(BASE, WIDGET):
 
     def publish(self):
         toPublish = self._toPublish()
-        if self.validateBeforePublication(toPublish):
+        if self.validateBeforePublication(toPublish):            
             progressDialog = ProgressDialog(toPublish, self.parent)
             task = self.getPublishTask(self.parent)
             task.stepStarted.connect(progressDialog.setInProgress)
             task.stepSkipped.connect(progressDialog.setSkipped)
             task.stepFinished.connect(progressDialog.setFinished)
-            progressDialog.show()
-            # task.progressChanged.connect(progress.setValue)
-            ret = execute(task.run)
+            progressDialog.show()            
+            #task.progressChanged.connect(progress.setValue)
+            ret = execute(task.run)     
             progressDialog.close()
-            # self.bar.clearWidgets()
+            #self.bar.clearWidgets()
             task.finished(ret)
             if task.exception is not None:
                 if task.exceptiontype == requests.exceptions.ConnectionError:
-                    QMessageBox.warning(
-                        self,
-                        self.tr("Error while publishing"),
-                        self.tr(
-                            "Connection error. Server unavailable.\nSee QGIS log for details"
-                        ),
-                    )
+                    QMessageBox.warning(self, self.tr("Error while publishing"), 
+                            self.tr("Connection error. Server unavailable.\nSee QGIS log for details"))
                 else:
                     self.bar.clearWidgets()
-                    self.bar.pushMessage(
-                        self.tr("Error while publishing"),
-                        self.tr("See QGIS log for details"),
-                        level=Qgis.Warning,
-                        duration=5,
-                    )
-                QgsMessageLog.logMessage(
-                    task.exception, "GeoCat Bridge", level=Qgis.Critical
-                )
+                    self.bar.pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
+                QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
             if isinstance(task, PublishTask):
-                self.updateLayersPublicationStatus(
-                    task.geodataServer is not None, task.metadataServer is not None
-                )
+                self.updateLayersPublicationStatus(task.geodataServer is not None, task.metadataServer is not None)
 
     def publishOnBackground(self):
         if self.validateBeforePublication():
             self.parent.close()
             task = self.getPublishTask(iface.mainWindow())
-
             def _finished():
-                if task.exception is not None:
-                    iface.messageBar().pushMessage(
-                        self.tr("Error while publishing"),
-                        self.tr("See QGIS log for details"),
-                        level=Qgis.Warning,
-                        duration=5,
-                    )
-                    QgsMessageLog.logMessage(
-                        task.exception, "GeoCat Bridge", level=Qgis.Critical
-                    )
-
+                if task.exception is not None:                    
+                    iface.messageBar().pushMessage(self.tr("Error while publishing"), self.tr("See QGIS log for details"), level=Qgis.Warning, duration=5)
+                    QgsMessageLog.logMessage(task.exception, 'GeoCat Bridge', level=Qgis.Critical)
             task.taskTerminated.connect(_finished)
             QgsApplication.taskManager().addTask(task)
             QCoreApplication.processEvents()
@@ -668,7 +561,7 @@ class PublishWidget(BASE, WIDGET):
     def validateBeforePublication(self, toPublish):
         names = []
         errors = set()
-        for i in range(self.listLayers.count()):
+        for i in range(self.listLayers.count()):            
             item = self.listLayers.item(i)
             widget = self.listLayers.itemWidget(item)
             if widget.checked():
@@ -685,16 +578,15 @@ class PublishWidget(BASE, WIDGET):
             geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
             geodataServer.validateGeodataBeforePublication(errors, toPublish)
 
+
         if self.comboMetadataServer.currentIndex() != 0:
             metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
             metadataServer.validateMetadataBeforePublication(errors)
-
+        
         if errors:
-            txt = """<p><b>Cannot publish data.</b></p>
+            txt = '''<p><b>Cannot publish data.</b></p>
                     <p>The following issues were found:<p><ul><li>%s</li></ul>
-                    """ % "</li><li>".join(
-                errors
-            )
+                    ''' % "</li><li>".join(errors)
             dlg = QgsMessageOutput.createMessageOutput()
             dlg.setTitle("Publish")
             dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
@@ -705,11 +597,11 @@ class PublishWidget(BASE, WIDGET):
 
     def _toPublish(self):
         toPublish = []
-        for i in range(self.listLayers.count()):
+        for i in range(self.listLayers.count()):            
             item = self.listLayers.item(i)
             widget = self.listLayers.itemWidget(item)
             if widget.checked():
-                name = widget.name()
+                name = widget.name()   
                 toPublish.append(name)
         return toPublish
 
@@ -726,31 +618,17 @@ class PublishWidget(BASE, WIDGET):
                 geodataServer = None
 
             if self.comboMetadataServer.currentIndex() != 0:
-                metadataServer = metadataServers()[
-                    self.comboMetadataServer.currentText()
-                ]
+                metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
             else:
-                metadataServer = None
+                metadataServer = None 
 
             onlySymbology = self.chkOnlySymbology.checkState() == Qt.Checked
 
-            return PublishTask(
-                toPublish,
-                self.fieldsToPublish,
-                onlySymbology,
-                geodataServer,
-                metadataServer,
-                parent,
-            )
+            return PublishTask(toPublish, self.fieldsToPublish, onlySymbology, geodataServer, metadataServer, parent)
         else:
-            return ExportTask(
-                self.txtExportFolder.text(),
-                toPublish,
-                self.fieldsToPublish,
-                self.chkExportData.isChecked(),
-                self.chkExportMetadata.isChecked(),
-                self.chkExportSymbology.isChecked(),
-            )
+            return ExportTask(self.txtExportFolder.text(), toPublish, self.fieldsToPublish, self.chkExportData.isChecked(),
+                                self.chkExportMetadata.isChecked(), self.chkExportSymbology.isChecked())
+
 
     def layerFromName(self, name):
         layers = self.publishableLayers()
@@ -760,16 +638,16 @@ class PublishWidget(BASE, WIDGET):
 
 
 class LayerItemWidget(QWidget):
-    def __init__(self, layer, parent=None):
+    def __init__ (self, layer, parent = None):
         super(LayerItemWidget, self).__init__(parent)
         self.layer = layer
         self.layout = QHBoxLayout()
         self.check = QCheckBox()
         self.check.setText(layer.name())
         if layer.type() == layer.VectorLayer:
-            self.check.setIcon(QgsApplication.getThemeIcon("/mIconLineLayer.svg"))
+            self.check.setIcon(QgsApplication.getThemeIcon('/mIconLineLayer.svg'))
         else:
-            self.check.setIcon(QgsApplication.getThemeIcon("/mIconRaster.svg"))
+            self.check.setIcon(QgsApplication.getThemeIcon('/mIconRaster.svg'))
         self.labelMetadata = QLabel()
         self.labelMetadata.setFixedWidth(50)
         self.labelData = QLabel()
@@ -778,16 +656,13 @@ class LayerItemWidget(QWidget):
         self.layout.addWidget(self.labelData)
         self.layout.addWidget(self.labelMetadata)
         self.setLayout(self.layout)
-
+        
     def name(self):
         return self.layer.name()
 
     def iconPath(self, server):
-        return os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "icons",
-            "%s.png" % server.__class__.__name__.lower()[:-6],
-        )
+        return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", 
+                        "%s.png" % server.__class__.__name__.lower()[:-6])
 
     def setMetadataPublished(self, server):
         self.labelMetadata.setPixmap(QPixmap(self.iconPath(server)))

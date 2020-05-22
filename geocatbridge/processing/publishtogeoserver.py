@@ -1,45 +1,40 @@
-from qgis.core import (
-    QgsSettings,
-    QgsProcessing,
-    QgsProcessingException,
-    QgsProcessingParameterMapLayer,
-    QgsProcessingParameterString,
-    QgsProcessingParameterAuthConfig,
-)
+from qgis.core import (QgsSettings,                       
+                       QgsProcessing,
+                       QgsProcessingException,
+                       QgsProcessingParameterMapLayer,
+                       QgsProcessingParameterString,
+                       QgsProcessingParameterAuthConfig)
 
 from .bridgealgorithm import BridgeAlgorithm
 
 from geocatbridge.publish.geoserver import GeoserverServer
 
-
 class PublishToGeoserverAlgorithm(BridgeAlgorithm):
 
-    INPUT = "INPUT"
-    URL = "URL"
-    WORKSPACE = "WORKSPACE"
-    AUTHID = "AUTHID"
+    INPUT = 'INPUT'
+    URL = 'URL'
+    WORKSPACE = 'WORKSPACE'
+    AUTHID = 'AUTHID' 
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterMapLayer(self.INPUT, self.tr("Layer")))
+        self.addParameter(QgsProcessingParameterMapLayer(self.INPUT,
+                                                              self.tr('Layer')))
 
-        self.addParameter(
-            QgsProcessingParameterString(self.URL, self.tr("Server URL"), "")
-        )
-        self.addParameter(
-            QgsProcessingParameterString(self.WORKSPACE, self.tr("Workspace"), "")
-        )
-        self.addParameter(
-            QgsProcessingParameterAuthConfig(self.AUTHID, self.tr("Auth credentials"))
-        )
-
+        self.addParameter(QgsProcessingParameterString(self.URL,
+                                                       self.tr('Server URL'), ''))
+        self.addParameter(QgsProcessingParameterString(self.WORKSPACE,
+                                                       self.tr('Workspace'), ''))
+        self.addParameter(QgsProcessingParameterAuthConfig(self.AUTHID,
+                                                       self.tr('Auth credentials')))
+        
     def name(self):
-        return "publishtogeoserver"
+        return 'publishtogeoserver'
 
     def displayName(self):
-        return self.tr("Publish layer to GeoServer")
+        return self.tr('Publish layer to GeoServer')
 
     def shortDescription(self):
-        return self.tr("Publishes a layer and its style to a GeoServer instance")
+        return self.tr('Publishes a layer and its style to a GeoServer instance')
 
     def tags(self):
         return []
@@ -49,8 +44,9 @@ class PublishToGeoserverAlgorithm(BridgeAlgorithm):
         authid = self.parameterAsString(parameters, self.AUTHID, context)
         workspace = self.parameterAsString(parameters, self.WORKSPACE, context)
         layer = self.parameterAsLayer(parameters, self.INPUT, context)
-
+        
         server = GeoserverServer("server", url=url, authid=authid, workspace=workspace)
         server.publishLayer(layer)
-
+        
         return {}
+

@@ -13,11 +13,11 @@ from bridgestyle.qgis import layerStyleAsSld, layerStyleAsMapbox, layerStyleAsMa
 from bridgestyle.qgis.togeostyler import convert
 
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), "multistyler.ui"))
-
+WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'multistyler.ui'))
 
 class MultistylerDialog(BASE, WIDGET):
-    def __init__(self,):
+
+    def __init__(self, ):
         super(MultistylerDialog, self).__init__(iface.mainWindow())
         self.setupUi(self)
 
@@ -39,7 +39,7 @@ class MultistylerDialog(BASE, WIDGET):
         self.txtMapserver = EditorWidget()
         layout = QVBoxLayout()
         layout.addWidget(self.txtMapserver)
-        self.widgetMapserver.setLayout(layout)
+        self.widgetMapserver.setLayout(layout)        
 
         self.updateForCurrentLayer()
 
@@ -49,16 +49,15 @@ class MultistylerDialog(BASE, WIDGET):
             self.updateForCurrentLayer()
 
     def updateForCurrentLayer(self):
-        layer = iface.activeLayer()
+        layer = iface.activeLayer()        
         sld = ""
         geostyler = ""
         mapbox = ""
         mapserver = ""
         warnings = []
         if layer is not None:
-            if isinstance(layer, QgsRasterLayer) or (
-                isinstance(layer, QgsVectorLayer) and layer.isSpatial()
-            ):
+            if (isinstance(layer, QgsRasterLayer) or
+                    (isinstance(layer, QgsVectorLayer) and layer.isSpatial())):
                 sld, _, sldWarnings = layerStyleAsSld(layer)
                 geostyler, _, geostylerWarnings = convert(layer)
                 geostyler = json.dumps(geostyler, indent=4)
@@ -75,7 +74,6 @@ class MultistylerDialog(BASE, WIDGET):
         self.txtMapserver.setText(mapserver)
         self.txtWarnings.setPlainText("\n".join(warnings))
 
-
 class EditorWidget(QsciScintilla):
     ARROW_MARKER_NUM = 8
 
@@ -83,12 +81,12 @@ class EditorWidget(QsciScintilla):
         super(EditorWidget, self).__init__()
 
         font = QFont()
-        font.setFamily("Courier")
+        font.setFamily('Courier')
         font.setFixedPitch(True)
         font.setPointSize(10)
         self.setFont(font)
         self.setMarginsFont(font)
-
+        
         fontmetrics = QFontMetrics(font)
         self.setMarginsFont(font)
         self.setMarginWidth(0, fontmetrics.width("00000") + 6)
@@ -101,7 +99,7 @@ class EditorWidget(QsciScintilla):
         self.setCaretLineBackgroundColor(QColor("#ffe4e4"))
 
         if lexer is not None:
-            lexer.setDefaultFont(font)
+            lexer.setDefaultFont(font)        
             self.setLexer(lexer)
 
-        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, "Courier".encode())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier'.encode())

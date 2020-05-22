@@ -8,8 +8,8 @@ DST_DIR = os.path.join(root, "geocatbridgeenterprise")
 DOCS_SRC_DIR = os.path.join(root, "docs")
 DOCS_DST_DIR = os.path.join(root, "docsenterprise")
 
+class ReplaceAction():
 
-class ReplaceAction:
     def __init__(self, old, new):
         self.old = old
         self.new = new
@@ -30,31 +30,27 @@ class ReplaceAction:
         files = []
         for folder in [DST_DIR, DOCS_DST_DIR]:
             for root, dirnames, filenames in os.walk(folder):
-                for ext in ["*.txt", "*.rst", "*.py", "*.ui", "*.html", "*.ui"]:
+                for ext in ["*.txt", "*.rst" , "*.py", "*.ui", "*.html", "*.ui"]:
                     for filename in fnmatch.filter(filenames, ext):
                         files.append(os.path.join(root, filename))
         return files
 
+class SetIsEnterpriseAsTrueAction():
 
-class SetIsEnterpriseAsTrueAction:
     def run(self):
         code = "def isEnterprise():\n\treturn True"
         filepath = os.path.join(DST_DIR, "utils", "enterprise.py")
         with open(filepath, "w") as f:
             f.write(code)
 
-
 brandingActions = [
-    ReplaceAction(" Bridge ", " Bridge Enterprise "),
-    ReplaceAction("GeoCat Bridge", "GeoCat Bridge Enterprise"),
-    ReplaceAction("geocatbridge.", "geocatbridgeenterprise."),
-    ReplaceAction(
-        "https://github.com/GeoCat/qgis-bridge-plugin/issues",
-        "https://my.geocat.net/submitticket.php?step=2&deptid=1&subject=Bridge",
-    ),
-    SetIsEnterpriseAsTrueAction(),
-]
-
+                    ReplaceAction(" Bridge ", " Bridge Enterprise "),
+                    ReplaceAction("GeoCat Bridge", "GeoCat Bridge Enterprise"),
+                    ReplaceAction("geocatbridge.", "geocatbridgeenterprise."),
+                    ReplaceAction("https://github.com/GeoCat/qgis-bridge-plugin/issues", 
+                                "https://my.geocat.net/submitticket.php?step=2&deptid=1&subject=Bridge"),
+                    SetIsEnterpriseAsTrueAction()
+                ]
 
 def doBranding():
     if os.path.exists(DST_DIR):
