@@ -467,26 +467,28 @@ class GeoserverServer(ServerBase):
             self.request(url, data=ws, method="post")
             
     def postgisDatastores(self):
-        url = "%s/workspaces.json" % (self.url)
-        r = self.request(url)
-        root = r.json()["workspaces"]
-        if "workspace" in root:
-            wss = [s["name"] for s in root["workspace"]]
-        else:
-            wss = []
-        datastores = []
-        for ws in wss:
-            url = "%s/workspaces/%s/datastores.json" % (self.url, ws)            
-            r = self.request(url)
-            root = r.json()["dataStores"]
-            if "dataStore" in root:
-                for datastore in root["dataStore"]:
-                    url = "%s/workspaces/%s/datastores/%s.json" % (self.url, ws, datastore["name"])
-                    r = self.request(url)
-                    datastoreJson = r.json()                    
-                    if datastoreJson["dataStore"].get("type", None) == "PostGIS":
-                        datastores.append("%s:%s" % (ws, datastore["name"]))
-        return datastores
+        pg_datastores = []
+        url = f"{self.url}/workspaces.json"
+        res = self.request(url).json().get("workspaces", {})
+        if not res:
+            # There aren't any workspaces (and thus no dataStores)
+            return pg_datastores
+        for ws_url in (s.get("href") for s in res.get("workspace", [])):
+            props = self.request(ws_url).json().get("workspace", {})
+            ws_name, ds_list_url = props.get("name"), props.get("dataStores")
+            res = self.request(ds_list_url).json().get("dataStores", {})
+            if not res:
+                # There aren't any dataStores for this workspace
+                continue
+            for ds_url in (s.get("href") for s in res.get("dataStore", [])):
+                ds = self.request(ds_url).json().get("dataStore", {})
+                ds_name, enabled, params = ds.get("name"), ds.get("enabled"), ds.get("connectionParameters", {})
+                # Only add dataStore if it is enabled and the "dbtype" parameter equals "postgis"
+                # Using the "type" property does not work in all cases (e.g. for JNDI connection pools)
+                entries = {e["@key"]: e["$"] for e in params.get("entry", [])}
+                if enabled and entries.get("dbtype") == "postgis":
+                    pg_datastores.append(f"{ws_name}:{ds_name}")
+        return pg_datastores
         
     def addPostgisDatastore(self, datastoreDef):        
         url = "%s/workspaces/%s/datastores/" % (self.url, self._workspace)
