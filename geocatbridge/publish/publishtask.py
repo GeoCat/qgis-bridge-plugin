@@ -113,34 +113,38 @@ class PublishTask(QgsTask):
                 validates, _ = validator.validate(layer.metadata())
                 validates = True
                 if self.geodataServer is not None:
+                    self.geodataServer.resetLog()
+
+                    # Publish style
+                    self.stepStarted.emit(name, SYMBOLOGY)
                     try:
-                        self.geodataServer.resetLog()
-                        self.stepStarted.emit(name, SYMBOLOGY)
                         self.geodataServer.publishStyle(layer)
-                        self.stepFinished.emit(name, SYMBOLOGY)
                     except:
-                        self.stepFinished.emit(name, SYMBOLOGY)
                         errors.append(traceback.format_exc())
+                    self.stepFinished.emit(name, SYMBOLOGY)
+
+                    if self.onlySymbology:
+                        self.stepSkipped.emit(name, DATA)
+                        return True
+
+                    # Publish data
+                    self.stepStarted.emit(name, DATA)
                     try:
-                        if self.onlySymbology:
-                            self.stepSkipped.emit(name, DATA)
+                        if validates or allowWithoutMetadata in [ALLOW, ALLOWONLYDATA]:
+                            fields = None
+                            if layer.type() == layer.VectorLayer:
+                                fields = [name for name, publish in self.fields[layer].items() if publish]
+                            self.geodataServer.publishLayer(layer, fields)
+                            if self.metadataServer is not None:
+                                metadataUuid = uuidForLayer(layer)
+                                url = self.metadataServer.metadataUrl(metadataUuid)
+                                self.geodataServer.setLayerMetadataLink(name, url)
                         else:
-                            self.stepStarted.emit(name, DATA)
-                            if validates or allowWithoutMetadata in [ALLOW, ALLOWONLYDATA]:
-                                fields = None
-                                if layer.type() == layer.VectorLayer:
-                                    fields = [name for name, publish in self.fields[layer].items() if publish]                            
-                                self.geodataServer.publishLayer(layer, fields)
-                                if self.metadataServer is not None:
-                                    metadataUuid = uuidForLayer(layer)
-                                    url = self.metadataServer.metadataUrl(metadataUuid)
-                                    self.geodataServer.setLayerMetadataLink(name, url)
-                            else:
-                                self.geodataServer.logError(self.tr("Layer '%s' has invalid metadata. Layer was not published") % layer.name())
-                            self.stepFinished.emit(name, DATA)
+                            self.geodataServer.logError(self.tr(f"Layer '{layer.name()}' has invalid metadata. "
+                                                                f"Layer was not published"))
                     except:
-                        self.stepFinished.emit(name, DATA)
                         errors.append(traceback.format_exc())
+                    self.stepFinished.emit(name, DATA)
                 else:
                     self.stepSkipped.emit(name, SYMBOLOGY)
                     self.stepSkipped.emit(name, DATA)
@@ -259,7 +263,7 @@ class ExportTask(QgsTask):
                 return layer
 
     def publishableLayers(self):
-        layers = [layer for layer in QgsProject.instance().mapLayers().values() 
+        layers = [layer for layer in QgsProject.instance().mapLayers().values()
                 if layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]]
         return layers
 
