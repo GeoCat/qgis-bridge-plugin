@@ -77,7 +77,6 @@ class GeoserverServer(ServerBase):
         return styleFilename
 
     def publishLayer(self, layer, fields=None):        
-        self.publishStyle(layer)
         if layer.type() == layer.VectorLayer:
             if layer.featureCount() == 0:
                 self.logError("Layer contains zero features and cannot be published")
