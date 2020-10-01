@@ -47,9 +47,10 @@ def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False, l
         else:
             # Use writeAsVectorFormatV2 for QGIS versions >= 3.10.3 to avoid DeprecationWarnings
             transform_ctx = QgsProject.instance().transformContext()
-            options = QgsVectorFileWriter.SaveVectorOptions(fileEncoding="UTF-8", attributes=attrs)
-            if ext == EXT_SHAPEFILE:
-                options.driverName = "ESRI Shapefile"
+            options = QgsVectorFileWriter.SaveVectorOptions()
+            options.fileEncoding = "UTF-8"
+            options.attributes = attrs
+            options.driverName = "ESRI Shapefile" if ext == EXT_SHAPEFILE else ""
             QgsVectorFileWriter.writeAsVectorFormatV2(layer, output, transform_ctx, options)
         if log is not None:
             log.logInfo(QCoreApplication.translate("GeocatBridge",
