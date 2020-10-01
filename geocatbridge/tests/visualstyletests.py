@@ -101,6 +101,7 @@ def create_styles_visual_test_page(folder, url = "http://localhost:8080/geoserve
                 name = os.path.splitext(os.path.basename(stylefile))[0]
                 layer.setName(name)              
                 layer.loadNamedStyle(stylefile)
+                server.publishStyle(layer)
                 server.publishLayer(layer)
                 contenthtml += create_images(folder, url, layer, subfolder)
         contenthtml += "</div>"
