@@ -62,14 +62,8 @@ class GeocatLiveServer(ServerBase):
             self.addOGCServers()
         return self._geonetworkServer
 
-    def setupForProject(self):
-        self.geoserverServer().setupForProject()
-    
     def prepareForPublishing(self, onlySymbology):
         self.geoserverServer().prepareForPublishing(onlySymbology)
-
-    def closePublishing(self):
-        self.geoserverServer().closePublishing()
 
     def publishLayerMetadata(self, layer, wms):
         self.geonetworkServer().publishLayerMetadata(layer, wms)

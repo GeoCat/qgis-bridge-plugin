@@ -194,7 +194,6 @@ class PublishTask(QgsTask):
                     #TODO: figure out where to put a warning or error message for this
                     pass
                 finally:
-                    self.geodataServer.closePublishing()
                     self.stepFinished.emit(None, GROUPS)
             else:
                 self.stepSkipped.emit(None, GROUPS)
