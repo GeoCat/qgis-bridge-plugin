@@ -63,9 +63,6 @@ class GeoserverServer(ServerBase):
         self._exportedLayers = {}
         self._postgisDatastoreExists = False
 
-    def closePublishing(self):
-        pass
-
     def publishStyle(self, layer):
         styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
@@ -268,7 +265,7 @@ class GeoserverServer(ServerBase):
         ft["featureType"]["title"] = name                
         try:
             ftUrl = "%s/workspaces/%s/datastores/%s/featuretypes" % (self.url, self._workspace, datasetName)
-            r = self.request(ftpUrl, ft, "post")
+            r = self.request(ftUrl, ft, "post")
         except:            
             r = self.request(url, ft, "put")
         self.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
@@ -357,14 +354,9 @@ class GeoserverServer(ServerBase):
         return self._exists(url, "workspace", self._workspace)
 
     def willDeleteLayersOnPublication(self, toPublish):
-
         if self.workspaceExists():
-            print(3)
             layers = self.layers()
             toDelete = list(set(layers) - set(toPublish))
-            print(layers)
-            print(toPublish)
-            print(toDelete)
             return bool(toDelete)
         else:
             return False
