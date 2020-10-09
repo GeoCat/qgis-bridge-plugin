@@ -369,10 +369,8 @@ class GeoserverServer(ServerBase):
         else:
             return False
 
-
-
     def datastoreExists(self, name):
-        url = "%s/workspaces%s/datastores.json" % (self.url, self._workspace)
+        url = "%s/workspaces/%s/datastores.json" % (self.url, self._workspace)
         return self._exists(url, "dataStore", name)
 
     def _deleteDatastore(self, name):
