@@ -1,5 +1,9 @@
 import os
-from osgeo import gdal
+
+try:
+    from osgeo import gdal
+except (ModuleNotFoundError, ImportError):
+    import gdal
 
 from qgis.core import QgsVectorFileWriter, QgsRasterFileWriter, QgsProject, Qgis
 from qgis.PyQt.QtCore import QCoreApplication
