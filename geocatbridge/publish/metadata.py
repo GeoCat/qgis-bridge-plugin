@@ -15,6 +15,7 @@ from qgis.core import (
     QgsMessageLog
 )
 from ..utils.files import tempFilenameInTempFolder
+from ..utils.layers import getLayerTitleAndName
 
 QMD_TO_ISO19139_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
 ISO19139_TO_QMD_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19139-to-qgis.xsl")
@@ -104,11 +105,12 @@ def saveMetadataToIsoXml(layer, filename):
 
 def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None, wfs=None, layerName=None):
     uuid = uuidForLayer(layer)
-    filename = tempFilenameInTempFolder(layer.name() + ".qmd")    
+    _, safe_name = getLayerTitleAndName(layer)
+    filename = tempFilenameInTempFolder(safe_name + ".qmd")
     layer.saveNamedMetadata(filename)
     thumbnail = saveLayerThumbnail(layer)
     apiUrl = apiUrl or ""
-    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms, wfs, layerName or layer.name())
+    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms, wfs, layerName or safe_name)
     mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
     createMef(uuid, transformedFilename, mefFilename, thumbnail)
     return mefFilename

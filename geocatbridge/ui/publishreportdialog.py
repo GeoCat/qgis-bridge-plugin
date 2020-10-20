@@ -78,7 +78,7 @@ class PublishReportDialog(BASE, WIDGET):
         txt = "<p><b>%s</b></p>%s<p><b>%s</b></p>%s" % (self.tr("Warnings:"), w, self.tr("Errors:"), e)
         txt = txt.replace("\n","<br>") # make output easier to read
         dlg = QgsMessageOutput.createMessageOutput()
-        dlg.setTitle(self.tr("Wanings / Errors"))
+        dlg.setTitle(self.tr("Warnings / Errors"))
         dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
         dlg.showMessage()
 

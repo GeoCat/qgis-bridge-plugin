@@ -8,7 +8,8 @@ from qgis.core import (
     QgsApplication
 )
 
-class ServerBase():
+
+class ServerBase:
 
     def __init__(self):
         self._warnings = []
@@ -54,17 +55,22 @@ class ServerBase():
         username, password = self.getCredentials()
         req_method = getattr(requests, method.lower())
         if isinstance(data, dict):
+            # If the request contains data as a dictionary, serialize as JSON
             data = json.dumps(data)
             headers["content-type"] = "application/json"
-        self.logInfo("Making %s request to '%s'" % (method, url))
+        # We always like to get JSON back
+        headers["accept"] = "application/json"
+        self.logInfo("Making %s request to '%s'" % (method.upper(), url))
         r = req_method(url, headers=headers, files=files, data=data, auth=(username, password))
+        if not isinstance(r, requests.Response):
+            self.logWarning("Empty or invalid response returned!")
         r.raise_for_status()
         return r
 
     def addOGCServers(self):
         pass
 
-    def validateGeodataBeforePublication(self, errors, toPublish):
+    def validateGeodataBeforePublication(self, errors, toPublish, onlySymbology):
         pass
 
     def validateMetadataBeforePublication(self, errors):
