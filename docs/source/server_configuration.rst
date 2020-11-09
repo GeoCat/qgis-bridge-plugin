@@ -65,7 +65,7 @@ Configure a GeoServer connection to publish your data to GeoServer.
 
 Provide a name for the server, its URL and the corresponding credentials. 
 
-URL can point to theGeoServer location (i.e. ``http://localhost:8080/geoserver``) or the REST API endpoint (i.e. ``http://localhost:8080/geoserver/rest``)
+URL can point to the GeoServer location (i.e. ``http://localhost:8080/geoserver``) or the REST API endpoint (i.e. ``http://localhost:8080/geoserver/rest``)
 
 Finally, you must select how data will be stored in the server. Three different methods are available:
 
@@ -103,7 +103,7 @@ PostGIS connection can be used in two different publish scenarios:
 MapServer connection
 --------------------
 
-Configure a MapServer connection to publish your map data to PostGIS. A mapserver
+Configure a MapServer connection to publish your map data to PostGIS. A MapServer
 endpoint (mapfile) is created for each QGIS project.
 
 In the *MapServer details* enter the information about your MapServer instance, to which you want to publish.
