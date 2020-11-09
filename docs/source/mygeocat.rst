@@ -19,4 +19,4 @@ Whenever Bridge finds an error, it will display the error information in a dialo
 
 .. image:: ./img/bridge_error.png
 
-You can copy the error description in the box by selecting the corresponding text and right-clicking on it. Send it aloong with your error report, as this will make it easier to find the cause of the error and fix it.
+You can copy the error description in the box by selecting the corresponding text and right-clicking on it. Send it along with your error report, as this will make it easier to find the cause of the error and fix it.
