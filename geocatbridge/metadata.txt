@@ -17,7 +17,7 @@ icon=icons/geocat.png
 
 tags=Geoserver, MapServer, GeoNetwork, Mapbox style, Geostyler, ISO19139, SLD, GeoPackage, PostGIS
 
-homepage=http://geocat.net/bridge
+homepage=https://www.geocat.net/bridge
 tracker=https://github.com/geocat/qgis-bridge-plugin/issues
 repository=https://github.com/geocat/qgis-bridge-plugin
 
