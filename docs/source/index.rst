@@ -18,7 +18,7 @@ different clients.
 
 The founder of GeoCat worked for many years with the United Nations
 where he founded the `GeoNetwork
-opensource <http://geonetwork-opensource.org>`_ project. Today GeoNetwork
+opensource <https://geonetwork-opensource.org>`_ project. Today GeoNetwork
 opensource can be considered the leading open source geospatial catalog
 application with numerous international and national geo-portal
 implementations.
