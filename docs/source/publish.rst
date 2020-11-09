@@ -56,7 +56,7 @@ shown:
 
 .. image:: ./img/publish_layers_report.png
 
-If you have already uploaded your data and only want to update the symbology of your server layers without uploading layer data again, check the *Only symbology* option. The styles of the selected layers willbe published, but no layer data will be uploaded.
+If you have already uploaded your data and only want to update the symbology of your server layers without uploading layer data again, check the *Only symbology* option. The styles of the selected layers will be published, but no layer data will be uploaded.
 
 When you are uploading a large number of layers, or your layers are large, the publishing process might take time. If you want to continue working with QGIS while layer data is uploaded, you can click the *Publish on background* button instead of the *Publish* one. The Bridge will close and you will be able to use QGIS normally. Once the publishing process is finished, the summary dialog will be shown.
 
