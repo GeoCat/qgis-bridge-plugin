@@ -3,7 +3,7 @@
 My GeoCat
 =========
 
-If you have a GeoCat live account, you can find additional functionality in the GeoCat section, and moving to the *My GeoCat* tab
+If you have a GeoCat Live account, you can find additional functionality in the GeoCat section, and moving to the *My GeoCat* tab
 
 .. image:: ./img/mygeocat.png
 
