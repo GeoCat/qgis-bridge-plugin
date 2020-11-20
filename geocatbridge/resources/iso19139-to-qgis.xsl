@@ -35,7 +35,7 @@
                     <keywords vocabulary="{gmd:MD_Keywords/gmd:thesaurusName/gmd:CI_Citation/gmd:title/gco:CharacterString}">                    
                         <xsl:for-each select="gmd:MD_Keywords/gmd:keyword">
                             <keyword>
-                                <xsl:value-of select="gmd:keyword/gco:CharacterString" />
+                                <xsl:value-of select="gco:CharacterString" />
                             </keyword>
                         </xsl:for-each>
                     </keywords>
@@ -135,10 +135,10 @@
                     </temporal>
                     
                 </xsl:if>
-                <spatial crs="EPSG:4326" minx="{gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:westBoundLongitude/gco:Decimal}" 
-                    maxx="{gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:eastBoundLongitude/gco:Decimal}" 
-                    miny="{gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:southBoundLatitude/gco:Decimal}" 
-                    maxy="{gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:northBoundLatitude/gco:Decimal}" />
+                <spatial crs="EPSG:4326" minx="{gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent[gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox][1]/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/gco:Decimal}" 
+                    maxx="{gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent[gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox][1]/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/gco:Decimal}" 
+                    miny="{gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent[gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox][1]/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/gco:Decimal}" 
+                    maxy="{gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent[gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox][1]/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/gco:Decimal}" />
             </extent>
             
             

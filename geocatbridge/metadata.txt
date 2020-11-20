@@ -19,5 +19,6 @@ tags=Geoserver, MapServer, GeoNetwork, Mapbox style, Geostyler, ISO19139, SLD, G
 
 homepage=http://geocat.net/bridge
 tracker=https://my.geocat.net/submitticket.php
+repository=https://github.com/geocat/qgis-bridge-plugin
 
 deprecated=False

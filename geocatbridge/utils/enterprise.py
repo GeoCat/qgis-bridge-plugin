@@ -1,0 +1,2 @@
+def isEnterprise():
+	return False

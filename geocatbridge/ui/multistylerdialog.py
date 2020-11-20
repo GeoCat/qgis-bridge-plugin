@@ -55,17 +55,19 @@ class MultistylerDialog(BASE, WIDGET):
         mapbox = ""
         mapserver = ""
         warnings = []
-        if layer is not None and isinstance(layer, (QgsVectorLayer, QgsRasterLayer)):
-            sld, _, sldWarnings = layerStyleAsSld(layer)
-            geostyler, _, geostylerWarnings = convert(layer)
-            geostyler = json.dumps(geostyler, indent=4)
-            mapbox, _, mapboxWarnings = layerStyleAsMapbox(layer)
-            mapserver, _, _, mapserverWarnings = layerStyleAsMapfile(layer)
-            warnings = set()
-            warnings.update(sldWarnings)
-            warnings.update(geostylerWarnings)
-            warnings.update(mapboxWarnings)
-            warnings.update(mapserverWarnings)
+        if layer is not None:
+            if (isinstance(layer, QgsRasterLayer) or
+                    (isinstance(layer, QgsVectorLayer) and layer.isSpatial())):
+                sld, _, sldWarnings = layerStyleAsSld(layer)
+                geostyler, icons, sprites, geostylerWarnings = convert(layer)
+                geostyler = json.dumps(geostyler, indent=4)
+                mapbox, _, mapboxWarnings = layerStyleAsMapbox(layer)
+                mapserver, _, _, mapserverWarnings = layerStyleAsMapfile(layer)
+                warnings = set()
+                warnings.update(sldWarnings)
+                warnings.update(geostylerWarnings)
+                warnings.update(mapboxWarnings)
+                warnings.update(mapserverWarnings)
         self.txtSld.setText(sld)
         self.txtGeostyler.setText(geostyler)
         self.txtMapbox.setText(mapbox)

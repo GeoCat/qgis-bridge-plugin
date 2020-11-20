@@ -48,7 +48,7 @@ from geocatbridge.utils.gui import execute
 from geocatbridge.publish.geonetwork import GeonetworkServer
 from geocatbridge.publish.publishtask import PublishTask, ExportTask
 from geocatbridge.publish.servers import geodataServers, metadataServers
-from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromIsoXml
+from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromXml
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 from geocatbridge.ui.progressdialog import ProgressDialog
@@ -238,7 +238,6 @@ class PublishWidget(BASE, WIDGET):
         item = self.listLayers.itemAt(pos)
         if item is None:
             return
-        row = self.listLayers.row(item)
         name = self.listLayers.itemWidget(item).name()
         menu = QMenu()        
         if self.isDataPublished.get(name):
@@ -345,23 +344,29 @@ class PublishWidget(BASE, WIDGET):
             metadataFile = self.currentLayer.source() + ".xml"
             if not os.path.exists(metadataFile):
                 metadataFile = None
-        if metadataFile is not None:
+        
+        if metadataFile is None:
+            ret = QMessageBox.question(self, self.tr("Metadata file"), 
+                            self.tr("Could not find a suitable metadata file.\nDo you want to select it manually?"))            
+            if ret == QMessageBox.Yes:
+                metadataFile, _ = QFileDialog.getOpenFileName(self, self.tr("Metadata file"), 
+                                    os.path.dirname(self.currentLayer.source()), '*.xml')
+                print(metadataFile)
+        
+        if metadataFile:
             try:
-                loadMetadataFromIsoXml(self.currentLayer, metadataFile)
+                loadMetadataFromXml(self.currentLayer, metadataFile)
             except:
                 self.bar.pushMessage(self.tr("Error importing metadata"), 
-                    self.tr("Cannot convert the metadata file. Maybe not ISO format?"), 
+                    self.tr("Cannot convert the metadata file. Maybe not ISO19139 or ESRI-ISO format?"), 
                     level=Qgis.Warning, duration=5)
                 return
 
             self.metadata[self.currentLayer] = self.currentLayer.metadata().clone()
             self.populateLayerMetadata()
             self.bar.pushMessage("", self.tr("Metadata correctly imported"), level=Qgis.Success, duration=5)
-        else:
-            self.bar.pushMessage(self.tr("Error importing metadata"), 
-                    self.tr("Cannot find ISO metadata file for the current layer"), 
-                    level=Qgis.Warning, duration=5)
-
+        
+        
     def validateMetadata(self):
         if self.currentLayer is None:
             return
@@ -516,8 +521,8 @@ class PublishWidget(BASE, WIDGET):
         server.openMetadata(uuid)
 
     def publish(self):
-        if self.validateBeforePublication():
-            toPublish = self._toPublish()
+        toPublish = self._toPublish()
+        if self.validateBeforePublication(toPublish):            
             progressDialog = ProgressDialog(toPublish, self.parent)
             task = self.getPublishTask(self.parent)
             task.stepStarted.connect(progressDialog.setInProgress)
@@ -552,7 +557,7 @@ class PublishWidget(BASE, WIDGET):
             QgsApplication.taskManager().addTask(task)
             QCoreApplication.processEvents()
 
-    def validateBeforePublication(self):
+    def validateBeforePublication(self, toPublish):
         names = []
         errors = set()
         for i in range(self.listLayers.count()):            
@@ -566,15 +571,14 @@ class PublishWidget(BASE, WIDGET):
                 if name in names:
                     errors.add("Several layers with the same name")
                 names.append(name)
-
         if self.comboGeodataServer.currentIndex() != 0:
             geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
-            geodataServer.validateBeforePublication(errors)
+            geodataServer.validateGeodataBeforePublication(errors, toPublish)
 
 
         if self.comboMetadataServer.currentIndex() != 0:
             metadataServer = metadataServers()[self.comboMetadataServer.currentText()]
-            metadataServer.validateBeforePublication(errors)
+            metadataServer.validateMetadataBeforePublication(errors)
         
         if errors:
             txt = '''<p><b>Cannot publish data.</b></p>

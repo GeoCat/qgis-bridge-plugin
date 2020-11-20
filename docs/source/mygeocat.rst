@@ -3,7 +3,7 @@
 My GeoCat
 =========
 
-If you have a GeoCat live account, you can find additional functionality in the GeoCat section, and moving to the *My GeoCat* tab
+If you have a GeoCat Live account, you can find additional functionality in the GeoCat section, and moving to the *My GeoCat* tab
 
 .. image:: ./img/mygeocat.png
 
@@ -19,4 +19,4 @@ Whenever Bridge finds an error, it will display the error information in a dialo
 
 .. image:: ./img/bridge_error.png
 
-You can copy the error description in the box by selecting the corresponding text and right-clicking on it. Send it aloong with your error report, as this will make it easier to find the cause of the error and fix it.
+You can copy the error description in the box by selecting the corresponding text and right-clicking on it. Send it along with your error report, as this will make it easier to find the cause of the error and fix it.

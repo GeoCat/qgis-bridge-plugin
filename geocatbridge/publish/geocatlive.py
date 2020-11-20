@@ -62,17 +62,11 @@ class GeocatLiveServer(ServerBase):
             self.addOGCServers()
         return self._geonetworkServer
 
-    def setupForProject(self):
-        self.geoserverServer().setupForProject()
-    
     def prepareForPublishing(self, onlySymbology):
         self.geoserverServer().prepareForPublishing(onlySymbology)
 
     def closePublishing(self):
         self.geoserverServer().closePublishing()
-
-    def publishLayerMetadata(self, layer, wms):
-        self.geonetworkServer().publishLayerMetadata(layer, wms)
 
     def publishStyle(self, layer):
         self.geoserverServer().publishStyle(layer)
@@ -106,7 +100,13 @@ class GeocatLiveServer(ServerBase):
         self.geoserverServer().deleteLayer(name)
     
     def openPreview(self, names, bbox, srs):
-        self.geoserverServer().openPreview(names, bbox, srs)
+        self.geoserverServer().openPreview(names, bbox, srs)    
+
+    def fullLayerName(self, layerName):
+        return self.geoserverServer().fullLayerName(layerName)
+
+    def layerWfsUrl(self):
+        return self.geoserverServer().layerWfsUrl()
 
     def layerWmsUrl(self, name):
         return self.geoserverServer().layerWmsUrl(name)
@@ -114,8 +114,8 @@ class GeocatLiveServer(ServerBase):
     def setLayerMetadataLink(self, name, url):
         return self.geoserverServer().setLayerMetadataLink(name, url)
 
-    def publishLayerMetadata(self, layer, wms):
-        return self.geonetworkServer().publishLayerMetadata(layer, wms)
+    def publishLayerMetadata(self, layer, wms, wfs, layerName):
+        return self.geonetworkServer().publishLayerMetadata(layer, wms, wfs, layerName)
 
     def metadataExists(self, uuid):
         return self.geonetworkServer().metadataExists(uuid)
@@ -141,5 +141,8 @@ class GeocatLiveServer(ServerBase):
         baseurl = "/".join(self._geoserverUrl.split("/")[:-1])
         addServicesForGeodataServer("GeoCat Live Geoserver - " + self.userid, baseurl, self.geoserverAuthid)
 
-    def validateBeforePublication(self, errors):
-        return self.geoserverServer().validateBeforePublication(errors)
+    def validateGeodataBeforePublication(self, errors, toPublish):
+        return self.geoserverServer().validateGeodataBeforePublication(errors, toPublish)
+
+    def validateMetadataBeforePublication(self, errors):    
+        return self.geonetworkServer().validateMetadataBeforePublication(errors)

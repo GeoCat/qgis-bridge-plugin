@@ -46,6 +46,7 @@ class PublishToGeoserverAlgorithm(BridgeAlgorithm):
         layer = self.parameterAsLayer(parameters, self.INPUT, context)
         
         server = GeoserverServer("server", url=url, authid=authid, workspace=workspace)
+        server.publishStyle(layer)
         server.publishLayer(layer)
         
         return {}

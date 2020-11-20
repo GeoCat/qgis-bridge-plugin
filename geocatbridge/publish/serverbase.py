@@ -64,5 +64,8 @@ class ServerBase():
     def addOGCServers(self):
         pass
 
-    def validateBeforePublication(self, errors):
+    def validateGeodataBeforePublication(self, errors, toPublish):
+        pass
+
+    def validateMetadataBeforePublication(self, errors):
         pass

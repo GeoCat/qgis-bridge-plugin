@@ -6,15 +6,17 @@ from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication
+from qgis.PyQt.QtWidgets import QAction, QDialog
+from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication, QgsAuthMethodConfig
 
 from .utils.files import removeTempFolder
 from .ui.bridgedialog import BridgeDialog
 from .ui.multistylerdialog import MultistylerDialog
+from .ui.logindialog import LoginDialog, KEY_NAME, doEnterpriseLogin
 from .publish.servers import readServers
 from .processing.bridgeprovider import BridgeProvider
 from .errorhandler import handleError
+from .utils.enterprise import isEnterprise
 
 PLUGIN_NAMESPACE = "geocatbridge"
 
@@ -68,14 +70,14 @@ class GeocatBridge:
         self.actionPublish.setObjectName("startPublish")
         self.actionPublish.triggered.connect(self.publishClicked)
 
-        self.iface.addPluginToWebMenu("GeoCatBridge", self.actionPublish)
+        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionPublish)
         self.iface.addWebToolBarIcon(self.actionPublish)
             
         helpPath = "file://{}".format(os.path.join(os.path.dirname(__file__), "docs", "index.html"))
         self.actionHelp = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self.iface.mainWindow())
         self.actionHelp.setObjectName("GeocatBridgeHelp")
         self.actionHelp.triggered.connect(lambda: webbrowser.open_new(helpPath))
-        self.iface.addPluginToWebMenu("GeoCatBridge", self.actionHelp)
+        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionHelp)
 
         self.multistylerDialog = MultistylerDialog()
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
@@ -85,11 +87,12 @@ class GeocatBridge:
         self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate("GeocatBridge", "Multistyler"), self.iface.mainWindow())
         self.actionMultistyler.setObjectName("multistyler")
         self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
-        self.iface.addPluginToWebMenu("GeoCatBridge", self.actionMultistyler)
+        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionMultistyler)
 
         self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
 
         QgsProject.instance().layerWasAdded.connect(self.layerWasAdded)
+        QgsProject.instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
 
         #QgsApplication.processingRegistry().addProvider(self.provider)
 
@@ -104,9 +107,9 @@ class GeocatBridge:
         for layer, func in self._layerSignals.items():
             layer.styleChanged.disconnect(func)
 
-        self.iface.removePluginWebMenu("GeoCatBridge", self.actionHelp)
-        self.iface.removePluginWebMenu("GeoCatBridge", self.actionPublish)
-        self.iface.removePluginWebMenu("GeoCatBridge", self.actionMultistyler)
+        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionHelp)
+        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionPublish)
+        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionMultistyler)
 
         self.iface.removeWebToolBarIcon(self.actionPublish)
 
@@ -119,8 +122,30 @@ class GeocatBridge:
     def layerWasAdded(self, layer):
         self._layerSignals[layer] = partial(self.multistylerDialog.updateLayer, layer) 
         layer.styleChanged.connect(self._layerSignals[layer])
-    
+
+    def layerWillBeRemoved(self, layerid):
+        for layer in self._layerSignals.keys():
+            if layer.id() == layerid:
+                del self._layerSignals[layer]
+                return
+
+    isRegistered = False
+
     def publishClicked(self):
+        if isEnterprise() and not self.isRegistered:
+            if not self.login():
+                return
         dialog = BridgeDialog(self.iface.mainWindow())
         dialog.exec_()
+
+    def login(self):
+        authManager = QgsApplication.authManager()
+        if KEY_NAME in authManager.configIds():
+            authConfig = QgsAuthMethodConfig()
+            authManager.loadAuthenticationConfig(KEY_NAME, authConfig, True)            
+            key = authConfig.config('licensekey')
+            if doEnterpriseLogin(key):
+                return True
+        dlg = LoginDialog(self.iface.mainWindow())
+        return dlg.exec_() == QDialog.Accepted
         
