@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import fnmatch
-import shutil
 import zipfile
-import json
-from collections import defaultdict
 import subprocess
 import argparse
 from enterprise.branding import doBranding

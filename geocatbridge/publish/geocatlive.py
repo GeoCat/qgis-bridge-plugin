@@ -65,8 +65,8 @@ class GeocatLiveServer(ServerBase):
     def prepareForPublishing(self, onlySymbology):
         self.geoserverServer().prepareForPublishing(onlySymbology)
 
-    def publishLayerMetadata(self, layer, wms):
-        self.geonetworkServer().publishLayerMetadata(layer, wms)
+    def closePublishing(self):
+        self.geoserverServer().closePublishing()
 
     def publishStyle(self, layer):
         self.geoserverServer().publishStyle(layer)

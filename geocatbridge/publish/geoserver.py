@@ -1,5 +1,5 @@
 import os
-import psycopg2
+import shutil
 import json
 import webbrowser
 from zipfile import ZipFile
@@ -9,17 +9,17 @@ from bridgestyle import mapboxgl
 
 from requests.exceptions import ConnectionError
 
-from qgis.core import QgsProject, QgsVectorLayer, QgsDataSourceUri
+from qgis.core import QgsProject, QgsDataSourceUri
 
 from qgis.PyQt.QtCore import QCoreApplication, QByteArray, QBuffer, QIODevice
 
 from qgis.PyQt.QtWidgets import QMessageBox
 
-from bridgestyle.qgis import saveLayerStyleAsZippedSld
+from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStylesAsMapboxFolder
 
 from .exporter import exportLayer
 from .serverbase import ServerBase
-from ..utils.files import tempFilenameInTempFolder
+from ..utils.files import tempFilenameInTempFolder, tempFolderInTempFolder
 from ..utils.services import addServicesForGeodataServer
 
 
@@ -28,7 +28,16 @@ class GeoserverServer(ServerBase):
     POSTGIS_MANAGED_BY_BRIDGE = 1
     POSTGIS_MANAGED_BY_GEOSERVER = 2
 
-    def __init__(self, name, url="", authid="", storage=0, postgisdb=None, useOriginalDataSource=False):
+    def __init__(
+        self,
+        name,
+        url="",
+        authid="",
+        storage=0,
+        postgisdb=None,
+        useOriginalDataSource=False,
+        useVectorTiles=False
+    ):
         super().__init__()
         self.name = name
 
@@ -44,6 +53,7 @@ class GeoserverServer(ServerBase):
         self.storage = storage
         self.postgisdb = postgisdb
         self.useOriginalDataSource = useOriginalDataSource
+        self.useVectorTiles = useVectorTiles
         self._isMetadataCatalog = False
         self._isDataCatalog = True
         self._layersCache = {}
@@ -63,8 +73,66 @@ class GeoserverServer(ServerBase):
         self._uploadedDatasets = {}
         self._exportedLayers = {}
         self._postgisDatastoreExists = False
+        self._publishedLayers = set()
+
+    def closePublishing(self):        
+        if self.useVectorTiles:
+            folder = tempFolderInTempFolder()            
+            warnings = layerStylesAsMapboxFolder(self._publishedLayers, folder)
+            for w in warnings:
+                self.logWarning(w)
+            self._editMapboxFiles(folder)
+            self.publishMapboxGLStyle(folder)
+            self._publishOpenLayersPreview(folder)
+
+    def _publishOpenLayersPreview(self, folder):
+        styleFilename = os.path.join(folder, "style.mapbox")
+        with open(styleFilename) as f:
+            style = f.read()
+        template = "var style = %s;\nvar map = olms.apply('map', style);" % style
+        
+        jsFilename = os.path.join(folder, "mapbox.js")
+        with open(jsFilename, "w") as f:
+            f.write(template)
+        src = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "openlayers", "index.html")
+        dst = os.path.join(folder, "index.html")
+        shutil.copyfile(src, dst)
+        self.uploadResource("%s/index.html" % self._workspace, src)
+        self.uploadResource("%s/mapbox.js" % self._workspace, jsFilename)
+
+    def uploadResource(self, path, file):
+        with open(file) as f:
+            content = f.read()
+        url = "%s/resource/%s" % (self.url, path)
+        self.request(url, content, "put")
+
+    def _editMapboxFiles(self, folder):        
+        filename = os.path.join(folder, "style.mapbox")
+        with open(filename) as f:
+            mapbox = json.load(f)
+        sources = mapbox["sources"]
+        for name in sources.keys():
+            url = ("%s/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS"
+                  "&VERSION=1.0.0&LAYER=%s:%s&STYLE=&TILEMATRIX=EPSG:900913:{z}"
+                  "&TILEMATRIXSET=EPSG:900913&FORMAT=application/vnd.mapbox-vector-tile"
+                  "&TILECOL={x}&TILEROW={y}" % (self.baseUrl(), self._workspace, name))
+            sourcedef = {
+                  "type": "vector",
+                  "tiles": [url],
+                  "minZoom": 0,
+                  "maxZoom": 14
+                }
+            sources[name] = sourcedef
+        with open(filename, "w") as f:
+            json.dump(mapbox, f)
+
+    def publishMapboxGLStyle(self, folder):
+        name = "mb_" + self._workspace
+        filename = os.path.join(folder, "style.mapbox")
+        self._publishStyle(name, filename)
 
     def publishStyle(self, layer):
+        self._publishedLayers.add(layer)
         styleFilename = tempFilenameInTempFolder(layer.name() + ".zip")
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
         for w in warnings:
@@ -270,9 +338,13 @@ class GeoserverServer(ServerBase):
         ft["featureType"]["name"] = name
         ft["featureType"]["title"] = name
         try:
-            ftUrl = "%s/workspaces/%s/datastores/%s/featuretypes" % (self.url, self._workspace, datasetName)
+            ftUrl = "%s/workspaces/%s/datastores/%s/featuretypes" % (
+                self.url,
+                self._workspace,
+                datasetName,
+            )
             r = self.request(ftUrl, ft, "post")
-        except:            
+        except:
             r = self.request(url, ft, "put")
         self.logInfo("Feature type correctly created from GPKG file '%s'" % filename)
         self._setLayerStyle(name, name)
@@ -498,20 +570,37 @@ class GeoserverServer(ServerBase):
             self._clearCache()
 
     def _publishStyle(self, name, styleFilename):
-        # feedback.setText("Publishing style for layer %s" % name)
         self._ensureWorkspaceExists()
         styleExists = self.styleExists(name)
-        headers = {'Content-type': 'application/zip'}
         if styleExists:
             method = "put"
             url = self.url + "/workspaces/%s/styles/%s" % (self._workspace, name)
         else:
             url = self.url + "/workspaces/%s/styles?name=%s" % (self._workspace, name)
             method = "post"
-        with open(styleFilename, "rb") as f:
-            self.request(url, f.read(), method, headers)
-        self.logInfo(QCoreApplication.translate("GeocatBridge", "Style %s correctly created from Zip file '%s'"
-                                                % (name, styleFilename)))
+        _, ext = os.path.splitext(styleFilename)
+        if ext.lower() == ".zip":
+            headers = {"Content-type": "application/zip"}
+            with open(styleFilename, "rb") as f:
+                self.request(url, f.read(), method, headers)
+            self.logInfo(
+                QCoreApplication.translate(
+                    "GeocatBridge",
+                    "Style %s correctly created from Zip file '%s'" % (name, styleFilename),
+                )
+            )
+        elif ext.lower() == ".mapbox":
+            headers = {"Content-type": "application/vnd.geoserver.mbstyle+json"}
+            with open(styleFilename) as f:
+                self.request(url, f.read(), method, headers)
+            self.logInfo(
+                QCoreApplication.translate(
+                    "GeocatBridge",
+                    "Style %s correctly created from mbstyle file '%s'" % (name, styleFilename),
+                )
+            )
+
+
 
     def _setLayerStyle(self, layername, stylename):
         url = "%s/workspaces/%s/layers/%s.json" % (self.url, self._workspace, layername)

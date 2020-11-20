@@ -5,17 +5,21 @@ import uuid
 from qgis.PyQt.QtCore import QDir
 
 def tempFolder():
-    tempDir = os.path.join(unicode(QDir.tempPath()), "geocatbridge")
+    tempDir = os.path.join(QDir.tempPath(), "geocatbridge")
     if not QDir(tempDir).exists():
         QDir().mkpath(tempDir)
-    return unicode(os.path.abspath(tempDir))
+    return os.path.abspath(tempDir)
 
-def tempFilenameInTempFolder(basename):
+def tempFolderInTempFolder():
     path = tempFolder()
     folder = os.path.join(path, str(uuid.uuid4()).replace("-",""))
     if not QDir(folder).exists():
         QDir().mkpath(folder)
-    filename =  os.path.join(folder, basename)
+    return folder
+
+def tempFilenameInTempFolder(basename):
+    folder = tempFolderInTempFolder()    
+    filename = os.path.join(folder, basename)
     return filename
 
 def removeTempFolder():    

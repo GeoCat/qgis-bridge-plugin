@@ -238,7 +238,6 @@ class PublishWidget(BASE, WIDGET):
         item = self.listLayers.itemAt(pos)
         if item is None:
             return
-        row = self.listLayers.row(item)
         name = self.listLayers.itemWidget(item).name()
         menu = QMenu()        
         if self.isDataPublished.get(name):
@@ -572,9 +571,7 @@ class PublishWidget(BASE, WIDGET):
                 if name in names:
                     errors.add("Several layers with the same name")
                 names.append(name)
-        print(0)
         if self.comboGeodataServer.currentIndex() != 0:
-            print("a")
             geodataServer = geodataServers()[self.comboGeodataServer.currentText()]
             geodataServer.validateGeodataBeforePublication(errors, toPublish)
 
