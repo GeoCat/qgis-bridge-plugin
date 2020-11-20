@@ -22,5 +22,4 @@ class NewDatasetDialog(BASE, WIDGET):
         self.database = self.txtDatabase.text()
         self.username = self.txtUsername.text()
         self.password = self.txtPassword.text()
-        print("acc")
         self.close()

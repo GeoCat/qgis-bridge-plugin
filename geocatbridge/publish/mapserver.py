@@ -1,7 +1,6 @@
 import os
 import shutil
 
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsProject,
     QgsRectangle,
@@ -39,9 +38,6 @@ class MapserverServer(ServerBase):
     def publishStyle(self, layer):        
         self._layers.append(layer)       
 
-        #self.logInfo(QCoreApplication.translate("GeocatBridge", 
-        #                        "Style for layer %s exported to %s") % (layer.name(), self.mapsFolder()))
-                
     def publishLayer(self, layer, fields=None):
         self.publishStyle(layer)
         layerFilename = layer.name() + ".shp"
@@ -49,7 +45,7 @@ class MapserverServer(ServerBase):
         exportLayer(layer, fields, toShapefile=True, path=layerPath, force=True, log=self)
 
     def uploadFolder(self, folder):
-        username, password = getCredentials()
+        username, password = self.getCredentials()
         uploadFolder(folder, self.host, self.port, self.folder, username, password)
 
     def testConnection(self):
@@ -171,7 +167,7 @@ class MapserverServer(ServerBase):
         shutil.copy2(src, dst)
 
         if not self.useLocalFolder:
-            self.uploadFolder(folder)
+            self.uploadFolder(dst)
 
     def styleExists(self, name):
         return False        
@@ -188,9 +184,16 @@ class MapserverServer(ServerBase):
     def openPreview(self, names, bbox, srs):
         pass
 
-    def layerWmsUrl(self,name):
+    def fullLayerName(self, layerName):
+        return layerName
+        
+    def layerWmsUrl(self, name):
         project = self.projectName()
-        return "%s?map=%s/maps/%s.map&service=WMS&version=1.1.0&request=GetMap&layers=%s" % (self.url, project, project, name)
+        return "%s?map=%s/maps/%s.map&service=WMS&version=1.1.0&request=GetCapabilities&layers=%s" % (self.url, project, project, name)
+
+    def layerWfsUrl(self):
+        project = self.projectName()
+        return "%s?map=%s/maps/%s.map&service=WFS&version=2.0.0&request=GetCapabilities" % (self.url, project, project)
         
     def setLayerMetadataLink(self, name, url):
         self._metadataLinks[name] = url

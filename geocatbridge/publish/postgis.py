@@ -1,6 +1,6 @@
 import psycopg2
-from qgis.core import (QgsVectorLayerExporter, 
-                        QgsFeatureSink, QgsFields)
+from qgis.core import QgsVectorLayerExporter, QgsFeatureSink, QgsFields
+from qgis.PyQt.QtCore import QCoreApplication
 from .serverbase import ServerBase
 
 class PostgisServer(ServerBase): 

@@ -10,17 +10,44 @@ from qgis.PyQt.QtGui import QImage, QColor, QPainter
 from qgis.PyQt.QtCore import QSize, QCoreApplication
 from qgis.core import (
     QgsMapSettings, 
-    QgsMapRendererCustomPainterJob
+    QgsMapRendererCustomPainterJob,
+    Qgis,
+    QgsMessageLog
 )
 from ..utils.files import tempFilenameInTempFolder
 
-XSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
-INVERSEXSLTFILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19139-to-qgis.xsl")
+QMD_TO_ISO19139_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "qgis-to-iso19139.xsl")
+ISO19139_TO_QMD_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19139-to-qgis.xsl")
+ISO19115_TO_ISO19139_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "iso19115-to-iso19139.xsl")
+WRAPPING_ISO19115_TO_ISO19139_XSLT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "ISO19115-wrapping-MD_Metadata-to-ISO19139.xslt")
+FGDC_TO_ISO19115 = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "ArcCatalogFgdc_to_ISO19115.xsl")
 
+def loadMetadataFromXml(layer, filename):
+    root = ElementTree.parse(filename).getroot()
+    def _hasTag(tag):
+        return bool(len(list(root.iter(tag))))
+ 
+    if _hasTag("esri"):
+        if _hasTag("gmd:MD_Metadata"):
+            loadMetadataFromWrappingEsriXml(layer, filename)
+        else:
+            loadMetadataFromEsriXml(layer, filename)
+    elif _hasTag("MD_Metadata") or _hasTag("gmd:MD_Metadata"):
+        loadMetadataFromIsoXml(layer, filename)      
+    elif _hasTag("metadata/mdStanName"):
+        schemaName = list(root.iter("metadata/mdStanName"))[0].text
+        if "FGDC-STD" in schemaName:
+            loadMetadataFromFgdcXml(layer, filename)
+        elif "19115" in schemaName:
+            loadMetadataFromIsoXml(layer, filename) 
+    else:
+        loadMetadataFromFgdcXml(layer, filename)
+            
 def loadMetadataFromIsoXml(layer, filename):
-    qmdFilename = tempFilenameInTempFolder("fromiso.qmd")    
+    qmdFilename = tempFilenameInTempFolder("fromiso.qmd")
+    QgsMessageLog.logMessage("Exporting ISO19193 metadata to %s" % qmdFilename, 'GeoCat Bridge', level=Qgis.Info)
     dom = ET.parse(filename)
-    xslt = ET.parse(INVERSEXSLTFILENAME)
+    xslt = ET.parse(ISO19139_TO_QMD_XSLT)
     transform = ET.XSLT(xslt)
     newdom = transform(dom)
     if newdom is None:
@@ -30,16 +57,58 @@ def loadMetadataFromIsoXml(layer, filename):
         f.write(s)
     layer.loadNamedMetadata(qmdFilename)
     
+def loadMetadataFromEsriXml(layer, filename):    
+    isoFilename = tempFilenameInTempFolder("fromesri.xml")
+    QgsMessageLog.logMessage("Exporting ISO19115 metadata to %s" % isoFilename, 'GeoCat Bridge', level=Qgis.Info)
+    dom = ET.parse(filename)
+    xslt = ET.parse(ISO19115_TO_ISO19139_XSLT)
+    transform = ET.XSLT(xslt)
+    newdom = transform(dom)
+    if newdom is None:
+        raise Exception("Cannot convert metadata")
+    s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
+    with open(isoFilename, "w", encoding="utf8") as f:
+        f.write(s)
+    loadMetadataFromIsoXml(layer, isoFilename)
+
+def loadMetadataFromWrappingEsriXml(layer, filename):
+    isoFilename = tempFilenameInTempFolder("fromesri.xml")
+    QgsMessageLog.logMessage("Exporting Wrapping-ISO19115 metadata to %s" % isoFilename, 'GeoCat Bridge', level=Qgis.Info) 
+    dom = ET.parse(filename)
+    xslt = ET.parse(WRAPPING_ISO19115_TO_ISO19139_XSLT)
+    transform = ET.XSLT(xslt)
+    newdom = transform(dom)
+    if newdom is None:
+        raise Exception("Cannot convert metadata")
+    s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
+    with open(isoFilename, "w", encoding="utf8") as f:
+        f.write(s)
+    loadMetadataFromIsoXml(layer, isoFilename)
+
+def loadMetadataFromFgdcXml(layer, filename):
+    isoFilename = tempFilenameInTempFolder("fromfgdc.xml")
+    QgsMessageLog.logMessage("Exporting FGDC metadata to %s" % isoFilename, 'GeoCat Bridge', level=Qgis.Info)
+    dom = ET.parse(filename)
+    xslt = ET.parse(FGDC_TO_ISO19115)
+    transform = ET.XSLT(xslt)
+    newdom = transform(dom)
+    if newdom is None:
+        raise Exception("Cannot convert metadata")
+    s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(newdom, pretty_print=True).decode()
+    with open(isoFilename, "w", encoding="utf8") as f:
+        f.write(s)
+    loadMetadataFromEsriXml(layer, isoFilename)   
+
 def saveMetadataToIsoXml(layer, filename):
     pass
 
-def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None):
+def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None, wfs=None, layerName=None):
     uuid = uuidForLayer(layer)
     filename = tempFilenameInTempFolder(layer.name() + ".qmd")    
     layer.saveNamedMetadata(filename)
     thumbnail = saveLayerThumbnail(layer)
     apiUrl = apiUrl or ""
-    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms)
+    transformedFilename = transformMetadata(filename, uuid, apiUrl, wms, wfs, layerName or layer.name())
     mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
     createMef(uuid, transformedFilename, mefFilename, thumbnail)
     return mefFilename
@@ -64,12 +133,12 @@ def saveLayerThumbnail(layer):
     img.save(filename)
     return filename
 
-def transformMetadata(filename, uuid, apiUrl, wms):
+def transformMetadata(filename, uuid, apiUrl, wms, wfs, layerName):
     def _ns(n):
         return '{http://www.isotc211.org/2005/gmd}' + n
     isoFilename = tempFilenameInTempFolder("metadata.xml")
     dom = ET.parse(filename)
-    xslt = ET.parse(XSLTFILENAME)
+    xslt = ET.parse(QMD_TO_ISO19139_XSLT)
     transform = ET.XSLT(xslt)
     newdom = transform(dom)    
     for ident in newdom.iter(_ns('fileIdentifier')):
@@ -86,6 +155,24 @@ def transformMetadata(filename, uuid, apiUrl, wms):
             protocol = ET.SubElement(cionline, _ns('protocol'))
             cs = ET.SubElement(protocol, '{http://www.isotc211.org/2005/gco}CharacterString')
             cs.text = "OGC:WMS"
+            name = ET.SubElement(cionline, _ns('name'))
+            csname = ET.SubElement(name, '{http://www.isotc211.org/2005/gco}CharacterString')            
+            csname.text = layerName
+    if wfs is not None:
+        for root in newdom.iter(_ns('MD_Distribution')):
+            trans = ET.SubElement(root, _ns('transferOptions'))
+            dtrans = ET.SubElement(trans, _ns('MD_DigitalTransferOptions'))
+            online = ET.SubElement(dtrans, _ns('onLine'))
+            cionline = ET.SubElement(online, _ns('CI_OnlineResource'))
+            linkage = ET.SubElement(cionline, _ns('linkage'))
+            url = ET.SubElement(linkage, _ns('URL'))
+            url.text = wfs
+            protocol = ET.SubElement(cionline, _ns('protocol'))
+            cs = ET.SubElement(protocol, '{http://www.isotc211.org/2005/gco}CharacterString')
+            cs.text = "OGC:WFS"
+            name = ET.SubElement(cionline, _ns('name'))
+            csname = ET.SubElement(name, '{http://www.isotc211.org/2005/gco}CharacterString')            
+            csname.text = layerName            
     for root in newdom.iter(_ns('MD_DataIdentification')):
         overview = ET.SubElement(root, _ns('graphicOverview'))
         browseGraphic = ET.SubElement(overview, _ns('MD_BrowseGraphic'))

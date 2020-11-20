@@ -271,10 +271,15 @@ class ServerConnectionsWidget(BASE, WIDGET):
         postgisdb = None
         if storage in [GeoserverServer.POSTGIS_MANAGED_BY_BRIDGE, GeoserverServer.POSTGIS_MANAGED_BY_GEOSERVER]:            
             postgisdb = self.comboGeoserverDatabase.currentText()                
-        
+        useOriginalDataSource = self.chkUseOriginalDataSource.isChecked()
+        useVectorTiles = self.chkUseVectorTiles.isChecked()
+
         if "" in [name, url]:
             return None
-        server = GeoserverServer(name, url, authid, storage, postgisdb)
+        server = GeoserverServer(
+            name, url, authid, storage, postgisdb, useOriginalDataSource, 
+            useVectorTiles
+        )
         return server
 
     def createPostgisServer(self):
@@ -459,6 +464,8 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.geoserverDatastorageChanged()            
             if server.postgisdb is not None:
                 self.comboGeoserverDatabase.setCurrentText(server.postgisdb)
+            self.chkUseOriginalDataSource.setChecked(server.useOriginalDataSource)
+            self.chkUseVectorTiles.setChecked(server.useVectorTiles)
             self.comboGeoserverDataStorage.blockSignals(False)
         elif isinstance(server, MapserverServer):
             self.stackedWidget.setCurrentWidget(self.widgetMapserver)

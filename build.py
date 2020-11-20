@@ -1,24 +1,27 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import fnmatch
-import shutil
 import zipfile
-import json
-from collections import defaultdict
 import subprocess
+import argparse
+from enterprise.branding import doBranding
 
-def package():
+def package(enterprise):
     builddocs()
     package_file = "./geocatbridge.zip"
+    suffix = ""
+    if enterprise:
+        doBranding()
+        suffix = "enterprise"
     with zipfile.ZipFile(package_file, "w", zipfile.ZIP_DEFLATED) as f:
-        make_zip(f)
+        make_zip(f, suffix)
 
-def make_zip(zipFile):
+def make_zip(zipFile, suffix):
+    print("Creating zip...")
     excludes = {"test", "tests", '*.pyc', ".git"}
-    src_dir = "./geocatbridge"
-    docs_dir = "./docs/build/latest"
+    docs_dir = "./docs%s/build/latest" % suffix
+    src_dir = "./geocatbridge%s" % suffix
     exclude = lambda p: any([fnmatch.fnmatch(p, e) for e in excludes])
     def filter_excludes(files):
         if not files: return []
@@ -37,7 +40,7 @@ def make_zip(zipFile):
 
     for root, dirs, files in os.walk(docs_dir):
         for f in files:
-            relpath = os.path.join("geocatbridge", "docs", os.path.relpath(root, docs_dir))
+            relpath = os.path.join("geocatbridge%s" % suffix, "docs", os.path.relpath(root, docs_dir))
             zipFile.write(os.path.join(root,  f), os.path.join(relpath, f))
 
 def sh(commands):
@@ -48,12 +51,16 @@ def sh(commands):
     return stdout.decode("utf-8")
 
 def builddocs():
+    print("Building docs...")
     cwd = os.getcwd()        
     scriptPath = os.path.join(cwd, "docs")
     buildFolder = os.path.join(scriptPath, "build")
     os.chdir(scriptPath)
-    sh("python builddocs.py --output %s --version dev --clean" % buildFolder)
+    sh("python builddocs.py --output %s --current --clean" % buildFolder)
     os.chdir(cwd)
 
 if __name__ == "__main__":
-    package()
+    parser = argparse.ArgumentParser(description='Build plugin artifact.')    
+    parser.add_argument('--enterprise', dest='enterprise', action='store_true', help='Build with Enterprise branding')
+    args = parser.parse_args()
+    package(args.enterprise)

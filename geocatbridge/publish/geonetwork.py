@@ -1,27 +1,16 @@
 import os
 import zipfile
-from xml.etree.ElementTree import Element, SubElement
-from xml.etree import ElementTree
-from xml.dom import minidom
-from datetime import datetime
 import webbrowser
-
-import lxml.etree as ET
 import requests
 from requests.auth import HTTPBasicAuth
 
-from qgis.PyQt.QtCore import QSize, QCoreApplication
-from qgis.PyQt.QtGui import QImage, QColor, QPainter
+from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
-    QgsMessageLog, 
-    Qgis, 
-    QgsFeatureSink, 
-    QgsMapSettings, 
-    QgsMapRendererCustomPainterJob
+    QgsMessageLog,
+    Qgis
 )
 
 from .metadata import saveMetadata
-from ..utils.files import tempFilenameInTempFolder
 from .serverbase import ServerBase
 
 
@@ -73,8 +62,8 @@ class GeonetworkServer(ServerBase):
     def request(self, url, data=None, method="get", headers={}):
         return self._nam.request(url, data, method, headers)
 
-    def publishLayerMetadata(self, layer, wms):
-        mefFilename = saveMetadata(layer, None, self.apiUrl(), wms)            
+    def publishLayerMetadata(self, layer, wms, wfs, layerName):
+        mefFilename = saveMetadata(layer, None, self.apiUrl(), wms, wfs, layerName)
         self.publishMetadata(mefFilename)
 
     def testConnection(self):
