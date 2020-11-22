@@ -26,6 +26,7 @@ from .newdataset import NewDatasetDialog
 
 WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'serverconnectionswidget.ui'))
 
+
 class ServerConnectionsWidget(BASE, WIDGET):
 
     def __init__(self):
@@ -60,7 +61,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.txtPostgisPort.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisSchema.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisDatabase.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtGeocatLiveIdentifier.textChanged.connect(self._setCurrentServerHasChanges)
         self.comboMetadataProfile.currentIndexChanged.connect(self._setCurrentServerHasChanges)
         self.comboGeoserverDatabase.currentIndexChanged.connect(self._setCurrentServerHasChanges)
 
