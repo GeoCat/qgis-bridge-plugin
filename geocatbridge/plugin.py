@@ -1,22 +1,20 @@
 import os
 import sys
-import webbrowser
 import traceback
+import webbrowser
 from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QDialog
-from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication, QgsAuthMethodConfig
+from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsProject, QgsApplication
 
-from .utils.files import removeTempFolder
+from .errorhandler import handleError
+from .processing.bridgeprovider import BridgeProvider
+from .publish.servers import readServers
 from .ui.bridgedialog import BridgeDialog
 from .ui.multistylerdialog import MultistylerDialog
-from .ui.logindialog import LoginDialog, KEY_NAME, doEnterpriseLogin
-from .publish.servers import readServers
-from .processing.bridgeprovider import BridgeProvider
-from .errorhandler import handleError
-from .utils.enterprise import isEnterprise
+from .utils.files import removeTempFolder
 
 PLUGIN_NAMESPACE = "geocatbridge"
 
@@ -25,14 +23,6 @@ class GeocatBridge:
         self.iface = iface
 
         readServers()
-        
-        class QgisLogger():
-            def logInfo(self, text):
-                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
-            def logWarning(self, text):
-                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Warning)
-            def logError(self, text):
-                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Critical)
 
         self.provider = BridgeProvider()
 
@@ -129,23 +119,6 @@ class GeocatBridge:
                 del self._layerSignals[layer]
                 return
 
-    isRegistered = False
-
     def publishClicked(self):
-        if isEnterprise() and not self.isRegistered:
-            if not self.login():
-                return
         dialog = BridgeDialog(self.iface.mainWindow())
         dialog.exec_()
-
-    def login(self):
-        authManager = QgsApplication.authManager()
-        if KEY_NAME in authManager.configIds():
-            authConfig = QgsAuthMethodConfig()
-            authManager.loadAuthenticationConfig(KEY_NAME, authConfig, True)            
-            key = authConfig.config('licensekey')
-            if doEnterpriseLogin(key):
-                return True
-        dlg = LoginDialog(self.iface.mainWindow())
-        return dlg.exec_() == QDialog.Accepted
-        
