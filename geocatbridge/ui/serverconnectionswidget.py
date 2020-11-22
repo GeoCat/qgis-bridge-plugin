@@ -4,7 +4,6 @@ from qgis.PyQt import uic
 from geocatbridge.publish.servers import *
 from geocatbridge.publish.geonetwork import GeonetworkServer
 from geocatbridge.publish.geoserver import GeoserverServer
-from geocatbridge.publish.geocatlive import GeocatLiveServer
 from geocatbridge.publish.mapserver import MapserverServer
 from geocatbridge.publish.postgis import PostgisServer
 from qgis.PyQt.QtWidgets import (
@@ -47,7 +46,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.comboGeoserverDataStorage.currentIndexChanged.connect(self.geoserverDatastorageChanged)        
         self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
         self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
-        self.btnConnectGeocatLive.clicked.connect(self.testConnectionGeocatLive)
         self.btnConnectCsw.clicked.connect(self.testConnectionCsw)
         self.btnAddDatastore.clicked.connect(self.addPostgisDatastore)
         self.btnRefreshDatabases.clicked.connect(self.populatePostgisComboWithGeoserverPostgisServers)
@@ -57,7 +55,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
         self.txtGeoserverName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtGeoserverUrl.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtGeocatLiveName.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtCswUrl.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisServerAddress.textChanged.connect(self._setCurrentServerHasChanges)
         self.txtPostgisPort.textChanged.connect(self._setCurrentServerHasChanges)
@@ -220,10 +217,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
         server = self.createGeoserverServer()
         self._testConnection(server)
 
-    def testConnectionGeocatLive(self):
-        server = self.createGeocatLiveServer()        
-        self._testConnection(server)
-
     def testConnectionCsw(self):
         server = self.createGeonetworkServer()
         self._testConnection(server)
@@ -241,8 +234,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
             server = self.createPostgisServer()
         elif w == self.widgetMetadataCatalog:
             server = self.createGeonetworkServer()
-        elif w == self.widgetGeocatLive:
-            server = self.createGeocatLiveServer()            
         if server is None:
             return False
         else:            
@@ -324,15 +315,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
         server = MapserverServer(name, url, local, folder, authid, host, port, servicesPath, projFolder)
         return server
 
-    def createGeocatLiveServer(self):
-        name = self.txtGeocatLiveName.text()        
-        geoserverAuthid = self.geocatLiveGeoserverAuth.configId()
-        geonetworkAuthid = self.geocatLiveGeonetworkAuth.configId()
-        if bool(geoserverAuthid) and bool(geonetworkAuthid): 
-            userid = self.txtGeocatLiveIdentifier.text()        
-            server = GeocatLiveServer(name, userid, geoserverAuthid, geonetworkAuthid)
-            return server        
-
     def addAuthWidgets(self):
         self.geoserverAuth = QgsAuthConfigSelect()
         self.geoserverAuth.selectedConfigIdChanged.connect(self._setCurrentServerHasChanges)
@@ -362,26 +344,11 @@ class ServerConnectionsWidget(BASE, WIDGET):
         layout.addWidget(self.cswAuth)
         self.cswAuthWidget.setLayout(layout)
         self.cswAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-        self.geocatLiveGeoserverAuth = QgsAuthConfigSelect()
-        self.geocatLiveGeoserverAuth.selectedConfigIdChanged.connect(self._setCurrentServerHasChanges)
-        layout = QHBoxLayout()
-        layout.setMargin(0)
-        layout.addWidget(self.geocatLiveGeoserverAuth)
-        self.geocatLiveGeoserverAuthWidget.setLayout(layout)
-        self.geocatLiveGeoserverAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-        self.geocatLiveGeonetworkAuth = QgsAuthConfigSelect()
-        self.geocatLiveGeonetworkAuth.selectedConfigIdChanged.connect(self._setCurrentServerHasChanges)
-        layout = QHBoxLayout()
-        layout.setMargin(0)
-        layout.addWidget(self.geocatLiveGeonetworkAuth)
-        self.geocatLiveGeonetworkAuthWidget.setLayout(layout)
-        self.geocatLiveGeonetworkAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
 
     def addMenuToButtonNew(self):
         menu = QMenu()
         menu.addAction("GeoServer", lambda: self._addServer("GeoServer", GeoserverServer))
         menu.addAction("MapServer", lambda: self._addServer("MapServer", MapserverServer))
-        menu.addAction("GeoCat Live", lambda: self._addServer("GeoCat Live", GeocatLiveServer))
         menu.addAction("GeoNetwork", lambda: self._addServer("GeoNetwork", GeonetworkServer))
         #menu.addAction("CSW", lambda: self._addServer("CSW", CswServer))
         menu.addAction("PostGIS", lambda: self._addServer("PostGIS", PostgisServer))
@@ -496,12 +463,6 @@ class ServerConnectionsWidget(BASE, WIDGET):
             self.txtCswUrl.setText(server.url)            
             self.cswAuth.setConfigId(server.authid)
             self.comboMetadataProfile.setCurrentIndex(server.profile)
-        elif isinstance(server, GeocatLiveServer):
-            self.stackedWidget.setCurrentWidget(self.widgetGeocatLive)
-            self.txtGeocatLiveName.setText(server.name)
-            self.txtGeocatLiveIdentifier.setText(server.userid)          
-            self.geocatLiveGeoserverAuth.setConfigId(server.geoserverAuthid)
-            self.geocatLiveGeonetworkAuth.setConfigId(server.geonetworkAuthid)
 
         self.currentServerHasChanges = False
 
