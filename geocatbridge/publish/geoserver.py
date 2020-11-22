@@ -15,7 +15,7 @@ from qgis.PyQt.QtCore import QCoreApplication, QByteArray, QBuffer, QIODevice
 
 from qgis.PyQt.QtWidgets import QMessageBox
 
-from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStylesAsMapboxFolder
+from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder
 
 from .exporter import exportLayer
 from .serverbase import ServerBase
@@ -78,7 +78,7 @@ class GeoserverServer(ServerBase):
     def closePublishing(self):        
         if self.useVectorTiles:
             folder = tempFolderInTempFolder()            
-            warnings = layerStylesAsMapboxFolder(self._publishedLayers, folder)
+            warnings = layerStyleAsMapboxFolder(self._publishedLayers, folder)
             for w in warnings:
                 self.logWarning(w)
             self._editMapboxFiles(folder)
