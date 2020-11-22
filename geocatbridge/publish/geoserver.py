@@ -1,22 +1,16 @@
+import json
 import os
 import shutil
-import json
+import sqlite3
 import webbrowser
 from zipfile import ZipFile
-import sqlite3
-import secrets
-from bridgestyle import mapboxgl
-
-from requests.exceptions import ConnectionError
-
-from qgis.core import QgsProject, QgsDataSourceUri
 
 from qgis.PyQt.QtCore import QCoreApplication, QByteArray, QBuffer, QIODevice
-
 from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.core import QgsProject, QgsDataSourceUri
 
+from bridgestyle import mapboxgl
 from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder
-
 from .exporter import exportLayer
 from .serverbase import ServerBase
 from ..utils.files import tempFilenameInTempFolder, tempFolderInTempFolder
