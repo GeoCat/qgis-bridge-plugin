@@ -2,15 +2,10 @@ import json
 
 from qgis.PyQt.QtCore import QSettings
 
-from geocatbridge.publish.geonetwork import GeonetworkServer
-from geocatbridge.publish.geoserver import GeoserverServer
-from geocatbridge.publish.geocatlive import GeocatLiveServer
-from geocatbridge.publish.mapserver import MapserverServer
-from geocatbridge.publish.postgis import PostgisServer
-    
 SERVERS_SETTING = "geocatbridge/BridgeServers"
 
 _servers = {}
+
 
 def readServers():
     global _servers
