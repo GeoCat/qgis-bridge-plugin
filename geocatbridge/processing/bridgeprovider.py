@@ -58,5 +58,5 @@ class BridgeProvider(QgsProcessingProvider):
 
     def tr(self, string, context=''):
         if context == '':
-            context = 'GeocatBridge'
+            context = 'GeoCat Bridge'
         return QCoreApplication.translate(context, string)

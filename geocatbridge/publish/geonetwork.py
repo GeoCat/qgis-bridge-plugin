@@ -27,7 +27,7 @@ class TokenNetworkAccessManager():
         self.session.headers.update({"X-XSRF-TOKEN" : self.token}) 
 
     def request(self, url, data=None, method="get", headers={}):
-        QgsMessageLog.logMessage(QCoreApplication.translate("GeocatBridge", "Making '%s' request to '%s'") % (method, url), 'GeoCat Bridge', level=Qgis.Info)
+        QgsMessageLog.logMessage(QCoreApplication.translate("GeoCat Bridge", "Making '%s' request to '%s'") % (method, url), 'GeoCat Bridge', level=Qgis.Info)
         self.setTokenInHeader()
         method = getattr(self.session, method.lower())
         resp = method(url, headers=headers, data=data)

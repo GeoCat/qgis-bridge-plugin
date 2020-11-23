@@ -35,7 +35,7 @@ def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False, l
         else:
             # No need to export
             if log is not None:
-                log.logInfo(QCoreApplication.translate("GeocatBridge",
+                log.logInfo(QCoreApplication.translate("GeoCat Bridge",
                                                        f"No need to export layer {destFilename} stored at {filename}"))
             return filename
 
@@ -57,7 +57,7 @@ def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False, l
             options.driverName = "ESRI Shapefile" if ext == EXT_SHAPEFILE else ""
             QgsVectorFileWriter.writeAsVectorFormatV2(layer, output, transform_ctx, options)
         if log is not None:
-            log.logInfo(QCoreApplication.translate("GeocatBridge",
+            log.logInfo(QCoreApplication.translate("GeoCat Bridge",
                                                    f"Layer {destFilename} exported to {output}"))
         return output
     else:
@@ -69,11 +69,11 @@ def exportLayer(layer, fields=None, toShapefile=False, path=None, force=False, l
             writer.writeRaster(layer.pipe(), layer.width(), layer.height(), layer.extent(), layer.crs())
             del writer
             if log is not None:
-                log.logInfo(QCoreApplication.translate("GeocatBridge",
+                log.logInfo(QCoreApplication.translate("GeoCat Bridge",
                                                        f"Layer {destFilename} exported to {output}"))
             return output
         else:
             if log is not None:
-                log.logInfo(QCoreApplication.translate("GeocatBridge",
+                log.logInfo(QCoreApplication.translate("GeoCat Bridge",
                                                        f"No need to export layer {destFilename} stored at {filename}"))
             return filename

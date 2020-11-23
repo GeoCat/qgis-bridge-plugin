@@ -18,6 +18,7 @@ from .utils.files import removeTempFolder
 
 PLUGIN_NAMESPACE = "geocatbridge"
 
+
 class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
@@ -53,10 +54,9 @@ class GeocatBridge:
         
         sys.excepthook = plugin_hook
 
-
     def initGui(self):
         iconPublish = QIcon(os.path.join(os.path.dirname(__file__), "icons", "publish_button.png"))
-        self.actionPublish = QAction(iconPublish, QCoreApplication.translate("GeocatBridge", "Publish"), self.iface.mainWindow())
+        self.actionPublish = QAction(iconPublish, QCoreApplication.translate("GeoCat Bridge", "Publish"), self.iface.mainWindow())
         self.actionPublish.setObjectName("startPublish")
         self.actionPublish.triggered.connect(self.publishClicked)
 
@@ -74,7 +74,7 @@ class GeocatBridge:
         self.multistylerDialog.hide()        
 
         iconMultistyler = QIcon(os.path.join(os.path.dirname(__file__), "icons", "symbology.png"))
-        self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate("GeocatBridge", "Multistyler"), self.iface.mainWindow())
+        self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate("GeoCat Bridge", "Multistyler"), self.iface.mainWindow())
         self.actionMultistyler.setObjectName("multistyler")
         self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
         self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionMultistyler)
@@ -83,8 +83,6 @@ class GeocatBridge:
 
         QgsProject.instance().layerWasAdded.connect(self.layerWasAdded)
         QgsProject.instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
-
-        #QgsApplication.processingRegistry().addProvider(self.provider)
 
     def unload(self):
 
@@ -102,8 +100,6 @@ class GeocatBridge:
         self.iface.removePluginWebMenu("GeoCat Bridge", self.actionMultistyler)
 
         self.iface.removeWebToolBarIcon(self.actionPublish)
-
-        #QgsApplication.processingRegistry().removeProvider(self.provider)
 
         sys.excepthook = self.qgis_hook
 

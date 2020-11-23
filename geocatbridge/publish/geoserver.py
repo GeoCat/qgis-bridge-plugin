@@ -131,7 +131,7 @@ class GeoserverServer(ServerBase):
         warnings = saveLayerStyleAsZippedSld(layer, styleFilename)
         for w in warnings:
             self.logWarning(w)
-        self.logInfo(QCoreApplication.translate("GeocatBridge", "Style for layer %s exported as zip file to %s")
+        self.logInfo(QCoreApplication.translate("GeoCat Bridge", "Style for layer %s exported as zip file to %s")
                      % (layer.name(), styleFilename))
         self._publishStyle(layer.name(), styleFilename)
         return styleFilename
@@ -172,7 +172,7 @@ class GeoserverServer(ServerBase):
                     db = allServers()[self.postgisdb]
                 except KeyError:
                     raise Exception(
-                        QCoreApplication.translate("GeocatBridge", "Cannot find the selected PostGIS database"))
+                        QCoreApplication.translate("GeoCat Bridge", "Cannot find the selected PostGIS database"))
                 db.importLayer(layer, fields)
                 self._publishVectorLayerFromPostgis(layer, db)
         elif layer.type() == layer.RasterLayer:
@@ -579,7 +579,7 @@ class GeoserverServer(ServerBase):
                 self.request(url, f.read(), method, headers)
             self.logInfo(
                 QCoreApplication.translate(
-                    "GeocatBridge",
+                    "GeoCat Bridge",
                     "Style %s correctly created from Zip file '%s'" % (name, styleFilename),
                 )
             )
@@ -589,7 +589,7 @@ class GeoserverServer(ServerBase):
                 self.request(url, f.read(), method, headers)
             self.logInfo(
                 QCoreApplication.translate(
-                    "GeocatBridge",
+                    "GeoCat Bridge",
                     "Style %s correctly created from mbstyle file '%s'" % (name, styleFilename),
                 )
             )

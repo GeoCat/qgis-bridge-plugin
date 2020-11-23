@@ -29,15 +29,15 @@ class PostgisServer(ServerBase):
                                           layer.wkbType(), layer.sourceCrs(), True)
 
         if exporter.errorCode() != QgsVectorLayerExporter.NoError:
-            raise Exception(QCoreApplication.translate("GeocatBridge", 'Error importing to PostGIS: {0}').format(exporter.errorMessage()))
+            raise Exception(QCoreApplication.translate("GeoCat Bridge", 'Error importing to PostGIS: {0}').format(exporter.errorMessage()))
 
         features = layer.getFeatures()
         for f in features:
             if not exporter.addFeature(f, QgsFeatureSink.FastInsert):
-                raise Exception(QCoreApplication.translate("GeocatBridge", 'Error importing to PostGIS: {0}').format(exporter.errorMessage()))
+                raise Exception(QCoreApplication.translate("GeoCat Bridge", 'Error importing to PostGIS: {0}').format(exporter.errorMessage()))
         exporter.flushBuffer()
         if exporter.errorCode() != QgsVectorLayerExporter.NoError:
-            raise Exception(QCoreApplication.translate("GeocatBridge", 'Error importing to PostGIS: {0}').format(exporter.errorMessage()))
+            raise Exception(QCoreApplication.translate("GeoCat Bridge", 'Error importing to PostGIS: {0}').format(exporter.errorMessage()))
 
     def testConnection(self):
         username, password = self.getCredentials()
