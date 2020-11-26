@@ -1,30 +1,57 @@
-import os
+import configparser
+import webbrowser
+from pathlib import Path
+from urllib import parse
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtGui import QIcon, QPixmap
+from qgis.PyQt.QtGui import QPixmap
+from qgis.core import QgsMessageLog
+from requests.models import PreparedRequest
 
-from geocatbridge.publish import mygeocat
+from geocatbridge import plugin
+from geocatbridge.utils.files import getIconPath
 
-rootFolder = os.path.dirname(os.path.dirname(__file__))
 
-def iconPath(icon):
-    return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
+def getTrackerUrl():
+    """ Reads the tracker URL from the file-based plugin metadata. """
+    plugin_metaparser = configparser.SafeConfigParser()
+    plugin_metaparser.read(Path(plugin.__file__).parent / 'metadata.txt')
+    try:
+        return plugin_metaparser.get('general', 'tracker')
+    except (configparser.NoSectionError, configparser.NoOptionError):
+        return None
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'errordialog.ui'))
+
+WIDGET, BASE = uic.loadUiType(Path(__file__).parent / 'errordialog.ui')
+
 
 class ErrorDialog(BASE, WIDGET):
 
-    def __init__(self, error, parent=None):
-        super(ErrorDialog, self).__init__(parent)
+    def __init__(self, html_error, md_error):
+        super(ErrorDialog, self).__init__()
         self.setupUi(self)
-        
-        pixmap = QPixmap(iconPath("geocatlogo.png"))
+
+        pixmap = QPixmap(getIconPath("geocatlogo"))
         self.labelIcon.setPixmap(pixmap)
 
-        self.txtError.setHtml(error)
+        self.txtError.setHtml(html_error)
+
+        tracker_url = getTrackerUrl()
+        if not tracker_url:
+            self.btnSendReport.setEnabled(False)
+        else:
+            self.btnSendReport.clicked.connect(lambda: self.sendReport(md_error, tracker_url))
         self.btnClose.clicked.connect(self.close)
 
-        self.btnSendReport.setEnabled(mygeocat.client.isLoggedIn())
-        
-
-    
+    def sendReport(self, error, tracker_url):
+        """ Copies the given stacktrace in a GeoCat support form. """
+        payload = {
+            "subject": "[Crash Report] GeoCat Bridge for QGIS",
+            "message": error
+        }
+        req = PreparedRequest()
+        try:
+            req.prepare('GET', tracker_url, params=parse.urlencode(payload, quote_via=parse.quote))
+            webbrowser.open_new(req.url)
+        except Exception as e:
+            QgsMessageLog().logMessage(f"Failed to send crash report: {e}", 'GeoCat Bridge')
