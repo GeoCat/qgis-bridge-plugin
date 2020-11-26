@@ -48,7 +48,7 @@ class GeocatBridge:
                 try:
                     handleError(errorList)
                 except:
-                    pass #we swallow all exceptions here, to avoid entering an endless loop
+                    pass  # we swallow all exceptions here, to avoid entering an endless loop
             else:
                 self.qgis_hook(t, value, tb)          
         
@@ -65,7 +65,7 @@ class GeocatBridge:
             
         helpPath = "file://{}".format(os.path.join(os.path.dirname(__file__), "docs", "index.html"))
         self.actionHelp = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self.iface.mainWindow())
-        self.actionHelp.setObjectName("GeocatBridgeHelp")
+        self.actionHelp.setObjectName("GeoCat Bridge Help")
         self.actionHelp.triggered.connect(lambda: webbrowser.open_new(helpPath))
         self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionHelp)
 
@@ -75,22 +75,20 @@ class GeocatBridge:
 
         iconMultistyler = QIcon(os.path.join(os.path.dirname(__file__), "icons", "symbology.png"))
         self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate("GeoCat Bridge", "Multistyler"), self.iface.mainWindow())
-        self.actionMultistyler.setObjectName("multistyler")
+        self.actionMultistyler.setObjectName("Multistyler")
         self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
         self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionMultistyler)
 
         self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
 
-        QgsProject.instance().layerWasAdded.connect(self.layerWasAdded)
-        QgsProject.instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
+        QgsProject().instance().layerWasAdded.connect(self.layerWasAdded)
+        QgsProject().instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
 
     def unload(self):
-
-        removeTempFolder()                        
+        removeTempFolder()
     
         self.iface.currentLayerChanged.disconnect(self.multistylerDialog.updateForCurrentLayer)
-
-        QgsProject.instance().layerWasAdded.disconnect(self.layerWasAdded)
+        QgsProject().instance().layerWasAdded.disconnect(self.layerWasAdded)
 
         for layer, func in self._layerSignals.items():
             layer.styleChanged.disconnect(func)
