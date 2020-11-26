@@ -1,49 +1,36 @@
 import sys
-from qgis.core import Qgis
+
 from qgis.PyQt.QtCore import QCoreApplication
+from qgis.core import Qgis
+
 from geocatbridge.ui.errordialog import ErrorDialog
 
-_errors = []
 
-def handleError(errorList):
+def handleError(errors):
 
-    txt = u'''<h3>{main_error}</h3>
-<pre>
-{error}
-</pre>
-<br>
-<b>{version_label}</b> {num}
-<br>
-<b>{qgis_label}</b> {qversion} {qgisrelease}, {devversion}
-<br>
-<h4>{pypath_label}</h4>
-<ul>
-{pypath}
-</ul>'''
-
-    error = ''
-    for s in errorList:
-        error += s.decode('utf-8', 'replace') if hasattr(s, 'decode') else s
-    error = error.replace('\n', '<br>')
-
-    main_error = errorList[-1].decode('utf-8', 'replace') if hasattr(errorList[-1], 'decode') else errorList[-1]
-
+    stacktrace = ''.join(errors).strip()
+    main_error = errors[-1]
     version_label = QCoreApplication.translate('Python', 'Python version:')
     qgis_label = QCoreApplication.translate('Python', 'QGIS version:')
-    pypath_label = QCoreApplication.translate('Python', 'Python Path:')
-    txt = txt.format(main_error=main_error,
-                     error=error,
-                     version_label=version_label,
-                     num=sys.version,
-                     qgis_label=qgis_label,
-                     qversion=Qgis.QGIS_VERSION,
-                     qgisrelease=Qgis.QGIS_RELEASE_NAME,
-                     devversion=Qgis.QGIS_DEV_VERSION,
-                     pypath_label=pypath_label,
-                     pypath=u"".join(u"<li>{}</li>".format(path) for path in sys.path))
+    pypath_label = QCoreApplication.translate('Python', 'Python path:')
+    md_pypaths = '\n'.join('- {}'.format(path) for path in sys.path)
 
-    txt = txt.replace('  ', '&nbsp; ')  # preserve whitespaces for nicer output
-    _errors.append(error)
-    dlg = ErrorDialog(txt)
+    html_text = f'''<h3>{main_error}</h3>
+                <pre>{stacktrace}</pre><br>
+                <b>{version_label}</b> {sys.version}<br>
+                <b>{qgis_label}</b> {Qgis().version()} ({Qgis().releaseName()} {Qgis.QGIS_DEV_VERSION})<br>
+                <h4>{pypath_label}</h4>
+                <ul>{"".join(f"<li>{path}</li>" for path in sys.path)}</ul>'''
+
+    md_text = f"[please insert description of what you were doing here]\n\n" \
+              f"### {main_error}\n" \
+              f"```\n" \
+              f"{stacktrace}\n" \
+              f"```\n\n" \
+              f"**{version_label}** {sys.version}\n" \
+              f"**{qgis_label}** {Qgis().version()} ({Qgis().releaseName()} {Qgis.QGIS_DEV_VERSION})\n\n" \
+              f"#### {pypath_label}\n" \
+              f"{md_pypaths}"
+
+    dlg = ErrorDialog(html_text, md_text)
     dlg.exec()
-    
