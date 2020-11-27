@@ -106,3 +106,4 @@ venv.bak/
 
 # PyCharm IDE
 .idea/
+*debug/
