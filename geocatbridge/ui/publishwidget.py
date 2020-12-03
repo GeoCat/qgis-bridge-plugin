@@ -324,7 +324,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if metadata_file is None:
             res = self.showQuestionBox("Metadata file",
                                        "Could not find a suitable metadata file.\nDo you want to select it manually?")
-            if res == FeedbackMixin.YES:
+            if res == self.Buttons.YES:
                 metadata_file, _ = QFileDialog.getOpenFileName(self, self.tr("Metadata file"),
                                                                files.getDirectory(self.currentLayer.source()), '*.xml')
 
