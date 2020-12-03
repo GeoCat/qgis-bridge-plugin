@@ -183,7 +183,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             if self.currentServerHasChanges:
                 res = self.showQuestionBox("Servers", "Do you want to save changes to the current server?",
                                            buttons=self.Buttons.CANCEL | self.Buttons.NO | self.Buttons.YES,
-                                           default_button=self.Buttons.YES)
+                                           defaultButton=self.Buttons.YES)
                 if res == self.Buttons.YES:
                     if not self.saveCurrentServer():
                         self.showErrorBar("Error", "Wrong values in current item")
@@ -473,7 +473,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         if self.currentServerHasChanges:
             res = self.showQuestionBox("Servers", "Do you want to close without saving the current changes?",
                                        buttons=self.Buttons.CANCEL | self.Buttons.NO | self.Buttons.YES,
-                                       default_button=self.Buttons.YES)
+                                       defaultButton=self.Buttons.YES)
 
             return res == self.Buttons.YES
         else:
