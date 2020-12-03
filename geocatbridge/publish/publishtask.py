@@ -5,11 +5,11 @@ import traceback
 
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import (
-    QgsTask, 
-    QgsLayerTreeLayer, 
-    QgsLayerTreeGroup, 
-    QgsNativeMetadataValidator, 
-    QgsProject, 
+    QgsTask,
+    QgsLayerTreeLayer,
+    QgsLayerTreeGroup,
+    QgsNativeMetadataValidator,
+    QgsProject,
     QgsMapLayer,
     QgsLayerMetadata,
     QgsBox3d,
@@ -18,12 +18,12 @@ from qgis.core import (
 )
 
 from bridgestyle.qgis import saveLayerStyleAsZippedSld
-from .exporter import exportLayer
-from .metadata import uuidForLayer, saveMetadata
-from ..ui.progressdialog import DATA, METADATA, SYMBOLOGY, GROUPS
-from ..ui.publishreportdialog import PublishReportDialog
-from ..utils.feedback import FeedbackMixin
-from ..utils import layers as layerUtils
+from geocatbridge.publish.exporter import exportLayer
+from geocatbridge.publish.metadata import uuidForLayer, saveMetadata
+from geocatbridge.ui.progressdialog import DATA, METADATA, SYMBOLOGY, GROUPS
+from geocatbridge.ui.publishreportdialog import PublishReportDialog
+from geocatbridge.utils.feedback import FeedbackMixin
+from geocatbridge.utils import layers as layerUtils
 
 
 class PublishTask(QgsTask):
@@ -55,6 +55,9 @@ class PublishTask(QgsTask):
                     in_name, out_name = layerUtils.getLayerTitleAndName(child.layer())
                     if in_name in to_publish:
                         layers.append(out_name)
+                    name = child.layer().name()
+                    if name in to_publish:
+                        layers.append(name)
                 elif isinstance(child, QgsLayerTreeGroup):
                     subgroup = _addGroup(child)
                     if subgroup is not None:
@@ -148,11 +151,11 @@ class PublishTask(QgsTask):
                     # Publish data
                     self.stepStarted.emit(name, DATA)
                     try:
-                        if validates or allow_without_md in (ALLOW, ALLOWONLYDATA):
+                        if md_valid or allow_without_md in (ALLOW, ALLOWONLYDATA):
                             publishLayer(layer, safe_name)
                         else:
                             self.stepStarted.emit(name, DATA)
-                            if validates or allow_without_md in (ALLOW, ALLOWONLYDATA):
+                            if md_valid or allow_without_md in (ALLOW, ALLOWONLYDATA):
                                 publishLayer(layer, safe_name)
                             else:
                                 self.geodata_server.logError(f"Layer '{name}' has invalid metadata. "
@@ -201,7 +204,7 @@ class PublishTask(QgsTask):
 
             if self.geodata_server is not None:
                 self.stepStarted.emit(None, GROUPS)
-                groups = self._layerGroups(self.layers)                            
+                groups = self._layerGroups(self.layers)
                 try:
                     self.geodata_server.createGroups(groups, qgs_layers)
                 except Exception:
