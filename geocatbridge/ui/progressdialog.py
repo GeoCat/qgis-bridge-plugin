@@ -1,24 +1,19 @@
-import os
-
-from qgis.PyQt import uic
-
 from qgis.PyQt.QtCore import Qt, QCoreApplication
 from qgis.PyQt.QtGui import QBrush, QIcon, QColor
 from qgis.PyQt.QtWidgets import QTreeWidgetItem
 
+from geocatbridge.utils import files, gui
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'progressdialog.ui'))
+WIDGET, BASE = gui.loadUiType(__file__)
 
 SYMBOLOGY, DATA, METADATA, GROUPS = range(4)
 
-def iconPath(icon):
-    return os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons", icon)
+DATA_ICON = QIcon(files.getIconPath("layer"))
+METADATA_ICON = QIcon(files.getIconPath("metadata"))
+SYMBOLOGY_ICON = QIcon(files.getIconPath("symbology"))
+GROUPS_ICON = QIcon(files.getIconPath("group"))
+CHECK_ICON = QIcon(files.getIconPath("checkmark"))
 
-DATA_ICON = QIcon(iconPath("layer.png"))
-METADATA_ICON = QIcon(iconPath("metadata.png"))
-SYMBOLOGY_ICON = QIcon(iconPath("symbology.png"))
-GROUPS_ICON = QIcon(iconPath("group.png"))
-CHECK_ICON = QIcon(iconPath("checkmark.png"))
 
 class ProgressDialog(BASE, WIDGET):
 
@@ -53,6 +48,7 @@ class ProgressDialog(BASE, WIDGET):
         QCoreApplication.processEvents()
 
     def setFinished(self, layer, category):
+        item = None
         if category == GROUPS:
             subitem = self.treeWidget.topLevelItem(len(self.layers))
         else:
@@ -66,13 +62,13 @@ class ProgressDialog(BASE, WIDGET):
         subitem.setText(1, "Finished")
         subitem.setBackground(0, QBrush(Qt.white))
         subitem.setBackground(1, QBrush(Qt.white))
-        if category == METADATA:
+        if item and category == METADATA:
             item.setForeground(1, QBrush(Qt.blue))
             item.setIcon(1, CHECK_ICON)
-            #item.setExpanded(False)
         QCoreApplication.processEvents()
 
     def setSkipped(self, layer, category):
+        item = None
         if category == GROUPS:
             subitem = self.treeWidget.topLevelItem(len(self.layers))
         else:
@@ -84,10 +80,9 @@ class ProgressDialog(BASE, WIDGET):
         self.treeWidget.scrollToItem(subitem)
         subitem.setForeground(1, QBrush(Qt.gray))
         subitem.setText(1, "Skipped")
-        if category == METADATA:
+        if item and category == METADATA:
             item.setForeground(1, QBrush(Qt.blue))
             item.setIcon(1, CHECK_ICON)
-            #item.setExpanded(False)
         QCoreApplication.processEvents()
 
     def setInProgress(self, layer, category):
