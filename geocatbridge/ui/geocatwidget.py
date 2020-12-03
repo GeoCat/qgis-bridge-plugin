@@ -1,13 +1,11 @@
-import os
 import webbrowser
 
-from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtWebKitWidgets import QWebPage
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'geocatwidget.ui'))
+from geocatbridge.utils import files, gui
 
-rootFolder = os.path.dirname(os.path.dirname(__file__))
+WIDGET, BASE = gui.loadUiType(__file__)
 
 
 class GeoCatWidget(WIDGET, BASE):
@@ -16,7 +14,7 @@ class GeoCatWidget(WIDGET, BASE):
         super(GeoCatWidget, self).__init__(parent)
         self.setupUi(self)
 
-        path = os.path.join(rootFolder, "resources", "geocat", "index.html")
+        path = files.getResourcePath(files.Path("geocat") / "index.html")
         url = QUrl.fromLocalFile(path)
         self.txtAbout.load(url)
         self.txtAbout.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
