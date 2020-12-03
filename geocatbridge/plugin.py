@@ -9,44 +9,39 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsProject, QgsApplication
 
-from .errorhandler import handleError
-from .processing.bridgeprovider import BridgeProvider
-from .publish.servers import readServers
-from .ui.bridgedialog import BridgeDialog
-from .ui.multistylerdialog import MultistylerDialog
-from .utils.files import removeTempFolder
-
-PLUGIN_NAMESPACE = "geocatbridge"
+from geocatbridge.errorhandler import handleError
+from geocatbridge.processing.bridgeprovider import BridgeProvider
+from geocatbridge.publish.servers import readServers
+from geocatbridge.ui.bridgedialog import BridgeDialog
+from geocatbridge.ui.multistylerwidget import MultistylerWidget
+from geocatbridge.utils import meta, files
 
 
 class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
+        self._mainWin = iface.mainWindow()
 
         readServers()
 
+        self.name = meta.getAppName()
         self.provider = BridgeProvider()
-
-        self.pluginFolder = os.path.dirname(__file__)
-        localePath = ""
         self.locale = QSettings().value("locale/userLocale")[0:2]
-
-        if os.path.exists(self.pluginFolder):
-            localePath = os.path.join(self.pluginFolder, "i18n", "bridge_" + self.locale + ".qm")
+        locale_path = files.getLocalePath(f"bridge_{self.locale}")
 
         self.translator = QTranslator()
-        if os.path.exists(localePath):
-            self.translator.load(localePath)
+        if os.path.exists(locale_path):
+            self.translator.load(locale_path)
             QCoreApplication.installTranslator(self.translator)
 
         self.qgis_hook = sys.excepthook
 
         def plugin_hook(t, value, tb):
-            errorList = traceback.format_exception(t, value, tb)
-            trace = "".join(errorList)            
-            if PLUGIN_NAMESPACE in trace.lower():
+            error_list = traceback.format_exception(t, value, tb)
+            trace = "".join(error_list)
+            if meta.PLUGIN_NAMESPACE in trace.lower():
                 try:
-                    handleError(errorList)
+                    handleError(error_list)
                 except:
                     pass  # we swallow all exceptions here, to avoid entering an endless loop
             else:
@@ -55,29 +50,28 @@ class GeocatBridge:
         sys.excepthook = plugin_hook
 
     def initGui(self):
-        iconPublish = QIcon(os.path.join(os.path.dirname(__file__), "icons", "publish_button.png"))
-        self.actionPublish = QAction(iconPublish, QCoreApplication.translate("GeoCat Bridge", "Publish"), self.iface.mainWindow())
+        iconPublish = QIcon(files.getIconPath("publish_button"))
+        self.actionPublish = QAction(iconPublish, QCoreApplication.translate(self.name, "Publish"), self._mainWin)
         self.actionPublish.setObjectName("startPublish")
         self.actionPublish.triggered.connect(self.publishClicked)
 
-        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionPublish)
+        self.iface.addPluginToWebMenu(self.name, self.actionPublish)
         self.iface.addWebToolBarIcon(self.actionPublish)
             
-        helpPath = "file://{}".format(os.path.join(os.path.dirname(__file__), "docs", "index.html"))
-        self.actionHelp = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self.iface.mainWindow())
-        self.actionHelp.setObjectName("GeoCat Bridge Help")
-        self.actionHelp.triggered.connect(lambda: webbrowser.open_new(helpPath))
-        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionHelp)
+        self.actionHelp = QAction(QgsApplication().getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self._mainWin)
+        self.actionHelp.setObjectName(f"{self.name} Help")
+        self.actionHelp.triggered.connect(lambda: webbrowser.open_new(files.getHtmlDocsPath("index")))
+        self.iface.addPluginToWebMenu(self.name, self.actionHelp)
 
-        self.multistylerDialog = MultistylerDialog()
+        self.multistylerDialog = MultistylerWidget()
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
         self.multistylerDialog.hide()        
 
-        iconMultistyler = QIcon(os.path.join(os.path.dirname(__file__), "icons", "symbology.png"))
-        self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate("GeoCat Bridge", "Multistyler"), self.iface.mainWindow())
+        iconMultistyler = QIcon(files.getIconPath("symbology"))
+        self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate(self.name, "Multistyler"), self._mainWin)
         self.actionMultistyler.setObjectName("Multistyler")
         self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
-        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionMultistyler)
+        self.iface.addPluginToWebMenu(self.name, self.actionMultistyler)
 
         self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
 
@@ -85,7 +79,7 @@ class GeocatBridge:
         QgsProject().instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
 
     def unload(self):
-        removeTempFolder()
+        files.removeTempFolder()
     
         self.iface.currentLayerChanged.disconnect(self.multistylerDialog.updateForCurrentLayer)
         QgsProject().instance().layerWasAdded.disconnect(self.layerWasAdded)
@@ -93,9 +87,9 @@ class GeocatBridge:
         for layer, func in self._layerSignals.items():
             layer.styleChanged.disconnect(func)
 
-        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionHelp)
-        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionPublish)
-        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionMultistyler)
+        self.iface.removePluginWebMenu(self.name, self.actionHelp)
+        self.iface.removePluginWebMenu(self.name, self.actionPublish)
+        self.iface.removePluginWebMenu(self.name, self.actionMultistyler)
 
         self.iface.removeWebToolBarIcon(self.actionPublish)
 
@@ -108,9 +102,9 @@ class GeocatBridge:
         layer.styleChanged.connect(self._layerSignals[layer])
 
     def layerWillBeRemoved(self, layerid):
-        for layer in self._layerSignals.keys():
+        for layer, signal in self._layerSignals.items():
             if layer.id() == layerid:
-                del self._layerSignals[layer]
+                del signal
                 return
 
     def publishClicked(self):
