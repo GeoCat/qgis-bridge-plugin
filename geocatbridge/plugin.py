@@ -20,7 +20,12 @@ from geocatbridge.utils import meta, files
 class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
-        self._mainWin = iface.mainWindow()
+        self._win = iface.mainWindow()
+
+        self.action_publish = None
+        self.action_help = None
+        self.action_multistyler = None
+        self.widget_multistyler = None
 
         readServers()
 
@@ -50,30 +55,30 @@ class GeocatBridge:
         sys.excepthook = plugin_hook
 
     def initGui(self):
-        iconPublish = QIcon(files.getIconPath("publish_button"))
-        self.actionPublish = QAction(iconPublish, QCoreApplication.translate(self.name, "Publish"), self._mainWin)
-        self.actionPublish.setObjectName("startPublish")
-        self.actionPublish.triggered.connect(self.publishClicked)
+        self.action_publish = QAction(QIcon(files.getIconPath("publish_button")),
+                                      QCoreApplication.translate(self.name, "Publish"), self._win)
+        self.action_publish.setObjectName("startPublish")
+        self.action_publish.triggered.connect(self.publishClicked)
 
-        self.iface.addPluginToWebMenu(self.name, self.actionPublish)
-        self.iface.addWebToolBarIcon(self.actionPublish)
+        self.iface.addPluginToWebMenu(self.name, self.action_publish)
+        self.iface.addWebToolBarIcon(self.action_publish)
             
-        self.actionHelp = QAction(QgsApplication().getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self._mainWin)
-        self.actionHelp.setObjectName(f"{self.name} Help")
-        self.actionHelp.triggered.connect(lambda: webbrowser.open_new(files.getHtmlDocsPath("index")))
-        self.iface.addPluginToWebMenu(self.name, self.actionHelp)
+        self.action_help = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self._win)
+        self.action_help.setObjectName(f"{self.name} Help")
+        self.action_help.triggered.connect(lambda: webbrowser.open_new(files.getHtmlDocsPath("index")))
+        self.iface.addPluginToWebMenu(self.name, self.action_help)
 
-        self.multistylerDialog = MultistylerWidget()
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
-        self.multistylerDialog.hide()        
+        self.widget_multistyler = MultistylerWidget()
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.widget_multistyler)
+        self.widget_multistyler.hide()
 
-        iconMultistyler = QIcon(files.getIconPath("symbology"))
-        self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate(self.name, "Multistyler"), self._mainWin)
-        self.actionMultistyler.setObjectName("Multistyler")
-        self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
-        self.iface.addPluginToWebMenu(self.name, self.actionMultistyler)
+        self.action_multistyler = QAction(QIcon(files.getIconPath("symbology")),
+                                          QCoreApplication.translate(self.name, "Multistyler"), self._win)
+        self.action_multistyler.setObjectName("Multistyler")
+        self.action_multistyler.triggered.connect(self.widget_multistyler.show)
+        self.iface.addPluginToWebMenu(self.name, self.action_multistyler)
 
-        self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
+        self.iface.currentLayerChanged.connect(self.widget_multistyler.updateForCurrentLayer)
 
         QgsProject().instance().layerWasAdded.connect(self.layerWasAdded)
         QgsProject().instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
@@ -81,24 +86,24 @@ class GeocatBridge:
     def unload(self):
         files.removeTempFolder()
     
-        self.iface.currentLayerChanged.disconnect(self.multistylerDialog.updateForCurrentLayer)
+        self.iface.currentLayerChanged.disconnect(self.widget_multistyler.updateForCurrentLayer)
         QgsProject().instance().layerWasAdded.disconnect(self.layerWasAdded)
 
         for layer, func in self._layerSignals.items():
             layer.styleChanged.disconnect(func)
 
-        self.iface.removePluginWebMenu(self.name, self.actionHelp)
-        self.iface.removePluginWebMenu(self.name, self.actionPublish)
-        self.iface.removePluginWebMenu(self.name, self.actionMultistyler)
+        self.iface.removePluginWebMenu(self.name, self.action_help)
+        self.iface.removePluginWebMenu(self.name, self.action_publish)
+        self.iface.removePluginWebMenu(self.name, self.action_multistyler)
 
-        self.iface.removeWebToolBarIcon(self.actionPublish)
+        self.iface.removeWebToolBarIcon(self.action_publish)
 
         sys.excepthook = self.qgis_hook
 
     _layerSignals = {}
 
     def layerWasAdded(self, layer):
-        self._layerSignals[layer] = partial(self.multistylerDialog.updateLayer, layer) 
+        self._layerSignals[layer] = partial(self.widget_multistyler.updateLayer, layer)
         layer.styleChanged.connect(self._layerSignals[layer])
 
     def layerWillBeRemoved(self, layerid):
