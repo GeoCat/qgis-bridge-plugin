@@ -2,12 +2,12 @@ from qgis.PyQt.QtCore import QSize, QSettings
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QFrame
 
-from geocatbridge.utils import files, gui
+from geocatbridge.utils import files, gui, meta
 from geocatbridge.ui.geocatwidget import GeoCatWidget
 from geocatbridge.ui.publishwidget import PublishWidget
 from geocatbridge.ui.serverconnectionswidget import ServerConnectionsWidget
 
-FIRSTTIME_SETTING = "geocatbridge/FirstTimeRun"
+FIRSTTIME_SETTING = f"{meta.PLUGIN_NAMESPACE}/FirstTimeRun"
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
