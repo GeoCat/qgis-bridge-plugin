@@ -1,28 +1,15 @@
-import configparser
 import webbrowser
-from pathlib import Path
 from urllib import parse
 
-from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QPixmap
 from qgis.core import QgsMessageLog
 from requests.models import PreparedRequest
 
-from geocatbridge import plugin
+from geocatbridge.utils.gui import loadUiType
+from geocatbridge.utils.meta import getTrackerUrl
 from geocatbridge.utils.files import getIconPath
 
-
-def getTrackerUrl():
-    """ Reads the tracker URL from the file-based plugin metadata. """
-    plugin_metaparser = configparser.SafeConfigParser()
-    plugin_metaparser.read(Path(plugin.__file__).parent / 'metadata.txt')
-    try:
-        return plugin_metaparser.get('general', 'tracker')
-    except (configparser.NoSectionError, configparser.NoOptionError):
-        return None
-
-
-WIDGET, BASE = uic.loadUiType(Path(__file__).parent / 'errordialog.ui')
+WIDGET, BASE = loadUiType(__file__)
 
 
 class ErrorDialog(BASE, WIDGET):
@@ -51,7 +38,7 @@ class ErrorDialog(BASE, WIDGET):
         }
         req = PreparedRequest()
         try:
-            req.prepare('GET', tracker_url, params=parse.urlencode(payload, quote_via=parse.quote))
+            req.prepare("GET", tracker_url, params=parse.urlencode(payload, quote_via=parse.quote))
             webbrowser.open_new(req.url)
         except Exception as e:
             QgsMessageLog().logMessage(f"Failed to send crash report: {e}", 'GeoCat Bridge')

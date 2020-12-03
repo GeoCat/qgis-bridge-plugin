@@ -1,13 +1,10 @@
-from qgis.core import (QgsSettings,                       
-                       QgsProcessing,
-                       QgsProcessingException,
-                       QgsProcessingParameterMapLayer,
+from qgis.core import (QgsProcessingParameterMapLayer,
                        QgsProcessingParameterString,
                        QgsProcessingParameterAuthConfig)
 
-from .bridgealgorithm import BridgeAlgorithm
-
+from geocatbridge.processing.bridgealgorithm import BridgeAlgorithm
 from geocatbridge.publish.geoserver import GeoserverServer
+
 
 class PublishToGeoserverAlgorithm(BridgeAlgorithm):
 
@@ -45,9 +42,9 @@ class PublishToGeoserverAlgorithm(BridgeAlgorithm):
         workspace = self.parameterAsString(parameters, self.WORKSPACE, context)
         layer = self.parameterAsLayer(parameters, self.INPUT, context)
         
-        server = GeoserverServer("server", url=url, authid=authid, workspace=workspace)
+        server = GeoserverServer("server", url=url, authid=authid)
+        server.forceWorkspace(workspace)
         server.publishStyle(layer)
         server.publishLayer(layer)
         
         return {}
-

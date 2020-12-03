@@ -1,12 +1,13 @@
-import os
-
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtCore import QCoreApplication
-from qgis.core import QgsProcessingProvider
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
+from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtGui import QIcon
+from qgis.core import QgsProcessingProvider
 
-from . publishtogeonetwork import PublishToGeonetworkAlgorithm
-from . publishtogeoserver import PublishToGeoserverAlgorithm
+from geocatbridge.processing.publishtogeonetwork import PublishToGeonetworkAlgorithm
+from geocatbridge.processing.publishtogeoserver import PublishToGeoserverAlgorithm
+from geocatbridge.utils import meta
+from geocatbridge.utils.files import getIconPath
+
 
 class BridgeProvider(QgsProcessingProvider):
 
@@ -14,23 +15,22 @@ class BridgeProvider(QgsProcessingProvider):
 
     def __init__(self):
         super().__init__()
-        self.algs = []
 
     def id(self):
-        return 'geocatbridge'
+        return meta.PLUGIN_NAMESPACE
 
     def name(self):
-        return self.tr('GeoCat Bridge')
+        return self.tr(meta.getAppName())
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'icons', 'geocat.png'))
+        return QIcon(getIconPath("geocat"))
 
     def load(self):
         ProcessingConfig.settingIcons[self.name()] = self.icon()
         ProcessingConfig.addSetting(Setting(self.name(),
-                                    self.BRIDGE_ACTIVE,
-                                    self.tr('Activate'),
-                                    False))    
+                                            self.BRIDGE_ACTIVE,
+                                            self.tr('Activate'),
+                                            False))
         ProcessingConfig.readSettings()
         self.refreshAlgorithms()
         return True
@@ -44,19 +44,9 @@ class BridgeProvider(QgsProcessingProvider):
     def supportsNonFileBasedOutput(self):
         return False
 
-    def getAlgs(self):
-        algs = [PublishToGeonetworkAlgorithm(),
-                PublishToGeoserverAlgorithm()
-               ]
-
-        return algs
-
     def loadAlgorithms(self):
-        self.algs = self.getAlgs()
-        for a in self.algs:
+        for a in (PublishToGeonetworkAlgorithm(), PublishToGeoserverAlgorithm()):
             self.addAlgorithm(a)
 
-    def tr(self, string, context=''):
-        if context == '':
-            context = 'GeoCat Bridge'
-        return QCoreApplication.translate(context, string)
+    def tr(self, string, **kwargs):
+        return QCoreApplication.translate(meta.getAppName(), string)
