@@ -502,14 +502,14 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         progress_dialog.close()
         task.finished(ret)
         if task.exception is not None:
-            if task.exceptiontype == requests.exceptions.ConnectionError:
+            if task.exc_type == requests.exceptions.ConnectionError:
                 self.showErrorBox("Error while publishing",
                                   "Connection error. Server unavailable.\nSee QGIS log for details",
                                   propagate=task.exception)
             else:
                 self.showErrorBar("Error while publishing", "See QGIS log for details", propagate=task.exception)
         if isinstance(task, PublishTask):
-            self.updateLayersPublicationStatus(task.geodataServer is not None, task.metadataServer is not None)
+            self.updateLayersPublicationStatus(task.geodata_server is not None, task.metadata_server is not None)
 
     def publishOnBackground(self):
         to_publish = self._toPublish()
