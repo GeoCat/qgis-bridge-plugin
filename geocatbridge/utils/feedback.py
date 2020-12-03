@@ -22,16 +22,21 @@ class FeedbackMixin:
         super().__init__(*args, **kwargs)
         self._errors = []
         self._warnings = []
-        self._main_bar = iface.MessageBar()
-        self._msgout = QgsMessageOutput()
-        if hasattr(self, 'layout'):
-            self._bar = QgsMessageBar()
-            self._bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-            self.layout().insertWidget(0, self._bar)
-        else:
-            self._bar = self._main_bar
+        self._main_bar = iface.messageBar()
+        self._widget_bar = self._main_bar
         if not hasattr(self, 'tr'):
+            # Do not reset the translate function if it's already there
             self.tr = None
+
+    def _updateWidgetBar(self):
+        """ Updates the _widget_bar property if the widget layout has been initialized. """
+        if self._widget_bar != self._main_bar:
+            # Widget bar already set: no need to update
+            return
+        if hasattr(self, 'layout') and self.layout():
+            self._widget_bar = QgsMessageBar()
+            self._widget_bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+            self.layout().insertWidget(0, self._widget_bar)
 
     def _translate(self, message, context=None):
         if context:
@@ -60,7 +65,8 @@ class FeedbackMixin:
     def _show_bar(self, title, message, level, **kwargs):
         title = self._translate(title)
         message = self._translate(message)
-        bar = self._main_bar if kwargs.get('main') else self._bar
+        self._updateWidgetBar()
+        bar = self._main_bar if kwargs.get('main') else self._widget_bar
         bar.pushMessage(title, message, level=level, duration=5)
         self._propagate(message, level, **kwargs)
 
@@ -175,7 +181,8 @@ class FeedbackMixin:
 
     def showHtmlMessage(self, title, html):
         """ Show a message dialog with an HTML body. """
-        dlg = self._msgout.createMessageOutput()
+        # noinspection PyArgumentList
+        dlg = QgsMessageOutput.createMessageOutput()
         dlg.setTitle(self._translate(title))
         dlg.setMessage(html, QgsMessageOutput.MessageHtml)
         dlg.showMessage()
