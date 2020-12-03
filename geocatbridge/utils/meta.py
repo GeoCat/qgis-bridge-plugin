@@ -5,7 +5,7 @@ from pathlib import Path
 PLUGIN_NAMESPACE = "geocatbridge"
 
 _prop_cache = {}
-_meta_parser = configparser.SafeConfigParser()
+_meta_parser = configparser.ConfigParser()
 
 
 def _load():
