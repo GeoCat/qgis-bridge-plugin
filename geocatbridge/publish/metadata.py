@@ -16,8 +16,9 @@ from qgis.core import (
     QgsMessageLog
 )
 
-from ..utils.files import tempFilenameInTempFolder, getResourcePath
-from ..utils.layers import getLayerTitleAndName
+from geocatbridge.utils.files import tempFilenameInTempFolder, getResourcePath
+from geocatbridge.utils import meta
+from geocatbridge.utils.layers import getLayerTitleAndName
 
 QMD_TO_ISO19139_XSLT = getResourcePath("qgis-to-iso19139.xsl")
 ISO19139_TO_QMD_XSLT = getResourcePath("iso19139-to-qgis.xsl")
@@ -183,7 +184,7 @@ def _getInfoXmlContent(uuid, thumb_filename):
     dom = minidom.parseString(xmlstring)
     return dom.toprettyxml(indent="  ")
 
-  
+
 def uuidForLayer(layer):
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, layer.source()))
 
@@ -224,4 +225,3 @@ def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None, wfs=None, layer
     mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
     _createMef(uuid, transformedFilename, mefFilename, thumbnail)
     return mefFilename
-  
