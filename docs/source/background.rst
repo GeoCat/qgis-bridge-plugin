@@ -1,5 +1,5 @@
 Background
-###########
+##########
 
 When publishing data on the Internet it is a common practice to provide
 the data using standardized exchange protocols. Adopting standards
@@ -19,12 +19,12 @@ You can also choose to save the metadata and map symbology on your computer as f
 (deegree, QGIS).
 
 Supported components and formats
-==================================
+================================
 
 `GeoServer  <http://geoserver.org/>`_ is the reference implementation of
 the Open Geospatial Consortium (OGC)_ Web Feature Service (WFS) and Web
 Coverage Service (WCS) standards, as well as a high performance
-certified compliant Web Map Service (WMS). GeoServer has a REST api, which can be used to configure featuretypes. Bridge uses this API to publish data. Geoserver internally uses `SLD <https://www.opengeospatial.org/standards/sld>`_ to define the visualisation of data layers.
+certified compliant Web Map Service (WMS). GeoServer has a REST api, which can be used to configure feature types. Bridge uses this API to publish data. Geoserver internally uses `SLD <https://www.opengeospatial.org/standards/sld>`_ to define the visualisation of data layers.
 
 `MapServer <https://mapserver.org>`_ is an Open Source platform for
 publishing spatial data and interactive mapping applications to the web.

@@ -1,5 +1,5 @@
 GeoCat Bridge for QGIS
-=======================
+======================
 
 GeoCat Bridge© for QGIS enables you to publish your
 metadata in a spatial catalogue (CSW), like GeoNetwork opensource, and

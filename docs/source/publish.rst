@@ -97,13 +97,13 @@ selected layers from the publishing server(s).
 
 .. image:: ./img/remove_all.png
 
-.. tip:
+.. tip::
 
-	When removing data from GeoServer, Bridge does not remove the spatial
-	data files, such as Shapefile, GeoPackage and GeoTIFF. GeoServer does
-	not allow to remove these files through the REST API. When publishing to
-	GeoServer with PostGIS, Bridge will not remove the data tables from
-	PostGIS.
+    When removing data from GeoServer, Bridge does not remove the spatial
+    data files, such as Shapefile, GeoPackage and GeoTIFF. GeoServer does
+    not allow to remove these files through the REST API. When publishing to
+    GeoServer with PostGIS, Bridge will not remove the data tables from
+    PostGIS.
 
 
 Remove data and metadata individual layers
@@ -133,5 +133,5 @@ symbology in the following formats:
 .. image:: ./img/offline_export.png
 
 Select a folder and the corresponding files will be created in it for
-all the layers currently selected when you click on the Publish button
+all the layers currently selected when you click on the Publish button.
 
