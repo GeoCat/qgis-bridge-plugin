@@ -40,7 +40,7 @@ def uploadFolder(folder, host, port, remote_folder, username, password):
             current_path = os.path.join(path, f)
             if os.path.isfile(current_path):
                 fh = open(f, 'rb')
-                ftp.storbinary('STOR %s' % f, fh)
+                ftp.storbinary(f"STOR {f}", fh)
                 fh.close()
             elif os.path.isdir(current_path):
                 try:

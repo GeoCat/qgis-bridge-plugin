@@ -16,7 +16,8 @@ from qgis.core import (
     QgsMessageLog
 )
 
-from ..utils.files import tempFilenameInTempFolder, getResourcePath
+from geocatbridge.utils.files import tempFilenameInTempFolder, getResourcePath
+from geocatbridge.utils import meta
 
 QMD_TO_ISO19139_XSLT = getResourcePath("qgis-to-iso19139.xsl")
 ISO19139_TO_QMD_XSLT = getResourcePath("iso19139-to-qgis.xsl")
@@ -89,21 +90,21 @@ def _convertMetadata(input_file, output_file, xslt_file):
 
 def _loadMetadataFromIsoXml(layer, filename):
     qmd_filename = tempFilenameInTempFolder("fromiso.qmd")
-    QgsMessageLog.logMessage("Exporting ISO19193 metadata to %s" % qmd_filename, 'GeoCat Bridge', level=Qgis.Info)
+    QgsMessageLog.logMessage(f"Exporting ISO19193 metadata to {qmd_filename}", meta.getAppName(), level=Qgis.Info)
     _convertMetadata(filename, qmd_filename, ISO19139_TO_QMD_XSLT)
     layer.loadNamedMetadata(qmd_filename)
 
 
 def _loadMetadataFromEsriXml(layer, filename):
     iso_filename = tempFilenameInTempFolder("fromesri.xml")
-    QgsMessageLog.logMessage("Exporting ISO19115 metadata to %s" % iso_filename, 'GeoCat Bridge', level=Qgis.Info)
+    QgsMessageLog.logMessage(f"Exporting ISO19115 metadata to {iso_filename}", meta.getAppName(), level=Qgis.Info)
     _convertMetadata(filename, iso_filename, ISO19115_TO_ISO19139_XSLT)
     _loadMetadataFromIsoXml(layer, iso_filename)
 
 
 def _loadMetadataFromWrappingEsriXml(layer, filename):
     iso_filename = tempFilenameInTempFolder("fromesri.xml")
-    QgsMessageLog.logMessage("Exporting Wrapping-ISO19115 metadata to %s" % iso_filename, 'GeoCat Bridge',
+    QgsMessageLog.logMessage(f"Exporting Wrapping-ISO19115 metadata to {iso_filename}", meta.getAppName(),
                              level=Qgis.Info)
     _convertMetadata(filename, iso_filename, WRAPPING_ISO19115_TO_ISO19139_XSLT)
     _loadMetadataFromIsoXml(layer, iso_filename)
@@ -111,7 +112,7 @@ def _loadMetadataFromWrappingEsriXml(layer, filename):
 
 def _loadMetadataFromFgdcXml(layer, filename):
     iso_filename = tempFilenameInTempFolder("fromfgdc.xml")
-    QgsMessageLog.logMessage("Exporting FGDC metadata to %s" % iso_filename, 'GeoCat Bridge', level=Qgis.Info)
+    QgsMessageLog.logMessage(f"Exporting FGDC metadata to {iso_filename}", meta.getAppName(), level=Qgis.Info)
     _convertMetadata(filename, iso_filename, FGDC_TO_ISO19115)
     _loadMetadataFromEsriXml(layer, iso_filename)
 
@@ -140,40 +141,40 @@ def _saveLayerThumbnail(layer):
 def _transformMetadata(filename, uuid, api_url, wms, wfs, layer_name):
 
     def _ns(n):
-        return '{http://www.isotc211.org/2005/gmd}' + n
+        return f"{{http://www.isotc211.org/2005/gmd}}{n}"
 
     def _addServiceElement(root_element, md_layer, service_url, service_type):
-        trans = ET.SubElement(root_element, _ns('transferOptions'))
-        dtrans = ET.SubElement(trans, _ns('MD_DigitalTransferOptions'))
-        online = ET.SubElement(dtrans, _ns('onLine'))
-        cionline = ET.SubElement(online, _ns('CI_OnlineResource'))
-        linkage = ET.SubElement(cionline, _ns('linkage'))
-        url = ET.SubElement(linkage, _ns('URL'))
+        trans = ET.SubElement(root_element, _ns("transferOptions"))
+        dtrans = ET.SubElement(trans, _ns("MD_DigitalTransferOptions"))
+        online = ET.SubElement(dtrans, _ns("onLine"))
+        cionline = ET.SubElement(online, _ns("CI_OnlineResource"))
+        linkage = ET.SubElement(cionline, _ns("linkage"))
+        url = ET.SubElement(linkage, _ns("URL"))
         url.text = service_url
-        protocol = ET.SubElement(cionline, _ns('protocol'))
-        cs = ET.SubElement(protocol, '{http://www.isotc211.org/2005/gco}CharacterString')
+        protocol = ET.SubElement(cionline, _ns("protocol"))
+        cs = ET.SubElement(protocol, "{http://www.isotc211.org/2005/gco}CharacterString")
         cs.text = f"OGC:{service_type.upper()}"
-        name = ET.SubElement(cionline, _ns('name'))
-        csname = ET.SubElement(name, '{http://www.isotc211.org/2005/gco}CharacterString')
+        name = ET.SubElement(cionline, _ns("name"))
+        csname = ET.SubElement(name, "{http://www.isotc211.org/2005/gco}CharacterString")
         csname.text = md_layer
 
     iso_filename = tempFilenameInTempFolder("metadata.xml")
     out_dom = _transformDom(filename, iso_filename)
 
-    for ident in out_dom.iter(_ns('fileIdentifier')):
+    for ident in out_dom.iter(_ns("fileIdentifier")):
         ident[0].text = uuid
     if wms is not None:
-        for root in out_dom.iter(_ns('MD_Distribution')):
-            _addServiceElement(root, layer_name, wms, 'wms')
+        for root in out_dom.iter(_ns("MD_Distribution")):
+            _addServiceElement(root, layer_name, wms, "wms")
     if wfs is not None:
-        for root in out_dom.iter(_ns('MD_Distribution')):
-            _addServiceElement(root, layer_name, wfs, 'wfs')
-    for root in out_dom.iter(_ns('MD_DataIdentification')):
-        overview = ET.SubElement(root, _ns('graphicOverview'))
-        browse_graphic = ET.SubElement(overview, _ns('MD_BrowseGraphic'))
-        file = ET.SubElement(browse_graphic, _ns('fileName'))
-        cs = ET.SubElement(file, '{http://www.isotc211.org/2005/gco}CharacterString')
-        thumbnail_url = "%s/records/%s/attachments/thumbnail.png" % (api_url, uuid)
+        for root in out_dom.iter(_ns("MD_Distribution")):
+            _addServiceElement(root, layer_name, wfs, "wfs")
+    for root in out_dom.iter(_ns("MD_DataIdentification")):
+        overview = ET.SubElement(root, _ns("graphicOverview"))
+        browse_graphic = ET.SubElement(overview, _ns("MD_BrowseGraphic"))
+        file = ET.SubElement(browse_graphic, _ns("fileName"))
+        cs = ET.SubElement(file, "{http://www.isotc211.org/2005/gco}CharacterString")
+        thumbnail_url = f"{api_url}/records/{uuid}/attachments/thumbnail.png"
         cs.text = thumbnail_url
 
     _writeDom(out_dom, iso_filename)
@@ -207,8 +208,8 @@ def _getInfoXmlContent(uuid, thumb_filename):
     _addSubElement(general, "format", "full")
     _addSubElement(general, "localId")
     _addSubElement(general, "uuid", uuid)
-    _addSubElement(general, "siteId", "GeoCat Bridge")
-    _addSubElement(general, "siteName", "GeoCat Bridge")
+    _addSubElement(general, "siteId", meta.getAppName())
+    _addSubElement(general, "siteName", meta.getAppName())
     _addSubElement(root, "categories")
     privs = _addSubElement(root, "privileges")
     grp = _addSubElement(privs, "group", attrib={"name": "all"})
@@ -219,6 +220,6 @@ def _getInfoXmlContent(uuid, thumb_filename):
     public = _addSubElement(root, "public")
     _addSubElement(public, "file", attrib={"name": os.path.basename(thumb_filename), "changeDate": d})
     _addSubElement(root, "private")
-    xmlstring = ElementTree.tostring(root, encoding='UTF-8', method='xml').decode()
+    xmlstring = ElementTree.tostring(root, encoding="UTF-8", method="xml").decode()
     dom = minidom.parseString(xmlstring)
     return dom.toprettyxml(indent="  ")

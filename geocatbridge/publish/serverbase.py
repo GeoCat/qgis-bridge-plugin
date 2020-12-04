@@ -56,7 +56,7 @@ class ServerBase():
         if isinstance(data, dict):
             data = json.dumps(data)
             headers["content-type"] = "application/json"
-        self.logInfo("Making %s request to '%s'" % (method, url))
+        self.logInfo(f"Making {method.upper()} request to '{url}'")
         r = req_method(url, headers=headers, files=files, data=data, auth=(username, password))
         r.raise_for_status()
         return r

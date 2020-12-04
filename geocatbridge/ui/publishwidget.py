@@ -42,7 +42,7 @@ from geocatbridge.utils import files, gui
 from geocatbridge.utils.feedback import FeedbackMixin
 
 PUBLISHED_ICON = QIcon(files.getIconPath("published"))
-ERROR_ICON = '<img src="%s">' % files.getIconPath("error-red")
+ERROR_ICON = f'<img src="{files.getIconPath("error-red")}">'
 REMOVE_ICON = QIcon(files.getIconPath("remove"))
 VALIDATE_ICON = QIcon(files.getIconPath("validation"))
 PREVIEW_ICON = QIcon(files.getIconPath("preview"))
