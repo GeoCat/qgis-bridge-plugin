@@ -3,7 +3,7 @@ from qgis.core import (QgsProcessingParameterMapLayer,
                        QgsProcessingParameterAuthConfig)
 
 from geocatbridge.processing.bridgealgorithm import BridgeAlgorithm
-from geocatbridge.publish.geoserver import GeoserverServer
+from geocatbridge.servers.models.geoserver import GeoserverServer
 
 
 class PublishToGeoserverAlgorithm(BridgeAlgorithm):
