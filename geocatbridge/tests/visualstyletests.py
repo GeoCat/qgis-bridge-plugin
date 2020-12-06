@@ -44,10 +44,10 @@ import os
 import bridgestyle
 from bridgestyle.qgis import layerStyleAsSld
 
-from geocatbridge.publish.geoserver import GeoserverServer
+from geocatbridge.servers.models.geoserver import GeoserverServer
 
 from qgis.PyQt.QtGui import QImage, QColor, QPainter
-from qgis.PyQt.QtCore import QSize, QCoreApplication, QUrl, QEventLoop
+from qgis.PyQt.QtCore import QSize, QUrl, QEventLoop
 
 from qgis.core import (
     QgsMapSettings, 

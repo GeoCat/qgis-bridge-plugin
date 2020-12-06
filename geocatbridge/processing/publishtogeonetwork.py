@@ -2,7 +2,7 @@ from qgis.core import (QgsProcessingParameterMapLayer,
                        QgsProcessingParameterString,
                        QgsProcessingParameterAuthConfig)
 
-from geocatbridge.publish.geonetwork import GeonetworkServer
+from geocatbridge.servers.models.geonetwork import GeonetworkServer
 from geocatbridge.processing.bridgealgorithm import BridgeAlgorithm
 
 

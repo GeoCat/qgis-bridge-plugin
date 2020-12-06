@@ -1,22 +1,19 @@
-from qgis.PyQt.QtGui import QPixmap
+from typing import Union
+
 from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMenu,
     QListWidgetItem,
-    QWidget,
-    QFileDialog
+    QWidget
 )
 from qgis.gui import QgsFileWidget, QgsAuthConfigSelect
 
-from geocatbridge.publish.geonetwork import GeonetworkServer
-from geocatbridge.publish.geoserver import GeoserverServer
-from geocatbridge.publish.mapserver import MapserverServer
-from geocatbridge.publish.postgis import PostgisServer
-from geocatbridge.publish.servers import *
-from geocatbridge.ui.newdataset import NewDatasetDialog
-from geocatbridge.utils import gui, files
+from geocatbridge.utils import gui
 from geocatbridge.utils.feedback import FeedbackMixin
+
+from geocatbridge.servers import manager
+from geocatbridge.servers.bases import ServerWidgetBase
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
@@ -25,480 +22,367 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
 
     def __init__(self):
         super().__init__()
-        self.currentServer = None
-        self.currentServerHasChanges = False
+        self._server_widgets = {}
         self.setupUi(self)
 
-        self.cswAuth = QgsAuthConfigSelect()
+        # self.cswAuth = QgsAuthConfigSelect()
         self.postgisAuth = QgsAuthConfigSelect()
-        self.geoserverAuth = QgsAuthConfigSelect()
-        self.mapserverAuth = QgsAuthConfigSelect()
+        # self.geoserverAuth = QgsAuthConfigSelect()
+        # self.mapserverAuth = QgsAuthConfigSelect()
 
         self.addMenuToButtonNew()
         self.addAuthWidgets()
         self.buttonRemove.clicked.connect(self.buttonRemoveClicked)
-        self.populateServers()
+        self.populateServerList()
         self.listServers.currentItemChanged.connect(self.currentServerChanged)
-        self.setCurrentServer(None)
+        self.showServerWidget()
         self.buttonSave.clicked.connect(self.saveButtonClicked)
-        self.comboGeoserverDataStorage.currentIndexChanged.connect(self.geoserverDatastorageChanged)
-        self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
+        # self.comboGeoserverDataStorage.currentIndexChanged.connect(self.datastoreChanged)
+        # self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
         self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
-        self.btnConnectCsw.clicked.connect(self.testConnectionCsw)
-        self.btnAddDatastore.clicked.connect(self.addPostgisDatastore)
-        self.btnRefreshDatabases.clicked.connect(self.populatePostgisComboWithGeoserverPostgisServers)
+        # self.btnConnectCsw.clicked.connect(self.testConnectionCsw)
+        # self.btnAddDatastore.clicked.connect(self.addPostgisDatastore)
+        # self.btnRefreshDatabases.clicked.connect(self.loadManagedDbServers)
 
-        self.txtCswName.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtCswNode.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtGeoserverName.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtPostgisName.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtGeoserverUrl.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtCswUrl.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtPostgisServerAddress.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtPostgisPort.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtPostgisSchema.textChanged.connect(self._setCurrentServerHasChanges)
-        self.txtPostgisDatabase.textChanged.connect(self._setCurrentServerHasChanges)
-        self.comboMetadataProfile.currentIndexChanged.connect(self._setCurrentServerHasChanges)
-        self.comboGeoserverDatabase.currentIndexChanged.connect(self._setCurrentServerHasChanges)
+        # self.txtCswName.textChanged.connect(self.setDirty)
+        # self.txtCswNode.textChanged.connect(self.setDirty)
+        # # self.txtGeoserverName.textChanged.connect(self.setDirty)
+        self.txtPostgisName.textChanged.connect(self.setDirty)
+        # # self.txtGeoserverUrl.textChanged.connect(self.setDirty)
+        # self.txtCswUrl.textChanged.connect(self.setDirty)
+        self.txtPostgisServerAddress.textChanged.connect(self.setDirty)
+        self.txtPostgisPort.textChanged.connect(self.setDirty)
+        self.txtPostgisSchema.textChanged.connect(self.setDirty)
+        self.txtPostgisDatabase.textChanged.connect(self.setDirty)
+        # self.comboMetadataProfile.currentIndexChanged.connect(self.setDirty)
 
-        self.radioLocalPath.toggled.connect(self.mapserverStorageChanged)
+        # self.radioLocalPath.toggled.connect(self.mapserverStorageChanged)
 
-        self.fileMapserver.setStorageMode(QgsFileWidget.GetDirectory)
+        # self.fileMapserver.setStorageMode(QgsFileWidget.GetDirectory)
 
-        self.btnSaveServers.clicked.connect(self.saveServers)
-        self.btnLoadServers.clicked.connect(self.loadServers)
+        # self.btnSaveServers.clicked.connect(self.saveServers)
+        # self.btnLoadServers.clicked.connect(self.loadServers)
 
-        self.comboMetadataProfile.setVisible(False)
-        self.labelMetadataProfile.setVisible(False)
+    @property
+    def serverManager(self):
+        return manager
 
-    def checkServersHaveBeenDefined(self):
-        if self.listServers.count():
-            self.txtNoServers.setVisible(False)
-            self.listServers.setVisible(True)
-        else:
-            self.txtNoServers.setVisible(True)
-            self.listServers.setVisible(False)
+    def toggleServerList(self):
+        has_servers = self.listServers.count() > 0
+        self.txtNoServers.setVisible(not has_servers)
+        self.listServers.setVisible(has_servers)
 
-    def saveServers(self):
-        filename = QFileDialog.getSaveFileName(self, self.tr("Save servers"), "", '*.json')[0]
-        if filename:
-            if not filename.endswith("json"):
-                filename += ".json"
-            with open(filename, "w") as f:
-                f.write(serversAsJsonString())
+    # def saveServers(self):
+    #     filename = QFileDialog.getSaveFileName(self, self.tr("Save servers"), "", '*.json')[0]
+    #     if filename:
+    #         if not filename.endswith("json"):
+    #             filename += ".json"
+    #         with open(filename, "w") as f:
+    #             f.write(serversAsJsonString())
+    #
+    # def loadServers(self):
+    #     filename = QFileDialog.getOpenFileName(self, self.tr("Load servers"), "", '*.json')[0]
+    #     if filename:
+    #         with open(filename) as f:
+    #             servers = json.load(f)
+    #         for server in servers:
+    #             s = serverFromDefinition(server)
+    #             if s.name not in allServers():
+    #                 self.addServerListItem(s)
+    #                 addServer(s)
 
-    def loadServers(self):
-        filename = QFileDialog.getOpenFileName(self, self.tr("Load servers"), "", '*.json')[0]
-        if filename:
-            with open(filename) as f:
-                servers = json.load(f)
-            for server in servers:
-                s = serverFromDefinition(server)
-                if s.name not in allServers():
-                    self.addServerItem(s)
-                    addServer(s)
+    def serverIsDirty(self) -> bool:
+        widget = self.stackedWidget.currentWidget()
+        if widget and hasattr(widget, ServerWidgetBase.isDirty.__name__):
+            return widget.isDirty
+        return False
 
-    def geoserverDatastorageChanged(self):
-        storage = self.comboGeoserverDataStorage.currentIndex()
-        if storage == GeoserverServer.POSTGIS_MANAGED_BY_BRIDGE:
-            self.populatePostgisComboWithPostgisServers()
-            self.comboGeoserverDatabase.setVisible(True)
-            self.btnAddDatastore.setVisible(False)
-            self.labelGeoserverDatastore.setVisible(True)
-            self.btnRefreshDatabases.setVisible(False)
-        elif storage == GeoserverServer.POSTGIS_MANAGED_BY_GEOSERVER:
-            self.comboGeoserverDatabase.setVisible(True)
-            self.btnAddDatastore.setVisible(True)
-            self.labelGeoserverDatastore.setVisible(True)
-            self.btnRefreshDatabases.setVisible(True)
-            self.populatePostgisComboWithGeoserverPostgisServers()
-        else:
-            self.comboGeoserverDatabase.setVisible(False)
-            self.btnAddDatastore.setVisible(False)
-            self.labelGeoserverDatastore.setVisible(False)
-            self.btnRefreshDatabases.setVisible(False)
-        self._setCurrentServerHasChanges()
+    def serverSetClean(self):
+        widget = self.stackedWidget.currentWidget()
+        if widget and hasattr(widget, ServerWidgetBase.setClean.__name__):
+            widget.setClean()
 
-    def addPostgisDatastore(self):
-        server = self.createGeoserverServer()
-        if server is None:
-            self.showErrorBar("Error", "Wrong values in server definition")
-            return
-        dlg = NewDatasetDialog(self)
-        dlg.exec_()
-        name = dlg.name
-        if name is None:
-            return
-
-        def _entry(k, v):
-            return {"@key": k, "$": v}
-
-        ds = {
-            "dataStore": {
-                "name": dlg.name,
-                "type": "PostGIS",
-                "enabled": True,
-                "connectionParameters": {
-                    "entry": [
-                        _entry("schema", dlg.schema),
-                        _entry("port", dlg.port),
-                        _entry("database", dlg.database),
-                        _entry("passwd", dlg.password),
-                        _entry("user", dlg.username),
-                        _entry("host", dlg.host),
-                        _entry("dbtype", "postgis")
-                    ]
-                }
-            }
-        }
-        try:
-            gui.execute(lambda: server.addPostgisDatastore(ds))
-            self.populatePostgisComboWithGeoserverPostgisServers()
-        except Exception as e:
-            self.showErrorBar("Error", "Could not create new PostGIS dataset", propagate=e)
-
-    def mapserverStorageChanged(self, checked):
-        self.labelLocalFolder.setVisible(checked)
-        self.labelRemoteFolder.setVisible(not checked)
-        self.fileMapserver.setVisible(checked)
-        self.txtRemoteFolder.setVisible(not checked)
-        self.labelHost.setVisible(not checked)
-        self.labelPort.setVisible(not checked)
-        self.labelMapserverCredentials.setVisible(not checked)
-        self.txtMapserverHost.setVisible(not checked)
-        self.txtMapserverPort.setVisible(not checked)
-        self.mapserverAuthWidget.setVisible(not checked)
-        self._setCurrentServerHasChanges()
+    def askToSave(self, question: str):
+        return self.showQuestionBox("Servers", question,
+                                    buttons=self.BUTTONS.CANCEL | self.BUTTONS.NO | self.BUTTONS.YES,
+                                    defaultButton=self.BUTTONS.YES)
 
     def currentServerChanged(self, new, old):
-        if new is None:
-            self.setCurrentServer(new)
-            return
-        else:
-            name = self.listServers.itemWidget(new).serverName()
-            server = allServers()[name]
-            if self.currentServer is not None and new is not None:
-                if server.name == self.currentServer.name:
-                    return
-            if self.currentServerHasChanges:
-                res = self.showQuestionBox("Servers", "Do you want to save changes to the current server?",
-                                           buttons=self.Buttons.CANCEL | self.Buttons.NO | self.Buttons.YES,
-                                           defaultButton=self.Buttons.YES)
-                if res == self.Buttons.YES:
-                    if not self.saveCurrentServer():
-                        self.showErrorBar("Error", "Wrong values in current item")
-                        self.listServers.setCurrentItem(old)
-                    else:
-                        self.setCurrentServer(server)
-                elif res == self.Buttons.CANCEL:
-                    self.listServers.setCurrentItem(old)
-                else:
-                    self.setCurrentServer(server)
-            else:
-                self.setCurrentServer(server)
+        new_server = self.getServerFromItem(new)
 
-    def _testConnection(self, server):
+        if not new_server:
+            # Nothing was selected or no matching server was found (should not happen)
+            self.showServerWidget()
+
+        if old and self.serverIsDirty():
+            # Current server has edits: ask user if we should save them
+            answer = self.askToSave("Do you want to save your changes to the current server?")
+            if (answer == self.BUTTONS.YES and not self.saveServer()) or answer == self.BUTTONS.CANCEL:
+                # User wants to save but saving failed OR user canceled: reset to old server
+                self.listServers.setCurrentItem(old)
+                return
+
+        self.showServerWidget(new_server)
+
+    def testConnection(self, server):
+        """ Tests if the server instance can actually connect to it. """
         if server is None:
-            self.showErrorBar("Error", "Wrong values in current item")
+            self.showErrorBar("Error", "Wrong value(s) in current server settings")
         else:
             if gui.execute(server.testConnection):
-                self.showSuccessBar("Success", "Connection succesfully established with server")
+                self.showSuccessBar("Success", "Successfully established server connection")
             else:
-                self.showErrorBar("Error", "Could not connect with server")
+                self.showErrorBar("Error", "Could not connect to server")
 
     def testConnectionPostgis(self):
         server = self.createPostgisServer()
         self._testConnection(server)
 
-    def testConnectionGeoserver(self):
-        server = self.createGeoserverServer()
-        self._testConnection(server)
-
-    def testConnectionCsw(self):
-        server = self.createGeonetworkServer()
-        self._testConnection(server)
-
-    def saveCurrentServer(self):
-        w = self.stackedWidget.currentWidget()
-        server = None
-        if w == self.widgetEmpty:
+    def saveServer(self) -> bool:
+        widget = self.stackedWidget.currentWidget()
+        if not widget or not hasattr(widget, ServerWidgetBase.createServerInstance.__name__):
+            # No (valid) current server widget
             return True
-        elif w == self.widgetGeoserver:
-            server = self.createGeoserverServer()
-        elif w == self.widgetMapserver:
-            server = self.createMapserverServer()
-        elif w == self.widgetPostgis:
-            server = self.createPostgisServer()
-        elif w == self.widgetMetadataCatalog:
-            server = self.createGeonetworkServer()
-        if server is None:
+        server = widget.createServerInstance()
+        if not server:
+            self.showErrorBar("Error", "Wrong values in current server settings")
             return False
-        else:
-            if self.currentServer is not None:
-                removeServer(self.currentServer.name)
-                item = self.itemFromServerName(self.currentServer.name)
-                self.listServers.itemWidget(item).setServerName(server.name)
-            addServer(server)
-            self.currentServer = server
-            return True
+        return manager.addServer(server)
 
-    def itemFromServerName(self, name):
-        for i in range(self.listServers.count()):
-            item = self.listServers.item(i)
-            if name == self.listServers.itemWidget(item).serverName():
-                return item
+    def getServerFromItem(self, item):
+        if not item:
+            return
+        list_widget = self.listServers.itemWidget(item)
+        return manager.getServer(list_widget.serverName)
 
-    def createGeoserverServer(self):
-        # TODO check validity of name and values
-        name = self.txtGeoserverName.text().strip()
-        url = self.txtGeoserverUrl.text().strip()
-        authid = self.geoserverAuth.configId()
-        if not bool(authid):
-            return None
-        storage = self.comboGeoserverDataStorage.currentIndex()
-        postgisdb = None
-        if storage in [GeoserverServer.POSTGIS_MANAGED_BY_BRIDGE, GeoserverServer.POSTGIS_MANAGED_BY_GEOSERVER]:
-            postgisdb = self.comboGeoserverDatabase.currentText()
-        use_original_data_source = self.chkUseOriginalDataSource.isChecked()
-        use_vector_tiles = self.chkUseVectorTiles.isChecked()
+    # def createGeoserverServer(self):
+    #     # TODO check validity of name and values
+    #     name = self.txtGeoserverName.text().strip()
+    #     url = self.txtGeoserverUrl.text().strip()
+    #     authid = self.geoserverAuth.configId()
+    #     if not bool(authid):
+    #         return None
+    #     storage = self.comboGeoserverDataStorage.currentIndex()
+    #     postgisdb = None
+    #     if storage in [GeoserverServer.POSTGIS_BRIDGE, GeoserverServer.POSTGIS_GEOSERVER]:
+    #         postgisdb = self.comboGeoserverDatabase.currentText()
+    #     use_original_data_source = self.chkUseOriginalDataSource.isChecked()
+    #     use_vector_tiles = self.chkUseVectorTiles.isChecked()
+    #
+    #     if "" in [name, url]:
+    #         return None
+    #     server = GeoserverServer(
+    #         name, url, authid, storage, postgisdb, use_original_data_source,
+    #         use_vector_tiles
+    #     )
+    #     return server
 
-        if "" in [name, url]:
-            return None
-        server = GeoserverServer(
-            name, url, authid, storage, postgisdb, use_original_data_source,
-            use_vector_tiles
-        )
-        return server
+    # def createPostgisServer(self):
+    #     # TODO check validity of name and values
+    #     name = self.txtPostgisName.text()
+    #     host = self.txtPostgisServerAddress.text()
+    #     port = self.txtPostgisPort.text()
+    #     schema = self.txtPostgisSchema.text()
+    #     database = self.txtPostgisDatabase.text()
+    #     authid = self.postgisAuth.configId()
+    #     server = PostgisServer(name, authid, host, port, schema, database)
+    #     return server
+    #
+    # def createGeonetworkServer(self):
+    #     # TODO check validity of name and values
+    #     name = self.txtCswName.text()
+    #     node = self.txtCswNode.text()
+    #     authid = self.cswAuth.configId()
+    #     if bool(authid):
+    #         url = self.txtCswUrl.text()
+    #         profile = self.comboMetadataProfile.currentIndex()
+    #         server = GeonetworkServer(name, url, authid, profile, node)
+    #         return server
 
-    def createPostgisServer(self):
-        # TODO check validity of name and values
-        name = self.txtPostgisName.text()
-        host = self.txtPostgisServerAddress.text()
-        port = self.txtPostgisPort.text()
-        schema = self.txtPostgisSchema.text()
-        database = self.txtPostgisDatabase.text()
-        authid = self.postgisAuth.configId()
-        server = PostgisServer(name, authid, host, port, schema, database)
-        return server
-
-    def createGeonetworkServer(self):
-        # TODO check validity of name and values
-        name = self.txtCswName.text()
-        node = self.txtCswNode.text()
-        authid = self.cswAuth.configId()
-        if bool(authid):
-            url = self.txtCswUrl.text()
-            profile = self.comboMetadataProfile.currentIndex()
-            server = GeonetworkServer(name, url, authid, profile, node)
-            return server
-
-    def createMapserverServer(self):
-        # TODO check validity of name and values
-        name = self.txtMapserverName.text()
-        authid = self.mapserverAuth.configId()
-        host = self.txtMapserverHost.text()
-        try:
-            port = int(self.txtMapserverPort.text())
-        except Exception as e:
-            self.logWarning(e)
-            return None
-        local = self.radioLocalPath.isChecked()
-        if local:
-            folder = self.fileMapserver.filePath()
-        else:
-            folder = self.txtRemoteFolder.text()
-        url = self.txtMapserverUrl.text()
-        services_path = self.txtMapServicesPath.text()
-        proj_folder = self.txtProjFolder.text()
-        server = MapserverServer(name, url, local, folder, authid, host, port, services_path, proj_folder)
-        return server
+    # def createMapserverServer(self):
+    #     # TODO check validity of name and values
+    #     name = self.txtMapserverName.text()
+    #     authid = self.mapserverAuth.configId()
+    #     host = self.txtMapserverHost.text()
+    #     try:
+    #         port = int(self.txtMapserverPort.text())
+    #     except Exception as e:
+    #         self.logWarning(e)
+    #         return None
+    #     local = self.radioLocalPath.isChecked()
+    #     if local:
+    #         folder = self.fileMapserver.filePath()
+    #     else:
+    #         folder = self.txtRemoteFolder.text()
+    #     url = self.txtMapserverUrl.text()
+    #     services_path = self.txtMapServicesPath.text()
+    #     proj_folder = self.txtProjFolder.text()
+    #     server = MapserverServer(name, url, local, folder, authid, host, port, services_path, proj_folder)
+    #     return server
 
     def addAuthWidgets(self):
-        self.geoserverAuth.selectedConfigIdChanged.connect(self._setCurrentServerHasChanges)
-        layout = QHBoxLayout()
-        layout.setMargin(0)
-        layout.addWidget(self.geoserverAuth)
-        self.geoserverAuthWidget.setLayout(layout)
-        self.geoserverAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-        self.mapserverAuth.selectedConfigIdChanged.connect(self._setCurrentServerHasChanges)
-        layout = QHBoxLayout()
-        layout.setMargin(0)
-        layout.addWidget(self.mapserverAuth)
-        self.mapserverAuthWidget.setLayout(layout)
-        self.mapserverAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-        self.postgisAuth.selectedConfigIdChanged.connect(self._setCurrentServerHasChanges)
         layout = QHBoxLayout()
         layout.setMargin(0)
         layout.addWidget(self.postgisAuth)
         self.postgisAuthWidget.setLayout(layout)
         self.postgisAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-        self.cswAuth.selectedConfigIdChanged.connect(self._setCurrentServerHasChanges)
-        layout = QHBoxLayout()
-        layout.setMargin(0)
-        layout.addWidget(self.cswAuth)
-        self.cswAuthWidget.setLayout(layout)
-        self.cswAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
 
     def addMenuToButtonNew(self):
         menu = QMenu()
-        menu.addAction("GeoServer", lambda: self._addServer("GeoServer", GeoserverServer))
-        menu.addAction("MapServer", lambda: self._addServer("MapServer", MapserverServer))
-        menu.addAction("GeoNetwork", lambda: self._addServer("GeoNetwork", GeonetworkServer))
-        menu.addAction("PostGIS", lambda: self._addServer("PostGIS", PostgisServer))
+        for s in manager.getServerTypes():
+            menu.addAction(s.getServerTypeLabel(), lambda: self.addNewServer(s))
+        # menu.addAction("GeoServer", lambda: self.addNewServer("GeoServer", GeoserverServer))
+        # menu.addAction("MapServer", lambda: self.addNewServer("MapServer", MapserverServer))
+        # menu.addAction("GeoNetwork", lambda: self.addNewServer("GeoNetwork", GeonetworkServer))
+        # menu.addAction("PostGIS", lambda: self.addNewServer("PostGIS", PostgisServer))
         self.buttonNew.setMenu(menu)
 
     def buttonRemoveClicked(self):
         item = self.listServers.currentItem()
         if item is None:
             return
-        name = self.listServers.itemWidget(item).serverName()
-        removeServer(name)
+        name = self.listServers.itemWidget(item).serverName
+        manager.removeServer(name)
         self.listServers.takeItem(self.listServers.currentRow())
         self.listServers.setCurrentItem(None)
-        self.checkServersHaveBeenDefined()
+        self.toggleServerList()
 
-    def populateServers(self):
+    def populateServerList(self):
         self.listServers.clear()
-        servers = allServers().values()
-        for server in servers:
-            self.addServerItem(server)
-        self.checkServersHaveBeenDefined()
+        for server in manager.getServers():
+            self.addServerListItem(server.__class__, server.serverName)
+        self.toggleServerList()
 
-    def addServerItem(self, server):
-        widget = ServerItemWidget(server)
+    def addServerListItem(self, server_class, server_name: str, set_active: bool = False):
+        widget = ServerItemWidget(server_class, server_name)
         item = QListWidgetItem(self.listServers)
         item.setSizeHint(widget.sizeHint())
+        self.listServers.blockSignals(True)
         self.listServers.addItem(item)
         self.listServers.setItemWidget(item, widget)
-        self.checkServersHaveBeenDefined()
-        return item
-
-    def _addServer(self, name, clazz):
-        if self.currentServerHasChanges:
-            self.showWarningBar("Warning", "Save changes to current server before creating one")
-        else:
-            name = self.getNewName(name)
-            server = clazz(name)
-            addServer(server)
-            self.setCurrentServer(server)
-            item = self.addServerItem(server)
+        if set_active:
             self.listServers.setCurrentItem(item)
+        self.listServers.blockSignals(False)
 
-    def populatePostgisComboWithPostgisServers(self):
-        self.comboGeoserverDatabase.clear()
-        servers = allServers().values()
-        for s in servers:
-            if isinstance(s, PostgisServer):
-                self.comboGeoserverDatabase.addItem(s.name)
+    def addNewServer(self, cls):
+        if self.serverIsDirty():
+            # Current server has edits: ask user if we should save them
+            answer = self.askToSave("Do you want to save your changes to the current server?")
+            if (answer == self.BUTTONS.YES and not self.saveServer()) or answer == self.BUTTONS.CANCEL:
+                # User wants to save but saving failed OR user canceled: do not add new server
+                return
 
-    def populatePostgisComboWithGeoserverPostgisServers(self):
-        self.comboGeoserverDatabase.clear()
-        server = self.createGeoserverServer()
-        if server is None:
-            self.showErrorBar("Error", "Wrong values in server definition")
-            return
-        try:
-            datastores = gui.execute(server.postgisDatastores)
-        except Exception as e:
-            self.logWarning(e)
-            datastores = []
-        if datastores:
-            self.comboGeoserverDatabase.addItems(datastores)
+        assigned_name = self.showServerWidget(cls)
+        if assigned_name:
+            self.addServerListItem(cls, assigned_name, True)
+            self.toggleServerList()
         else:
-            self.showWarningBar("Warning", "No PostGIS datastores in server or could not retrieve them")
+            self.showErrorBar("Error", f"Failed to add {cls.getServerTypeLabel()} server. Please check logs.")
 
-    def _setCurrentServerHasChanges(self):
-        self.currentServerHasChanges = True
+    def showServerWidget(self, server=None) -> Union[str, None]:
+        """ Sets the current server configuration widget.
+        If `server` is a class, a new server of that class will be added with a generated name.
 
-    def setCurrentServer(self, server):
-        self.currentServer = server
+        :param server:  An existing server instance or a server class (for new servers).
+                        If this argument is omitted, an empty widget will be shown.
+        :returns:       The currently shown server name or None (if unsuccessful).
+        """
+
         if server is None:
+            # If there's no current server, show empty widget
             self.stackedWidget.setCurrentWidget(self.widgetEmpty)
-        elif isinstance(server, GeoserverServer):
-            self.stackedWidget.setCurrentWidget(self.widgetGeoserver)
-            self.txtGeoserverName.setText(server.name)
-            self.txtGeoserverUrl.setText(server.url)
-            self.geoserverAuth.setConfigId(server.authid)
-            self.comboGeoserverDataStorage.blockSignals(True)
-            self.comboGeoserverDataStorage.setCurrentIndex(server.storage)
-            self.geoserverDatastorageChanged()
-            if server.postgisdb is not None:
-                self.comboGeoserverDatabase.setCurrentText(server.postgisdb)
-            self.chkUseOriginalDataSource.setChecked(server.useOriginalDataSource)
-            self.chkUseVectorTiles.setChecked(server.useVectorTiles)
-            self.comboGeoserverDataStorage.blockSignals(False)
-        elif isinstance(server, MapserverServer):
-            self.stackedWidget.setCurrentWidget(self.widgetMapserver)
-            self.txtMapserverName.setText(server.name)
-            self.fileMapserver.setFilePath(server.folder)
-            self.txtRemoteFolder.setText(server.folder)
-            self.txtMapserverHost.setText(server.host)
-            self.txtMapserverPort.setText(str(server.port))
-            self.mapserverAuth.setConfigId(server.authid)
-            self.txtMapserverUrl.setText(server.url)
-            self.txtMapServicesPath.setText(server.servicesPath)
-            self.txtProjFolder.setText(server.projFolder)
-            self.radioLocalPath.setChecked(server.useLocalFolder)
-            self.radioFtp.setChecked(not server.useLocalFolder)
-            self.mapserverStorageChanged(server.useLocalFolder)
-        elif isinstance(server, PostgisServer):
-            self.stackedWidget.setCurrentWidget(self.widgetPostgis)
-            self.txtPostgisName.setText(server.name)
-            self.txtPostgisDatabase.setText(server.database)
-            self.txtPostgisPort.setText(server.port)
-            self.txtPostgisServerAddress.setText(server.host)
-            self.txtPostgisSchema.setText(server.schema)
-            self.postgisAuth.setConfigId(server.authid)
+            return
 
-        self.currentServerHasChanges = False
+        server_cls = server.__class__
+        if server_cls is type:
+            # Server is not an instance but a model/class: we're dealing with a new server
+            server_cls = server
 
-    @staticmethod
-    def getNewName(name):
-        servers = list(allServers().keys())
-        i = 1
-        while True:
-            n = name + str(i)
-            if n not in servers:
-                return n
-            else:
-                i += 1
+        # Retrieve widget class from server
+        cls = server.getWidgetClass()
+        if not issubclass(cls, ServerWidgetBase):
+            # All server widgets must implement the ServerWidgetBase class
+            self.logError(f"Server widget {cls.__name__} does not implement {ServerWidgetBase.__name__}")
+            return
+
+        # Lookup existing widget instance
+        widget = self._server_widgets.get(cls.__name__, None)
+
+        # If the widget does not exist yet, instantiate and add it to the stackedWidget
+        if not widget:
+            widget = cls(self, server_cls)
+            self._server_widgets[cls.__name__] = widget
+            self.stackedWidget.addWidget(widget)
+
+        # Set as current widget and populate its form fields
+        self.stackedWidget.setCurrentWidget(widget)
+        if server_cls == server:
+            srv_name = manager.generateName(server_cls)
+            widget.newFromName(srv_name)
+        else:
+            srv_name = server.serverName
+            widget.loadFromInstance(server)
+
+        return srv_name
+
+        # elif isinstance(server, GeoserverServer):
+        #     self.stackedWidget.setCurrentWidget(self.widgetGeoserver)
+
+        # elif isinstance(server, MapserverServer):
+        #     self.stackedWidget.setCurrentWidget(self.widgetMapserver)
+        #     self.txtMapserverName.setText(server.serverName)
+        #     self.fileMapserver.setFilePath(server.folder)
+        #     self.txtRemoteFolder.setText(server.folder)
+        #     self.txtMapserverHost.setText(server.host)
+        #     self.txtMapserverPort.setText(str(server.port))
+        #     self.mapserverAuth.setConfigId(server.authid)
+        #     self.txtMapserverUrl.setText(server.url)
+        #     self.txtMapServicesPath.setText(server.servicesPath)
+        #     self.txtProjFolder.setText(server.projFolder)
+        #     self.radioLocalPath.setChecked(server.useLocalFolder)
+        #     self.radioFtp.setChecked(not server.useLocalFolder)
+        #     self.mapserverStorageChanged(server.useLocalFolder)
+        # elif isinstance(server, PostgisServer):
+        #     self.stackedWidget.setCurrentWidget(self.widgetPostgis)
+        #     self.txtPostgisName.setText(server.serverName)
+        #     self.txtPostgisDatabase.setText(server.database)
+        #     self.txtPostgisPort.setText(server.port)
+        #     self.txtPostgisServerAddress.setText(server.host)
+        #     self.txtPostgisSchema.setText(server.schema)
+        #     self.postgisAuth.setConfigId(server.authid)
+
+        # self.setDirty()
 
     def saveButtonClicked(self):
-        if self.saveCurrentServer():
-            self.currentServerHasChanges = False
-        else:
-            self.showErrorBar("Error", "Wrong values in current item")
+        if not self.saveServer():
+            return
+        self.serverSetClean()
 
     def canClose(self):
-        if self.currentServerHasChanges:
-            res = self.showQuestionBox("Servers", "Do you want to close without saving the current changes?",
-                                       buttons=self.Buttons.CANCEL | self.Buttons.NO | self.Buttons.YES,
-                                       defaultButton=self.Buttons.YES)
-
-            return res == self.Buttons.YES
-        else:
-            return True
+        if self.serverIsDirty():
+            res = self.askToSave("Do you want to close without saving the current server?")
+            return res == self.BUTTONS.YES
+        return True
 
 
 class ServerItemWidget(QWidget):
-    def __init__(self, server, parent=None):
+    def __init__(self, server_class, server_name, parent=None):
         super(ServerItemWidget, self).__init__(parent)
-        self.server = server
+        icon = server_class.getWidgetClass().getPngIcon()
         self.layout = QHBoxLayout()
         self.label = QLabel()
-        self.label.setText(server.name)
+        self.serverName = server_name
         self.iconLabel = QLabel()
-        self.iconLabel.setPixmap(QPixmap(self.iconPath()))
+        self.iconLabel.setPixmap(icon)
         self.iconLabel.setFixedWidth(50)
         self.layout.addWidget(self.iconLabel)
         self.layout.addWidget(self.label)
         self.setLayout(self.layout)
 
-    def iconPath(self):
-        return files.getIconPath(f"{self.server.__class__.__name__.lower()[:-6]}_black")
-
-    def setServerName(self, name):
-        self.label.setText(name)
-
+    @property
     def serverName(self):
         return self.label.text()
+
+    @serverName.setter
+    def serverName(self, name):
+        self.label.setText(name)
