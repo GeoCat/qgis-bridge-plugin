@@ -145,17 +145,17 @@
      </column>
      <column>
       <property name="text">
-       <string>Data in server</string>
+       <string>Data on server</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Symbology in server</string>
+       <string>Symbology on server</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Metadata in server</string>
+       <string>Metadata on server</string>
       </property>
      </column>
      <column>

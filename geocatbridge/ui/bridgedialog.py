@@ -80,7 +80,7 @@ class BridgeDialog(BASE, WIDGET):
             self.publishWidget.updateServers()
         elif idx == 1:
             self.stackedWidget.setCurrentWidget(self.serversWidget)
-            self.serversWidget.populateServers()
+            self.serversWidget.populateServerList()
         elif idx == 2:
             self.stackedWidget.setCurrentWidget(self.geocatWidget)
 

@@ -3,10 +3,10 @@ from geocatbridge.utils import gui
 WIDGET, BASE = gui.loadUiType(__file__)
 
 
-class NewDatasetDialog(BASE, WIDGET):
+class GeoserverDatastoreDialog(BASE, WIDGET):
 
     def __init__(self, parent=None):
-        super(NewDatasetDialog, self).__init__(parent)
+        super(GeoserverDatastoreDialog, self).__init__(parent)
         self.setupUi(self)
         self.name = None
         self.host = None

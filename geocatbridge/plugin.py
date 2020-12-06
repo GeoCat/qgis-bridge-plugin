@@ -10,11 +10,27 @@ from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsProject, QgsApplication
 
 from geocatbridge.errorhandler import handleError
-from geocatbridge.processing.bridgeprovider import BridgeProvider
-from geocatbridge.publish.servers import readServers
+# from geocatbridge.processing.bridgeprovider import BridgeProvider
+from geocatbridge.servers import manager
 from geocatbridge.ui.bridgedialog import BridgeDialog
 from geocatbridge.ui.multistylerwidget import MultistylerWidget
 from geocatbridge.utils import meta, files
+
+
+# Enable PyCharm remote debugger, if debug folder exists
+_debug_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '_debug'))
+if os.path.isdir(_debug_dir):
+    sys.path.append(_debug_dir)
+    import pydevd_pycharm
+    from warnings import simplefilter
+    try:
+        # Suppress ResourceWarning when remote debug server is not running
+        simplefilter('ignore', category=ResourceWarning)
+        pydevd_pycharm.settrace('localhost', True, True, 53100)
+    except (ConnectionRefusedError, AttributeError):
+        # PyCharm remote debug server is not running on localhost:53100
+        # Restore ResourceWarnings
+        simplefilter('default', category=ResourceWarning)    
 
 
 class GeocatBridge:
@@ -27,10 +43,11 @@ class GeocatBridge:
         self.action_multistyler = None
         self.widget_multistyler = None
 
-        readServers()
+        # readServers()  # TODO: remove
+        manager.loadConfiguredServers()
 
         self.name = meta.getAppName()
-        self.provider = BridgeProvider()
+        # self.provider = BridgeProvider()  FIXME
         self.locale = QSettings().value("locale/userLocale")[0:2]
         locale_path = files.getLocalePath(f"bridge_{self.locale}")
 

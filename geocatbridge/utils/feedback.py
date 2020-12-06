@@ -10,13 +10,38 @@ from geocatbridge.utils.meta import getAppName
 _LOGGER = QgsMessageLog()
 
 
+def _log(message, level):
+    """ Simple log wrapper function. """
+    if isinstance(message, Exception):
+        message = str(message)
+    _LOGGER.logMessage(message, getAppName(), level)
+
+
+def logInfo(message):
+    """ Logs a basic information message. """
+    _log(message, Qgis.Info)
+
+
+def logWarning(message):
+    """ Logs a basic warning message. """
+    _log(message, Qgis.Warning)
+
+
+def logError(message):
+    """ Logs a basic error message. """
+    _log(message, Qgis.Critical)
+
+
+class Buttons:
+    OK = QMessageBox.Ok
+    NO = QMessageBox.No
+    YES = QMessageBox.Yes
+    CANCEL = QMessageBox.Cancel
+
+
 class FeedbackMixin:
 
-    class Buttons:
-        OK = QMessageBox.Ok
-        NO = QMessageBox.No
-        YES = QMessageBox.Yes
-        CANCEL = QMessageBox.Cancel
+    BUTTONS = Buttons()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -82,7 +107,7 @@ class FeedbackMixin:
         return self._translate(message, context)
 
     def logInfo(self, message, context=None):
-        """ Logs and information message. """
+        """ Logs an information message. """
         self._log(message, Qgis.Info, context)
 
     def logWarning(self, message, context=None):
@@ -148,8 +173,8 @@ class FeedbackMixin:
 
         :param title:               Header of the message box (set to "" if no header is required).
         :param message:             The message that should be displayed in the message box.
-        :keyword buttons:           Optional override of the standard warning box buttons (use Feedback.YES/NO/etc.).
-        :keyword default_button:    Optional override of the default button (use Feedback.YES/NO/etc.).
+        :keyword buttons:           Optional override of the standard warning box buttons (use BUTTONS.YES/NO/etc.).
+        :keyword default_button:    Optional override of the default button (use BUTTONS.YES/NO/etc.).
         :keyword propagate:         When set to `True`, the message will also be logged.
                                     When set to a string or Exception, it's value will be logged.
         """
@@ -161,8 +186,8 @@ class FeedbackMixin:
 
         :param title:               Header of the message box (set to "" if no header is required).
         :param message:             The message that should be displayed in the message box.
-        :keyword buttons:           Optional override of the standard warning box buttons (use Feedback.YES/NO/etc.).
-        :keyword default_button:    Optional override of the default button (use Feedback.YES/NO/etc.).
+        :keyword buttons:           Optional override of the standard warning box buttons (use BUTTONS.YES/NO/etc.).
+        :keyword default_button:    Optional override of the default button (use BUTTONS.YES/NO/etc.).
         :keyword propagate:         When set to `True`, the message will also be logged.
                                     When set to a string or Exception, it's value will be logged.
         """
@@ -174,8 +199,8 @@ class FeedbackMixin:
 
         :param title:               Header of the message box (set to "" if no header is required).
         :param message:             The message that should be displayed in the message box.
-        :keyword buttons:           Optional override of the standard warning box buttons (use Feedback.YES/NO/etc.).
-        :keyword default_button:    Optional override of the default button (use Feedback.YES/NO/etc.).
+        :keyword buttons:           Optional override of the standard warning box buttons (use BUTTONS.YES/NO/etc.).
+        :keyword default_button:    Optional override of the default button (use BUTTONS.YES/NO/etc.).
         """
         return self._show_box(QMessageBox.question, title, message, **kwargs)
 

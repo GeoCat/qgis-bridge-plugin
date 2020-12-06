@@ -72,15 +72,17 @@ def getIconPath(name, ext=".png"):
     return str(BRIDGE_ROOT_DIR / _DIR_NAME_ICONS / _fix_ext(name, ext))
 
 
-def getUiPath(name, ext=".ui"):
+def getViewPath(controller, ext=".ui"):
     """
-    Constructs the full Qt UI file path for a given base name.
-    If `name` does not have an extension, the given `ext` will be appended.
-    :param name:    The UI file name or relative `Path`.
-    :param ext:     The default UI extension (if not specified in the name).
-    :returns:       An Qt UI file path string.
+    Constructs the full Qt UI file path for a given view controller (*.py).
+    UI files should always be stored in the same folder as the controller
+    and bear the same name.
+
+    :param controller:  The Python view controller file path.
+    :param ext:         The default UI extension (if not specified in the name).
+    :returns:           An Qt UI file path string.
     """
-    return str(BRIDGE_ROOT_DIR / _DIR_NAME_WIDGETS / _fix_ext(name, ext))
+    return Path(controller).with_suffix(ext)
 
 
 def getLocalePath(name, ext=".qm"):
