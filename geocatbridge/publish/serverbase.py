@@ -58,8 +58,6 @@ class ServerBase:
             # If the request contains data as a dictionary, serialize as JSON
             data = json.dumps(data)
             headers["content-type"] = "application/json"
-        # We always like to get JSON back
-        headers["accept"] = "application/json"
         self.logInfo("Making %s request to '%s'" % (method.upper(), url))
         r = req_method(url, headers=headers, files=files, data=data, auth=(username, password))
         if not isinstance(r, requests.Response):

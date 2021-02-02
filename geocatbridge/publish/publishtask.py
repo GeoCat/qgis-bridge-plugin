@@ -117,8 +117,7 @@ class PublishTask(QgsTask):
                         warnings.append("Layer name '%s' contains characters that might cause issues" % name)
                     except UnicodeError:
                         warnings.append("Layer name contains characters that might cause issues")
-                validates, _ = validator.validate(layer.metadata())
-                validates = True
+                md_valid, _ = validator.validate(layer.metadata())
                 if self.geodataServer is not None:
                     self.geodataServer.resetLog()
 
@@ -137,7 +136,7 @@ class PublishTask(QgsTask):
                     # Publish data
                     self.stepStarted.emit(name, DATA)
                     try:
-                        if validates or allowWithoutMetadata in [ALLOW, ALLOWONLYDATA]:
+                        if md_valid or allowWithoutMetadata in [ALLOW, ALLOWONLYDATA]:
                             fields = None
                             if layer.type() == layer.VectorLayer:
                                 fields = [fname for fname, publish in self.fields[layer].items() if publish]
@@ -171,7 +170,7 @@ class PublishTask(QgsTask):
                 if self.metadataServer is not None:
                     try:
                         self.metadataServer.resetLog()
-                        if validates or allowWithoutMetadata == ALLOW:
+                        if md_valid or allowWithoutMetadata == ALLOW:
                             wms = None
                             wfs = None
                             full_name = None

@@ -55,6 +55,7 @@ class GeoserverServer(ServerBase):
 
     @property
     def _workspace(self):
+        """ Returns the QGIS project name if the file has been saved. """
         path = QgsProject.instance().absoluteFilePath()
         if path:
             # Return project name from file path with spaces replaced by underscores
@@ -128,7 +129,7 @@ class GeoserverServer(ServerBase):
         self._publishStyle(name, filename)
 
     def publishStyle(self, layer):
-        _, lyr_title, _, lyr_name = self._getNames(layer)
+        lyr_title, lyr_name = layerUtils.getLayerTitleAndName(layer)
         export_layer = layerUtils.getExportableLayer(layer, lyr_name)
         styleFilename = tempFilenameInTempFolder(lyr_name + ".zip")
         warnings = saveLayerStyleAsZippedSld(export_layer, styleFilename)
@@ -188,30 +189,65 @@ class GeoserverServer(ServerBase):
             self._publishRasterLayer(filename, safe_name)
         self._clearCache()
 
+    def _getPostgisDatastores(self, ds_list_url=None):
+        """
+        Finds all PostGIS datastores for a certain workspace (typically only 1).
+        If `ds_list_url` is not specified, the first PostGIS datastore for the current workspace is returned.
+        Otherwise, `ds__list_url` should be the datastores REST endpoint to a specific workspace.
+
+        :param ds_list_url: REST URL that returns a list of datastores for a specific workspace.
+        :returns:           A generator with PostGIS datastore names.
+        """
+
+        if not ds_list_url:
+            ds_list_url = "%s/workspaces/%s/datastores.json" % (self.url, self._workspace)
+
+        res = self.request(ds_list_url).json().get("dataStores", {})
+        if not res:
+            # There aren't any dataStores for the given workspace
+            return
+
+        for ds_url in (s.get("href") for s in res.get("dataStore", [])):
+            ds = self.request(ds_url).json().get("dataStore", {})
+            ds_name, enabled, params = ds.get("name"), ds.get("enabled"), ds.get("connectionParameters", {})
+            # Only yield dataStore if it is enabled and the "dbtype" parameter equals "postgis"
+            # Using the "type" property does not work in all cases (e.g. for JNDI connection pools or NG)
+            entries = {e["@key"]: e["$"] for e in params.get("entry", [])}
+            if enabled and entries.get("dbtype").startswith("postgis"):
+                yield ds_name
+
     def createPostgisDatastore(self):
         """
         Creates a new datastore based on the selected one in the Server widget if the workspace is created from scratch.
-        """
-        ws, name = self.postgisdb.split(":")
-        if self.datastoreExists(name):
-            # Datastore for current project workspace already exists
-            return
 
-        # Get dataStore settings from selected one in Server widget
-        url = "%s/workspaces/%s/datastores/%s.json" % (self.url, ws, name)
+        :returns:   The existing or created PostGIS datastore name.
+        """
+
+        # Check if current workspaces has a PostGIS datastore (use first)
+        for ds_name in self._getPostgisDatastores():
+            return ds_name
+
+        # Get workspace and datastore name from selected template in Server widget
+        ws, ds_name = self.postgisdb.split(":")
+
+        # Retrieve settings from datastore template
+        url = "%s/workspaces/%s/datastores/%s.json" % (self.url, ws, ds_name)
         datastore = self.request(url).json()
+        # Change datastore name to match workspace name
+        datastore["dataStore"]["name"] = self._workspace
         # Change workspace settings to match the one for the current project
         datastore["dataStore"]["workspace"] = {
           "name": self._workspace,
-          "href": "%s/workspaces/%s.json" % (self.url, ws)
+          "href": "%s/workspaces/%s.json" % (self.url, self._workspace)
         }
         # Fix featureTypes endpoint
-        datastore["dataStore"]["featureTypes"] = "%s/workspaces/%s/datastores/%s/featuretypes.json" % (self.url, ws, name)
+        datastore["dataStore"]["featureTypes"] = "%s/workspaces/%s/datastores/%s/featuretypes.json" % (self.url, self._workspace, self._workspace)
         # Fix namespace connection parameter for current workspace
         self._fixNamespaceParam(datastore["dataStore"].get("connectionParameters", {}))
         # Post copy of datastore with modified workspace
-        url = "%s/workspaces/%s/datastores" % (self.url, self._workspace)
+        url = "%s/workspaces/%s/datastores.json" % (self.url, self._workspace)
         self.request(url, datastore, "post")
+        return self._workspace
 
     def testConnection(self):
         try:
@@ -269,9 +305,10 @@ class GeoserverServer(ServerBase):
     def _publishVectorLayerFromPostgis(self, layer, db):
         name = layer.name()
         username, password = db.getCredentials()
+
         def _entry(k, v):
-            return {"@key":k, "$":v}
-        ds = {   
+            return {"@key": k, "$": v}
+        ds = {
             "dataStore": {
                 "name": name,
                 "type": "PostGIS",
@@ -285,7 +322,7 @@ class GeoserverServer(ServerBase):
                         _entry("user", username),
                         _entry("host", db.host),
                         _entry("dbtype", "postgis")
-                    ]                        
+                    ]
                 }
             }
         }
@@ -301,20 +338,6 @@ class GeoserverServer(ServerBase):
         self.request(ftUrl, data=ft, method="post")
         self._setLayerStyle(name)
 
-    def _getNames(self, layer):
-        """
-        Returns a tuple of (datastore, layer title, layer safe name, layer target name).
-        Gets a safe name (with spaces replaced for underscores) from the layer.name() property.
-        If the layer is a raster layer, that safe name is returned as the layer target name.
-        If it is a vector layer, a check is performed if the safe name has never been used before for feature types.
-        If it has been used, it will try to append and increment a numeric suffix until the name is available.
-        """
-        _, datastore = self.postgisdb.split(":")
-        title, safe_name = layerUtils.getLayerTitleAndName(layer)
-        if layer.type() == layer.VectorLayer:
-            return datastore, title, safe_name, self._getNextFeatureTypeName(datastore, safe_name)
-        return datastore, title, safe_name, safe_name
-
     def _getImportResult(self, importId, taskId):
         """ Get the error message on the import task (if any) and the resulting layer name. """
         task = self.request("%s/imports/%s/tasks/%s" % (self.url, importId, taskId)).json()["task"] or {}
@@ -324,9 +347,9 @@ class GeoserverServer(ServerBase):
         return err_msg, task["layer"]["name"]
 
     def _publishVectorLayerFromFileToPostgis(self, layer, filename):
-        self.logInfo("Publishing layer from file: %s" % filename)
-        self.createPostgisDatastore()
-        datastore, title, native_name, available_name = self._getNames(layer)
+        self.logInfo("Publishing layer from file `%s`" % filename)
+        datastore = self.createPostgisDatastore()
+        title, ft_name = layerUtils.getLayerTitleAndName(layer)
         source_name = os.path.splitext(os.path.basename(filename))[0]
 
         # Create a new import
@@ -348,6 +371,7 @@ class GeoserverServer(ServerBase):
         ret = self.request(url, body, "post")
 
         # Create a new task and upload ZIP
+        self.logInfo("Uploading layer data...")
         importId = ret.json()["import"]["id"]
         zipname = os.path.basename(filename)
         url = "%s/imports/%s/tasks/%s" % (self.url, importId, zipname)
@@ -366,37 +390,50 @@ class GeoserverServer(ServerBase):
         del ret
 
         # Start import execution
+        self.logInfo("Starting Importer task for layer '%s'..." % ft_name)
         url = "%s/imports/%s" % (self.url, importId)
         self.request(url, method="post")
 
         # Get the import result (error message and target layer name)
         import_err, tmp_name = self._getImportResult(importId, taskId)
         if import_err:
-            self.logError("Failed to publish QGIS layer '%s' as '%s'.\n\n%s" % (title, available_name, import_err))
+            self.logError("Failed to publish QGIS layer '%s' as '%s'.\n\n%s" % (title, ft_name, import_err))
             return
 
         self._uploadedDatasets[filename] = (datastore, source_name)
 
         # Get the created feature type
+        self.logInfo("Checking if feature type creation was successful...")
         url = "%s/workspaces/%s/datastores/%s/featuretypes/%s.json" % (self.url, self._workspace, datastore, tmp_name)
         try:
             ret = self.request(url + "?quietOnNotFound=true")
         except HTTPError as e:
+            # Something unexpected happened: failure cannot be retrieved from import task,
+            # so the user should check the GeoServer logs to find out what caused it.
             if e.response.status_code == 404:
                 self.logError("Failed to publish QGIS layer '%s' as '%s' due to an unknown error.\n"
-                              "Please check the GeoServer logs." % (title, available_name))
+                              "Please check the GeoServer logs." % (title, ft_name))
                 return
             raise
 
         # Modify the feature type descriptions, but leave the name in tact to avoid db schema mismatches
+        self.logInfo("Fixing feature type properties...")
         ft = ret.json()
-        ft["featureType"]["nativeName"] = native_name       # safe name from QGIS layer name (used for renaming)
+        ft["featureType"]["nativeName"] = tmp_name          # name given by Importer extension
         ft["featureType"]["originalName"] = source_name     # source file name
         ft["featureType"]["title"] = title                  # layer name as displayed in QGIS
         self.request(url, ft, "put")
 
         self.logInfo("Successfully created feature type from file '%s'" % filename)
-        self._fixLayerStyle(tmp_name, available_name)
+
+        # Fix layer style reference and remove unwanted global style
+        self.logInfo("Performing style cleanup...")
+        try:
+            self._fixLayerStyle(tmp_name, ft_name)
+        except HTTPError as e:
+            self.logWarning("Failed to clean up layer styles:\n%s" % e)
+        else:
+            self.logInfo("Successfully published layer '%s'" % title)
 
     def _publishRasterLayer(self, filename, layername):
         self._ensureWorkspaceExists()
@@ -530,30 +567,6 @@ class GeoserverServer(ServerBase):
             return name in items
         except:
             return False
-
-    def _getNextFeatureTypeName(self, datastore, name):
-        """
-        GeoServer never really removes a feature type. It appends a numeric suffix instead.
-        This function tries to figure out what the next numeric suffix will be in case the name already exists.
-        """
-        url = "%s/workspaces/%s/datastores/%s/featuretypes.json?list=all" % (self.url, self._workspace, datastore)
-        try:
-            ftypes = sorted(self.request(url).json().get("list", {}).get("string", []))
-        except HTTPError as e:
-            if e.response.status_code == 404:
-                # Workspace and/or datastore does not exist yet, so proposed name can be returned as-is
-                return name
-            raise
-
-        # Find the next available numeric suffix
-        numsuffix = -1
-        for ft in ftypes:
-            if not ft.startswith(name):
-                continue
-            suffix = ft[len(name):]
-            if suffix.isnumeric():
-                numsuffix = max(numsuffix, int(suffix))
-        return name + (str(numsuffix + 1) if numsuffix >= 0 else "")
 
     def layerExists(self, name):
         url = "%s/workspaces/%s/layers.json" % (self.url, self._workspace)
@@ -708,83 +721,133 @@ class GeoserverServer(ServerBase):
             return True
         return False
 
-    def _publishStyle(self, name, styleFilename):
+    def _publishStyle(self, name, style_filepath):
+        # Make sure that the workspace is present
         self._ensureWorkspaceExists()
-        if self.styleExists(name):
-            # Update style
-            method = "put"
-            url = self.url + "/workspaces/%s/styles/%s" % (self._workspace, name)
-        else:
-            # Create new style
-            url = self.url + "/workspaces/%s/styles?name=%s" % (self._workspace, name)
-            method = "post"
 
+        # Figure out what style we're dealing with
         filetype = None
         headers = {}
         filemode = 'r'
-        _, ext = os.path.splitext(styleFilename)
-        if ext.lower() == ".zip":
+        filename = os.path.basename(style_filepath)
+        _, ext = os.path.splitext(filename.casefold())
+        if ext == ".zip":
             filetype = 'ZIP'
             headers = {"Content-Type": "application/zip"}
             filemode = 'rb'
-        elif ext.lower() == ".mapbox":
+        elif ext == ".mapbox":
             filetype = 'MBStyle'
             headers = {"Content-Type": "application/vnd.geoserver.mbstyle+json"}
 
-        # Upload style
-        if filetype and headers:
-            with open(styleFilename, filemode) as f:
-                self.request(url, f.read(), method, headers)
+        # If style does not exist, create it using POST
+        if not self.styleExists(name):
+            try:
+                if ext == ".zip":
+                    # Create style but do not upload ZIP yet
+                    url = self.url + "/workspaces/%s/styles" % self._workspace
+                    body = {
+                        "style": {
+                            "name": name,
+                            "filename": filename.replace('zip', 'sld')
+                        }
+                    }
+                    self.request(url, body, "post")
+                elif ext == ".mapbox":
+                    # Upload MBStyle JSON
+                    url = self.url + "/workspaces/%s/styles?name=%s" % (self._workspace, name)
+                    with open(style_filepath, filemode) as f:
+                        self.request(url, f.read(), "post", headers)
+            except HTTPError as e:
+                self.logError("Failed to create new style '%s' in workspace '%s':\n%s" % (name, self._workspace, e))
+                return
+            self.logInfo(QCoreApplication.translate("GeocatBridge",
+                                                    "Successfully created style '%s' in workspace '%s'"
+                                                    % (name, self._workspace)))
+            if ext == ".mapbox":
+                # If a Mapbox JSON was uploaded, we're done now
+                return
 
-            self.logInfo(
-                QCoreApplication.translate(
-                    "GeocatBridge",
-                    "Successfully created style '%s' from %s file '%s'" % (name, filetype, styleFilename),
-                )
-            )
+        # Update existing style (perform upload)
+        url = self.url + "/workspaces/%s/styles/%s" % (self._workspace, name)
+        try:
+            with open(style_filepath, filemode) as f:
+                self.request(url, f.read(), "put", headers)
+        except HTTPError as e:
+            self.logError("Failed to update style '%s' in workspace '%s' "
+                          "using ZIP file '%s':\n%s" % (name, self._workspace, style_filepath, e))
+            return
+        self.logInfo(QCoreApplication.translate("GeocatBridge",
+                                                "Successfully updated style '%s' from %s in workspace '%s' using ZIP file '%s'"
+                                                % (name, filetype, self._workspace, style_filepath)))
 
-    def _setLayerStyle(self, name):
+    def _setLayerStyle(self, name, style_name=None):
+        """
+        Update the layer style so that it matches the layer name and workspace.
+        If the update was successful, the previous style object is returned.
+        If the update failed or the new style does not exist, an empty object is returned.
+
+        :param name:        Layer (and style name).
+        :param style_name:  Style name (if different from layer name).
+        :return:            A style object.
+        """
+        style_name = style_name or name
+
+        # Get layer properties
         url = "%s/workspaces/%s/layers/%s.json" % (self.url, self._workspace, name)
-        layer = self.request(url).json()
-        styleUrl = "%s/workspaces/%s/styles/%s.json" % (self.url, self._workspace, name)
-        # TODO: does this still work properly?
-        layer["layer"]["defaultStyle"] = {
-            "name": name,
-            "href": styleUrl
-        }
-        self.request(url, data=layer, method="put")
+        try:
+            layer_def = self.request(url).json()
+            if not self.styleExists(style_name):
+                self.logWarning(QCoreApplication.translate("GeocatBridge",
+                                                           "Style '%s' does not exist in workspace '%s'" %
+                                                           (style_name, self._workspace)))
 
-    def _fixLayerStyle(self, tmp_name, new_name):
+                raise KeyError()
+        except (HTTPError, KeyError):
+            return {}
+
+        # Copy current default style and update for layer
+        old_style = dict(layer_def["layer"]["defaultStyle"])
+        style_url = "%s/workspaces/%s/styles/%s.json" % (self.url, self._workspace, style_name)
+        layer_def["layer"]["defaultStyle"] = {
+            "name": "%s:%s" % (self._workspace, style_name),
+            "workspace": self._workspace,
+            "href": style_url
+        }
+        try:
+            self.request(url, data=layer_def, method="put")
+        except HTTPError:
+            return {}
+        return old_style
+
+    def _fixLayerStyle(self, actual_name, proper_name):
         """
         Fixes the layer style for feature types that have been imported using the GeoServer Importer extension.
         The Importer extension also creates an unwanted global style, which is removed by this function.
+
+        :param actual_name: Layer name given by GeoServer (may contain numeric suffix).
+        :param proper_name: The desired layer name, which should also be the style name.
         """
 
-        # Get layer properties
-        url = "%s/workspaces/%s/layers/%s.json" % (self.url, self._workspace, tmp_name)
-        try:
-            layer = self.request(url).json()
-        except HTTPError:
-            # This should not happen, because the layer inherits the feature type name.
-            # In case that goes wrong, we could try fetching the layer using the new name.
-            url = "%s/workspaces/%s/layers/%s.json" % (self.url, self._workspace, new_name)
-            layer = self.request(url).json()
+        old_style = self._setLayerStyle(actual_name, proper_name)
+        if not old_style:
+            # Something went wrong or the new style to assign does not exist:
+            # The layer style will remain as-is and we will not delete the old style.
+            return
 
-        # Get the URL of the unwanted global style that we need to clean up
-        remove_url = "%s?recurse=true&purge=true" % layer["layer"]["defaultStyle"]["href"]
-
-        # Assign desired workspace style (and name)
-        layer["layer"]["name"] = new_name
-        layer["layer"]["defaultStyle"] = {
-            "name": "%s:%s" % (self._workspace, new_name)   # use workspace:name as identifier
-        }
-        self.request(url, data=layer, method="put")
-
-        # Remove unwanted global style created by Importer extension (if exists)
-        try:
-            self.request(remove_url, method="delete")
-        except HTTPError:
-            pass
+        # Only remove style created by Importer extension if it is a global style.
+        # However, built-in GeoServer styles should not be touched.
+        if old_style.get("workspace"):
+            # Style is not global: don't delete old style
+            return
+        style_name = old_style.get("name", "").casefold()
+        if style_name and style_name not in ("raster", "point", "polygon", "line", "generic"):
+            remove_url = "%s?purge=true" % old_style.get("href")
+            try:
+                # Delete old style
+                self.request(remove_url, method="delete")
+            except HTTPError:
+                # Bad request or style is still in use by other layers: do nothing
+                pass
 
     def _createWorkspace(self):
         """ Creates the workspace. """
@@ -795,7 +858,7 @@ class GeoserverServer(ServerBase):
     def _ensureWorkspaceExists(self):
         if not self.workspaceExists():
             self._createWorkspace()
-            
+
     def postgisDatastores(self):
         pg_datastores = []
         url = "%s/workspaces.json" % self.url
@@ -806,22 +869,12 @@ class GeoserverServer(ServerBase):
         for ws_url in (s.get("href") for s in res.get("workspace", [])):
             props = self.request(ws_url).json().get("workspace", {})
             ws_name, ds_list_url = props.get("name"), props.get("dataStores")
-            res = self.request(ds_list_url).json().get("dataStores", {})
-            if not res:
-                # There aren't any dataStores for this workspace
-                continue
-            for ds_url in (s.get("href") for s in res.get("dataStore", [])):
-                ds = self.request(ds_url).json().get("dataStore", {})
-                ds_name, enabled, params = ds.get("name"), ds.get("enabled"), ds.get("connectionParameters", {})
-                # Only add dataStore if it is enabled and the "dbtype" parameter equals "postgis"
-                # Using the "type" property does not work in all cases (e.g. for JNDI connection pools or NG)
-                entries = {e["@key"]: e["$"] for e in params.get("entry", [])}
-                if enabled and entries.get("dbtype").startswith("postgis"):
-                    pg_datastores.append("%s:%s" % (ws_name, ds_name))
+            for ds_name in self._getPostgisDatastores(ds_list_url):
+                pg_datastores.append("%s:%s" % (ws_name, ds_name))
         return pg_datastores
 
     def addPostgisDatastore(self, datastoreDef):
-        url = "%s/workspaces/%s/datastores/" % (self.url, self._workspace)
+        url = "%s/workspaces/%s/datastores" % (self.url, self._workspace)
         self.request(url, data=datastoreDef, method="post")
 
     def addOGCServers(self):
@@ -833,7 +886,7 @@ class GeoserverServer(ServerBase):
         try:
             url = "%s/about/version.json" % self.url
             result = self.request(url).json()['about']['resource']
-        except:
+        except HTTPError:
             errors.add("Could not connect to Geoserver.  Please check the server settings (including password).")
             return
         try:
@@ -849,9 +902,9 @@ class GeoserverServer(ServerBase):
                     "Please see <a href='https://my.geocat.net/knowledgebase/100/Bridge-4-compatibility-with-"
                     "Geoserver-2134-and-before.html'>Bridge 4 Compatibility with Geoserver 2.13.4 and before</a>"
                 )
-        except:
+        except Exception as e:
             # version format might not be the expected. This is usually a RC or dev version, so we consider it ok
-            pass
+            self.logWarning("Failed to retrieve GeoServer version info:\n%s" % e)
 
     def validateGeodataBeforePublication(self, errors, toPublish, onlySymbology):
         if not self._workspace:
