@@ -1,31 +1,30 @@
-
 Supported Symbology
 ###################
 
-Bridge uses the `bridge-style` library to export QGIS simbology into other formats such as SLD (used when uploading to GeoServer), MapServer files, or MapboxGL.
+Bridge uses the `bridge-style` library to export QGIS symbology into other formats such as SLD (used when uploading to GeoServer), MapServer files, or MapboxGL.
 
 Below you can find a list of supported elements that are know to be correctly converted from QGIS to SLD, along with additional information about limitations of the conversion between these two formats.
 
 
 Common settings
-================
+===============
 
-This section describes general elements that are common to most types of layers and symbologies
+This section describes general elements that are common to most types of layers and symbologies.
 
 Drawing order (symbol levels)
--------------------------------
+-----------------------------
 
 You can use `symbol levels <https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id95>`_ in QGIS to define the order used to render symbol layers, and they will be correctly converted to z-levels in SLD.
 
 Size units
------------
+----------
 
-Size values can be used in milimeters, pixels, points, or real world meters. In this last case, expressions cannot be used, only fixed values.
+Size values can be used in millimeters, pixels, points, or real world meters. In this last case, expressions cannot be used, only fixed values.
 
-Notice that it's, however, a safer option to use pixels instead of milimeters (which are the default unit in QGIS), since pixels is the assumed unit for formats like SLD, and, therefore, no conversion is needed. 
+Notice that it's, however, a safer option to use pixels instead of millimeters (which are the default unit in QGIS), since pixels is the assumed unit for formats like SLD, and, therefore, no conversion is needed.
 
 Expressions
--------------
+-----------
 
 `Expressions <https://docs.qgis.org/3.4/en/docs/pyqgis_developer_cookbook/expressions.html>`_ are supported wherever QGIS allows to use data-defined values. They must be created using QGIS expression language (Python custom functions are not supported). Not all functions available in QGIS can be used, since there's not an equivalent for all of them in GeoServer. The following is a list of the QGIS functions that can be used::
 
@@ -47,18 +46,18 @@ Certain parameters accept expressions, but those are not supported by Bridge whe
 - Expressions are not supported for size measurements, when those measures are not expressed in pixels or mm (that is, if you are using map units or real word meters for a size that changes with the current map scale)
 
 Blending modes
----------------
+--------------
 
 Blending modes are supported at the layer level.
 
 
 Vector Layers
-==============
+=============
 
 The supported elements for styling vector layers are detailed in this section.
 
 Supported renderers
----------------------
+-------------------
 
 The following renderers are supported for vector layers:
 
@@ -91,11 +90,11 @@ The following renderers are supported for vector layers:
 	
 	- ``ELSE`` rule is supported, but it might behave incorrectly in the SLD version if the layer has labeling, since QGIS consider labeling to be a separate part of the symbology, while SLD considers it as another symbolizer 
 
-	- To know more about the supported expressiosn that can be used in rules filters, see the Expressions section
+	- To know more about the supported expressions that can be used in rules filters, see the Expressions section
 
 
 Supported symbology elements for points symbols
--------------------------------------------------
+-----------------------------------------------
 
 The following symbol layer types are supported for rendering points:
 
@@ -169,7 +168,7 @@ The following symbol layer types are supported for rendering points:
 
 
 Supported symbology elements for line symbols
-----------------------------------------------
+---------------------------------------------
 
 The following symbol layer types are supported for rendering lines:
 
@@ -280,7 +279,7 @@ The following labeling modes are supported for vector layer labels.
 Text options for labels
 -----------------------
 
-The folowwing options from the :guilabel:`Text` group of parameters are supported:
+The following options from the :guilabel:`Text` group of parameters are supported:
 
 - Size
 
@@ -290,11 +289,11 @@ The folowwing options from the :guilabel:`Text` group of parameters are supporte
 
 	
 Buffer options for labels
---------------------------
+-------------------------
 
 .. figure:: img/labelhalo.png
 
-The folowing options from the :guilabel:`Buffer` group of parameters are supported:
+The following options from the :guilabel:`Buffer` group of parameters are supported:
 
 - Size
 
@@ -308,7 +307,7 @@ Background options for labels
 
 .. figure:: img/labelbackground.png
 
-The folowing options from the :guilabel:`Background` group of parameters are supported:
+The following options from the :guilabel:`Background` group of parameters are supported:
 
 - Size X
 
@@ -326,7 +325,7 @@ The folowing options from the :guilabel:`Background` group of parameters are sup
 Placement options for labels
 ----------------------------
 
-The folowing options from the :guilabel:`Placement` group of parameters are supported:
+The following options from the :guilabel:`Placement` group of parameters are supported:
 
 - The only supported :guilabel:`Placement` option is: :guilabel:`Offset from centroid`, with the following parameters
 
@@ -339,12 +338,12 @@ The folowing options from the :guilabel:`Placement` group of parameters are supp
 
 
 Raster Layers
-==============
+=============
 
 The supported elements for styling raster layers are detailed in this section.
 
 Supported renderers
----------------------
+-------------------
 
 - Single band gray
 

@@ -104,5 +104,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# PyCharm IDE
+.idea/
+*debug/
+
 # Custom folders
 _debug/

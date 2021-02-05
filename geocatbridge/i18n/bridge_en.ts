@@ -383,7 +383,7 @@
     </message>
 </context>
 <context>
-    <name>GeocatBridge</name>
+    <name>GeoCat Bridge</name>
     <message>
         <location filename="plugin.py" line="63"/>
         <source>Publish</source>

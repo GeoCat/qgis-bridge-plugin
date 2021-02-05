@@ -1,5 +1,5 @@
 [general]
-name=GeoCatBridge
+name=GeoCat Bridge
 description=Easy publication of data and metadata from QGIS.
 about=GeoCat is pleased to offer the Bridge plugin to our customers using QGIS.
 
@@ -18,7 +18,7 @@ icon=icons/geocat.png
 tags=Geoserver, MapServer, GeoNetwork, Mapbox style, Geostyler, ISO19139, SLD, GeoPackage, PostGIS
 
 homepage=http://geocat.net/bridge
-tracker=https://my.geocat.net/submitticket.php
+tracker=https://my.geocat.net/submitticket.php?step=2&deptid=4
 repository=https://github.com/geocat/qgis-bridge-plugin
 
 deprecated=False

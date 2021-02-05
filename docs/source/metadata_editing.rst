@@ -46,7 +46,7 @@ After validation a dialog with validation results is displayed.
 .. image:: ./img/metadata_validation.png
 
 Load metadata
---------------
+-------------
 
 If your layer has metadata in ISO19139 or ESRI-ISO (ISO 19115) format, and that metadata is available in an additional file stored along with the data file, QGIS will not automatically read it (QGIS only has native support for its own `qmd` format), but Bridge can import it. Select the layer in the Bridge dialog and then click on the :guilabel:`Load metadata button` |loadmetadata|
 

@@ -1,24 +1,22 @@
-import os
 import json
 
-from qgis.PyQt.QtWidgets import QVBoxLayout
-from qgis.PyQt.QtGui import QFont, QColor, QFontMetrics
 from qgis.PyQt.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
-from qgis.PyQt import uic
-
-from qgis.utils import iface
+from qgis.PyQt.QtGui import QFont, QColor, QFontMetrics
+from qgis.PyQt.QtWidgets import QVBoxLayout
 from qgis.core import QgsVectorLayer, QgsRasterLayer
+from qgis.utils import iface
 
 from bridgestyle.qgis import layerStyleAsSld, layerStyleAsMapbox, layerStyleAsMapfile
 from bridgestyle.qgis.togeostyler import convert
+from geocatbridge.utils import gui
+
+WIDGET, BASE = gui.loadUiType(__file__)
 
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'multistyler.ui'))
-
-class MultistylerDialog(BASE, WIDGET):
+class MultistylerWidget(BASE, WIDGET):
 
     def __init__(self, ):
-        super(MultistylerDialog, self).__init__(iface.mainWindow())
+        super(MultistylerWidget, self).__init__(iface.mainWindow())
         self.setupUi(self)
 
         self.txtSld = EditorWidget(QsciLexerXML())
@@ -44,8 +42,8 @@ class MultistylerDialog(BASE, WIDGET):
         self.updateForCurrentLayer()
 
     def updateLayer(self, layer):
-        activeLayer = iface.activeLayer()
-        if activeLayer is None or layer.id() == iface.activeLayer().id():
+        active_layer = iface.activeLayer()
+        if active_layer is None or layer.id() == iface.activeLayer().id():
             self.updateForCurrentLayer()
 
     def updateForCurrentLayer(self):
@@ -58,21 +56,22 @@ class MultistylerDialog(BASE, WIDGET):
         if layer is not None:
             if (isinstance(layer, QgsRasterLayer) or
                     (isinstance(layer, QgsVectorLayer) and layer.isSpatial())):
-                sld, _, sldWarnings = layerStyleAsSld(layer)
-                geostyler, icons, sprites, geostylerWarnings = convert(layer)
+                sld, _, sld_warnings = layerStyleAsSld(layer)
+                geostyler, icons, sprites, geostyler_warnings = convert(layer)
                 geostyler = json.dumps(geostyler, indent=4)
-                mapbox, _, mapboxWarnings = layerStyleAsMapbox(layer)
+                mapbox, _, mapbox_warnings = layerStyleAsMapbox(layer)
                 mapserver, _, _, mapserverWarnings = layerStyleAsMapfile(layer)
                 warnings = set()
-                warnings.update(sldWarnings)
-                warnings.update(geostylerWarnings)
-                warnings.update(mapboxWarnings)
+                warnings.update(sld_warnings)
+                warnings.update(geostyler_warnings)
+                warnings.update(mapbox_warnings)
                 warnings.update(mapserverWarnings)
         self.txtSld.setText(sld)
         self.txtGeostyler.setText(geostyler)
         self.txtMapbox.setText(mapbox)
         self.txtMapserver.setText(mapserver)
         self.txtWarnings.setPlainText("\n".join(warnings))
+
 
 class EditorWidget(QsciScintilla):
     ARROW_MARKER_NUM = 8

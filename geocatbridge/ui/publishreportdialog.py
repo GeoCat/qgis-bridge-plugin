@@ -1,9 +1,4 @@
-import os
 from functools import partial
-
-from qgis.PyQt import uic
-from qgis.core import QgsMessageOutput
-from qgis.utils import iface
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import (
@@ -14,72 +9,70 @@ from qgis.PyQt.QtWidgets import (
     QWidget
 )
 
-WIDGET, BASE = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'publishreportdialog.ui'))
+from geocatbridge.utils import gui
+from geocatbridge.utils.feedback import FeedbackMixin
 
-class PublishReportDialog(BASE, WIDGET):
+WIDGET, BASE = gui.loadUiType(__file__)
 
-    def __init__(self, results, onlySymbology, geodataServer, metadataServer, parent):
+
+class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
+
+    def __init__(self, results, only_symbology, geodata_server, metadata_server, parent):
         super(PublishReportDialog, self).__init__(parent)
         self.results = results
         self.setupUi(self)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        if geodataServer is not None:
-            url = geodataServer.url
-            self.labelUrlMapServer.setText('<a href="%s">%s</a>' % (url, url))
+        if geodata_server is not None:
+            url = geodata_server.url
+            self.labelUrlMapServer.setText(f'<a href="{url}">{url}</a>')
         else:
             self.labelUrlMapServer.setText("----")
-        if metadataServer is not None:            
-            url = metadataServer.url
-            self.labelUrlMetadataServer.setText('<a href="%s">%s</a>' % (url, url))
+        if metadata_server is not None:
+            url = metadata_server.url
+            self.labelUrlMetadataServer.setText(f'<a href="{url}">{url}</a>')
         else:
             self.labelUrlMetadataServer.setText("----")
-        publishData = geodataServer is not None
-        self.labelPublishMapData.setText("ON" if publishData and not onlySymbology else "OFF")
-        self.labelPublishSymbology.setText("ON" if publishData else "OFF")
-        self.labelPublishMetadata.setText("ON" if metadataServer is not None else "OFF")
+        publish_data = geodata_server is not None
+        self.labelPublishMapData.setText("ON" if publish_data and not only_symbology else "OFF")
+        self.labelPublishSymbology.setText("ON" if publish_data else "OFF")
+        self.labelPublishMetadata.setText("ON" if metadata_server is not None else "OFF")
         self.tableWidget.setRowCount(len(results))
         for i, name in enumerate(results.keys()):
             warnings, errors = results[name]
             item = QTableWidgetItem(name)
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 0, item)
-            if geodataServer is not None:                
-                dataPublished = geodataServer.layerExists(name)
-                stylePublished = geodataServer.styleExists(name)
+            if geodata_server is not None:
+                data_published = geodata_server.layerExists(name)
+                style_published = geodata_server.styleExists(name)
             else:
-                dataPublished = False
-                stylePublished = False
-            item = QTableWidgetItem("Yes" if dataPublished else "No")
+                data_published = False
+                style_published = False
+            item = QTableWidgetItem("Yes" if data_published else "No")
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 1, item)
-            item = QTableWidgetItem("Yes" if stylePublished else "No")
+            item = QTableWidgetItem("Yes" if style_published else "No")
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 2, item)            
-            metadataPublished = metadataServer is not None            
-            item = QTableWidgetItem(self.tr("Yes") if metadataPublished else self.tr("No"))
+            metadata_published = metadata_server is not None
+            item = QTableWidgetItem(self.tr("Yes") if metadata_published else self.tr("No"))
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.tableWidget.setItem(i, 3, item)
-            txt = self.tr("warnings(%i), errors(%i)") % (len(warnings), len(errors))
+            txt = self.tr(f"warnings({len(warnings)}), errors({len(errors)})")
             widget = QWidget()
             button = QPushButton()
             button.setText(txt)
             button.clicked.connect(partial(self.openDetails, name))
             layout = QHBoxLayout(widget)
             layout.addWidget(button)
-            layout.setAlignment(Qt.AlignCenter);
+            layout.setAlignment(Qt.AlignCenter)
             layout.setContentsMargins(0, 0, 0, 0)
             widget.setLayout(layout)
             self.tableWidget.setCellWidget(i, 4, widget)
 
     def openDetails(self, name):
         warnings, errors = self.results[name]
-        w = "<br><br>".join(warnings)
-        e = "<br><br>".join(errors)
-        txt = "<p><b>%s</b></p>%s<p><b>%s</b></p>%s" % (self.tr("Warnings:"), w, self.tr("Errors:"), e)
-        txt = txt.replace("\n","<br>") # make output easier to read
-        dlg = QgsMessageOutput.createMessageOutput()
-        dlg.setTitle(self.tr("Warnings / Errors"))
-        dlg.setMessage(txt, QgsMessageOutput.MessageHtml)
-        dlg.showMessage()
-
-
+        w = "".join(f"<p>{w}</p>" for w in warnings).replace("\n", "\n<br>")
+        e = "".join(f"<p>{e}</p>" for e in errors).replace("\n", "\n<br>")
+        html = f"<p><b>{self.tr('Warnings:')}</b></p>\n{w}\n<p><b>{self.tr('Errors:')}</b></p>\n{e}"
+        self.showHtmlMessage("Errors and warnings", html)

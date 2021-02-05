@@ -1,12 +1,13 @@
-import os
-
+from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
 from qgis.PyQt.QtGui import QIcon
 
-from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
+from geocatbridge.utils.files import getIconPath
+from geocatbridge.utils import meta
 
-class ProcessingLogger():
+
+class ProcessingLogger:
     def __init__(self, fb):
-        self.fb = fb    
+        self.fb = fb
 
     def logInfo(self, text):
         self.fb.pushInfo(text)
@@ -16,15 +17,15 @@ class ProcessingLogger():
 
     def logError(self, text):
         self.fb.pushError(text, fatalError=True)
-        
+
 
 class BridgeAlgorithm(QgisAlgorithm):
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'icons', 'geocat.png'))   
+        return QIcon(getIconPath("geocat"))
 
     def group(self):
-        return self.tr('Bridge')
+        return self.tr(meta.getAppName())
 
     def groupId(self):
-        return 'bridge'  
+        return meta.PLUGIN_NAMESPACE

@@ -108,7 +108,7 @@ html_theme = 'geocat_rtd'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-  'logo_only': True,                  # product logo contains name already
+  'logo_only': True,                 # product logo contains name already
   'display_version': True            # no version number
 }
 

@@ -1,151 +1,117 @@
 import os
 import sys
-import webbrowser
 import traceback
+import webbrowser
 from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QDialog
-from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsApplication, QgsAuthMethodConfig
+from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsProject, QgsApplication
 
-from .utils.files import removeTempFolder
-from .ui.bridgedialog import BridgeDialog
-from .ui.multistylerdialog import MultistylerDialog
-from .ui.logindialog import LoginDialog, KEY_NAME, doEnterpriseLogin
-from .publish.servers import readServers
-from .processing.bridgeprovider import BridgeProvider
-from .errorhandler import handleError
-from .utils.enterprise import isEnterprise
+from geocatbridge.errorhandler import handleError
+from geocatbridge.processing.bridgeprovider import BridgeProvider
+from geocatbridge.publish.servers import readServers
+from geocatbridge.ui.bridgedialog import BridgeDialog
+from geocatbridge.ui.multistylerwidget import MultistylerWidget
+from geocatbridge.utils import meta, files
 
-PLUGIN_NAMESPACE = "geocatbridge"
 
 class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
+        self._win = iface.mainWindow()
+
+        self.action_publish = None
+        self.action_help = None
+        self.action_multistyler = None
+        self.widget_multistyler = None
 
         readServers()
-        
-        class QgisLogger():
-            def logInfo(self, text):
-                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Info)
-            def logWarning(self, text):
-                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Warning)
-            def logError(self, text):
-                QgsMessageLog.logMessage(text, 'GeoCat Bridge', level=Qgis.Critical)
 
+        self.name = meta.getAppName()
         self.provider = BridgeProvider()
-
-        self.pluginFolder = os.path.dirname(__file__)
-        localePath = ""
         self.locale = QSettings().value("locale/userLocale")[0:2]
-
-        if os.path.exists(self.pluginFolder):
-            localePath = os.path.join(self.pluginFolder, "i18n", "bridge_" + self.locale + ".qm")
+        locale_path = files.getLocalePath(f"bridge_{self.locale}")
 
         self.translator = QTranslator()
-        if os.path.exists(localePath):
-            self.translator.load(localePath)
+        if os.path.exists(locale_path):
+            self.translator.load(locale_path)
             QCoreApplication.installTranslator(self.translator)
 
         self.qgis_hook = sys.excepthook
 
         def plugin_hook(t, value, tb):
-            errorList = traceback.format_exception(t, value, tb)
-            trace = "".join(errorList)            
-            if PLUGIN_NAMESPACE in trace.lower():
+            error_list = traceback.format_exception(t, value, tb)
+            trace = "".join(error_list)
+            if meta.PLUGIN_NAMESPACE in trace.lower():
                 try:
-                    handleError(errorList)
+                    handleError(error_list)
                 except:
-                    pass #we swallow all exceptions here, to avoid entering an endless loop
+                    pass  # we swallow all exceptions here, to avoid entering an endless loop
             else:
                 self.qgis_hook(t, value, tb)          
         
         sys.excepthook = plugin_hook
 
-
     def initGui(self):
-        iconPublish = QIcon(os.path.join(os.path.dirname(__file__), "icons", "publish_button.png"))
-        self.actionPublish = QAction(iconPublish, QCoreApplication.translate("GeocatBridge", "Publish"), self.iface.mainWindow())
-        self.actionPublish.setObjectName("startPublish")
-        self.actionPublish.triggered.connect(self.publishClicked)
+        self.action_publish = QAction(QIcon(files.getIconPath("publish_button")),
+                                      QCoreApplication.translate(self.name, "Publish"), self._win)
+        self.action_publish.setObjectName("startPublish")
+        self.action_publish.triggered.connect(self.publishClicked)
 
-        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionPublish)
-        self.iface.addWebToolBarIcon(self.actionPublish)
+        self.iface.addPluginToWebMenu(self.name, self.action_publish)
+        self.iface.addWebToolBarIcon(self.action_publish)
             
-        helpPath = "file://{}".format(os.path.join(os.path.dirname(__file__), "docs", "index.html"))
-        self.actionHelp = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self.iface.mainWindow())
-        self.actionHelp.setObjectName("GeocatBridgeHelp")
-        self.actionHelp.triggered.connect(lambda: webbrowser.open_new(helpPath))
-        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionHelp)
+        self.action_help = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self._win)
+        self.action_help.setObjectName(f"{self.name} Help")
+        self.action_help.triggered.connect(lambda: webbrowser.open_new(files.getHtmlDocsPath("index")))
+        self.iface.addPluginToWebMenu(self.name, self.action_help)
 
-        self.multistylerDialog = MultistylerDialog()
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.multistylerDialog)
-        self.multistylerDialog.hide()        
+        self.widget_multistyler = MultistylerWidget()
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.widget_multistyler)
+        self.widget_multistyler.hide()
 
-        iconMultistyler = QIcon(os.path.join(os.path.dirname(__file__), "icons", "symbology.png"))
-        self.actionMultistyler = QAction(iconMultistyler, QCoreApplication.translate("GeocatBridge", "Multistyler"), self.iface.mainWindow())
-        self.actionMultistyler.setObjectName("multistyler")
-        self.actionMultistyler.triggered.connect(self.multistylerDialog.show)
-        self.iface.addPluginToWebMenu("GeoCat Bridge", self.actionMultistyler)
+        self.action_multistyler = QAction(QIcon(files.getIconPath("symbology")),
+                                          QCoreApplication.translate(self.name, "Multistyler"), self._win)
+        self.action_multistyler.setObjectName("Multistyler")
+        self.action_multistyler.triggered.connect(self.widget_multistyler.show)
+        self.iface.addPluginToWebMenu(self.name, self.action_multistyler)
 
-        self.iface.currentLayerChanged.connect(self.multistylerDialog.updateForCurrentLayer)
+        self.iface.currentLayerChanged.connect(self.widget_multistyler.updateForCurrentLayer)
 
-        QgsProject.instance().layerWasAdded.connect(self.layerWasAdded)
-        QgsProject.instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
-
-        #QgsApplication.processingRegistry().addProvider(self.provider)
+        QgsProject().instance().layerWasAdded.connect(self.layerWasAdded)
+        QgsProject().instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
 
     def unload(self):
-
-        removeTempFolder()                        
+        files.removeTempFolder()
     
-        self.iface.currentLayerChanged.disconnect(self.multistylerDialog.updateForCurrentLayer)
-
-        QgsProject.instance().layerWasAdded.disconnect(self.layerWasAdded)
+        self.iface.currentLayerChanged.disconnect(self.widget_multistyler.updateForCurrentLayer)
+        QgsProject().instance().layerWasAdded.disconnect(self.layerWasAdded)
 
         for layer, func in self._layerSignals.items():
             layer.styleChanged.disconnect(func)
 
-        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionHelp)
-        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionPublish)
-        self.iface.removePluginWebMenu("GeoCat Bridge", self.actionMultistyler)
+        self.iface.removePluginWebMenu(self.name, self.action_help)
+        self.iface.removePluginWebMenu(self.name, self.action_publish)
+        self.iface.removePluginWebMenu(self.name, self.action_multistyler)
 
-        self.iface.removeWebToolBarIcon(self.actionPublish)
-
-        #QgsApplication.processingRegistry().removeProvider(self.provider)
+        self.iface.removeWebToolBarIcon(self.action_publish)
 
         sys.excepthook = self.qgis_hook
 
     _layerSignals = {}
 
     def layerWasAdded(self, layer):
-        self._layerSignals[layer] = partial(self.multistylerDialog.updateLayer, layer) 
+        self._layerSignals[layer] = partial(self.widget_multistyler.updateLayer, layer)
         layer.styleChanged.connect(self._layerSignals[layer])
 
     def layerWillBeRemoved(self, layerid):
-        for layer in self._layerSignals.keys():
+        for layer, signal in self._layerSignals.items():
             if layer.id() == layerid:
-                del self._layerSignals[layer]
+                del signal
                 return
-
-    isRegistered = False
 
     def publishClicked(self):
-        if isEnterprise() and not self.isRegistered:
-            if not self.login():
-                return
         dialog = BridgeDialog(self.iface.mainWindow())
         dialog.exec_()
-
-    def login(self):
-        authManager = QgsApplication.authManager()
-        if KEY_NAME in authManager.configIds():
-            authConfig = QgsAuthMethodConfig()
-            authManager.loadAuthenticationConfig(KEY_NAME, authConfig, True)            
-            key = authConfig.config('licensekey')
-            if doEnterpriseLogin(key):
-                return True
-        dlg = LoginDialog(self.iface.mainWindow())
-        return dlg.exec_() == QDialog.Accepted
-        

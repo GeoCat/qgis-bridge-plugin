@@ -13,7 +13,6 @@ Add new connection
 Click *New Server* and choose one of the supported
 server connection types to create a new server:
 
--   GeoCat Live
 -   GeoServer
 -   MapServer
 -   PostGIS
@@ -26,23 +25,6 @@ Fill the required parameters and then click on the *Save* button to save the ser
 
 Below you can find more detail about the different types of services and connections supported in Bridge.
 
-
-GeoCat Live
------------
-
-GeoCat Live is a SDI platform hosted by GeoCat. Depending on your GeoCat
-Live configuration Bridge is able to publish metadata to a catalogue
-server (CSW) and the layers of the map to a mapserver
-(WMS/WFS/WCS/WMTS). Components used
-
-.. image:: ./img/geocatlive_server.png
-
-To configure a GeoCat Live connection, enter your Live id and a name for the server. You can then click on 
-the *Connect* button to verify that Bridge can connect to the Live instance and retrieve the URLs of the associated data and metadata servers.
-
-When you add a Live server, two new servers will be added to the list of available ones in the *Publish* section: a geodata server and a metadata server.
-
-You don't need to supply the URLs of those servers (as it would be the case if you wanted to manually add each of them), but you must supply their credentials.
 
 GeoNetwork server
 -----------------
