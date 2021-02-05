@@ -107,3 +107,6 @@ venv.bak/
 # PyCharm IDE
 .idea/
 *debug/
+
+# Custom folders
+_debug/

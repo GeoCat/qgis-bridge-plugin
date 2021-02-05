@@ -5,11 +5,11 @@ import traceback
 
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import (
-    QgsTask,
-    QgsLayerTreeLayer,
-    QgsLayerTreeGroup,
-    QgsNativeMetadataValidator,
-    QgsProject,
+    QgsTask, 
+    QgsLayerTreeLayer, 
+    QgsLayerTreeGroup, 
+    QgsNativeMetadataValidator, 
+    QgsProject, 
     QgsMapLayer,
     QgsLayerMetadata,
     QgsBox3d,
@@ -18,11 +18,12 @@ from qgis.core import (
 )
 
 from bridgestyle.qgis import saveLayerStyleAsZippedSld
-from geocatbridge.publish.exporter import exportLayer
-from geocatbridge.publish.metadata import uuidForLayer, saveMetadata
-from geocatbridge.ui.progressdialog import DATA, METADATA, SYMBOLOGY, GROUPS
-from geocatbridge.ui.publishreportdialog import PublishReportDialog
-from geocatbridge.utils.feedback import FeedbackMixin
+from .exporter import exportLayer
+from .metadata import uuidForLayer, saveMetadata
+from ..ui.progressdialog import DATA, METADATA, SYMBOLOGY, GROUPS
+from ..ui.publishreportdialog import PublishReportDialog
+from ..utils.feedback import FeedbackMixin
+from ..utils import layers as layerUtils
 
 
 class PublishTask(QgsTask):
@@ -51,17 +52,18 @@ class PublishTask(QgsTask):
             children.reverse()  # GS and QGIS have opposite ordering
             for child in children:
                 if isinstance(child, QgsLayerTreeLayer):
-                    name = child.layer().name()
-                    if name in to_publish:
-                        layers.append(name)
+                    in_name, out_name = layerUtils.getLayerTitleAndName(child.layer())
+                    if in_name in to_publish:
+                        layers.append(out_name)
                 elif isinstance(child, QgsLayerTreeGroup):
                     subgroup = _addGroup(child)
                     if subgroup is not None:
                         layers.append(subgroup)
             if layers:
-                return {"name": layer_tree.name(),
-                        "title": layer_tree.customProperty("wmsTitle", layer_tree.name()),
-                        "abstract": layer_tree.customProperty("wmsAbstract", layer_tree.name()),
+                title, name = layerUtils.getLayerTitleAndName(layer_tree)
+                return {"name": name,
+                        "title": layerTreeGroup.customProperty("wmsTitle", title),
+                        "abstract": layerTreeGroup.customProperty("wmsAbstract", title),
                         "layers": layers}
             else:
                 return None
@@ -121,9 +123,13 @@ class PublishTask(QgsTask):
                 self.setProgress(i * 100 / len(self.layers))
                 layer = self.layerFromName(name)
                 qgs_layers[name] = layer
-                warnings.extend(self.validateLayer(layer))
-                validates, _ = validator.validate(layer.metadata())
-                validates = True
+                _, safe_name = layerUtils.getLayerTitleAndName(layer)
+                if not layerUtils.hasValidLayerName(layer):
+                    try:
+                        warnings.append(f"Layer name '{name}' contains characters that might cause issues")
+                    except UnicodeError:
+                        warnings.append("Layer name contains characters that might cause issues")
+                md_valid, _ = validator.validate(layer.metadata())
                 if self.geodata_server is not None:
                     self.geodata_server.resetLog()
 
@@ -137,19 +143,19 @@ class PublishTask(QgsTask):
 
                     if self.only_symbology:
                         self.stepSkipped.emit(name, DATA)
-                        return True
+                        continue
 
                     # Publish data
                     self.stepStarted.emit(name, DATA)
                     try:
                         if validates or allow_without_md in (ALLOW, ALLOWONLYDATA):
-                            publishLayer(layer, name)
+                            publishLayer(layer, safe_name)
                         else:
                             self.stepStarted.emit(name, DATA)
                             if validates or allow_without_md in (ALLOW, ALLOWONLYDATA):
-                                publishLayer(layer, name)
+                                publishLayer(layer, safe_name)
                             else:
-                                self.geodata_server.logError(f"Layer '{layer.name()}' has invalid metadata. "
+                                self.geodata_server.logError(f"Layer '{name}' has invalid metadata. "
                                                              f"Layer was not published")
                             self.stepFinished.emit(name, DATA)
                     except:
@@ -162,24 +168,21 @@ class PublishTask(QgsTask):
                 if self.metadata_server is not None:
                     try:
                         self.metadata_server.resetLog()
-                        if validates or allow_without_md == ALLOW:
+                        if md_valid or allow_without_md == ALLOW:
+                            wms = None
+                            wfs = None
+                            full_name = None
                             if self.geodata_server is not None:
-                                full_name = self.geodata_server.fullLayerName(layer.name())
+                                full_name = self.geodata_server.fullLayerName(safe_name)
                                 wms = self.geodata_server.layerWmsUrl()
                                 if layer.type() == layer.VectorLayer:
                                     wfs = self.geodata_server.layerWfsUrl()
-                                else:
-                                    wfs = None
-                            else:
-                                wms = None
-                                wfs = None
-                                full_name = None
                             self.autofillMetadata(layer)
                             self.stepStarted.emit(name, METADATA)
                             self.metadata_server.publishLayerMetadata(layer, wms, wfs, full_name)
                             self.stepFinished.emit(name, METADATA)
                         else:
-                            self.metadata_server.logError(f"Layer '{layer.name()}' has invalid metadata. "
+                            self.metadata_server.logError(f"Layer '{name}' has invalid metadata. "
                                                           f"Metadata was not published")
                     except:
                         errors.append(traceback.format_exc())
@@ -198,7 +201,7 @@ class PublishTask(QgsTask):
 
             if self.geodata_server is not None:
                 self.stepStarted.emit(None, GROUPS)
-                groups = self._layerGroups(self.layers)
+                groups = self._layerGroups(self.layers)                            
                 try:
                     self.geodata_server.createGroups(groups, qgs_layers)
                 except Exception:
@@ -286,8 +289,9 @@ class ExportTask(FeedbackMixin, QgsTask):
                     return False
                 self.setProgress(i * 100 / len(self.layers))
                 layer = self.layerFromName(name)
+                _, safe_name = layerUtils.getLayerTitleAndName(layer)
                 if self.exportSymbology:
-                    style_filename = os.path.join(self.folder, layer.name() + "_style.zip")
+                    style_filename = os.path.join(self.folder, safe_name + "_style.zip")
                     self.stepStarted.emit(name, SYMBOLOGY)
                     saveLayerStyleAsZippedSld(layer, style_filename)
                     self.stepFinished.emit(name, SYMBOLOGY)
@@ -295,14 +299,14 @@ class ExportTask(FeedbackMixin, QgsTask):
                     self.stepSkipped.emit(name, SYMBOLOGY)
                 if self.exportData:
                     ext = ".gpkg" if layer.type() == layer.VectorLayer else ".tif"
-                    layer_filename = os.path.join(self.folder, layer.name() + ext)
+                    layer_filename = os.path.join(self.folder, safe_name + ext)
                     self.stepStarted.emit(name, DATA)
                     exportLayer(layer, self.fields, path=layer_filename, force=True, logger=self)
                     self.stepFinished.emit(name, DATA)
                 else:
                     self.stepSkipped.emit(name, DATA)
                 if self.exportMetadata:
-                    metadata_filename = os.path.join(self.folder, layer.name() + "_metadata.zip")
+                    metadata_filename = os.path.join(self.folder, safe_name + "_metadata.zip")
                     self.stepStarted.emit(name, METADATA)
                     saveMetadata(layer, metadata_filename)
                     self.stepFinished.emit(name, METADATA)

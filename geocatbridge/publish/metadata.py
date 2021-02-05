@@ -16,55 +16,14 @@ from qgis.core import (
     QgsMessageLog
 )
 
-from geocatbridge.utils.files import tempFilenameInTempFolder, getResourcePath
-from geocatbridge.utils import meta
+from ..utils.files import tempFilenameInTempFolder, getResourcePath
+from ..utils.layers import getLayerTitleAndName
 
 QMD_TO_ISO19139_XSLT = getResourcePath("qgis-to-iso19139.xsl")
 ISO19139_TO_QMD_XSLT = getResourcePath("iso19139-to-qgis.xsl")
 ISO19115_TO_ISO19139_XSLT = getResourcePath("iso19115-to-iso19139.xsl")
 WRAPPING_ISO19115_TO_ISO19139_XSLT = getResourcePath("ISO19115-wrapping-MD_Metadata-to-ISO19139.xslt")
 FGDC_TO_ISO19115 = getResourcePath("ArcCatalogFgdc_to_ISO19115.xsl")
-
-
-def uuidForLayer(layer):
-    return str(uuid.uuid5(uuid.NAMESPACE_DNS, layer.source()))
-
-
-def loadMetadataFromXml(layer, filename):
-    root = ElementTree.parse(filename).getroot()
-
-    def _hasTag(tag):
-        for _ in root.iter(tag):
-            return True
-        return False
-
-    if _hasTag("esri"):
-        if _hasTag("gmd:MD_Metadata"):
-            _loadMetadataFromWrappingEsriXml(layer, filename)
-        else:
-            _loadMetadataFromEsriXml(layer, filename)
-    elif _hasTag("MD_Metadata") or _hasTag("gmd:MD_Metadata"):
-        _loadMetadataFromIsoXml(layer, filename)
-    elif _hasTag("metadata/mdStanName"):
-        schema_name = list(root.iter("metadata/mdStanName"))[0].text
-        if "FGDC-STD" in schema_name:
-            _loadMetadataFromFgdcXml(layer, filename)
-        elif "19115" in schema_name:
-            _loadMetadataFromIsoXml(layer, filename)
-    else:
-        _loadMetadataFromFgdcXml(layer, filename)
-
-
-def saveMetadata(layer, mef_filename=None, api_url=None, wms=None, wfs=None, layer_name=None):
-    uuid = uuidForLayer(layer)
-    filename = tempFilenameInTempFolder(layer.name() + ".qmd")
-    layer.saveNamedMetadata(filename)
-    thumbnail = _saveLayerThumbnail(layer)
-    api_url = api_url or ""
-    transformed_filename = _transformMetadata(filename, uuid, api_url, wms, wfs, layer_name or layer.name())
-    mef_filename = mef_filename or tempFilenameInTempFolder(uuid + ".mef")
-    _createMef(uuid, transformed_filename, mef_filename, thumbnail)
-    return mef_filename
 
 
 def _transformDom(input_file, xslt_file):
@@ -223,3 +182,46 @@ def _getInfoXmlContent(uuid, thumb_filename):
     xmlstring = ElementTree.tostring(root, encoding="UTF-8", method="xml").decode()
     dom = minidom.parseString(xmlstring)
     return dom.toprettyxml(indent="  ")
+
+  
+def uuidForLayer(layer):
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, layer.source()))
+
+
+def loadMetadataFromXml(layer, filename):
+    root = ElementTree.parse(filename).getroot()
+
+    def _hasTag(tag):
+        for _ in root.iter(tag):
+            return True
+        return False
+
+    if _hasTag("esri"):
+        if _hasTag("gmd:MD_Metadata"):
+            _loadMetadataFromWrappingEsriXml(layer, filename)
+        else:
+            _loadMetadataFromEsriXml(layer, filename)
+    elif _hasTag("MD_Metadata") or _hasTag("gmd:MD_Metadata"):
+        _loadMetadataFromIsoXml(layer, filename)
+    elif _hasTag("metadata/mdStanName"):
+        schema_name = list(root.iter("metadata/mdStanName"))[0].text
+        if "FGDC-STD" in schema_name:
+            _loadMetadataFromFgdcXml(layer, filename)
+        elif "19115" in schema_name:
+            _loadMetadataFromIsoXml(layer, filename)
+    else:
+        _loadMetadataFromFgdcXml(layer, filename)
+
+
+def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None, wfs=None, layerName=None):
+    uuid = uuidForLayer(layer)
+    _, safe_name = getLayerTitleAndName(layer)
+    filename = tempFilenameInTempFolder(safe_name + ".qmd")
+    layer.saveNamedMetadata(filename)
+    thumbnail = _saveLayerThumbnail(layer)
+    apiUrl = apiUrl or ""
+    transformedFilename = _transformMetadata(filename, uuid, apiUrl, wms, wfs, layerName or safe_name)
+    mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
+    _createMef(uuid, transformedFilename, mefFilename, thumbnail)
+    return mefFilename
+  

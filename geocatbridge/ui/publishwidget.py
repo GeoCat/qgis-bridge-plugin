@@ -544,7 +544,9 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                 names.append(name)
         if self.comboGeodataServer.currentIndex() != 0:
             geodata_server = geodataServers()[self.comboGeodataServer.currentText()]
-            geodata_server.validateGeodataBeforePublication(errors, to_publish)
+            geodata_server.validateGeodataBeforePublication(
+              errors, to_publish, self.chkOnlySymbology.checkState() == Qt.Checked
+            )
 
         if self.comboMetadataServer.currentIndex() != 0:
             metadata_server = metadataServers()[self.comboMetadataServer.currentText()]

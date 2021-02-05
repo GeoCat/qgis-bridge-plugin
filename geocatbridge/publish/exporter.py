@@ -1,4 +1,4 @@
-import os
+from ..utils import layers
 
 try:
     from osgeo import gdal
@@ -12,6 +12,7 @@ from qgis.core import (
     Qgis
 )
 
+from geocatbridge.utils import layers as layerUtils
 from geocatbridge.utils.files import tempFilenameInTempFolder
 
 EXT_SHAPEFILE = ".shp"
@@ -30,26 +31,26 @@ def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, 
             return
         logger.logInfo(message)
 
-    filename = layer.source().split("|")[0]
-    dest_filename = layer.name()
+    filepath, _, ext = layers.getLayerSourceInfo(layer)
+    lyr_name, safe_name = layerUtils.getLayerTitleAndName(layer)
     fields = fields or []
     if layer.type() == layer.VectorLayer:
-        if to_shapefile and (force or layer.fields().count() != len(fields) or
-                             (os.path.splitext(filename.lower())[1] != EXT_SHAPEFILE)):
+        if to_shapefile and (force or layer.fields().count() != len(fields) or ext != EXT_SHAPEFILE):
             # Export with Shapefile extension
             ext = EXT_SHAPEFILE
-        elif force or os.path.splitext(filename.lower())[1] != EXT_GEOPACKAGE or \
-                layer.fields().count() != len(fields) or not isSingleTableGpkg(filename):
+        elif force or ext != EXT_GEOPACKAGE or layer.fields().count() != len(fields) or not isSingleTableGpkg(filepath):
             # Export with GeoPackage extension
             ext = EXT_GEOPACKAGE
         else:
             # No need to export
-            safeLog(f"No need to export layer {dest_filename} stored at {filename}")
-            return filename
+            safeLog(QCoreApplication.translate("GeoCat Bridge", 
+                                               f"No need to export layer {lyr_name} stored at {filepath}")
+            return filepath
 
         # Perform GeoPackage or Shapefile export
         attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
-        output = path or tempFilenameInTempFolder(dest_filename + ext)
+        output = path or tempFilenameInTempFolder(safe_name + ext)
+
         if Qgis.QGIS_VERSION_INT < 31003:
             # Use writeAsVectorFormat for QGIS versions < 3.10.3 for backwards compatibility
             # noinspection PyArgumentList
@@ -65,18 +66,19 @@ def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, 
             options.attributes = attrs
             options.driverName = "ESRI Shapefile" if ext == EXT_SHAPEFILE else ""
             QgsVectorFileWriter().writeAsVectorFormatV2(layer, output, transform_ctx, options)
-        safeLog(f"Layer {dest_filename} exported to {output}")
+        safeLog(QCoreApplication.translate("GeoCat Bridge", f"Layer {lyr_name} exported to {output}")
         return output
     else:
         # Export raster
-        if force or not filename.lower().endswith("tif"):
-            output = path or tempFilenameInTempFolder(dest_filename + ".tif")
+        if force or not filepath.lower().endswith("tif"):
+            output = path or tempFilenameInTempFolder(safe_name + ".tif")
             writer = QgsRasterFileWriter(output)
             writer.setOutputFormat("GTiff")
             writer.writeRaster(layer.pipe(), layer.width(), layer.height(), layer.extent(), layer.crs())
             del writer
-            safeLog(f"Layer {dest_filename} exported to {output}")
+            safeLog(QCoreApplication.translate("GeoCat Bridge", f"Layer {lyr_name} exported to {output}")
             return output
         else:
-            safeLog(f"No need to export layer {dest_filename} stored at {filename}")
-            return filename
+            safeLog(QCoreApplication.translate("GeoCat Bridge", 
+                                               f"No need to export layer {lyr_name} stored at {filepath}")
+            return filepath

@@ -8,7 +8,7 @@ about=GeoCat is pleased to offer the Bridge plugin to our customers using QGIS.
 experimental=False
 category=Web
 qgisMinimumVersion=3.6
-version=4.1
+version=4.1.1
 
 author=GeoCat
 email=support@geocat.net
