@@ -871,9 +871,8 @@ class GeoserverServer(ServerBase):
         if not res:
             # There aren't any workspaces (and thus no dataStores)
             return pg_datastores
-        for ws_url in (s.get("href") for s in res.get("workspace", [])):
-            props = self.request(ws_url).json().get("workspace", {})
-            ws_name, ds_list_url = props.get("name"), props.get("dataStores")
+        for ws_name in (s.get("name") for s in res.get("workspace", [])):
+            ds_list_url = "%s/workspaces/%s/datastores.json" % (self.url, ws_name)
             for ds_name in self._getPostgisDatastores(ds_list_url):
                 pg_datastores.append("%s:%s" % (ws_name, ds_name))
         return pg_datastores
