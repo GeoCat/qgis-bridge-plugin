@@ -59,7 +59,7 @@ def getrefs():
 def buildref(ref, folder, versionname=None):
     print(f"Building project '{NAME}' at version '{versionname or ref}'...")
     if ref is not None:
-        sh(f"git checkout {ref}")
+        sh(f"git checkout {DOC_BRANCH_PREFIX if ref != 'master' else ''}{ref}")
     sourcedir = os.path.join(os.getcwd(), "source")
     builddir = os.path.join(folder, versionname or ref)
     if os.path.exists(builddir):
