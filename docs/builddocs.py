@@ -44,12 +44,15 @@ def builddocs(addmaster, folder):
 
 def getrefs():
     refs = []
-    branches = sh("git branch").splitlines()
+    print("Listing git branches...")
+    branches = sh("git branch -r").splitlines()
     for line in branches:
+        print(f"\t{line}")
         name = line.split(" ")[-1]
         if name.startswith(DOC_BRANCH_PREFIX):
             foldername = name.split(DOC_BRANCH_PREFIX)[-1]
             refs.append(foldername)
+            print(f"\t\t--> Using '{foldername}' as docs folder")
     return refs
 
 
