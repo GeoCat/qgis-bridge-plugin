@@ -48,7 +48,7 @@ def getrefs():
     branches = sh("git branch -r").splitlines()
     for line in branches:
         print(f"\t{line}")
-        name = line.split(" ")[-1]
+        name = line.split("/")[-1]
         if name.startswith(DOC_BRANCH_PREFIX):
             foldername = name.split(DOC_BRANCH_PREFIX)[-1]
             refs.append(foldername)
