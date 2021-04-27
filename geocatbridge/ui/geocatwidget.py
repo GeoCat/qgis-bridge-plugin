@@ -1,4 +1,5 @@
 import webbrowser
+from functools import partial
 
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtWebKitWidgets import QWebPage
@@ -18,6 +19,8 @@ class GeoCatWidget(WIDGET, BASE):
         url = QUrl.fromLocalFile(path)
         self.txtAbout.load(url)
         self.txtAbout.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
-        self.txtAbout.linkClicked.connect(lambda url: webbrowser.open_new_tab(url.toString()))
+        self.txtAbout.linkClicked.connect(partial(self.open_link))
 
-        self.tabWidget.setCurrentIndex(0)
+    @staticmethod
+    def open_link(url: QUrl) -> bool:
+        return webbrowser.open_new_tab(url.toString())

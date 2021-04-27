@@ -1,13 +1,17 @@
 from typing import Union
+from functools import partial
+from copy import deepcopy
 
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QKeyEvent
 from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMenu,
     QListWidgetItem,
-    QWidget
+    QWidget,
+    QFileDialog
 )
-from qgis.gui import QgsFileWidget, QgsAuthConfigSelect
 
 from geocatbridge.utils import gui
 from geocatbridge.utils.feedback import FeedbackMixin
@@ -20,112 +24,198 @@ WIDGET, BASE = gui.loadUiType(__file__)
 
 class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self._server_widgets = {}
         self.setupUi(self)
 
-        # self.cswAuth = QgsAuthConfigSelect()
-        self.postgisAuth = QgsAuthConfigSelect()
-        # self.geoserverAuth = QgsAuthConfigSelect()
-        # self.mapserverAuth = QgsAuthConfigSelect()
-
         self.addMenuToButtonNew()
-        self.addAuthWidgets()
-        self.buttonRemove.clicked.connect(self.buttonRemoveClicked)
+        self.buttonRemove.clicked.connect(self.removeButtonClicked)
         self.populateServerList()
-        self.listServers.currentItemChanged.connect(self.currentServerChanged)
+        # self.listServers.currentItemChanged.connect(self.currentServerChanged)
         self.showServerWidget()
-        self.buttonSave.clicked.connect(self.saveButtonClicked)
-        # self.comboGeoserverDataStorage.currentIndexChanged.connect(self.datastoreChanged)
-        # self.btnConnectGeoserver.clicked.connect(self.testConnectionGeoserver)
-        self.btnConnectPostgis.clicked.connect(self.testConnectionPostgis)
-        # self.btnConnectCsw.clicked.connect(self.testConnectionCsw)
-        # self.btnAddDatastore.clicked.connect(self.addPostgisDatastore)
-        # self.btnRefreshDatabases.clicked.connect(self.loadManagedDbServers)
+        self.buttonSave.clicked.connect(self.saveServer)
+        self.buttonImport.clicked.connect(self.importServers)
+        self.buttonExport.clicked.connect(self.exportServers)
+        self.buttonDuplicate.clicked.connect(self.duplicateServer)
 
-        # self.txtCswName.textChanged.connect(self.setDirty)
-        # self.txtCswNode.textChanged.connect(self.setDirty)
-        # # self.txtGeoserverName.textChanged.connect(self.setDirty)
-        self.txtPostgisName.textChanged.connect(self.setDirty)
-        # # self.txtGeoserverUrl.textChanged.connect(self.setDirty)
-        # self.txtCswUrl.textChanged.connect(self.setDirty)
-        self.txtPostgisServerAddress.textChanged.connect(self.setDirty)
-        self.txtPostgisPort.textChanged.connect(self.setDirty)
-        self.txtPostgisSchema.textChanged.connect(self.setDirty)
-        self.txtPostgisDatabase.textChanged.connect(self.setDirty)
-        # self.comboMetadataProfile.currentIndexChanged.connect(self.setDirty)
-
-        # self.radioLocalPath.toggled.connect(self.mapserverStorageChanged)
-
-        # self.fileMapserver.setStorageMode(QgsFileWidget.GetDirectory)
-
-        # self.btnSaveServers.clicked.connect(self.saveServers)
-        # self.btnLoadServers.clicked.connect(self.loadServers)
+        # Connect event handlers for server widget activation
+        self.listServers.itemClicked.connect(partial(self.listItemClicked))
+        self.listServers.keyPressEvent = partial(self.listKeyPressed)
 
     @property
     def serverManager(self):
+        """ Convenience property to get a reference to the server manager module.
+        This is mainly used by server widgets that have the server connection dialog as a parent.
+
+        ..note::    Server widget views should **not** import the manager module,
+                    as this could lead to cyclical import errors.
+        """
         return manager
 
     def toggleServerList(self):
         has_servers = self.listServers.count() > 0
         self.txtNoServers.setVisible(not has_servers)
         self.listServers.setVisible(has_servers)
+        self.buttonExport.setEnabled(has_servers)
+        self.buttonDuplicate.setEnabled(has_servers)
+        self.buttonRemove.setEnabled(has_servers)
+        if not has_servers:
+            # If there are no servers (anymore), show empty widget
+            self.stackedWidget.setCurrentWidget(self.widgetEmpty)
 
-    # def saveServers(self):
-    #     filename = QFileDialog.getSaveFileName(self, self.tr("Save servers"), "", '*.json')[0]
-    #     if filename:
-    #         if not filename.endswith("json"):
-    #             filename += ".json"
-    #         with open(filename, "w") as f:
-    #             f.write(serversAsJsonString())
-    #
-    # def loadServers(self):
-    #     filename = QFileDialog.getOpenFileName(self, self.tr("Load servers"), "", '*.json')[0]
-    #     if filename:
-    #         with open(filename) as f:
-    #             servers = json.load(f)
-    #         for server in servers:
-    #             s = serverFromDefinition(server)
-    #             if s.name not in allServers():
-    #                 self.addServerListItem(s)
-    #                 addServer(s)
+    def exportServers(self):
+        filename = QFileDialog.getSaveFileName(self, self.tr("Export servers"),
+                                               filter=self.tr("Server configuration (*.json)"),
+                                               options=QFileDialog.DontUseNativeDialog)[0]
+        if not filename:
+            self.logWarning("No export filename specified")
+            return
+
+        config_str = manager.serializeServers()
+        if not config_str:
+            self.showErrorBar("Error", "Failed to export server configuration")
+            return
+
+        if not filename.endswith("json"):
+            filename += ".json"
+        try:
+            with open(filename, "w+") as f:
+                f.write(config_str)
+            self.showSuccessBar("Success", "Successfully exported server configuration to JSON file")
+        except Exception as err:
+            self.logError(err)
+            self.showErrorBar("Error", "Failed to write server configuration JSON file")
+
+    def importServers(self):
+        filename = QFileDialog.getOpenFileName(self, self.tr("Import servers"),
+                                               filter=self.tr("Server configuration (*.json)"),
+                                               options=QFileDialog.DontUseNativeDialog)[0]
+        if not filename:
+            self.logWarning("No export filename specified")
+            return
+
+        try:
+            with open(filename) as f:
+                config_str = f.read()
+        except Exception as err:
+            self.logError(err)
+            self.showErrorBar("Error", "Unable to read server configuration JSON file")
+
+        if not manager.deserializeServers(config_str):
+            self.showErrorBar("Error", "Failed to import server configuration from JSON file")
+            return
+
+        self.populateServerList()
+        self.showSuccessBar("Success", "Successfully imported server configuration from JSON file")
 
     def serverIsDirty(self) -> bool:
         widget = self.stackedWidget.currentWidget()
-        if widget and hasattr(widget, ServerWidgetBase.isDirty.__name__):
+        if widget and hasattr(widget, 'isDirty'):
             return widget.isDirty
         return False
 
     def serverSetClean(self):
         widget = self.stackedWidget.currentWidget()
-        if widget and hasattr(widget, ServerWidgetBase.setClean.__name__):
+        if widget and hasattr(widget, 'setClean'):
             widget.setClean()
 
-    def askToSave(self, question: str):
-        return self.showQuestionBox("Servers", question,
-                                    buttons=self.BUTTONS.CANCEL | self.BUTTONS.NO | self.BUTTONS.YES,
-                                    defaultButton=self.BUTTONS.YES)
+    def serverExists(self, item=None) -> bool:
+        """ Returns True if the server has been saved before (i.e. is not new). """
+        return manager.getServer(self.getListWidgetItemName(item)) is not None
 
-    def currentServerChanged(self, new, old):
-        new_server = self.getServerFromItem(new)
+    def askToSave(self, question: str, **kwargs):
+        msgbox_kwargs = {
+            'buttons': self.BUTTONS.CANCEL | self.BUTTONS.NO | self.BUTTONS.YES,
+            'defaultButton': self.BUTTONS.YES
+        }
+        msgbox_kwargs.update(kwargs)
+        return self.showQuestionBox("Servers", question, **msgbox_kwargs)
 
-        if not new_server:
-            # Nothing was selected or no matching server was found (should not happen)
-            self.showServerWidget()
+    def listSelectNoSignals(self, item):
+        self.listServers.blockSignals(True)
+        self.listServers.setCurrentItem(item)
+        self.listServers.blockSignals(False)
 
-        if old and self.serverIsDirty():
+    def getListItemFromServerWidget(self, widget):
+        if not hasattr(widget, 'getName'):
+            return None
+        server_name = widget.getName()
+        for i in range(self.listServers.count()):
+            item = self.listServers.item(i)
+            widget = self.listServers.itemWidget(item)
+            if widget.serverName == server_name:
+                return item
+        return None
+
+    def listKeyPressed(self, event: QKeyEvent):
+        """ Activates the server widget matching a key press event if the QListWidget has focus.
+        The QListWidget items can be selected using the Up and Down arrow keys only.
+        These key events emit an `itemClicked` event in turn, which are being handled by the `listItemClicked` method.
+        """
+        list_index = -1
+        row_index = self.listServers.currentRow()
+        if event.key() == Qt.Key_Up and row_index > 0:
+            # User pressed the Up key and there is a list item above the current one
+            list_index = row_index - 1
+        elif event.key() == Qt.Key_Down and row_index < self.listServers.count() - 1:
+            # User pressed the Down key and there is a list item below the current one
+            list_index = row_index + 1
+
+        if list_index >= 0:
+            # Select the list item that the user requested
+            list_item = self.listServers.item(list_index)
+            self.listSelectNoSignals(list_item)
+            self.listServers.itemClicked.emit(list_item)
+
+        # Default action
+        event.accept()
+
+    def listItemClicked(self, list_item: QListWidgetItem):
+        """ Activates the panel that matches the clicked QListWidgetItem.
+
+        .. note::   The `QListWidget.itemPressed` event handler is the **second-last** triggered event handler
+                    whenever the user clicks a QListWidgetItem. Because we reselect the Servers QListWidgetItem
+                    if the Servers panel still has edits (which the user wants to save), we cannot handle more
+                    logical events like `QListWidget.currentRowChanged` for example, since we cannot stop event
+                    propagation (as with a QEvent).
+        """
+        new_server = self.getServerFromItem(list_item)
+        cur_widget = self.stackedWidget.currentWidget()
+        old_item = self.getListItemFromServerWidget(cur_widget)
+
+        if not old_item:
+            # No item was selected before: set widget for new server (or empty widget) directly
+            return self.showServerWidget(new_server)
+        if not new_server and list_item == old_item:
+            # User clicked the same list item again, but it was not saved yet: do nothing
+            return
+        if new_server.serverName == cur_widget.getName():
+            # User clicked the same list item again: do nothing
+            return
+
+        if cur_widget.isDirty:
             # Current server has edits: ask user if we should save them
+            item = self.getListItemFromServerWidget(cur_widget)
             answer = self.askToSave("Do you want to save your changes to the current server?")
-            if (answer == self.BUTTONS.YES and not self.saveServer()) or answer == self.BUTTONS.CANCEL:
+            if (answer == self.BUTTONS.YES and not self.persistServer(item)) or answer == self.BUTTONS.CANCEL:
                 # User wants to save but saving failed OR user canceled: reset to old server
-                self.listServers.setCurrentItem(old)
-                return
+                # return self.listSelectNoSignals(item)
+                return self.listServers.setCurrentItem(item)
+            elif answer == self.BUTTONS.NO:
+                # Clean up newly created dirty servers that were never saved before
+                self.cleanupServerItem(item)
 
+        # Match server widget to selected server list item
         self.showServerWidget(new_server)
 
     def testConnection(self, server):
-        """ Tests if the server instance can actually connect to it. """
+        """ Tests if the server instance can actually connect to it.
+
+        .. note::   Not all servers might support this. Servers that don't support it,
+                    should still implement :func:`testConnection`, but in that case,
+                    the method should simply always return `True`.
+        """
         if server is None:
             self.showErrorBar("Error", "Wrong value(s) in current server settings")
         else:
@@ -134,20 +224,44 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             else:
                 self.showErrorBar("Error", "Could not connect to server")
 
-    def testConnectionPostgis(self):
-        server = self.createPostgisServer()
-        self._testConnection(server)
+    def persistServer(self, list_item=None) -> bool:
+        """ Tells the server manager to store the server in the QGIS settings. """
+        server_widget = self.stackedWidget.currentWidget()
+        if not server_widget:
+            # No current server widget set (should not happen)
+            return False
 
-    def saveServer(self) -> bool:
-        widget = self.stackedWidget.currentWidget()
-        if not widget or not hasattr(widget, ServerWidgetBase.createServerInstance.__name__):
-            # No (valid) current server widget
-            return True
-        server = widget.createServerInstance()
+        # See if the server can be instantiated from field values
+        try:
+            server = server_widget.createServerInstance()
+        except NotImplementedError:
+            self.showErrorBar("Error", f"Current server does not implement {ServerWidgetBase.__name__}")
+            return False
         if not server:
             self.showErrorBar("Error", "Wrong values in current server settings")
             return False
-        return manager.addServer(server)
+
+        list_widget = self.getListWidgetItem(list_item)
+        try:
+            result = manager.saveServer(server, list_widget.serverName)
+        except ValueError as err:
+            # Show error bar if user set a bad name
+            self.showErrorBar("Error", f"Invalid name: {err}")
+            return False
+        if result:
+            # Update list view item if server was successfully saved
+            list_widget.serverName = server.serverName
+        return result
+
+    def getListWidgetItem(self, item=None):
+        item = item or self.listServers.currentItem()
+        if item is None:
+            return
+        return self.listServers.itemWidget(item)
+
+    def getListWidgetItemName(self, item=None):
+        widget = self.getListWidgetItem(item)
+        return widget.serverName if widget else None
 
     def getServerFromItem(self, item):
         if not item:
@@ -155,105 +269,107 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         list_widget = self.listServers.itemWidget(item)
         return manager.getServer(list_widget.serverName)
 
-    # def createGeoserverServer(self):
-    #     # TODO check validity of name and values
-    #     name = self.txtGeoserverName.text().strip()
-    #     url = self.txtGeoserverUrl.text().strip()
-    #     authid = self.geoserverAuth.configId()
-    #     if not bool(authid):
-    #         return None
-    #     storage = self.comboGeoserverDataStorage.currentIndex()
-    #     postgisdb = None
-    #     if storage in [GeoserverServer.POSTGIS_BRIDGE, GeoserverServer.POSTGIS_GEOSERVER]:
-    #         postgisdb = self.comboGeoserverDatabase.currentText()
-    #     use_original_data_source = self.chkUseOriginalDataSource.isChecked()
-    #     use_vector_tiles = self.chkUseVectorTiles.isChecked()
-    #
-    #     if "" in [name, url]:
-    #         return None
-    #     server = GeoserverServer(
-    #         name, url, authid, storage, postgisdb, use_original_data_source,
-    #         use_vector_tiles
-    #     )
-    #     return server
+    def duplicateServer(self):
+        """ Duplicates (copies) the current selected server. """
+        if self.serverIsDirty():
+            # Ask to save but do not provide a No button: can't duplicate an unsaved server
+            res = self.askToSave("Do you want to save your changes to the current server?",
+                                 buttons=self.BUTTONS.CANCEL | self.BUTTONS.YES)
+            if (res == self.BUTTONS.YES and not self.persistServer()) or res == self.BUTTONS.CANCEL:
+                # User wants to save but saving failed OR user canceled: do not add new server
+                return
 
-    # def createPostgisServer(self):
-    #     # TODO check validity of name and values
-    #     name = self.txtPostgisName.text()
-    #     host = self.txtPostgisServerAddress.text()
-    #     port = self.txtPostgisPort.text()
-    #     schema = self.txtPostgisSchema.text()
-    #     database = self.txtPostgisDatabase.text()
-    #     authid = self.postgisAuth.configId()
-    #     server = PostgisServer(name, authid, host, port, schema, database)
-    #     return server
-    #
-    # def createGeonetworkServer(self):
-    #     # TODO check validity of name and values
-    #     name = self.txtCswName.text()
-    #     node = self.txtCswNode.text()
-    #     authid = self.cswAuth.configId()
-    #     if bool(authid):
-    #         url = self.txtCswUrl.text()
-    #         profile = self.comboMetadataProfile.currentIndex()
-    #         server = GeonetworkServer(name, url, authid, profile, node)
-    #         return server
+        source_name = self.getListWidgetItemName()
+        source_instance = manager.getServer(source_name)
+        if not (source_name and source_instance):
+            return
 
-    # def createMapserverServer(self):
-    #     # TODO check validity of name and values
-    #     name = self.txtMapserverName.text()
-    #     authid = self.mapserverAuth.configId()
-    #     host = self.txtMapserverHost.text()
-    #     try:
-    #         port = int(self.txtMapserverPort.text())
-    #     except Exception as e:
-    #         self.logWarning(e)
-    #         return None
-    #     local = self.radioLocalPath.isChecked()
-    #     if local:
-    #         folder = self.fileMapserver.filePath()
-    #     else:
-    #         folder = self.txtRemoteFolder.text()
-    #     url = self.txtMapserverUrl.text()
-    #     services_path = self.txtMapServicesPath.text()
-    #     proj_folder = self.txtProjFolder.text()
-    #     server = MapserverServer(name, url, local, folder, authid, host, port, services_path, proj_folder)
-    #     return server
+        # Copy settings from selected server and make new unique name
+        settings = source_instance.getSettings()
+        server_type = type(source_instance)
+        target_name = manager.getUniqueName(f"Copy of {source_name}")
+        settings['name'] = target_name
 
-    def addAuthWidgets(self):
-        layout = QHBoxLayout()
-        layout.setMargin(0)
-        layout.addWidget(self.postgisAuth)
-        self.postgisAuthWidget.setLayout(layout)
-        self.postgisAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
+        # Instantiate new server (but do not store it yet)
+        try:
+            target_instance = server_type(**settings)
+        except Exception as err:
+            self.logError(err)
+            self.showErrorBar("Error", f"Failed to duplicate server {source_name}. Please check logs.")
+            return
+
+        # Populate server widget with duplicated instance values and set dirty
+        target_name = self.showServerWidget(target_instance, force_dirty=True)
+        if target_name:
+            self.addServerListItem(server_type, target_name, True)
+            self.toggleServerList()
+        else:
+            manager.removeServer(target_name, True)
+            self.showErrorBar("Error", f"Failed to duplicate server {source_name}. Please check logs.")
 
     def addMenuToButtonNew(self):
+        """ Populate "New Server" menu button with available server types. """
         menu = QMenu()
         for s in manager.getServerTypes():
-            menu.addAction(s.getServerTypeLabel(), lambda: self.addNewServer(s))
-        # menu.addAction("GeoServer", lambda: self.addNewServer("GeoServer", GeoserverServer))
-        # menu.addAction("MapServer", lambda: self.addNewServer("MapServer", MapserverServer))
-        # menu.addAction("GeoNetwork", lambda: self.addNewServer("GeoNetwork", GeonetworkServer))
-        # menu.addAction("PostGIS", lambda: self.addNewServer("PostGIS", PostgisServer))
+            menu.addAction(s.getServerTypeLabel(), partial(self.addNewServer, deepcopy(s)))
         self.buttonNew.setMenu(menu)
 
-    def buttonRemoveClicked(self):
-        item = self.listServers.currentItem()
-        if item is None:
-            return
-        name = self.listServers.itemWidget(item).serverName
-        manager.removeServer(name)
-        self.listServers.takeItem(self.listServers.currentRow())
-        self.listServers.setCurrentItem(None)
+    def selectItemAbove(self, index: int):
+        """ Selects the item above the one with the given index and activates the server widget for it. """
+        if self.listServers.count():
+            # Set the selected list item to the one above the deleted item (if there are any items left).
+            new_item = self.listServers.item(max(0, index - 1))
+            self.listServers.setCurrentItem(new_item)
+            server = self.getServerFromItem(new_item)
+            if not self.showServerWidget(server):
+                return None
+            return new_item
+        # If there are no items left, toggle some buttons and set to empty widget
         self.toggleServerList()
+        return None
+
+    def removeButtonClicked(self):
+        """ Completely removes the current server when the user clicks the Remove button. """
+        index = self.removeServer(purge=True)
+        return self.selectItemAbove(index)
+
+    def cleanupServerItem(self, item=None):
+        """ Cleans up the current server (or given item) if it was never saved before. """
+        if self.serverExists(item):
+            # Keep the server list item if the server instance was saved before
+            return
+        index = self.removeServer(item)
+        return self.selectItemAbove(index)
+
+    def removeServer(self, item=None, purge: bool = False) -> int:
+        """ Removes the server under the given list item or the current selected server from the list.
+
+        :param item:    If a list widget item is specified, the server instance and widget for that
+                        specific item will be removed. If unspecified, the current selected one will
+                        be removed (default).
+        :param purge:   If True (default is False), the server instance will also be removed (not just the list item).
+        :returns:       The index of the removed item.
+        """
+        name = self.getListWidgetItemName(item)
+        index = self.listServers.row(item) if item else self.listServers.currentRow()
+        if purge:
+            # Remove server instance as well (not just list item)
+            manager.removeServer(name, True)
+        # Remove list item
+        self.listServers.blockSignals(True)
+        self.listServers.takeItem(index)
+        self.listServers.blockSignals(False)
+        return index
 
     def populateServerList(self):
+        """ Populates the list widget with all available server instances. """
         self.listServers.clear()
         for server in manager.getServers():
             self.addServerListItem(server.__class__, server.serverName)
         self.toggleServerList()
 
     def addServerListItem(self, server_class, server_name: str, set_active: bool = False):
+        """ Adds a server item to the list widget. """
         widget = ServerItemWidget(server_class, server_name)
         item = QListWidgetItem(self.listServers)
         item.setSizeHint(widget.sizeHint())
@@ -265,12 +381,16 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self.listServers.blockSignals(False)
 
     def addNewServer(self, cls):
+        """ Adds a new server of type `cls`. Adds a list widget item and activates a server widget for it. """
         if self.serverIsDirty():
             # Current server has edits: ask user if we should save them
             answer = self.askToSave("Do you want to save your changes to the current server?")
-            if (answer == self.BUTTONS.YES and not self.saveServer()) or answer == self.BUTTONS.CANCEL:
+            if (answer == self.BUTTONS.YES and not self.persistServer()) or answer == self.BUTTONS.CANCEL:
                 # User wants to save but saving failed OR user canceled: do not add new server
                 return
+            elif answer == self.BUTTONS.NO:
+                # Cleanup server that was never saved before
+                self.cleanupServerItem()
 
         assigned_name = self.showServerWidget(cls)
         if assigned_name:
@@ -279,13 +399,16 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         else:
             self.showErrorBar("Error", f"Failed to add {cls.getServerTypeLabel()} server. Please check logs.")
 
-    def showServerWidget(self, server=None) -> Union[str, None]:
-        """ Sets the current server configuration widget.
-        If `server` is a class, a new server of that class will be added with a generated name.
+    def showServerWidget(self, server=None, force_dirty: bool = False) -> Union[str, None]:
+        """ Sets the current server configuration widget for the given server instance or class.
 
-        :param server:  An existing server instance or a server class (for new servers).
-                        If this argument is omitted, an empty widget will be shown.
-        :returns:       The currently shown server name or None (if unsuccessful).
+        :param server:      An existing server instance or a server class.
+                            If this argument is omitted, an empty widget will be shown.
+                            If `server` is a class, a new server of that class will be added with a generated name.
+                            If `server` is an instance, the matching server widget will be populated with the data.
+        :param force_dirty: This only applies when `server` is an instance. When True (default is False),
+                            the server widget will be set to a dirty state after the fields were populated.
+        :returns:           The currently shown server name or None (if unsuccessful).
         """
 
         if server is None:
@@ -293,9 +416,11 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.stackedWidget.setCurrentWidget(self.widgetEmpty)
             return
 
-        server_cls = server.__class__
-        if server_cls is type:
-            # Server is not an instance but a model/class: we're dealing with a new server
+        if isinstance(server, manager.bases.ServerBase):
+            # 'server' argument is a model instance (existing servers)
+            server_cls = type(server)
+        else:
+            # 'server' argument is a model class (new servers)
             server_cls = server
 
         # Retrieve widget class from server
@@ -305,7 +430,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.logError(f"Server widget {cls.__name__} does not implement {ServerWidgetBase.__name__}")
             return
 
-        # Lookup existing widget instance
+        # Lookup existing widget instance (there should only be 1 widget instance for each server type)
         widget = self._server_widgets.get(cls.__name__, None)
 
         # If the widget does not exist yet, instantiate and add it to the stackedWidget
@@ -317,56 +442,51 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         # Set as current widget and populate its form fields
         self.stackedWidget.setCurrentWidget(widget)
         if server_cls == server:
-            srv_name = manager.generateName(server_cls)
+            srv_name = manager.getUniqueName(server_cls.getServerTypeLabel())
             widget.newFromName(srv_name)
+            widget.setDirty()
         else:
             srv_name = server.serverName
             widget.loadFromInstance(server)
+            if force_dirty:
+                widget.setDirty()
 
         return srv_name
 
-        # elif isinstance(server, GeoserverServer):
-        #     self.stackedWidget.setCurrentWidget(self.widgetGeoserver)
+    def saveServer(self, silent: bool = False) -> bool:
+        """ Makes sure that the current server is stored in the QGIS Bridge settings.
+        Sets the server state to "clean" if it was successfully stored.
+        Updates the server name in the list view (if changed).
 
-        # elif isinstance(server, MapserverServer):
-        #     self.stackedWidget.setCurrentWidget(self.widgetMapserver)
-        #     self.txtMapserverName.setText(server.serverName)
-        #     self.fileMapserver.setFilePath(server.folder)
-        #     self.txtRemoteFolder.setText(server.folder)
-        #     self.txtMapserverHost.setText(server.host)
-        #     self.txtMapserverPort.setText(str(server.port))
-        #     self.mapserverAuth.setConfigId(server.authid)
-        #     self.txtMapserverUrl.setText(server.url)
-        #     self.txtMapServicesPath.setText(server.servicesPath)
-        #     self.txtProjFolder.setText(server.projFolder)
-        #     self.radioLocalPath.setChecked(server.useLocalFolder)
-        #     self.radioFtp.setChecked(not server.useLocalFolder)
-        #     self.mapserverStorageChanged(server.useLocalFolder)
-        # elif isinstance(server, PostgisServer):
-        #     self.stackedWidget.setCurrentWidget(self.widgetPostgis)
-        #     self.txtPostgisName.setText(server.serverName)
-        #     self.txtPostgisDatabase.setText(server.database)
-        #     self.txtPostgisPort.setText(server.port)
-        #     self.txtPostgisServerAddress.setText(server.host)
-        #     self.txtPostgisSchema.setText(server.schema)
-        #     self.postgisAuth.setConfigId(server.authid)
-
-        # self.setDirty()
-
-    def saveButtonClicked(self):
-        if not self.saveServer():
-            return
+        :param silent:  If True (default = False), a message bar will be shown upon success.
+                        Otherwise, there will only be a log message.
+        :returns:       True if the server was successfully saved, False otherwise.
+        """
+        if not self.persistServer():
+            return False
         self.serverSetClean()
+        if not silent:
+            self.showSuccessBar("Success", "Successfully saved server settings")
+        else:
+            self.logInfo("Successfully saved server settings")
+        return True
 
-    def canClose(self):
+    def canClose(self) -> bool:
+        """ Checks if the server connection widget can be closed (i.e. no unsaved edits). """
         if self.serverIsDirty():
-            res = self.askToSave("Do you want to close without saving the current server?")
-            return res == self.BUTTONS.YES
+            res = self.askToSave("Do you want to save your changes to the current server?")
+            if res == self.BUTTONS.YES:
+                return self.saveServer(True)
+            if res == self.BUTTONS.NO:
+                # Remove server from list view if it has never been saved before (clean up)
+                self.cleanupServerItem()
+            return res != self.BUTTONS.CANCEL
         return True
 
 
 class ServerItemWidget(QWidget):
     def __init__(self, server_class, server_name, parent=None):
+        """ Widget used by the list widget control to show all available server instances. """
         super(ServerItemWidget, self).__init__(parent)
         icon = server_class.getWidgetClass().getPngIcon()
         self.layout = QHBoxLayout()

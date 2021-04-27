@@ -6,7 +6,7 @@ from qgis.core import QgsMessageLog
 from requests.models import PreparedRequest
 
 from geocatbridge.utils.gui import loadUiType
-from geocatbridge.utils.meta import getTrackerUrl
+from geocatbridge.utils.meta import getTrackerUrl, getAppName
 from geocatbridge.utils.files import getIconPath
 
 WIDGET, BASE = loadUiType(__file__)
@@ -18,8 +18,9 @@ class ErrorDialog(BASE, WIDGET):
         super(ErrorDialog, self).__init__()
         self.setupUi(self)
 
-        pixmap = QPixmap(getIconPath("geocatlogo"))
+        pixmap = QPixmap(getIconPath("bridge_logo"))
         self.labelIcon.setPixmap(pixmap)
+        self.label.setText(f"The {getAppName()} plugin has caused the following exception:")
 
         self.txtError.setHtml(html_error)
 
@@ -39,6 +40,6 @@ class ErrorDialog(BASE, WIDGET):
         req = PreparedRequest()
         try:
             req.prepare("GET", tracker_url, params=parse.urlencode(payload, quote_via=parse.quote))
-            webbrowser.open_new(req.url)
+            webbrowser.open_new_tab(req.url)
         except Exception as e:
             QgsMessageLog().logMessage(f"Failed to send crash report: {e}", 'GeoCat Bridge')

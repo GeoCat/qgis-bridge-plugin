@@ -1,4 +1,4 @@
-<html>
+<html lang="en">
 <head>
   <style>
     body {
@@ -13,8 +13,8 @@
       font-size: 24px;
     }
     h2 {
-      font-weight: 100;
-      font-size: 20px;
+      font-weight: 200;
+      font-size: 18px;
       margin: 10px 0;
     }
     h3 {
@@ -26,7 +26,6 @@
     p {
       margin: 10px 0;
       line-height: 1.7;
-      columns: #373737;
     }
     a {
       color: #0366d6;
@@ -42,13 +41,11 @@
     }
     .gc-left-column {
       vertical-align: top;
-      padding: 15px;
-      width: 80%;
+      padding: 10px 0px;
     }
     .gc-right-column {
       vertical-align: top;
-      width: 300px;
-      padding: 15px;
+      padding: 20px;
       background-color: #fff;
       border-left: 1px solid #ddd;
     }
@@ -67,11 +64,10 @@
       padding: 15px 30px;
     }
     .gc-intro {
-      padding: 0 85px;
-      padding-bottom: 15px;
+      padding: 0 75px 15px;
     }
     .gc-about {
-      padding: 0 85px;
+      padding: 0 75px;
     }
     .gc-about table {
       margin-top: 35px;
@@ -79,9 +75,11 @@
       width: 100%;
       border-collapse: collapse;
       border-spacing: 0;
+      table-layout: fixed;
+      word-wrap: break-word;
     }
     .gc-about td {
-      width: 23%;
+      /* width: 23%; */
       background-color: #fff;
       border: 1px solid #ddd;
       vertical-align: top;
@@ -93,7 +91,7 @@
     .gc-about td a {
       padding: 15px 10px;
       display: block;
-      font-size: 15px;
+      font-size: 13px;
       color: #373737;
       text-decoration: none;
     }
@@ -123,28 +121,38 @@
       transform: rotate(180deg);
     }
     .gc-about .gc-column {
-      width: 2%;
+      width: 30px;
+      background-color: #f9f9f9;
+      border: 0 !important;
+    }
+    .gc-about .gc-row {
+      height: 50px;
       background-color: #f9f9f9;
       border: 0 !important;
     }
     .gc-footer {
-      padding: 10px 85px;
+      padding: 15px 75px;
     }    
-    .gc-footer p {
-      margin-bottom: 5px;
-    }
-    .gc-logo-geocat a {
-      display: block;
-    }
-    .gc-logo-geocat .gc-logo {
+    .gc-footer .gc-logo {
       height: 35px;
+    }
+    .gc-footer .gc-logo-text {
+      float: left;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 15px;
+      margin-top: 6px;
+      height: 35px;
+    }
+    .gc-logo-bridge {
+      margin-left: -10px;
     }
     /* buttons */
     .gc-btn {
       display: block;
       padding: 10px 20px;
       border-radius: 5px;
-      font-weight: 300;
+      font-weight: 400;
       text-decoration: none;
       color: #fff;
       font-size: 16px;
@@ -156,16 +164,12 @@
       color: #fff;
       text-decoration: none;
     }
-    .gc-btn-bridge {
-      background-color: #ffd400;
-      display: inline-block;
-      margin-left: 0;
-    }
     .gc-btn-live {
       background-color: #ff9900;
       min-width: 200px;
     }
    </style>
+  <title>About GeoCat</title>
 </head>
 <body>
   <table class="gc-columns">
@@ -185,46 +189,47 @@
             <tr>
               <td>
                 <a href="https://www.geocat.net/geonetwork/">
-                  <img src="img/gc_enterprise_logo_500x500.png">
+                  <img src="img/gc_enterprise_logo.png" alt="GeoNetwork Enterprise">
                   <h2>GeoNetwork Enterprise</h2>
                 </a>
               </td>
-              <td class="gc-column"></td class="gc-column">
+              <td class="gc-column"></td>
               <td>
                 <a href="https://www.geocat.net/geoserver/">
-                  <img src="img/gc_geoserver_logo_500x500.png">
+                  <img src="img/gc_geoserver_logo.png" alt="GeoServer Enterprise">
                   <h2>GeoServer Enterprise</h2>
                 </a>
               </td>
-              <td class="gc-column"></td class="gc-column">
+            </tr>
+            <tr class="gc-row"></tr>
+            <tr>
               <td>
                 <a href="https://www.geocat.net/live/">
-                  <img src="img/gc_live_logo_500x500.png">
+                  <img src="img/gc_live_logo.png" alt="GeoCat Live">
                   <h2>GeoCat Live</h2>
                 </a>
               </td>
-              <td class="gc-column"></td class="gc-column">
+              <td class="gc-column"></td>
               <td>
                 <a href="https://www.geocat.net/services/">
-                  <img src="img/gc_services_logo_500x500.png">
+                  <img src="img/gc_services_logo.png" alt="Services">
                    <h2>Services</h2>
                 </a>
               </td>
             </tr>
           </table>
-          <a href="https://www.geocat.net/" data-icon="$">Learn more &rarr;</a>
         </div>
         <div class="gc-footer">
-          <p>Products made with &#9829; by</p>
-          <div class="gc-logo-geocat">
-            <a href="https://www.geocat.net"><img class="gc-logo" src="img/gc_geocat_logo_text.svg" alt="GeoCat"></a>
+          <div class="gc-logo-text">
+            Products made with &#9829; by
           </div>
+          <a href="https://www.geocat.net"><img class="gc-logo" src="img/gc_geocat_logo_text.svg" alt="GeoCat"></a>
         </div>
       </td>
       <td class="gc-right-column">
-        <h3>Live</h3>
-        <p>Try GeoCat Live hosting of GeoNetwork, GeoServer and PostGIS today!</p>
-        <a class="gc-btn gc-btn-live" href="https://www.geocat.net/live/">Sign up here</a>
+        <h3>GeoCat Live</h3>
+        <p>Try all-in-one hosting of GeoNetwork, GeoServer and PostGIS today!</p>
+        <a class="gc-btn gc-btn-live" href="https://www.geocat.net/live/">Sign up for GeoCat Live</a>
       </td>
     </tr>
   </table>

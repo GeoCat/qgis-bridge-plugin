@@ -1,7 +1,7 @@
 from qgis.PyQt.QtWidgets import QHBoxLayout
 from qgis.gui import QgsAuthConfigSelect
 
-from geocatbridge.servers.models.geonetwork import GeoNetworkProfiles
+from geocatbridge.servers.models.gn_profile import GeoNetworkProfiles
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.utils import gui
 
@@ -30,16 +30,17 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         self.comboMetadataProfile.setVisible(False)
         self.labelMetadataProfile.setVisible(False)
 
+    def getName(self):
+        return self.txtGeonetworkName.text().strip()
+
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
-        profile = GeoNetworkProfiles[self.comboMetadataProfile.currentIndex()]
-
         try:
             return self.serverType(
-                name=self.txtGeonetworkName.text().strip(),
+                name=self.getName(),
                 authid=self.geonetworkAuth.configId() or None,
                 url=self.txtGeonetworkUrl.text().strip(),
-                profile=profile,
+                profile=self.comboMetadataProfile.currentIndex(),
                 node=self.txtGeonetworkNode.text().strip()
             )
         except Exception as e:
@@ -57,9 +58,6 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         self.comboMetadataProfile.blockSignals(True)
         self.comboMetadataProfile.setCurrentIndex(GeoNetworkProfiles.DEFAULT)
         self.comboMetadataProfile.blockSignals(False)
-
-        # After the name was set and the other fields cleared, the form is "dirty"
-        self.setDirty()
 
     def loadFromInstance(self, server):
         """ Populates the form fields with the values from the given server instance. """
@@ -88,5 +86,4 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
 
     def populateProfileCombo(self):
         self.comboMetadataProfile.clear()
-        for profile in GeoNetworkProfiles:
-            self.comboMetadataProfile.addItem(profile)
+        self.comboMetadataProfile.addItems(GeoNetworkProfiles.values())

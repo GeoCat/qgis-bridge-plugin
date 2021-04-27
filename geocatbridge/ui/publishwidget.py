@@ -55,7 +55,7 @@ WIDGET, BASE = gui.loadUiType(__file__)
 class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
     def __init__(self, parent):
-        super().__init__()
+        super().__init__(parent)
         self.isMetadataPublished = {}
         self.isDataPublished = {}
         self.currentRow = None
@@ -64,6 +64,11 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
         self.fieldsToPublish = {}
         self.metadata = {}
+
+        # Default "not set" values for publish comboboxes
+        self.COMBO_NOTSET_DATA = self.tr("Do not publish data")
+        self.COMBO_NOTSET_META = self.tr("Do not publish metadata")
+
         gui.execute(self._setupUi)
 
     def _setupUi(self):
@@ -77,7 +82,6 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
         self.btnPublish.clicked.connect(self.publish)
-        self.btnPublishOnBackground.clicked.connect(self.publishOnBackground)
         self.btnOpenQgisMetadataEditor.clicked.connect(self.openMetadataEditor)
         self.labelSelect.linkActivated.connect(self.selectLabelClicked)
         self.btnRemoveAll.clicked.connect(self.unpublishAll)
@@ -119,7 +123,10 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
     def metadataServerChanged(self):
         self.updateLayersPublicationStatus(False, True)
-        profile = manager.getMetadataProfile(self.comboMetadataServer.currentText())
+        md_combo = self.comboMetadataServer.currentText()
+        profile = 0
+        if md_combo != self.COMBO_NOTSET_META:
+            profile = manager.getMetadataProfile(self.comboMetadataServer.currentText())
         num_tabs = self.tabWidgetMetadata.count()
         if profile == 0:  # Default profile should be equal to 0
             if num_tabs > 1:
@@ -267,19 +274,19 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.comboLanguage.addItem(lang)
 
     def populateComboGeodataServer(self):
-        servers = manager.getGeodataServers()
+        servers = manager.getGeodataServerNames()
         current = self.comboGeodataServer.currentText()
         self.comboGeodataServer.clear()
-        self.comboGeodataServer.addItem(self.tr("Do not publish data"))
+        self.comboGeodataServer.addItem(self.COMBO_NOTSET_DATA)
         self.comboGeodataServer.addItems(servers)
         if current in servers:
             self.comboGeodataServer.setCurrentText(current)
 
     def populateComboMetadataServer(self):
-        servers = manager.getMetadataServers()
+        servers = manager.getMetadataServerNames()
         current = self.comboMetadataServer.currentText()
         self.comboMetadataServer.clear()
-        self.comboMetadataServer.addItem(self.tr("Do not publish metadata"))
+        self.comboMetadataServer.addItem(self.COMBO_NOTSET_META)
         self.comboMetadataServer.addItems(servers)
         if current in servers:
             self.comboMetadataServer.setCurrentText(current)
@@ -434,7 +441,6 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
         can_publish = can_publish and self.listLayers.count()
         self.btnPublish.setEnabled(can_publish)
-        self.btnPublishOnBackground.setEnabled(can_publish)
 
     def unpublishAll(self):
         for name in self.isDataPublished:
@@ -492,6 +498,9 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if not self.validateBeforePublication(to_publish, style_only):
             return
 
+        if self.chkBackground.isChecked():
+            return self.publishOnBackground()
+
         progress_dialog = ProgressDialog(to_publish, self.parent)
         task = self.getPublishTask(self.parent)
         task.stepStarted.connect(progress_dialog.setInProgress)
@@ -512,11 +521,6 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.updateLayersPublicationStatus(task.geodata_server is not None, task.metadata_server is not None)
 
     def publishOnBackground(self):
-        to_publish = self._toPublish()
-        style_only = self.chkOnlySymbology.isChecked()
-        if not self.validateBeforePublication(to_publish, style_only):
-            return
-
         self.parent.close()
         task = self.getPublishTask(iface.mainWindow())
 
@@ -602,9 +606,9 @@ class LayerItemWidget(QWidget):
         self.check = QCheckBox()
         self.check.setText(layer.name())
         if layer.type() == layer.VectorLayer:
-            self.check.setIcon(QgsApplication().getThemeIcon('/mIconLineLayer.svg'))
+            self.check.setIcon(QgsApplication.getThemeIcon('/mIconLineLayer.svg'))
         else:
-            self.check.setIcon(QgsApplication().getThemeIcon('/mIconRaster.svg'))
+            self.check.setIcon(QgsApplication.getThemeIcon('/mIconRaster.svg'))
         self.labelMetadata = QLabel()
         self.labelMetadata.setFixedWidth(50)
         self.labelData = QLabel()

@@ -10,27 +10,11 @@ from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsProject, QgsApplication
 
 from geocatbridge.errorhandler import handleError
-# from geocatbridge.processing.bridgeprovider import BridgeProvider
+from geocatbridge.process.provider import BridgeProvider
 from geocatbridge.servers import manager
 from geocatbridge.ui.bridgedialog import BridgeDialog
 from geocatbridge.ui.multistylerwidget import MultistylerWidget
 from geocatbridge.utils import meta, files
-
-
-# Enable PyCharm remote debugger, if debug folder exists
-_debug_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '_debug'))
-if os.path.isdir(_debug_dir):
-    sys.path.append(_debug_dir)
-    import pydevd_pycharm
-    from warnings import simplefilter
-    try:
-        # Suppress ResourceWarning when remote debug server is not running
-        simplefilter('ignore', category=ResourceWarning)
-        pydevd_pycharm.settrace('localhost', True, True, 53100)
-    except (ConnectionRefusedError, AttributeError):
-        # PyCharm remote debug server is not running on localhost:53100
-        # Restore ResourceWarnings
-        simplefilter('default', category=ResourceWarning)    
 
 
 class GeocatBridge:
@@ -43,11 +27,13 @@ class GeocatBridge:
         self.action_multistyler = None
         self.widget_multistyler = None
 
-        # readServers()  # TODO: remove
+        self._layerSignals = LayerStyleEventManager()
+
+        # Load server configuration from QSettings
         manager.loadConfiguredServers()
 
         self.name = meta.getAppName()
-        # self.provider = BridgeProvider()  FIXME
+        self.provider = None
         self.locale = QSettings().value("locale/userLocale")[0:2]
         locale_path = files.getLocalePath(f"bridge_{self.locale}")
 
@@ -71,7 +57,21 @@ class GeocatBridge:
         
         sys.excepthook = plugin_hook
 
+    @staticmethod
+    def openDocUrl():
+        """ Opens the web-based documentation in a new tab of the default browser. """
+        doc_url = meta.getProperty('docs').rstrip('/')
+        version = meta.getProperty('version')
+        full_url = f"{doc_url}/v{version}/"
+        webbrowser.open_new_tab(full_url)
+
+    def initProcessing(self):
+        self.provider = BridgeProvider()
+        QgsApplication.processingRegistry().addProvider(self.provider)  # noqa
+
     def initGui(self):
+        self.initProcessing()
+
         self.action_publish = QAction(QIcon(files.getIconPath("publish_button")),
                                       QCoreApplication.translate(self.name, "Publish"), self._win)
         self.action_publish.setObjectName("startPublish")
@@ -80,11 +80,6 @@ class GeocatBridge:
         self.iface.addPluginToWebMenu(self.name, self.action_publish)
         self.iface.addWebToolBarIcon(self.action_publish)
             
-        self.action_help = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'), "Plugin help...", self._win)
-        self.action_help.setObjectName(f"{self.name} Help")
-        self.action_help.triggered.connect(lambda: webbrowser.open_new(files.getHtmlDocsPath("index")))
-        self.iface.addPluginToWebMenu(self.name, self.action_help)
-
         self.widget_multistyler = MultistylerWidget()
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.widget_multistyler)
         self.widget_multistyler.hide()
@@ -97,17 +92,22 @@ class GeocatBridge:
 
         self.iface.currentLayerChanged.connect(self.widget_multistyler.updateForCurrentLayer)
 
-        QgsProject().instance().layerWasAdded.connect(self.layerWasAdded)
-        QgsProject().instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
+        self.action_help = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'),
+                                   "Plugin Help...", self._win)
+        self.action_help.setObjectName(f"{self.name} Help")
+        self.action_help.triggered.connect(self.openDocUrl)
+        self.iface.addPluginToWebMenu(self.name, self.action_help)
+
+        QgsProject().instance().layersAdded.connect(self.layersAdded)
+        QgsProject().instance().layersWillBeRemoved.connect(self.layersWillBeRemoved)
 
     def unload(self):
         files.removeTempFolder()
     
         self.iface.currentLayerChanged.disconnect(self.widget_multistyler.updateForCurrentLayer)
-        QgsProject().instance().layerWasAdded.disconnect(self.layerWasAdded)
+        QgsProject().instance().layersAdded.disconnect(self.layersAdded)
 
-        for layer, func in self._layerSignals.items():
-            layer.styleChanged.disconnect(func)
+        self._layerSignals.clear()
 
         self.iface.removePluginWebMenu(self.name, self.action_help)
         self.iface.removePluginWebMenu(self.name, self.action_publish)
@@ -115,20 +115,53 @@ class GeocatBridge:
 
         self.iface.removeWebToolBarIcon(self.action_publish)
 
+        QgsApplication.processingRegistry().removeProvider(self.provider)  # noqa
+
         sys.excepthook = self.qgis_hook
 
-    _layerSignals = {}
+    def layersAdded(self, layers):
+        for lyr in layers:
+            self._layerSignals.connect(lyr, self.widget_multistyler.updateLayer)
 
-    def layerWasAdded(self, layer):
-        self._layerSignals[layer] = partial(self.widget_multistyler.updateLayer, layer)
-        layer.styleChanged.connect(self._layerSignals[layer])
-
-    def layerWillBeRemoved(self, layerid):
-        for layer, signal in self._layerSignals.items():
-            if layer.id() == layerid:
-                del signal
-                return
+    def layersWillBeRemoved(self, layer_ids):
+        layer_ids = frozenset(layer_ids)
+        for lyr_id in layer_ids:
+            self._layerSignals.disconnect(lyr_id)
 
     def publishClicked(self):
         dialog = BridgeDialog(self.iface.mainWindow())
-        dialog.exec_()
+        dialog.show()
+
+
+class LayerStyleEventManager:
+    def __init__(self):
+        self._store = dict()
+
+    def connect(self, lyr, handler, *args, **kwargs):
+        """ Connects an event handler function to the layer styleChanged event.
+        It is expected that the handler function requires a layer argument.
+        Optionally, other *args and **kwargs may be passed on to the function.
+        """
+        try:
+            func = partial(handler, lyr, *args, **kwargs)
+            lyr.styleChanged.connect(func)
+            self._store[lyr.id()] = lyr, func
+        except RuntimeError:
+            pass
+
+    def disconnect(self, layer_id):
+        lyr, func = self._store.get(layer_id, (None, None))
+        if lyr and func:
+            try:
+                lyr.styleChanged.disconnect(func)  # noqa
+            except RuntimeError:
+                pass
+        try:
+            del self._store[layer_id]
+        except KeyError:
+            pass
+
+    def clear(self):
+        all_ids = list(self._store.keys())
+        for lyr_id in all_ids:
+            self.disconnect(lyr_id)

@@ -2,6 +2,7 @@ from urllib.parse import urlparse
 from abc import ABC, abstractmethod
 from pathlib import Path
 from importlib import import_module
+from typing import Union
 
 import requests
 import json
@@ -9,7 +10,8 @@ import json
 from qgis.PyQt.QtGui import QPixmap
 from qgis.core import (
     QgsAuthMethodConfig,
-    QgsApplication
+    QgsApplication,
+    QgsProcessingAlgorithm
 )
 
 from geocatbridge.utils.feedback import FeedbackMixin
@@ -17,8 +19,6 @@ from geocatbridge.utils import files
 
 
 class AbstractServer(ABC):
-    _DATACAT = False
-    _METACAT = False
 
     @abstractmethod
     def getSettings(self) -> dict:
@@ -27,7 +27,7 @@ class AbstractServer(ABC):
 
         :returns:   A keyword arguments dictionary.
         """
-        pass
+        raise NotImplementedError(f"{self.__class__.__name__} must implement getSettings()")
 
     @classmethod
     @abstractmethod
@@ -37,7 +37,7 @@ class AbstractServer(ABC):
 
         :returns:   A server class type.
         """
-        raise NotImplementedError("cannot call abstract class method")
+        raise NotImplementedError(f"{cls.__name__} must implement getWidgetClass()")
 
     @classmethod
     @abstractmethod
@@ -47,7 +47,7 @@ class AbstractServer(ABC):
 
         :returns:   A string with the server type label.
         """
-        raise NotImplementedError("cannot call abstract class method")
+        raise NotImplementedError(f"{cls.__name__} must implement getServerTypeLabel()")
 
 
 class ServerBase(AbstractServer, FeedbackMixin, ABC):
@@ -80,14 +80,6 @@ class ServerBase(AbstractServer, FeedbackMixin, ABC):
     def authId(self):
         return self._authid
 
-    @property
-    def isDataCatalog(self):
-        return self._DATACAT
-
-    @property
-    def isMetaCatalog(self):
-        return self._METACAT
-
     @abstractmethod
     def testConnection(self) -> bool:
         """ This abstract method must be implemented on all server instances.
@@ -96,6 +88,17 @@ class ServerBase(AbstractServer, FeedbackMixin, ABC):
         :returns:   True if the connection is established, False otherwise.
         """
         pass
+
+    @classmethod
+    def getAlgorithmInstance(cls) -> Union[QgsProcessingAlgorithm, None]:
+        """ This abstract class method can be implemented on all server classes, if needed.
+        If the server class can also be used by a QGIS processing provider, this method should
+        return a new processing algorithm instance that exposes its functionality.
+
+        :returns:   A new algorithm instance that inherits from QgsProcessingAlgorithm.
+                    If the server class does not support this, return None.
+        """
+        return
 
 
 class CatalogServerBase(ServerBase, ABC):
@@ -122,7 +125,7 @@ class CatalogServerBase(ServerBase, ABC):
         if isinstance(data, dict):
             data = json.dumps(data)
             headers["Content-Type"] = "application/json"
-        self.logInfo("Making %s request to '%s'" % (method, url))
+        self.logInfo(f"{method.upper()} {url}")
         r = req_method(url, headers=headers, files=files_, data=data, auth=auth)
         r.raise_for_status()
         return r
@@ -196,25 +199,34 @@ class ServerWidgetBase:
         """ Sets the form to a 'clean' state if the field values did not change. """
         self._dirty = False
 
+    def getName(self):
+        """ This method must be implemented on all server widget controllers.
+        It should return the current name of the server, retrieved from a user input text field.
+
+        :returns:   A server name string.
+        """
+        raise NotImplementedError(f"{self.__class__.__name__} must implement getName()")
+
     def createServerInstance(self):
         """ This method must be implemented on all server widget controllers.
         It should collect all data from the server configuration widget form fields and
         return a new server instance using that data as input parameters.
 
-        :returns:           A server instance of type `self.serverType`.
+        :returns:   A server instance of type `self.serverType`.
         """
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.__class__.__name__} must implement createServerInstance()")
 
     def newFromName(self, name: str):
         """ This method must be implemented on all server widget controllers.
         It should set the server name form field to the given name and keep
         all other fields blank or in an initial state.
 
-        .. note::   Once the name has been set, typically `setDirty()` should be called.
+        .. note::   Once the name has been set and initial fields have been populated,
+                    `setDirty()` is called by the server connections dialog.
 
         :param name:    The new server name.
         """
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.__class__.__name__} must implement newFromName()")
 
     def loadFromInstance(self, server):
         """ This method must be implemented on all server widget controllers.
@@ -225,7 +237,7 @@ class ServerWidgetBase:
 
         :param server:  A server instance.
         """
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.__class__.__name__} must implement loadFromInstance()")
 
     @classmethod
     def getPngIcon(cls) -> QPixmap:
