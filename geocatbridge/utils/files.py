@@ -96,17 +96,6 @@ def getLocalePath(name, ext=".qm"):
     return str(BRIDGE_ROOT_DIR / _DIR_NAME_TRANSLATIONS / _fix_ext(name, ext))
 
 
-def getHtmlDocsPath(name, ext=".html"):
-    """
-    Constructs the full HTML documentation file path for a given base name.
-    If `name` does not have an extension, the given `ext` will be appended.
-    :param name:    The documentation file name or relative `Path`.
-    :param ext:     The default docs extension (if not specified in the name).
-    :returns:       A browser-ready documentation file path string.
-    """
-    return f"file://{BRIDGE_ROOT_DIR / _DIR_NAME_DOCS / _fix_ext(name, ext)}"
-
-
 def getDirectory(path):
     """ Returns the parent directory path to the given file or directory path. """
     return str(Path(path).resolve().parent)

@@ -8,7 +8,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt import QtCore
 from qgis.gui import QgsAuthConfigSelect
 
-from geocatbridge.servers.models.geoserver import GeoserverStorage
+from geocatbridge.servers.models.gs_storage import GeoserverStorage
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.servers.views.geoserver_ds import GeoserverDatastoreDialog
 from geocatbridge.utils import gui
@@ -27,7 +27,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.addAuthWidget()
 
         self.populateStorageCombo()
-        self.comboGeoserverDataStorage.currentIndexChanged.connect(self.datastoreChanged)
+        self.comboStorageType.currentIndexChanged.connect(self.datastoreChanged)
         self.btnConnectGeoserver.clicked.connect(self.testConnection)
         self.btnRefreshDatabases.clicked.connect(partial(self.updateDbServersCombo, True))
         self.txtGeoserverName.textChanged.connect(self.setDirty)
@@ -37,16 +37,19 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         # Declare progress dialog
         self._pgdialog = None
 
+    def getName(self):
+        return self.txtGeoserverName.text().strip()
+
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
         db = None
-        storage = self.comboGeoserverDataStorage.currentIndex()
-        if storage in (self._server_type.POSTGIS_BRIDGE, self._server_type.POSTGIS_GEOSERVER):
+        storage = self.comboStorageType.currentIndex()
+        if storage in (GeoserverStorage.POSTGIS_BRIDGE, GeoserverStorage.POSTGIS_GEOSERVER):
             db = self.comboGeoserverDatabase.currentText()
 
         try:
             return self.serverType(
-                name=self.txtGeoserverName.text().strip(),
+                name=self.getName(),
                 authid=self.geoserverAuth.configId() or None,
                 url=self.txtGeoserverUrl.text().strip(),
                 storage=storage,
@@ -65,15 +68,12 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.geoserverAuth.setConfigId(None)
 
         # Set datastore and database comboboxes
-        self.comboGeoserverDataStorage.blockSignals(True)
-        self.comboGeoserverDataStorage.setCurrentIndex(GeoserverStorage.FILE_BASED)
+        self.comboStorageType.blockSignals(True)
+        self.comboStorageType.setCurrentIndex(GeoserverStorage.FILE_BASED)
         self.datastoreChanged(GeoserverStorage.FILE_BASED)
-        self.chkUseOriginalDatasource.setChecked(False)
+        self.chkUseOriginalDataSource.setChecked(False)
         self.chkUseVectorTiles.setChecked(False)
-        self.comboGeoserverDataStorage.blockSignals(False)
-
-        # After the name was set and the other fields cleared, the form is "dirty"
-        self.setDirty()
+        self.comboStorageType.blockSignals(False)
 
     def loadFromInstance(self, server):
         """ Populates the form fields with the values from the given server instance. """
@@ -82,12 +82,12 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.geoserverAuth.setConfigId(server.authId)
 
         # Set datastore and database comboboxes
-        self.comboGeoserverDataStorage.blockSignals(True)
-        self.comboGeoserverDataStorage.setCurrentIndex(server.storage)
+        self.comboStorageType.blockSignals(True)
+        self.comboStorageType.setCurrentIndex(server.storage)
         self.datastoreChanged(server.storage, server.postgisdb)
         self.chkUseOriginalDataSource.setChecked(server.useOriginalDataSource)
         self.chkUseVectorTiles.setChecked(server.useVectorTiles)
-        self.comboGeoserverDataStorage.blockSignals(False)
+        self.comboStorageType.blockSignals(False)
 
         # After the data has loaded, the form is "clean"
         self.setClean()
@@ -104,29 +104,30 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.parent.testConnection(server)
 
     def populateStorageCombo(self):
-        self.comboGeoserverDataStorage.clear()
-        for storage in GeoserverStorage:
-            self.comboGeoserverDataStorage.addItem(storage)
+        self.comboStorageType.clear()
+        self.comboStorageType.addItems(GeoserverStorage.values())
 
     def datastoreChanged(self, storage, init_value=None):
         """ Called each time the database combobox selection changed. """
+        if storage is None:
+            storage = GeoserverStorage[self.comboStorageType.currentIndex()]
         if storage == GeoserverStorage.POSTGIS_BRIDGE:
             self.updateDbServersCombo(False, init_value)
             self.comboGeoserverDatabase.setVisible(True)
-            self.btnAddDatastore.setVisible(False)
+            self.labelGeoserverDatastore.setText('Database')
             self.labelGeoserverDatastore.setVisible(True)
-            self.btnRefreshDatabases.setVisible(False)
+            self.datastoreControls.setVisible(False)
         elif storage == GeoserverStorage.POSTGIS_GEOSERVER:
             self.comboGeoserverDatabase.setVisible(True)
-            self.btnAddDatastore.setVisible(True)
+            self.labelGeoserverDatastore.setText('Datastore')
             self.labelGeoserverDatastore.setVisible(True)
-            self.btnRefreshDatabases.setVisible(True)
+            self.datastoreControls.setVisible(True)
             self.updateDbServersCombo(True, init_value)
         elif storage == GeoserverStorage.FILE_BASED:
             self.comboGeoserverDatabase.setVisible(False)
-            self.btnAddDatastore.setVisible(False)
             self.labelGeoserverDatastore.setVisible(False)
-            self.btnRefreshDatabases.setVisible(False)
+            self.datastoreControls.setVisible(False)
+        self.adjustSize()
         self.setDirty()
 
     def addGeoserverPgDatastores(self, current, result):
@@ -156,11 +157,17 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                                         this value can be set immediately as the only available and selected item.
                                         Doing so prevents a full refresh of GeoServer datastores.
         """
-        self.parent.logInfo(f"managed_by_geoserver: {managed_by_geoserver}, init_value: {init_value}")  # TODO: remove
-        if managed_by_geoserver and init_value and self.comboGeoserverDatabase.count() == 0:
-            self.comboGeoserverDatabase.addItem(init_value)
-            self.comboGeoserverDatabase.setCurrentText(init_value)
-            return
+        if managed_by_geoserver and init_value:
+            if self.comboGeoserverDatabase.count() == 0:
+                # Only add the given init_value item to the empty combo (user should manually refresh)
+                self.comboGeoserverDatabase.addItem(init_value)
+                self.comboGeoserverDatabase.setCurrentText(init_value)
+                return
+            # If combo has values, try and find the init_value and set it to that (user should manually refresh)
+            index = self.comboGeoserverDatabase.findText(init_value)
+            if index >= 0:
+                self.comboGeoserverDatabase.setCurrentIndex(index)
+                return
 
         current_db = self.comboGeoserverDatabase.currentText() or init_value
         self.comboGeoserverDatabase.clear()
@@ -190,10 +197,10 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
 
         else:
             # Database is managed by Bridge: iterate over all user-defined database connections
-            for s in self.parent.serverManager.getDbServers():
-                self.comboGeoserverDatabase.addItem(s.serverName)
-                if current_db == s.serverName:
-                    self.comboGeoserverDatabase.setCurrentText(current_db)
+            db_servers = self.parent.serverManager.getDbServerNames()
+            self.comboGeoserverDatabase.addItems(db_servers)
+            if current_db in db_servers:
+                self.comboGeoserverDatabase.setCurrentText(current_db)
 
     def addPostgisDatastore(self):
         server = self.createServerInstance()

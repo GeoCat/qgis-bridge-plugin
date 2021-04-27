@@ -1,92 +1,134 @@
-from qgis.PyQt.QtCore import QSize, QSettings
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QFrame
+from functools import partial
 
-from geocatbridge.utils import files, gui, meta
+from qgis.PyQt.QtCore import QSettings, Qt
+from qgis.PyQt.QtGui import QIcon, QKeyEvent
+from qgis.PyQt.QtWidgets import QListWidgetItem
+
 from geocatbridge.ui.geocatwidget import GeoCatWidget
 from geocatbridge.ui.publishwidget import PublishWidget
 from geocatbridge.ui.serverconnectionswidget import ServerConnectionsWidget
+from geocatbridge.utils import files, gui, meta
+from geocatbridge.utils.enum_ import LabeledIntEnum
 
 FIRSTTIME_SETTING = f"{meta.PLUGIN_NAMESPACE}/FirstTimeRun"
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
 
+class Panels(LabeledIntEnum):
+    PUBLISH = PublishWidget
+    SERVERS = ServerConnectionsWidget
+    ABOUT = GeoCatWidget
+
+
 class BridgeDialog(BASE, WIDGET):
 
     def __init__(self, parent=None):
-        super(BridgeDialog, self).__init__(parent)
+        super().__init__(parent)
         self.setupUi(self)
-        self.publishWidget = PublishWidget(self)
-        self.serversWidget = ServerConnectionsWidget()
-        self.geocatWidget = GeoCatWidget()
-        self.stackedWidget.addWidget(self.publishWidget)
-        self.stackedWidget.addWidget(self.serversWidget)
-        self.stackedWidget.addWidget(self.geocatWidget)
-        self.listWidget.setMinimumSize(QSize(100, 200))
-        self.listWidget.setMaximumSize(QSize(153, 16777215))
-        self.listWidget.setStyleSheet("QListWidget{\n"
-                                      "    background-color: rgb(69, 69, 69, 220);\n"
-                                      "    outline: 0;\n"
-                                      "}\n"
-                                      "QListWidget::item {\n"
-                                      "    color: white;\n"
-                                      "    padding: 3px;\n"
-                                      "}\n"
-                                      "QListWidget::item::selected {\n"
-                                      "    color: black;\n"
-                                      "    background-color:palette(Window);\n"
-                                      "    padding-right: 0px;\n"
-                                      "}")
-        self.listWidget.setFrameShape(QFrame.Box)
-        self.listWidget.setLineWidth(0)
-        self.listWidget.setIconSize(QSize(32, 32))
-        self.listWidget.setUniformItemSizes(True)
-        self.item = []
-        for i in range(3):
-            item = self.listWidget.item(i)
-            item.setIcon(QIcon(files.getIconPath("preview")))
-        self.listWidget.currentRowChanged.connect(self.sectionChanged)
+        self.setWindowTitle(meta.getAppName())
+
+        self.panel_widgets, self.keymap = self.addPanels()
+
+        # Connect event handlers for panel activation
+        self.listWidget.itemClicked.connect(partial(self.listItemClicked))
+        self.listWidget.keyPressEvent = partial(self.listKeyPressed)
+
         if self.isFirstTime():
-            self.currentIdx = 2
-            self.listWidget.setCurrentRow(2)
+            # First-time users should see the About panel first
+            self.listWidget.setCurrentRow(Panels.ABOUT)
         else:
-            self.currentIdx = 0
-            self.listWidget.setCurrentRow(0)
+            self.listWidget.setCurrentRow(Panels.PUBLISH)
+
+    def addPanels(self):
+        """ Populate stackWidget and listWidget and return a list of available panel widgets and a keymap. """
+        keymap = {}
+        panels = []
+        for i, panel in enumerate(Panels):
+            widget = panel.value(self)
+            panels.append(widget)
+            self.stackedWidget.addWidget(widget)
+            name = panel.name.lower().title()
+            list_item = QListWidgetItem(QIcon(files.getIconPath(name.lower())), name)
+            self.listWidget.insertItem(panel, list_item)
+            keymap[name.lower()[0]] = i
+        return panels, keymap
 
     @staticmethod
-    def isFirstTime():
+    def isFirstTime() -> bool:
+        """ Checks if the FirstTimeRun QSetting exists. If not, it is set to False. """
         if QSettings().contains(FIRSTTIME_SETTING):
             return False
         else:
             QSettings().setValue(FIRSTTIME_SETTING, False)
             return True
 
-    def sectionChanged(self):
-        if self.currentIdx == 1:
-            if not self.serversWidget.canClose():
-                self.listWidget.blockSignals(True)
-                self.listWidget.item(1).setSelected(True)
-                self.listWidget.setCurrentRow(1)
-                self.listWidget.blockSignals(False)
-                return
-        idx = self.listWidget.currentRow()
-        self.setCurrentPanel(idx)
+    def listSelectNoSignals(self, index: int):
+        self.listWidget.blockSignals(True)
+        self.listWidget.setCurrentRow(index)
+        self.listWidget.blockSignals(False)
 
-    def setCurrentPanel(self, idx):
-        self.currentIdx = idx
-        if idx == 0:
-            self.stackedWidget.setCurrentWidget(self.publishWidget)
-            self.publishWidget.updateServers()
-        elif idx == 1:
-            self.stackedWidget.setCurrentWidget(self.serversWidget)
-            self.serversWidget.populateServerList()
-        elif idx == 2:
-            self.stackedWidget.setCurrentWidget(self.geocatWidget)
+    def listKeyPressed(self, event: QKeyEvent):
+        """ Activates the panel matching a key press event if the QListWidget has focus.
+        The QListWidget items can be selected using the Up and Down arrow keys or by pressing the
+        first letter of the item title (e.g. "a" for the "About" item).
+        These key events emit an `itemClicked` event in turn, which are being handled by the `listItemClicked` method.
+        """
+        key = (event.text() or '').lower() or event.key()
+        list_index = self.keymap.get(key, -1)
+        if list_index < 0:
+            # User did not press the first letter of a panel name: check if arrow keys were pressed
+            row_index = self.listWidget.currentRow()
+            if key == Qt.Key_Up and row_index > 0:
+                # User pressed the Up key and there is a list item above the current one
+                list_index = row_index - 1
+            elif key == Qt.Key_Down and row_index < len(self.panel_widgets) - 1:
+                # User pressed the Down key and there is a list item below the current one
+                list_index = row_index + 1
+
+        if list_index >= 0:
+            # Select the list item that the user requested
+            self.listSelectNoSignals(list_index)
+            list_item = self.listWidget.item(list_index)
+            self.listWidget.itemClicked.emit(list_item)
+
+        # Default action
+        event.accept()
+
+    def listItemClicked(self, list_item: QListWidgetItem):
+        """ Activates the panel that matches the clicked QListWidgetItem.
+
+        .. note::   The `QListWidget.itemPressed` event handler is the **second-last** triggered event handler
+                    whenever the user clicks a QListWidgetItem. Because we reselect the Servers QListWidgetItem
+                    if the Servers panel still has edits (which the user wants to save), we cannot handle more
+                    logical events like `QListWidget.currentRowChanged` for example, since we cannot stop event
+                    propagation (as with a QEvent).
+        """
+        enum_name = list_item.text().upper()
+        panel_widget = self.panel_widgets[getattr(Panels, enum_name)]
+        current_panel = self.stackedWidget.currentWidget()
+
+        if panel_widget == current_panel:
+            # User clicked the same list item again: do nothing
+            return
+        if isinstance(current_panel, Panels.SERVERS.value) and not current_panel.canClose():
+            # User wants to edit/save Server settings: reselect Servers list item
+            self.listSelectNoSignals(Panels.SERVERS)
+            return
+
+        # Match panel to selected list item and populate/update if needed
+        self.stackedWidget.setCurrentWidget(panel_widget)
+        if isinstance(panel_widget, Panels.PUBLISH.value):
+            panel_widget.updateServers()
+        elif isinstance(panel_widget, Panels.SERVERS.value):
+            panel_widget.populateServerList()
 
     def closeEvent(self, evt):
-        self.publishWidget.storeMetadata()
-        if self.serversWidget.canClose():
-            evt.accept()
-        else:
+        """ Triggered whenever the user closes the dialog. """
+        self.panel_widgets[Panels.PUBLISH].storeMetadata()
+        current_panel = self.stackedWidget.currentWidget()
+        if isinstance(current_panel, Panels.SERVERS.value) and not current_panel.canClose():
+            # Abort dialog close if the user decided that a server still needs editing
             evt.ignore()
+        else:
+            evt.accept()

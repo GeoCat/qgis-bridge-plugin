@@ -1,8 +1,5 @@
 from qgis.PyQt.QtWidgets import QHBoxLayout
-from qgis.gui import (
-    QgsAuthConfigSelect,
-    QgsFileWidget
-)
+from qgis.gui import QgsAuthConfigSelect
 
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.utils import gui
@@ -21,7 +18,7 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.addAuthWidget()
 
         self.radioLocalPath.toggled.connect(self.showLocalStorageFields)
-        self.fileMapserver.setStorageMode(QgsFileWidget.GetDirectory)
+        self.fileMapserver.setStorageMode(self.fileMapserver.GetDirectory)
 
         self.txtMapserverName.textChanged.connect(self.setDirty)
         self.txtMapserverUrl.textChanged.connect(self.setDirty)
@@ -31,12 +28,15 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.txtMapServicesPath.textChanged.connect(self.setDirty)
         self.txtProjFolder.textChanged.connect(self.setDirty)
 
+    def getName(self):
+        return self.txtMapserverName.text().strip()
+
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
         try:
             port = int(self.txtMapserverPort.text())
         except (ValueError, TypeError):
-            self.logError('Invalid MapServer port specified')
+            self.parent.logError('Invalid MapServer port specified')
             return None
         local_storage = self.radioLocalPath.isChecked()
         if local_storage:
@@ -46,7 +46,7 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
 
         try:
             return self.serverType(
-                name=self.txtMapserverName.text().strip(),
+                name=self.getName(),
                 url=self.txtMapserverUrl.text().strip(),
                 useLocalFolder=local_storage,
                 folder=folder,
@@ -72,9 +72,6 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.radioLocalPath.setChecked(True)
         self.radioFtp.setChecked(False)
         self.showLocalStorageFields(True)
-
-        # After the name was set and the other fields cleared, the form is "dirty"
-        self.setDirty()
 
     def loadFromInstance(self, server):
         """ Populates the form fields with the values from the given server instance. """

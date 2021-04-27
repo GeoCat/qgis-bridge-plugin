@@ -3,6 +3,7 @@ from importlib import import_module
 from inspect import isclass
 from pathlib import Path
 from pkgutil import iter_modules
+from typing import Union
 
 from qgis.PyQt.QtCore import QSettings
 
@@ -50,7 +51,7 @@ def _loadServerTypes(force: bool = False):
     for (_, module_name, _) in iter_modules([package_dir]):
         module = import_module(f"{models.__name__}.{module_name}")
         # Iterate all non-imported classes in the module
-        for name, cls in ((k, v) for k, v in module.__dict__.items() if isclass(v) and v.__module__ == module.__name__):
+        for name, cls in ((k, v) for k, v in module.__dict__.items() if isclass(v) and v.__module__ == module.__name__):  # noqa
             # Server class must inherit from ServerBase
             if not issubclass(cls, bases.ServerBase):
                 continue
@@ -93,16 +94,19 @@ def _getServerAsTuple(server):
     """ Verifies that the given server can be recreated using the values from `getSettings()`.
         If this is the case, a tuple of (type, params) will be returned. Otherwise, None is returned.
     """
-    param_func = bases.AbstractServer.getSettings.__name__
-    get_kwargs = getattr(server, param_func, None)
-    params = get_kwargs() if get_kwargs else {}
+    try:
+        params = server.getSettings() or {}
+    except (AttributeError, NotImplementedError):
+        # This should not happen if the server properly implements AbstractServer
+        feedback.logError(f"Server does not implement {bases.AbstractServer.__name__}.getSettings")
+        return
     server_type = server.__class__.__name__
     try:
         # Test that the server class can be instantiated again using the output from getSettings()
         _initServer(server_type, **params)
     except ServerInitError as e:
         # Report error that the server cannot be initialized with the given parameters
-        feedback.logError(f"{server_type}.{param_func}() returns bad parameters:\n{e}")
+        feedback.logError(f"{server_type}.getSettings() returns bad parameters:\n{e}")
         return
     return server_type, params
 
@@ -116,8 +120,8 @@ def getServerTypes():
         yield t
 
 
-def saveConfiguredServers() -> bool:
-    """ Calls `getSettings()` on all initialized servers and stores them in the QGIS server settings. """
+def serializeServers() -> Union[str, None]:
+    """ Calls `getSettings()` on all initialized serializable servers and returns them as a JSON string. """
     global _instances
 
     server_config = []
@@ -127,7 +131,7 @@ def saveConfiguredServers() -> bool:
     for s in _instances.values():
         server_tuple = _getServerAsTuple(s)
         if not server_tuple:
-            feedback.logError(f"Server configuration for '{s.serverName}' cannot be saved in QGIS settings.'")
+            feedback.logError(f"Server configuration for '{s.serverName}' cannot be saved and will be removed.'")
             bad_servers.append(s.serverName)
             continue
         server_config.append(server_tuple)
@@ -136,45 +140,80 @@ def saveConfiguredServers() -> bool:
     while bad_servers:
         del _instances[bad_servers.pop()]
 
-    # Write QSettings value
+    # Serialize JSON and output string
     try:
         config_str = json.dumps(server_config)
     except TypeError as e:
         feedback.logError(f"Failed to serialize server configuration as JSON: {e}")
-        return False
-    else:
-        QSettings().setValue(SERVERS_SETTING, config_str)
-    return True
-
-
-def loadConfiguredServers():
-    """ Reads all configured servers from the QGIS settings and initializes them. """
-    global _instances
-
-    # Read QGIS Bridge server settings string
-    server_config = QSettings().value(SERVERS_SETTING)
-    if not server_config:
-        feedback.logWarning(f"Could not find existing QGIS setting '{SERVERS_SETTING}'")
         return
+    return config_str
+
+
+def deserializeServers(config_str: str) -> bool:
+    """ Deserializes a JSON server configuration string and creates Bridge server instances.
+
+    :param config_str:  A JSON string. Must be deserializable as a list of (str, dict).
+    :returns:           True when successful, False otherwise.
+    """
+    global _instances
 
     # Parse JSON object from settings string
     try:
-        stored_servers = json.loads(server_config)
+        stored_servers = json.loads(config_str)
     except json.JSONDecodeError as e:
-        feedback.logWarning(f"Failed to parse {SERVERS_SETTING} configuration:\n{e}")
-        return
+        feedback.logError(f"Failed to parse servers configuration:\n{e}")
+        return False
 
     # It is expected that `stored_servers` is a list
-    assert isinstance(stored_servers, list)
+    if not isinstance(stored_servers, list) or len(stored_servers) == 0:
+        feedback.logError("Server configuration must be a non-empty list")
+        return False
 
     # Instantiate servers from models and settings
+    num_added = 0
     for (server_type, properties) in stored_servers:
+        name = properties.get('name')
+        if not name:
+            feedback.logWarning(f'Skipped {server_type} entry due to missing name')
+            continue
+        key = getUniqueName(name)
+        if key != name:
+            properties['name'] = key
         try:
             s = _initServer(server_type, **properties)
         except (UnknownServerError, ServerInitError) as e:
             feedback.logError(f"Failed to load server:\n{e}")
             continue
-        _instances[s.serverName] = s
+        if key != name:
+            feedback.logWarning(f"Changed name from '{name}' to '{key}' for "
+                                f"non-unique {s.getServerTypeLabel()} entry")
+        _instances[key] = s
+        num_added += 1
+
+    # Return True if any of the servers initialized successfully
+    return num_added > 0
+
+
+def saveConfiguredServers() -> bool:
+    """ Persists all valid initialized servers in the QGIS server settings. """
+    config_str = serializeServers()
+    if config_str is None:
+        return False
+    QSettings().setValue(SERVERS_SETTING, config_str)
+    return True
+
+
+def loadConfiguredServers() -> bool:
+    """ Reads all configured servers from the QGIS settings and initializes them. """
+
+    # Read QGIS Bridge server settings string
+    server_config = QSettings().value(SERVERS_SETTING)
+    if not server_config:
+        feedback.logWarning(f"Could not find existing QGIS setting '{SERVERS_SETTING}'")
+        return False
+
+    # Deserialize JSON and initialize servers
+    return deserializeServers(server_config)
 
 
 def getServer(name: str):
@@ -220,10 +259,25 @@ def getDbServers():
     return [s for s in getServers() if isinstance(s, bases.DbServerBase)]
 
 
+def getGeodataServerNames():
+    """ Retrieves all available (geo)data server names. """
+    return [s.serverName for s in getGeodataServers()]
+
+
+def getMetadataServerNames():
+    """ Retrieves all available metadata server names. """
+    return [s.serverName for s in getMetadataServers()]
+
+
+def getDbServerNames():
+    """ Retrieves all available database server names. """
+    return [s.serverName for s in getDbServers()]
+
+
 def getServerNames() -> frozenset:
     """ Retrieves all configured server names. """
     global _instances
-    return frozenset(_instances.keys())
+    return frozenset(s.serverName for s in getServers())
 
 
 def getMetadataProfile(server_name: str) -> LabeledIntEnum:
@@ -240,53 +294,80 @@ def getMetadataProfile(server_name: str) -> LabeledIntEnum:
     raise Exception('Server is not a metadata catalog server')
 
 
-def generateName(server_class) -> str:
-    """ Generates an available server name for the given server class. """
-    label = server_class.getServerTypeLabel()
+def getUniqueName(preferred_name: str) -> str:
+    """ Generates an available server name for the given server name. """
     servers = getServerNames()
-    i = 1
+    new_name = preferred_name
+    i = 0
     while True:
-        new_name = f"{label}{i}"
         if new_name not in servers:
             return new_name
-        else:
-            i += 1
+        i += 1
+        new_name = f"{preferred_name}{i}"
 
 
-def addServer(server) -> bool:
+def saveServer(server, replace_key: str) -> bool:
     """ Adds the given server (instance) to the Bridge server settings.
+    Returns True if the instance was successfully saved.
 
-    :param server:  The new server instance to store.
+    :param server:      The new server instance to store.
+    :param replace_key: The key (server name) under which to save the server instance.
+                        If the key matches the `server.serverName`, the server is updated
+                        under that key. If it doesn't match, the server instance under the
+                        given key is deleted and a new instance is saved under a new key
+                        equal to the `server.serverName`.
+
+    :returns:   True if save was successful.
+    :raises:    ValueError if `replace_key` does not match the `server.serverName` and the new
+                `server.serverName` already exists in the `_instances` dictionary (duplicate key),
+                or if `server.serverName` is empty.
     """
     global _instances
 
-    server_name = getattr(server, bases.ServerBase.serverName.__name__, None)
-    if not server_name:
+    if not isinstance(server, bases.ServerBase):
         # This should not happen if the server properly implements ServerBase
-        feedback.logError(f"Cannot store server of type '{server.__class__.__name__}': missing name")
+        feedback.logError(f"Cannot store server of type '{server.__class__.__name__}': "
+                          f"must implement {bases.ServerBase.__name__}")
         return False
-    if server_name in _instances:
-        # This should not happen if the name passed through generateName() first
-        feedback.logError(f"A '{server.__class__.__name__}' instance named '{server_name}' already exists")
-        return False
-    _instances[server_name] = server
-    # TODO: call addOGCServers()?
+
+    if not server.serverName:
+        # Make sure that the server has a non-empty name
+        raise ValueError('server name cannot be empty')
+
+    if replace_key != server.serverName:
+        # User has renamed the server: check if new name does not exist yet
+        if server.serverName in getServerNames():
+            raise ValueError(f"server named '{server.serverName}' already exists")
+        try:
+            # Remove instance under old name
+            del _instances[replace_key]
+        except KeyError:
+            feedback.logWarning(f"server named '{replace_key}' does not exist")
+
+    # Save instance using (new) server name as key
+    _instances[server.serverName] = server
+    if isinstance(server, bases.CatalogServerBase):
+        server.addOGCServices()
     if not saveConfiguredServers():
-        del _instances[server_name]
+        # Remove server again if the instance could not be saved in QGIS settings
+        del _instances[server.serverName]
         return False
     return True
 
 
-def removeServer(name):
+def removeServer(name, silent: bool = False):
     """ Removes the server with the given name from the Bridge server settings.
 
     :param name:    The server name as defined by the user.
+    :param silent:  If True (default is False), a warning is logged when
+                    the server name does not exist.
     """
     global _instances
 
     try:
         del _instances[name]
     except KeyError:
-        feedback.logWarning(f"Server named '{name}' does not exist or has already been removed")
+        if not silent:
+            feedback.logWarning(f"Server named '{name}' does not exist or has already been removed")
     else:
         saveConfiguredServers()
