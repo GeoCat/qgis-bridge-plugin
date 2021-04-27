@@ -1,18 +1,17 @@
 import webbrowser
 import requests
+from qgis.core import (
+    QgsProcessingParameterMapLayer,
+    QgsProcessingParameterString,
+    QgsProcessingParameterAuthConfig
+)
 
 from geocatbridge.utils.sessions import TokenizedSession
 from geocatbridge.publish.metadata import saveMetadata
 from geocatbridge.servers.bases import MetaCatalogServerBase
 from geocatbridge.servers.views.geonetwork import GeoNetworkWidget
-from geocatbridge.utils.enum_ import LabeledIntEnum
-
-
-class GeoNetworkProfiles(LabeledIntEnum):
-    """ Container class for GeoNetwork profile constants. """
-    DEFAULT = 'Default'
-    INSPIRE = 'INSPIRE'
-    DUTCH = 'Dutch Geography'
+from geocatbridge.servers.models.gn_profile import GeoNetworkProfiles
+from geocatbridge.process.algorithm import BridgeAlgorithm
 
 
 class GeonetworkServer(MetaCatalogServerBase):
@@ -107,3 +106,43 @@ class GeonetworkServer(MetaCatalogServerBase):
 
     def openMetadata(self, uuid):
         webbrowser.open_new_tab(self.metadataUrl(uuid))
+
+    @classmethod
+    def getAlgorithmInstance(cls):
+        return GeonetworkAlgorithm()
+
+
+class GeonetworkAlgorithm(BridgeAlgorithm):
+    URL = 'URL'
+    AUTHID = 'AUTHID'
+
+    def initAlgorithm(self, config=None):
+        self.addParameter(QgsProcessingParameterMapLayer(self.INPUT,
+                                                         self.tr('Layer')))
+        self.addParameter(QgsProcessingParameterString(self.URL,
+                                                       self.tr('Server URL'), ''))
+        self.addParameter(QgsProcessingParameterAuthConfig(self.AUTHID,
+                                                           self.tr('Auth credentials')))
+
+    def name(self):
+        return 'publishtogeonetwork'
+
+    def displayName(self):
+        return self.tr('Metadata to GeoNetwork')
+
+    def shortDescription(self):
+        return self.tr('Publishes metadata to a GeoNetwork server instance')
+
+    def processAlgorithm(self, parameters, context, feedback):
+        url = self.parameterAsString(parameters, self.URL, context)
+        authid = self.parameterAsString(parameters, self.AUTHID, context)
+        layer = self.parameterAsLayer(parameters, self.INPUT, context)
+
+        feedback.pushInfo(f'Publishing {layer} to GeoNetwork...')
+        try:
+            server = GeonetworkServer(GeonetworkServer.__name__, authid, url)
+            server.publishLayerMetadata(layer, None, None, None)
+        except Exception as err:
+            feedback.reportError(err, True)
+
+        return {self.OUTPUT: True}

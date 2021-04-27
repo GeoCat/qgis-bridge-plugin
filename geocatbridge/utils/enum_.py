@@ -61,17 +61,17 @@ class LabeledIntEnumType(type):
     def __contains__(cls, profile):
         return any(v == profile for v in cls)
 
-    def __getattribute__(cls, item):
+    def __getattribute__(cls, item) -> LabeledInt:
         constant = dict(object.__getattribute__(cls, '_items')()).get(item)
         if constant is not None:
             return constant
         return object.__getattribute__(cls, item)
 
-    def __getitem__(cls, item):
-        if not isinstance(item, int):
-            raise TypeError(f'{cls.__name__} indices must be integers, not {type(item)}')
+    def __getitem__(cls, index) -> LabeledInt:
+        if not isinstance(index, int):
+            raise TypeError(f'{cls.__name__} indices must be integers, not {type(index)}')
         for _, constant in object.__getattribute__(cls, '_items')():
-            if item == int(constant):
+            if index == int(constant):
                 return constant
         raise IndexError(f'{cls.__name__} index out of range')
 
@@ -88,6 +88,10 @@ class LabeledIntEnumType(type):
             if constant.value == value:
                 return constant
         raise KeyError(f'no {LabeledIntEnum.__name__} constant with value {repr(value)} in {cls.__name__}')
+
+    def values(cls) -> list:
+        """ Returns a list of all LabeledIntEnum values. """
+        return [c.value for c in cls]
 
 
 class LabeledIntEnum(metaclass=LabeledIntEnumType):

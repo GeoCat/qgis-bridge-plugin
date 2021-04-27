@@ -75,7 +75,7 @@ class FeedbackMixin:
         if isinstance(message, Exception):
             message = str(message)
         text = self.translate(context, message)
-        _LOGGER.logMessage(text, getAppName(), level)
+        _log(text, level)
         if level == Qgis.Warning:
             self._warnings.append(text)
         elif level == Qgis.Critical:

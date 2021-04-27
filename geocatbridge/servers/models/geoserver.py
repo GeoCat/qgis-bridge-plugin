@@ -4,6 +4,8 @@ import shutil
 import sqlite3
 import webbrowser
 from zipfile import ZipFile
+
+from qgis._core import QgsProcessingParameterMapLayer, QgsProcessingParameterString, QgsProcessingParameterAuthConfig
 from requests.exceptions import ConnectionError, HTTPError
 
 from qgis.PyQt.QtCore import QCoreApplication, QByteArray, QBuffer, QIODevice, QSettings
@@ -16,16 +18,10 @@ from geocatbridge.publish.exporter import exportLayer
 from geocatbridge.servers.bases import DataCatalogServerBase
 from geocatbridge.servers import manager
 from geocatbridge.servers.views.geoserver import GeoServerWidget
-from geocatbridge.utils.enum_ import LabeledIntEnum
 from geocatbridge.utils import layers as lyr_utils
 from geocatbridge.utils.files import tempFilenameInTempFolder, tempFolderInTempFolder, Path
-from geocatbridge.utils.services import addServicesForGeodataServer
-
-
-class GeoserverStorage(LabeledIntEnum):
-    FILE_BASED = 'File-based storage (e.g. GeoPackage)'
-    POSTGIS_BRIDGE = 'Import into PostGIS database (direct connect)'
-    POSTGIS_GEOSERVER = 'Import into PostGIS database (managed by GeoServer)'
+from geocatbridge.servers.models.gs_storage import GeoserverStorage
+from geocatbridge.process.algorithm import BridgeAlgorithm
 
 
 class GeoserverServer(DataCatalogServerBase):
@@ -39,7 +35,7 @@ class GeoserverServer(DataCatalogServerBase):
         :param authid:                  QGIS Authentication ID (optional)
         :param url:                     GeoServer base or REST API URL
         :param storage:                 Data storage type (default = FILE_BASED)
-        :param postgisdb:               PostGIS database (if `storage` = POSTGIS_BRIDGE)
+        :param postgisdb:               PostGIS database (required if `storage` is *not* FILE_BASED)
         :param useOriginalDataSource:   Set to True if original data source should be used.
                                         This means that no data will be uploaded.
         :param useVectorTiles:          Set to True if vector tiles need to be published.
@@ -50,9 +46,12 @@ class GeoserverServer(DataCatalogServerBase):
             self.storage = GeoserverStorage[storage]
         except IndexError:
             raise ValueError(f"'{storage}' is not a valid GeoServer storage type")
-        if self.storage == GeoserverStorage.POSTGIS_BRIDGE:
-            if postgisdb is None:
-                raise RuntimeError('managed connection requires PostGIS instance')
+        if self.storage != GeoserverStorage.FILE_BASED:
+            if not postgisdb:
+                if self.storage == GeoserverStorage.POSTGIS_BRIDGE:
+                    raise RuntimeError('GeoServer instance with database storage has missing PostGIS server name')
+                else:
+                    raise RuntimeError('GeoServer instance with database storage has missing datastore name')
             self.postgisdb = postgisdb
         self.useOriginalDataSource = useOriginalDataSource
         self.useVectorTiles = useVectorTiles
@@ -993,3 +992,51 @@ class GeoserverServer(DataCatalogServerBase):
             if ret == self.BUTTONS.NO:
                 errors.add("Cannot overwrite existing workspace.")
         self.checkMinGeoserverVersion(errors)
+
+    @classmethod
+    def getAlgorithmInstance(cls):
+        return GeoserverAlgorithm()
+
+
+class GeoserverAlgorithm(BridgeAlgorithm):
+
+    INPUT = 'INPUT'
+    URL = 'URL'
+    WORKSPACE = 'WORKSPACE'
+    AUTHID = 'AUTHID'
+
+    def initAlgorithm(self, config=None):
+        self.addParameter(QgsProcessingParameterMapLayer(self.INPUT,
+                                                         self.tr('Layer')))
+        self.addParameter(QgsProcessingParameterString(self.URL,
+                                                       self.tr('Server URL'), ''))
+        self.addParameter(QgsProcessingParameterString(self.WORKSPACE,
+                                                       self.tr('Workspace'), ''))
+        self.addParameter(QgsProcessingParameterAuthConfig(self.AUTHID,
+                                                           self.tr('Auth credentials')))
+
+    def name(self):
+        return 'publishtogeoserver'
+
+    def displayName(self):
+        return self.tr('Layer to GeoServer')
+
+    def shortDescription(self):
+        return self.tr('Publishes a layer (data and style) to a GeoServer instance')
+
+    def processAlgorithm(self, parameters, context, feedback):
+        url = self.parameterAsString(parameters, self.URL, context)
+        authid = self.parameterAsString(parameters, self.AUTHID, context)
+        workspace = self.parameterAsString(parameters, self.WORKSPACE, context)
+        layer = self.parameterAsLayer(parameters, self.INPUT, context)
+
+        feedback.pushInfo(f'Publishing {layer} and its style to GeoServer...')
+        try:
+            server = GeoserverServer(GeoserverServer.__name__, authid, url)
+            server.forceWorkspace(workspace)
+            server.publishStyle(layer)
+            server.publishLayer(layer)
+        except Exception as err:
+            feedback.reportError(err, True)
+
+        return {self.OUTPUT: True}

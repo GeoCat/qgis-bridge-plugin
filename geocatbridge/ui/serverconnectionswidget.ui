@@ -42,11 +42,9 @@
           </sizepolicy>
          </property>
          <property name="styleSheet">
-          <string notr="true">
-           font: 600 12pt &quot;MS Shell Dlg 2&quot;;
-           color: rgb(170, 170, 170);
-           background-color: rgb(255, 255, 255);
-          </string>
+          <string notr="true">font: 350 13pt &quot;Segoe UI&quot;;
+color: rgb(170, 170, 170);
+background-color: rgb(255, 255, 255);       </string>
          </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -69,11 +67,17 @@
      </item>
      <item>
       <widget class="QStackedWidget" name="stackedWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="widgetEmpty"/>
       </widget>
@@ -87,12 +91,28 @@
        <property name="text">
         <string>New Server</string>
        </property>
+       <property name="shortcut">
+        <string>Ctrl+N</string>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="buttonRemove">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Remove</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonDuplicate">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Duplicate</string>
        </property>
       </widget>
      </item>
@@ -102,7 +122,7 @@
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
+        <enum>QSizePolicy::MinimumExpanding</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -113,7 +133,20 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btnSaveServers">
+      <widget class="QPushButton" name="buttonImport">
+       <property name="toolTip">
+        <string>Import servers (*.json)</string>
+       </property>
+       <property name="text">
+        <string>Import</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonExport">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="toolTip">
         <string>Export servers (*.json)</string>
        </property>
@@ -126,19 +159,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnLoadServers">
-       <property name="toolTip">
-        <string>Import servers (*.json)</string>
-       </property>
-       <property name="text">
-        <string>Import</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::MinimumExpanding</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -153,6 +179,9 @@
        <property name="text">
         <string>Save</string>
        </property>
+       <property name="shortcut">
+        <string>Ctrl+S</string>
+       </property>
        <property name="autoDefault">
         <bool>false</bool>
        </property>
@@ -165,13 +194,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QgsFileWidget</class>
-   <extends>QWidget</extends>
-   <header>qgsfilewidget.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
