@@ -14,7 +14,7 @@ from geocatbridge.process.provider import BridgeProvider
 from geocatbridge.servers import manager
 from geocatbridge.ui.bridgedialog import BridgeDialog
 from geocatbridge.ui.multistylerwidget import MultistylerWidget
-from geocatbridge.utils import meta, files
+from geocatbridge.utils import meta, files, feedback
 
 
 class GeocatBridge:
@@ -22,6 +22,7 @@ class GeocatBridge:
         self.iface = iface
         self._win = iface.mainWindow()
 
+        self.dialog_publish = None
         self.action_publish = None
         self.action_help = None
         self.action_multistyler = None
@@ -45,14 +46,23 @@ class GeocatBridge:
         self.qgis_hook = sys.excepthook
 
         def plugin_hook(t, value, tb):
+            """ Exception handling (catch all) """
             error_list = traceback.format_exception(t, value, tb)
             trace = "".join(error_list)
             if meta.PLUGIN_NAMESPACE in trace.lower():
                 try:
+                    # Show error report dialog
                     handleError(error_list)
-                except:
-                    pass  # we swallow all exceptions here, to avoid entering an endless loop
+                except Exception as err:
+                    # Swallow all exceptions here, to avoid entering an endless loop
+                    feedback.logWarning(f"A failure occurred while handling an exception: {err}")
+                try:
+                    # Close/disable the plugin to avoid messing up things
+                    self.unload()
+                except Exception as err:
+                    feedback.logWarning(f"A failure occurred while unloading the Bridge plugin: {err}")
             else:
+                # Handle regular QGIS exception
                 self.qgis_hook(t, value, tb)          
         
         sys.excepthook = plugin_hook
@@ -72,10 +82,12 @@ class GeocatBridge:
     def initGui(self):
         self.initProcessing()
 
+        self.dialog_publish = BridgeDialog(self.iface.mainWindow())
         self.action_publish = QAction(QIcon(files.getIconPath("publish_button")),
                                       QCoreApplication.translate(self.name, "Publish"), self._win)
         self.action_publish.setObjectName("startPublish")
-        self.action_publish.triggered.connect(self.publishClicked)
+        self.action_publish.triggered.connect(self.dialog_publish.show)
+        self.dialog_publish.hide()
 
         self.iface.addPluginToWebMenu(self.name, self.action_publish)
         self.iface.addWebToolBarIcon(self.action_publish)
@@ -107,6 +119,13 @@ class GeocatBridge:
         self.iface.currentLayerChanged.disconnect(self.widget_multistyler.updateForCurrentLayer)
         QgsProject().instance().layersAdded.disconnect(self.layersAdded)
 
+        self.action_multistyler.triggered.disconnect(self.widget_multistyler.show)
+        self.action_publish.triggered.disconnect(self.dialog_publish.show)
+        self.widget_multistyler.hide()
+        self.dialog_publish.hide()
+        del self.widget_multistyler
+        del self.dialog_publish
+
         self._layerSignals.clear()
 
         self.iface.removePluginWebMenu(self.name, self.action_help)
@@ -127,10 +146,6 @@ class GeocatBridge:
         layer_ids = frozenset(layer_ids)
         for lyr_id in layer_ids:
             self._layerSignals.disconnect(lyr_id)
-
-    def publishClicked(self):
-        dialog = BridgeDialog(self.iface.mainWindow())
-        dialog.show()
 
 
 class LayerStyleEventManager:
