@@ -3,10 +3,10 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingProvider
 
-from geocatbridge.utils import meta, feedback
-from geocatbridge.utils.files import getIconPath
 from geocatbridge.process.algorithm import BridgeAlgorithm
 from geocatbridge.servers.manager import getServerTypes
+from geocatbridge.utils import meta, feedback
+from geocatbridge.utils.files import getIconPath
 
 
 class BridgeProvider(QgsProcessingProvider):

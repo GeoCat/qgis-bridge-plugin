@@ -1,12 +1,11 @@
-from urllib.parse import urlparse
+import json
 from abc import ABC, abstractmethod
-from pathlib import Path
 from importlib import import_module
+from pathlib import Path
 from typing import Union
+from urllib.parse import urlparse
 
 import requests
-import json
-
 from qgis.PyQt.QtGui import QPixmap
 from qgis.core import (
     QgsAuthMethodConfig,
@@ -14,8 +13,8 @@ from qgis.core import (
     QgsProcessingAlgorithm
 )
 
-from geocatbridge.utils.feedback import FeedbackMixin
 from geocatbridge.utils import files
+from geocatbridge.utils.feedback import FeedbackMixin
 
 
 class AbstractServer(ABC):
@@ -67,7 +66,7 @@ class ServerBase(AbstractServer, FeedbackMixin, ABC):
     def getCredentials(self):
         if self._username is None or self._password is None:
             auth_config = QgsAuthMethodConfig()
-            QgsApplication.authManager().loadAuthenticationConfig(self.authId, auth_config, True)
+            QgsApplication.authManager().loadAuthenticationConfig(self.authId, auth_config, True)  # noqa
             self._username = auth_config.config('username')
             self._password = auth_config.config('password')
         return self._username, self._password
@@ -132,12 +131,13 @@ class CatalogServerBase(ServerBase, ABC):
 
     @property
     def baseUrl(self):
+        """ Returns the base part of the server URL. """
         return self._baseurl
 
     def addOGCServices(self):
         pass
 
-    def validateBeforePublication(self, errors, *args, **kwargs):
+    def validateBeforePublication(self, *args, **kwargs):
         pass
 
 
@@ -157,7 +157,88 @@ class DataCatalogServerBase(CatalogServerBase, ABC):
     def __init__(self, name, authid="", url=""):
         super().__init__(name, authid, url)
 
-    def openPreview(self, names, bbox, srs):
+    def prepareForPublishing(self, only_symbology: bool):
+        """ This method is called right before any publication takes place.
+
+        :param only_symbology:  If True, a destination folder/workspace does not need to be cleared.
+        """
+        pass
+
+    def clearTarget(self, recreate: bool = True) -> bool:
+        """ This method is called by the publish widget (among others) to clear a destination
+        workspace or folder. All data, layers and styling within the target workspace/folder is removed.
+
+        :param recreate:    If True, the target workspace/folder should be recreated (i.e. empty, but existing).
+        :returns:           Returns True if clearing was successful.
+        """
+        pass
+
+    @abstractmethod
+    def publishLayer(self, layer, fields=None):
+        """ Publishes the given QGIS layer (and specified fields) to the server. """
+        raise NotImplementedError
+
+    @abstractmethod
+    def publishStyle(self, layer):
+        """ Publishes a style (symbology) for the given QGIS layer to the server. """
+        raise NotImplementedError
+
+    def getPreviewUrl(self, layer_names: list, bbox: str, crs_authid: str) -> str:
+        """ This method may be implemented for servers that support previewing published layers.
+        It should return a URL to get a preview map for the given layers.
+
+        :param layer_names: A list of layer names for which to get a preview map.
+        :param bbox:        A concatenated BBOX string (XMIN, YMIN, XMAX, YMAX) for the preview map extent.
+        :param crs_authid:  The coordinate system ID (e.g. EPSG code) for the preview map.
+        """
+        pass
+
+    def layerExists(self, name: str) -> bool:
+        """ This method must be implemented if the server offers a way to check if a layer was published. """
+        raise NotImplementedError
+
+    def styleExists(self, name: str) -> bool:
+        """ This method must be implemented if the server offers a way to check if a style was published. """
+        raise NotImplementedError
+
+    def deleteStyle(self, name) -> bool:
+        """ This method must be implemented if the server offers a way to delete a style.
+        Should return True if deletion was successful.
+
+        :param name:    The name of the style as it is stored on the server.
+        """
+        raise NotImplementedError
+
+    def deleteLayer(self, name) -> bool:
+        """ This method must be implemented if the server offers a way to delete a layer.
+        Should return True if deletion was successful.
+
+        :param name:    The name of the layer as it is stored on the server.
+        """
+        raise NotImplementedError
+
+    def fullLayerName(self, layer_name) -> str:
+        """ This method should return the full layer name on the server (e.g. including a workspace path). """
+        return layer_name
+
+    def getWmsUrl(self) -> str:
+        """ This method should return the Web Map Service (WMS) URL for the server. """
+        raise NotImplementedError
+
+    def getWfsUrl(self) -> str:
+        """ This method should return the Web Feature Service (WFS) URL for the server. """
+        raise NotImplementedError
+
+    def setLayerMetadataLink(self, name, url):
+        """ This method must be implemented if the server supports setting a metadata link URL on a layer. """
+        raise NotImplementedError
+
+    def createGroups(self, groups, layers):
+        """ This method may be implemented to create layer groups on the server.
+
+        :param groups:  One or more groups to assign the given layers to.
+        :param layers:  QGIS layer names to put in the given group(s).
+        """
         pass
 
 

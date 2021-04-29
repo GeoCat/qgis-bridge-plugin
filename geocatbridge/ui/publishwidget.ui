@@ -73,29 +73,6 @@
            </property>
           </spacer>
          </item>
-         <item>
-          <widget class="QToolButton" name="btnRemoveAll">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>22</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Unpublish all</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../icons/remove.png</normaloff>../icons/remove.png</iconset>
-           </property>
-           <property name="autoRaise">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>
@@ -114,6 +91,12 @@
          </property>
          <property name="contextMenuPolicy">
           <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::NoDragDrop</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
          </property>
         </widget>
        </item>
@@ -273,6 +256,41 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
               <layout class="QGridLayout" name="gridLayout_2">
+               <item row="4" column="2">
+                <widget class="QLineEdit" name="txtDataContact">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>Title</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="2">
+                <widget class="QLineEdit" name="txtMetadataContact">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="2">
+                <widget class="QLineEdit" name="txtKeywords">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="3">
+                <widget class="QToolButton" name="btnKeywords">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
                <item row="2" column="3">
                 <widget class="QToolButton" name="btnIsoTopic">
                  <property name="text">
@@ -280,8 +298,67 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
                  </property>
                 </widget>
                </item>
+               <item row="5" column="0">
+                <widget class="QLabel" name="label_5">
+                 <property name="text">
+                  <string>Metadata contact</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="3">
+                <widget class="QToolButton" name="btnAccessConstraints">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="8" column="0">
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>Use constraints</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="2">
+                <widget class="QLineEdit" name="txtAccessConstraints">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_3">
+                 <property name="text">
+                  <string>ISO topic category</string>
+                 </property>
+                </widget>
+               </item>
                <item row="0" column="2" colspan="2">
                 <widget class="QLineEdit" name="txtMetadataTitle"/>
+               </item>
+               <item row="5" column="3">
+                <widget class="QToolButton" name="btnMetadataContact">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="QLabel" name="label_6">
+                 <property name="text">
+                  <string>Access constraints</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_7">
+                 <property name="text">
+                  <string>Keywords</string>
+                 </property>
+                </widget>
                </item>
                <item row="4" column="0">
                 <widget class="QLabel" name="label_4">
@@ -294,6 +371,16 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
                 <widget class="QToolButton" name="btnUseConstraints">
                  <property name="text">
                   <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2" colspan="2">
+                <widget class="QTextEdit" name="txtAbstract"/>
+               </item>
+               <item row="9" column="0">
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Language</string>
                  </property>
                 </widget>
                </item>
@@ -316,20 +403,10 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
                  </item>
                 </widget>
                </item>
-               <item row="6" column="3">
-                <widget class="QToolButton" name="btnAccessConstraints">
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_2">
                  <property name="text">
-                  <string>...</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="2">
-                <widget class="QLineEdit" name="txtAccessConstraints">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="text">
-                  <string/>
+                  <string>Abstract</string>
                  </property>
                 </widget>
                </item>
@@ -340,13 +417,6 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="3">
-                <widget class="QToolButton" name="btnMetadataContact">
-                 <property name="text">
-                  <string>...</string>
-                 </property>
-                </widget>
-               </item>
                <item row="4" column="3">
                 <widget class="QToolButton" name="btnDataContact">
                  <property name="text">
@@ -354,95 +424,8 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
                  </property>
                 </widget>
                </item>
-               <item row="8" column="0">
-                <widget class="QLabel" name="label_8">
-                 <property name="text">
-                  <string>Use constraints</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_7">
-                 <property name="text">
-                  <string>Keywords</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="0">
-                <widget class="QLabel" name="label_5">
-                 <property name="text">
-                  <string>Metadata contact</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="2" colspan="2">
-                <widget class="QTextEdit" name="txtAbstract"/>
-               </item>
-               <item row="9" column="0">
-                <widget class="QLabel" name="label_9">
-                 <property name="text">
-                  <string>Language</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_3">
-                 <property name="text">
-                  <string>ISO topic category</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="0">
-                <widget class="QLabel" name="label_6">
-                 <property name="text">
-                  <string>Access constraints</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_2">
-                 <property name="text">
-                  <string>Abstract</string>
-                 </property>
-                </widget>
-               </item>
                <item row="8" column="2">
                 <widget class="QLineEdit" name="txtUseConstraints">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label">
-                 <property name="text">
-                  <string>Title</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="2">
-                <widget class="QLineEdit" name="txtKeywords">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="3">
-                <widget class="QToolButton" name="btnKeywords">
-                 <property name="text">
-                  <string>...</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="2">
-                <widget class="QLineEdit" name="txtDataContact">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="2">
-                <widget class="QLineEdit" name="txtMetadataContact">
                  <property name="enabled">
                   <bool>false</bool>
                  </property>
@@ -597,14 +580,29 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
        </widget>
        <widget class="QWidget" name="tabData">
         <attribute name="title">
-         <string>Data</string>
+         <string>Attributes</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
           <widget class="QTableWidget" name="tableFields">
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
            <column>
             <property name="text">
              <string>Publish</string>
+            </property>
+            <property name="textAlignment">
+             <set>AlignLeading|AlignVCenter</set>
             </property>
            </column>
            <column>
@@ -631,7 +629,7 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabOnline">
         <property name="sizePolicy">
@@ -644,28 +642,7 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
          <string>Online</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_6">
-         <item row="0" column="3">
-          <widget class="QCheckBox" name="chkOnlySymbology">
-           <property name="text">
-            <string>Symbology only</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_20">
-           <property name="text">
-            <string>Metadata server</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_19">
-           <property name="text">
-            <string>Data server</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
+         <item row="1" column="3">
           <widget class="QComboBox" name="comboGeodataServer">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -675,13 +652,44 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="2">
+         <item row="3" column="3">
           <widget class="QComboBox" name="comboMetadataServer">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_20">
+           <property name="text">
+            <string>Metadata server</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_19">
+           <property name="text">
+            <string>Data server</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QCheckBox" name="chkOnlySymbology">
+           <property name="text">
+            <string>Symbology only</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="4">
+          <widget class="QPushButton" name="btnRemoveAll">
+           <property name="toolTip">
+            <string>Remove all published geodata and metadata</string>
+           </property>
+           <property name="text">
+            <string>Clear All</string>
            </property>
           </widget>
          </item>

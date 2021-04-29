@@ -10,10 +10,8 @@ The current version ignores all elements except for MD_Metadata, which is copied
 author Heikki Doeleman
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <xsl:stylesheet version="2.0"
-xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-xmlns:xs="http://www.w3.org/2001/XMLSchema"
-xmlns:fn="http://www.w3.org/2005/xpath-functions"
-xmlns:gmd="http://www.isotc211.org/2005/gmd">
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:gmd="http://www.isotc211.org/2005/gmd">
     <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
 
   <xsl:strip-space elements="*" />

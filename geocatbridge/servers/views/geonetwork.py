@@ -1,8 +1,8 @@
 from qgis.PyQt.QtWidgets import QHBoxLayout
 from qgis.gui import QgsAuthConfigSelect
 
-from geocatbridge.servers.models.gn_profile import GeoNetworkProfiles
 from geocatbridge.servers.bases import ServerWidgetBase
+from geocatbridge.servers.models.gn_profile import GeoNetworkProfiles
 from geocatbridge.utils import gui
 
 WIDGET, BASE = gui.loadUiType(__file__)

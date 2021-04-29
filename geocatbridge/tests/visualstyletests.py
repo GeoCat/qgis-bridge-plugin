@@ -41,25 +41,23 @@ calling the main function:
 
 import os
 
-import bridgestyle
-from bridgestyle.qgis import layerStyleAsSld
-
-from geocatbridge.servers.models.geoserver import GeoserverServer
-
-from qgis.PyQt.QtGui import QImage, QColor, QPainter
 from qgis.PyQt.QtCore import QSize, QUrl, QEventLoop
-
+from qgis.PyQt.QtGui import QImage, QColor, QPainter
+from qgis.PyQt.QtNetwork import (
+    QNetworkAccessManager,
+    QNetworkRequest
+)
 from qgis.core import (
-    QgsMapSettings, 
+    QgsMapSettings,
     QgsMapRendererCustomPainterJob,
     QgsRasterLayer,
     QgsVectorLayer
 )
 
-from qgis.PyQt.QtNetwork import (
-    QNetworkAccessManager,
-    QNetworkRequest
-)
+import bridgestyle
+from bridgestyle.qgis import layerStyleAsSld
+from geocatbridge.servers.models.geoserver import GeoserverServer
+
 
 class TestGeoserverServer(GeoserverServer):
 

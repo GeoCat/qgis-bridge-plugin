@@ -10,14 +10,14 @@ from qgis.core import (
     QgsVectorLayer,
     QgsWkbTypes
 )
-from bridgestyle.qgis import layerStyleAsMapfileFolder
-from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
-from geocatbridge.utils.files import tempFolder
 
+from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
+from bridgestyle.qgis import layerStyleAsMapfileFolder
+from geocatbridge.publish.exporter import exportLayer
 from geocatbridge.publish.ftpupload import uploadFolder
 from geocatbridge.servers.bases import DataCatalogServerBase
-from geocatbridge.publish.exporter import exportLayer
 from geocatbridge.servers.views.mapserver import MapServerWidget
+from geocatbridge.utils.files import tempFolder
 
 
 class MapserverServer(DataCatalogServerBase):
@@ -60,7 +60,6 @@ class MapserverServer(DataCatalogServerBase):
         self._layers.append(layer)
 
     def publishLayer(self, layer, fields=None):
-        self.publishStyle(layer)
         layerFilename = layer.name() + ".shp"
         layerPath = os.path.join(self.dataFolder(), layerFilename)
         exportLayer(layer, fields, to_shapefile=True, path=layerPath, force=True, logger=self)
@@ -73,7 +72,7 @@ class MapserverServer(DataCatalogServerBase):
         # MapServer connections are not tested
         return True
 
-    def prepareForPublishing(self, onlySymbology):
+    def prepareForPublishing(self, only_symbology):
         self._layers = []
         self._metadataLinks = {}
         self._folder = self.folder if self.useLocalFolder else tempFolder()
@@ -137,7 +136,7 @@ class MapserverServer(DataCatalogServerBase):
             metadata = {
                 "wms_abstract": _quote(layer.metadata().abstract()),
                 "wms_title": _quote(layer.name()),
-                "ows_srs": _quote("EPSG:4326 EPSG:3857 " + layer.crs().auth_id()),
+                "ows_srs": _quote("EPSG:4326 EPSG:3857 " + layer.crs().authid()),
                 "wms_extent": _quote(" ".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(),
                                                                 bbox.xMaximum(), bbox.yMaximum()]]))
             }
@@ -185,13 +184,13 @@ class MapserverServer(DataCatalogServerBase):
         if not self.useLocalFolder:
             self.uploadFolder(dst)
 
-    def styleExists(self, name):
-        return False
+    def layerExists(self, name: str):
+        return
+
+    def styleExists(self, name: str):
+        return
 
     def deleteStyle(self, name):
-        return False
-
-    def layerExists(self, name):
         return False
 
     def deleteLayer(self, name):
@@ -200,20 +199,18 @@ class MapserverServer(DataCatalogServerBase):
     def openPreview(self, names, bbox, srs):
         pass
 
-    def fullLayerName(self, layerName):
-        return layerName
-
-    def layerWmsUrl(self, name):
+    def getWmsUrl(self):
         project = self.projectName
-        return "%s?map=%s/maps/%s.map&service=WMS&version=1.1.0&request=GetCapabilities&layers=%s" % (
-        self.url, project, project, name)
+        return "%s?map=%s/maps/%s.map&service=WMS&version=1.1.0&request=GetCapabilities" % (
+            self.baseUrl, project, project)
 
-    def layerWfsUrl(self):
+    def getWfsUrl(self):
         project = self.projectName
-        return "%s?map=%s/maps/%s.map&service=WFS&version=2.0.0&request=GetCapabilities" % (self.url, project, project)
+        return "%s?map=%s/maps/%s.map&service=WFS&version=2.0.0&request=GetCapabilities" % (
+            self.baseUrl, project, project)
 
     def setLayerMetadataLink(self, name, url):
         self._metadataLinks[name] = url
 
-    def createGroups(self, groups):
+    def createGroups(self, groups, qgis_layers):
         pass

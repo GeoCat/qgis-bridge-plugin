@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsl:stylesheet version="1.0" xmlns="http://www.isotc211.org/2005/gmd"
-										xmlns:gco="http://www.isotc211.org/2005/gco"
-										xmlns:gts="http://www.isotc211.org/2005/gts"
-										xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-										xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                xmlns:gco="http://www.isotc211.org/2005/gco"
+                xmlns:gts="http://www.isotc211.org/2005/gts"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 	<!-- ============================================================================= -->
   <xsl:template name="remove-html">

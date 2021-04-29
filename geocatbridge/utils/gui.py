@@ -1,10 +1,10 @@
-from qgis.PyQt.QtWidgets import QApplication
-from qgis.PyQt.QtGui import QCursor
 from qgis.PyQt import QtCore
 from qgis.PyQt import uic
+from qgis.PyQt.QtGui import QCursor
+from qgis.PyQt.QtWidgets import QApplication
 
-from geocatbridge.utils.feedback import logError
 from geocatbridge.utils import files
+from geocatbridge.utils.feedback import logError
 
 
 def loadUiType(controller) -> tuple:

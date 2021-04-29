@@ -1,15 +1,15 @@
-from itertools import chain
 from functools import partial
+from itertools import chain
 
+from qgis.PyQt import QtCore
 from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QProgressDialog
 )
-from qgis.PyQt import QtCore
 from qgis.gui import QgsAuthConfigSelect
 
-from geocatbridge.servers.models.gs_storage import GeoserverStorage
 from geocatbridge.servers.bases import ServerWidgetBase
+from geocatbridge.servers.models.gs_storage import GeoserverStorage
 from geocatbridge.servers.views.geoserver_ds import GeoserverDatastoreDialog
 from geocatbridge.utils import gui
 from geocatbridge.utils.meta import getAppName

@@ -5,9 +5,9 @@ from qgis.PyQt.QtGui import QPixmap, QIcon
 from qgis.core import QgsMessageLog
 from requests.models import PreparedRequest
 
+from geocatbridge.utils.files import getIconPath
 from geocatbridge.utils.gui import loadUiType
 from geocatbridge.utils.meta import getTrackerUrl, getAppName
-from geocatbridge.utils.files import getIconPath
 
 WIDGET, BASE = loadUiType(__file__)
 
@@ -18,7 +18,7 @@ class ErrorDialog(BASE, WIDGET):
         super(ErrorDialog, self).__init__()
         self.setupUi(self)
 
-        self.setWindowTitle(f"{getAppName()} Publish Report")
+        self.setWindowTitle(f"{getAppName()} Error Report")
         self.setWindowIcon(QIcon(getIconPath('geocat')))
         pixmap = QPixmap(getIconPath("bridge_logo"))
         self.labelIcon.setPixmap(pixmap)

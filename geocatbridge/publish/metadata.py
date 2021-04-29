@@ -16,8 +16,8 @@ from qgis.core import (
     QgsMessageLog
 )
 
-from geocatbridge.utils.files import tempFilenameInTempFolder, getResourcePath
 from geocatbridge.utils import meta
+from geocatbridge.utils.files import tempFileInSubFolder, getResourcePath
 from geocatbridge.utils.layers import getLayerTitleAndName
 
 QMD_TO_ISO19139_XSLT = getResourcePath("qgis-to-iso19139.xsl")
@@ -49,21 +49,21 @@ def _convertMetadata(input_file, output_file, xslt_file):
 
 
 def _loadMetadataFromIsoXml(layer, filename):
-    qmd_filename = tempFilenameInTempFolder("fromiso.qmd")
+    qmd_filename = tempFileInSubFolder("fromiso.qmd")
     QgsMessageLog.logMessage(f"Exporting ISO19193 metadata to {qmd_filename}", meta.getAppName(), level=Qgis.Info)
     _convertMetadata(filename, qmd_filename, ISO19139_TO_QMD_XSLT)
     layer.loadNamedMetadata(qmd_filename)
 
 
 def _loadMetadataFromEsriXml(layer, filename):
-    iso_filename = tempFilenameInTempFolder("fromesri.xml")
+    iso_filename = tempFileInSubFolder("fromesri.xml")
     QgsMessageLog.logMessage(f"Exporting ISO19115 metadata to {iso_filename}", meta.getAppName(), level=Qgis.Info)
     _convertMetadata(filename, iso_filename, ISO19115_TO_ISO19139_XSLT)
     _loadMetadataFromIsoXml(layer, iso_filename)
 
 
 def _loadMetadataFromWrappingEsriXml(layer, filename):
-    iso_filename = tempFilenameInTempFolder("fromesri.xml")
+    iso_filename = tempFileInSubFolder("fromesri.xml")
     QgsMessageLog.logMessage(f"Exporting Wrapping-ISO19115 metadata to {iso_filename}", meta.getAppName(),
                              level=Qgis.Info)
     _convertMetadata(filename, iso_filename, WRAPPING_ISO19115_TO_ISO19139_XSLT)
@@ -71,14 +71,14 @@ def _loadMetadataFromWrappingEsriXml(layer, filename):
 
 
 def _loadMetadataFromFgdcXml(layer, filename):
-    iso_filename = tempFilenameInTempFolder("fromfgdc.xml")
+    iso_filename = tempFileInSubFolder("fromfgdc.xml")
     QgsMessageLog.logMessage(f"Exporting FGDC metadata to {iso_filename}", meta.getAppName(), level=Qgis.Info)
     _convertMetadata(filename, iso_filename, FGDC_TO_ISO19115)
     _loadMetadataFromEsriXml(layer, iso_filename)
 
 
 def _saveLayerThumbnail(layer):
-    filename = tempFilenameInTempFolder("thumbnail.png")
+    filename = tempFileInSubFolder("thumbnail.png")
     img = QImage(QSize(800, 800), QImage.Format_A2BGR30_Premultiplied)
     color = QColor(255, 255, 255, 255)
     img.fill(color.rgba())
@@ -118,7 +118,7 @@ def _transformMetadata(filename, uuid, api_url, wms, wfs, layer_name):
         csname = ET.SubElement(name, "{http://www.isotc211.org/2005/gco}CharacterString")
         csname.text = md_layer
 
-    iso_filename = tempFilenameInTempFolder("metadata.xml")
+    iso_filename = tempFileInSubFolder("metadata.xml")
     out_dom = _transformDom(filename, iso_filename)
 
     for ident in out_dom.iter(_ns("fileIdentifier")):
@@ -192,12 +192,29 @@ def uuidForLayer(layer):
 def loadMetadataFromXml(layer, filename):
     root = ElementTree.parse(filename).getroot()
 
-    def _hasTag(tag):
+    def _casefoldRoot():
+        """ Returns a lowercase version of the entire XML tree.
+        As this also changes the case of the element values, *don't* use this function to retrieve data.
+        """
+        t = ElementTree.tostring(root)
+        return ET.fromstring(t.lower())
+
+    def _hasTag(tag, case_insensitive=False):
+        """ Checks if the given tag exists in the XML document.
+
+        :param case_insensitive:    If True (default = False), the tag is also checked in a case-insensitive manner
+                                    if no match was found in the original case.
+        """
+        # Always find tag in original case first
         for _ in root.iter(tag):
             return True
+        if case_insensitive:
+            # Tag not found, try case-insensitive search
+            for _ in _casefoldRoot().iter(tag.lower()):
+                return True
         return False
 
-    if _hasTag("esri"):
+    if _hasTag("Esri", True):
         if _hasTag("gmd:MD_Metadata"):
             _loadMetadataFromWrappingEsriXml(layer, filename)
         else:
@@ -217,11 +234,11 @@ def loadMetadataFromXml(layer, filename):
 def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None, wfs=None, layerName=None):
     uuid = uuidForLayer(layer)
     _, safe_name = getLayerTitleAndName(layer)
-    filename = tempFilenameInTempFolder(safe_name + ".qmd")
+    filename = tempFileInSubFolder(safe_name + ".qmd")
     layer.saveNamedMetadata(filename)
     thumbnail = _saveLayerThumbnail(layer)
     apiUrl = apiUrl or ""
     transformedFilename = _transformMetadata(filename, uuid, apiUrl, wms, wfs, layerName or safe_name)
-    mefFilename = mefFilename or tempFilenameInTempFolder(uuid + ".mef")
+    mefFilename = mefFilename or tempFileInSubFolder(uuid + ".mef")
     _createMef(uuid, transformedFilename, mefFilename, thumbnail)
     return mefFilename
