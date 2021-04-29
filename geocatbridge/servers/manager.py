@@ -209,7 +209,7 @@ def loadConfiguredServers() -> bool:
     # Read QGIS Bridge server settings string
     server_config = QSettings().value(SERVERS_SETTING)
     if not server_config:
-        feedback.logWarning(f"Could not find existing QGIS setting '{SERVERS_SETTING}'")
+        feedback.logInfo(f"Could not find existing {meta.getAppName()} setting '{SERVERS_SETTING}'")
         return False
 
     # Deserialize JSON and initialize servers

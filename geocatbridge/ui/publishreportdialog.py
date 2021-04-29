@@ -1,5 +1,6 @@
 from functools import partial
 
+from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import (
     QPushButton,
@@ -9,7 +10,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget
 )
 
-from geocatbridge.utils import gui
+from geocatbridge.utils import gui, files
 from geocatbridge.utils.feedback import FeedbackMixin
 
 WIDGET, BASE = gui.loadUiType(__file__)
@@ -21,6 +22,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         super(PublishReportDialog, self).__init__(parent)
         self.results = results
         self.setupUi(self)
+        self.setWindowIcon(QIcon(files.getIconPath('geocat')))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         if geodata_server is not None:
             url = geodata_server.url
@@ -34,7 +36,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
             self.labelUrlMetadataServer.setText("----")
         publish_data = geodata_server is not None
         self.labelPublishMapData.setText("ON" if publish_data and not only_symbology else "OFF")
-        self.labelPublishSymbology.setText("ON" if publish_data else "OFF")
+        self.labelPublishSymbology.setText("ON" if publish_data or only_symbology else "OFF")
         self.labelPublishMetadata.setText("ON" if metadata_server is not None else "OFF")
         self.tableWidget.setRowCount(len(results))
         for i, name in enumerate(results.keys()):

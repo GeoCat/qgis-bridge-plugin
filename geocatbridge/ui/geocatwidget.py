@@ -21,6 +21,8 @@ class GeoCatWidget(WIDGET, BASE):
         self.txtAbout.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
         self.txtAbout.linkClicked.connect(partial(self.open_link))
 
+        self.btnClose.clicked.connect(parent.close)
+
     @staticmethod
     def open_link(url: QUrl) -> bool:
         return webbrowser.open_new_tab(url.toString())

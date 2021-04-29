@@ -20,6 +20,9 @@ class ProgressDialog(BASE, WIDGET):
     def __init__(self, layers, parent=None):
         super(ProgressDialog, self).__init__(parent)
         self.setupUi(self)
+
+        self.setWindowIcon(QIcon(files.getIconPath('geocat')))
+
         self.layers = layers
         self.populateTree()
 

@@ -30,18 +30,15 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         self.comboMetadataProfile.setVisible(False)
         self.labelMetadataProfile.setVisible(False)
 
-    def getName(self):
-        return self.txtGeonetworkName.text().strip()
-
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
         try:
             return self.serverType(
-                name=self.getName(),
+                name=self.txtGeonetworkName.text().strip(),
                 authid=self.geonetworkAuth.configId() or None,
                 url=self.txtGeonetworkUrl.text().strip(),
-                profile=self.comboMetadataProfile.currentIndex(),
-                node=self.txtGeonetworkNode.text().strip()
+                # profile=self.comboMetadataProfile.currentIndex(),
+                node=self.txtGeonetworkNode.text().strip() or 'srv'
             )
         except Exception as e:
             self.parent.logError(f"Failed to create server instance:\n{e}")

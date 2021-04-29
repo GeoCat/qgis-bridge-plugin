@@ -35,9 +35,6 @@
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <layout class="QHBoxLayout" name="layoutSelectLayers">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <item>
           <widget class="QLabel" name="labelSelect">
            <property name="sizePolicy">
@@ -65,9 +62,12 @@
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Minimum</enum>
+           </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>40</width>
+             <width>250</width>
              <height>20</height>
             </size>
            </property>
@@ -100,6 +100,18 @@
        </item>
        <item>
         <widget class="QListWidget" name="listLayers">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>350</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="contextMenuPolicy">
           <enum>Qt::CustomContextMenu</enum>
          </property>
@@ -108,10 +120,16 @@
        <item>
         <widget class="QLabel" name="txtNoLayers">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>350</width>
+           <height>0</height>
+          </size>
          </property>
          <property name="font">
           <font>
@@ -154,6 +172,12 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
      </item>
      <item>
       <widget class="QTabWidget" name="tabLayerInfo">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
@@ -695,7 +719,7 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QCheckBox" name="chkExportData">
+          <widget class="QCheckBox" name="chkExportGeodata">
            <property name="text">
             <string>Export geodata</string>
            </property>
@@ -786,6 +810,19 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
        </property>
        <property name="default">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="btnClose">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Close</set>
        </property>
       </widget>
      </item>

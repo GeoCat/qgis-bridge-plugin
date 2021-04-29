@@ -13,10 +13,10 @@ from geocatbridge.utils import gui
 WIDGET, BASE = gui.loadUiType(__file__)
 
 
-class MultistylerWidget(BASE, WIDGET):
+class StyleviewerWidget(BASE, WIDGET):
 
     def __init__(self, ):
-        super(MultistylerWidget, self).__init__(iface.mainWindow())
+        super(StyleviewerWidget, self).__init__(iface.mainWindow())
         self.setupUi(self)
 
         self.txtSld = EditorWidget(QsciLexerXML())
@@ -101,4 +101,5 @@ class EditorWidget(QsciScintilla):
             lexer.setDefaultFont(font)        
             self.setLexer(lexer)
 
+        self.setReadOnly(True)
         self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier'.encode())

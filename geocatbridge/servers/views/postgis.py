@@ -24,9 +24,6 @@ class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
         self.txtPostgisSchema.textChanged.connect(self.setDirty)
         self.txtPostgisDatabase.textChanged.connect(self.setDirty)
 
-    def getName(self):
-        return self.txtPostgisName.text().strip()
-
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
         try:
@@ -37,7 +34,7 @@ class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
 
         try:
             return self.serverType(
-                name=self.getName(),
+                name=self.txtPostgisName.text().strip(),
                 authid=self.postgisAuth.configId(),
                 host=self.txtPostgisServerAddress.text().strip(),
                 port=port,

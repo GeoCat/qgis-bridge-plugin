@@ -16,18 +16,18 @@ from geocatbridge.process.algorithm import BridgeAlgorithm
 
 class GeonetworkServer(MetaCatalogServerBase):
 
-    def __init__(self, name, auth_id="", url="", profile=GeoNetworkProfiles.DEFAULT, node="srv"):
+    def __init__(self, name, authid="", url="", profile=GeoNetworkProfiles.DEFAULT, node="srv"):
         """
         Creates a new GeoNetwork model instance.
 
         :param name:    Descriptive server name (given by the user)
-        :param auth_id: QGIS Authentication ID (optional)
+        :param authid:  QGIS Authentication ID (optional)
         :param url:     GeoNetwork base URL
         :param profile: GeoNetwork metadata profile type (optional)
         :param node:    GeoNetwork node name (default = srv)
         """
 
-        super().__init__(name, auth_id, url)
+        super().__init__(name, authid, url)
         try:
             self.profile = GeoNetworkProfiles[profile]
         except IndexError:

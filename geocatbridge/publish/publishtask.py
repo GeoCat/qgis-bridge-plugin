@@ -23,7 +23,8 @@ from geocatbridge.publish.metadata import uuidForLayer, saveMetadata
 from geocatbridge.ui.progressdialog import DATA, METADATA, SYMBOLOGY, GROUPS
 from geocatbridge.ui.publishreportdialog import PublishReportDialog
 from geocatbridge.utils.feedback import FeedbackMixin
-from geocatbridge.utils import layers as layerUtils
+from geocatbridge.utils import layers as lyr_utils
+from geocatbridge.utils.meta import getAppName
 
 
 class PublishTask(QgsTask):
@@ -32,7 +33,7 @@ class PublishTask(QgsTask):
     stepSkipped = pyqtSignal(str, int)
 
     def __init__(self, layers, fields, only_symbology, geodata_server, metadata_server, parent):
-        super().__init__("Publish from GeoCat Bridge", QgsTask.CanCancel)
+        super().__init__(f"Publish from {getAppName()}", QgsTask.CanCancel)
         self.results = {}
         self.exception = None
         self.exc_type = None
@@ -52,7 +53,7 @@ class PublishTask(QgsTask):
             children.reverse()  # GS and QGIS have opposite ordering
             for child in children:
                 if isinstance(child, QgsLayerTreeLayer):
-                    in_name, out_name = layerUtils.getLayerTitleAndName(child.layer())
+                    in_name, out_name = lyr_utils.getLayerTitleAndName(child.layer())
                     if in_name in to_publish:
                         layers.append(out_name)
                     name = child.layer().name()
@@ -63,10 +64,10 @@ class PublishTask(QgsTask):
                     if subgroup is not None:
                         layers.append(subgroup)
             if layers:
-                title, name = layerUtils.getLayerTitleAndName(layer_tree)
+                title, name = lyr_utils.getLayerTitleAndName(layer_tree)
                 return {"name": name,
-                        "title": layerTreeGroup.customProperty("wmsTitle", title),
-                        "abstract": layerTreeGroup.customProperty("wmsAbstract", title),
+                        "title": layer_tree.customProperty("wmsTitle", title),
+                        "abstract": layer_tree.customProperty("wmsAbstract", title),
                         "layers": layers}
             else:
                 return None
@@ -126,8 +127,8 @@ class PublishTask(QgsTask):
                 self.setProgress(i * 100 / len(self.layers))
                 layer = self.layerFromName(name)
                 qgs_layers[name] = layer
-                _, safe_name = layerUtils.getLayerTitleAndName(layer)
-                if not layerUtils.hasValidLayerName(layer):
+                _, safe_name = lyr_utils.getLayerTitleAndName(layer)
+                if not lyr_utils.hasValidLayerName(layer):
                     try:
                         warnings.append(f"Layer name '{name}' contains characters that might cause issues")
                     except UnicodeError:
@@ -263,7 +264,7 @@ class ExportTask(FeedbackMixin, QgsTask):
     stepSkipped = pyqtSignal(str, int)
 
     def __init__(self, folder, layers, fields, export_data, export_metadata, export_symbology):
-        super().__init__("Export from GeoCat Bridge", QgsTask.CanCancel)
+        super().__init__(f"Export from {getAppName()}", QgsTask.CanCancel)
         self.exception = None
         self.folder = folder
         self.layers = layers
@@ -292,7 +293,7 @@ class ExportTask(FeedbackMixin, QgsTask):
                     return False
                 self.setProgress(i * 100 / len(self.layers))
                 layer = self.layerFromName(name)
-                _, safe_name = layerUtils.getLayerTitleAndName(layer)
+                _, safe_name = lyr_utils.getLayerTitleAndName(layer)
                 if self.exportSymbology:
                     style_filename = os.path.join(self.folder, safe_name + "_style.zip")
                     self.stepStarted.emit(name, SYMBOLOGY)

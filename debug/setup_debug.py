@@ -108,10 +108,15 @@ def main(plugin_py: Path, pydevd_egg: Path, debug_dir: str = _REMOTE_DEBUG_DIR, 
     dest_debug_dir = plugin_py.parent / debug_dir
     local_py = cur_dir / plugin_py.name
 
-    # Backup plugin.py file
-    if not local_py.exists():
-        print(f'Creating backup of {plugin_py} in {cur_dir}...')
-        shutil.copy2(plugin_py, local_py)
+    # Check if plugin.py already contains the injected debug code
+    with open(plugin_py) as f:
+        if next(line for line in _CODE.splitlines() if line) in f.read():
+            print(f'{plugin_py} already contains debug code!')
+            return
+
+    # Backup plugin.py file (always overwrite)
+    print(f'Creating backup of {plugin_py} in {cur_dir}...')
+    shutil.copy2(plugin_py, local_py)
     print(f'Using backup {local_py} for code injection')
 
     # Extract PyCharm pydevd egg to destination debug directory

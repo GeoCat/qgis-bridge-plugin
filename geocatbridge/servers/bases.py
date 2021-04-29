@@ -172,6 +172,7 @@ class ServerWidgetBase:
 
     def __init__(self, parent, server_type):
         super().__init__(parent)
+        self._id = None
         self._parent = parent
         self._server_type = server_type
         self._dirty = False
@@ -199,13 +200,18 @@ class ServerWidgetBase:
         """ Sets the form to a 'clean' state if the field values did not change. """
         self._dirty = False
 
-    def getName(self):
-        """ This method must be implemented on all server widget controllers.
-        It should return the current name of the server, retrieved from a user input text field.
+    def getId(self):
+        """ This method returns the original name of the server (regardless of unsaved user changes).
 
         :returns:   A server name string.
         """
-        raise NotImplementedError(f"{self.__class__.__name__} must implement getName()")
+        return self._id
+
+    def setId(self, name: str):
+        """ This method sets the original name of the server (before any user changes).
+        It is typically called by the server connections widget, directly after a server widget was populated.
+        """
+        self._id = name
 
     def createServerInstance(self):
         """ This method must be implemented on all server widget controllers.

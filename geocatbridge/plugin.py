@@ -5,15 +5,15 @@ import webbrowser
 from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import QIcon, QHideEvent, QShowEvent
+from qgis.PyQt.QtWidgets import QAction, QWidget
 from qgis.core import QgsProject, QgsApplication
 
 from geocatbridge.errorhandler import handleError
 from geocatbridge.process.provider import BridgeProvider
 from geocatbridge.servers import manager
 from geocatbridge.ui.bridgedialog import BridgeDialog
-from geocatbridge.ui.multistylerwidget import MultistylerWidget
+from geocatbridge.ui.styleviewerwidget import StyleviewerWidget
 from geocatbridge.utils import meta, files, feedback
 
 
@@ -22,11 +22,13 @@ class GeocatBridge:
         self.iface = iface
         self._win = iface.mainWindow()
 
-        self.dialog_publish = None
+        self.main_dialog = None
         self.action_publish = None
         self.action_help = None
-        self.action_multistyler = None
-        self.widget_multistyler = None
+        self.action_styleviewer = None
+        self.widget_styleviewer = StyleviewerWidget()
+        self.widget_styleviewer.hideEvent = partial(self.styleviewerHidden)
+        self.widget_styleviewer.showEvent = partial(self.styleviewerShown)
 
         self._layerSignals = LayerStyleEventManager()
 
@@ -76,76 +78,119 @@ class GeocatBridge:
         webbrowser.open_new_tab(full_url)
 
     def initProcessing(self):
+        """ Initializes and adds a processing provider. """
         self.provider = BridgeProvider()
         QgsApplication.processingRegistry().addProvider(self.provider)  # noqa
 
     def initGui(self):
         self.initProcessing()
 
-        self.dialog_publish = BridgeDialog(self.iface.mainWindow())
+        # Publish / main dialog menu item + toolbar button
         self.action_publish = QAction(QIcon(files.getIconPath("publish_button")),
                                       QCoreApplication.translate(self.name, "Publish"), self._win)
         self.action_publish.setObjectName("startPublish")
-        self.action_publish.triggered.connect(self.dialog_publish.show)
-        self.dialog_publish.hide()
-
+        self.action_publish.triggered.connect(self.bridgeButtonClicked)
         self.iface.addPluginToWebMenu(self.name, self.action_publish)
         self.iface.addWebToolBarIcon(self.action_publish)
-            
-        self.widget_multistyler = MultistylerWidget()
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.widget_multistyler)
-        self.widget_multistyler.hide()
 
-        self.action_multistyler = QAction(QIcon(files.getIconPath("symbology")),
-                                          QCoreApplication.translate(self.name, "Multistyler"), self._win)
-        self.action_multistyler.setObjectName("Multistyler")
-        self.action_multistyler.triggered.connect(self.widget_multistyler.show)
-        self.iface.addPluginToWebMenu(self.name, self.action_multistyler)
+        # Register dockable StyleViewer widget (also registers to View > Panels) but keep hidden
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.widget_styleviewer)
+        self.widget_styleviewer.hide()
 
-        self.iface.currentLayerChanged.connect(self.widget_multistyler.updateForCurrentLayer)
+        # StyleViewer menu item
+        self.action_styleviewer = QAction(QIcon(files.getIconPath("symbology")),
+                                          QCoreApplication.translate(self.name, "StyleViewer"), self._win)
+        self.action_styleviewer.setObjectName("StyleViewer")
+        self.action_styleviewer.triggered.connect(self.widget_styleviewer.show)
+        self.iface.addPluginToWebMenu(self.name, self.action_styleviewer)
 
+        # Help menu item
         self.action_help = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'),
                                    "Plugin Help...", self._win)
         self.action_help.setObjectName(f"{self.name} Help")
         self.action_help.triggered.connect(self.openDocUrl)
         self.iface.addPluginToWebMenu(self.name, self.action_help)
 
+        # Add layer event handlers
         QgsProject().instance().layersAdded.connect(self.layersAdded)
         QgsProject().instance().layersWillBeRemoved.connect(self.layersWillBeRemoved)
 
     def unload(self):
         files.removeTempFolder()
-    
-        self.iface.currentLayerChanged.disconnect(self.widget_multistyler.updateForCurrentLayer)
-        QgsProject().instance().layersAdded.disconnect(self.layersAdded)
 
-        self.action_multistyler.triggered.disconnect(self.widget_multistyler.show)
-        self.action_publish.triggered.disconnect(self.dialog_publish.show)
-        self.widget_multistyler.hide()
-        self.dialog_publish.hide()
-        del self.widget_multistyler
-        del self.dialog_publish
-
+        # Remove layer event handlers
+        try:
+            QgsProject().instance().layersAdded.disconnect(self.layersAdded)
+            QgsProject().instance().layersWillBeRemoved.disconnect(self.layersWillBeRemoved)
+        except TypeError:
+            # Event handlers were never connected in the first place:
+            # initGui() was probably never called, so abort the unload method
+            if self.qgis_hook and self.qgis_hook != sys.excepthook:
+                sys.excepthook = self.qgis_hook
+            return
         self._layerSignals.clear()
 
-        self.iface.removePluginWebMenu(self.name, self.action_help)
+        # Remove StyleViewer button and close StyleViewer
+        self.action_styleviewer.triggered.disconnect(self.widget_styleviewer.show)
+        self.iface.removePluginWebMenu(self.name, self.action_styleviewer)
+        self.closeDialog(self.widget_styleviewer)
+
+        # Remove Publish button and close Publish dialog
+        self.action_publish.triggered.disconnect(self.bridgeButtonClicked)
         self.iface.removePluginWebMenu(self.name, self.action_publish)
-        self.iface.removePluginWebMenu(self.name, self.action_multistyler)
-
         self.iface.removeWebToolBarIcon(self.action_publish)
+        self.closeDialog(self.main_dialog)
 
+        # Remove Help button
+        self.iface.removePluginWebMenu(self.name, self.action_help)
+
+        # Remove processing provider
         QgsApplication.processingRegistry().removeProvider(self.provider)  # noqa
 
         sys.excepthook = self.qgis_hook
 
     def layersAdded(self, layers):
         for lyr in layers:
-            self._layerSignals.connect(lyr, self.widget_multistyler.updateLayer)
+            self._layerSignals.connect(lyr, self.widget_styleviewer.updateLayer)
 
     def layersWillBeRemoved(self, layer_ids):
         layer_ids = frozenset(layer_ids)
         for lyr_id in layer_ids:
             self._layerSignals.disconnect(lyr_id)
+
+    def bridgeButtonClicked(self):
+        """ Opens the Bridge Publish dialog. This will always create a new BridgeDialog instance."""
+        # Since the BridgeDialog is a modal window, the Bridge button cannot be clicked if the dialog is open.
+        # Therefore, we don't need to check if there is a current (open) dialog or not.
+        self.main_dialog = BridgeDialog(self.iface.mainWindow())
+        self.main_dialog.show()
+
+    def styleviewerHidden(self, event: QHideEvent):
+        """ Detaches the 'currentLayerChanged' event handler from the StyleViewer widget if it is hidden. """
+        if self.iface and self.widget_styleviewer:
+            try:
+                self.iface.currentLayerChanged.disconnect(self.widget_styleviewer.updateForCurrentLayer)
+            except TypeError:
+                # currentLayerChanged was never connected
+                pass
+        event.accept()
+
+    def styleviewerShown(self, event: QShowEvent):
+        """ Attaches the 'currentLayerChanged' event handler to the StyleViewer widget if it is shown.
+        Also calls 'updateForCurrentLayer' to make sure that the initial view is refreshed.
+        """
+        if self.iface and self.widget_styleviewer:
+            self.iface.currentLayerChanged.connect(self.widget_styleviewer.updateForCurrentLayer)
+            self.widget_styleviewer.updateForCurrentLayer()
+        event.accept()
+
+    @staticmethod
+    def closeDialog(dialog: QWidget):
+        """ Closes (hides) and unsets the given dialog. """
+        if dialog is None:
+            return
+        dialog.hide()
+        dialog = None  # noqa
 
 
 class LayerStyleEventManager:
@@ -169,7 +214,7 @@ class LayerStyleEventManager:
         if lyr and func:
             try:
                 lyr.styleChanged.disconnect(func)  # noqa
-            except RuntimeError:
+            except (TypeError, RuntimeError):
                 pass
         try:
             del self._store[layer_id]
