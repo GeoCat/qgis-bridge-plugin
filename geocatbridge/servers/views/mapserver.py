@@ -28,9 +28,6 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.txtMapServicesPath.textChanged.connect(self.setDirty)
         self.txtProjFolder.textChanged.connect(self.setDirty)
 
-    def getName(self):
-        return self.txtMapserverName.text().strip()
-
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
         try:
@@ -46,7 +43,7 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
 
         try:
             return self.serverType(
-                name=self.getName(),
+                name=self.txtMapserverName.text().strip(),
                 url=self.txtMapserverUrl.text().strip(),
                 useLocalFolder=local_storage,
                 folder=folder,

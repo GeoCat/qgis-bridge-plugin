@@ -1,9 +1,11 @@
+import json
 import os
+from collections import Counter
 
 import requests
 from qgis.PyQt.QtCore import (
     Qt,
-    QCoreApplication
+    QCoreApplication, QSettings
 )
 from qgis.PyQt.QtGui import (
     QIcon,
@@ -37,8 +39,11 @@ from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromXml
 from geocatbridge.publish.publishtask import PublishTask, ExportTask
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.progressdialog import ProgressDialog
-from geocatbridge.utils import files, gui
+from geocatbridge.utils import files, gui, meta
 from geocatbridge.utils.feedback import FeedbackMixin
+
+# QGIS setting that stores the online/offline publish settings
+PUBLISH_SETTING = f"{meta.PLUGIN_NAMESPACE}/BridgePublish"
 
 PUBLISHED_ICON = QIcon(files.getIconPath("published"))
 ERROR_ICON = f'<img src="{files.getIconPath("error-red")}">'
@@ -81,6 +86,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.listLayers.currentRowChanged.connect(self.currentRowChanged)
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
+        self.txtExportFolder.textChanged.connect(self.exportFolderChanged)
         self.btnPublish.clicked.connect(self.publish)
         self.btnOpenQgisMetadataEditor.clicked.connect(self.openMetadataEditor)
         self.labelSelect.linkActivated.connect(self.selectLabelClicked)
@@ -99,6 +105,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.btnDataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
         self.btnMetadataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
         self.btnExportFolder.clicked.connect(self.selectExportFolder)
+        self.btnClose.clicked.connect(self.parent.close)
 
         if self.listLayers.count():
             item = self.listLayers.item(0)
@@ -113,16 +120,84 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.metadataServerChanged()
         self.selectLabelClicked("all")
 
+    def setFromConfig(self):
+        """ Sets online and offline publish settings from QGIS Bridge configuration. """
+
+        # Read QGIS setting
+        config_str = QSettings().value(PUBLISH_SETTING)
+        if not config_str:
+            self.logInfo(f"Could not find existing {meta.getAppName()} setting '{PUBLISH_SETTING}'")
+            return
+
+        # Parse JSON object from settings string
+        try:
+            settings = json.loads(config_str)
+        except json.JSONDecodeError as e:
+            self.logError(f"Failed to parse publish settings:\n{e}")
+            return
+
+        # Set online settings
+        online_settings = settings.get('online', {})
+        geodata_server = online_settings.get('geodataServer')
+        if geodata_server and geodata_server in manager.getGeodataServerNames():
+            self.comboGeodataServer.setCurrentText(geodata_server)
+        metadata_server = online_settings.get('metadataServer')
+        if metadata_server and metadata_server in manager.getMetadataServerNames():
+            self.comboMetadataServer.setCurrentText(metadata_server)
+        style_only = online_settings.get('symbologyOnly', False)
+        self.chkOnlySymbology.setCheckState(Qt.Checked if style_only else Qt.Unchecked)
+
+        # Set offline settings
+        offline_settings = settings.get('offline', {})
+        self.chkExportGeodata.setCheckState(Qt.Checked if offline_settings.get('exportGeodata') else Qt.Unchecked)
+        self.chkExportMetadata.setCheckState(Qt.Checked if offline_settings.get('exportMetadata') else Qt.Unchecked)
+        self.chkExportSymbology.setCheckState(Qt.Checked if offline_settings.get('exportSymbology') else Qt.Unchecked)
+        folder = offline_settings.get('exportFolder') or ''
+        self.txtExportFolder.setText(folder)
+
+        # Set active tab (making sure there's no IndexError)
+        tab_index = min(max(0, settings.get('currentTab', 0)), self.tabOnOffline.count() - 1)
+        self.tabOnOffline.setCurrentIndex(tab_index)
+
+    def saveConfig(self):
+        """ Collects current publish settings and persists them as QGIS Bridge configuration. """
+
+        # Create JSON object
+        geodata_server = self.comboGeodataServer.currentText()
+        metadata_server = self.comboMetadataServer.currentText()
+        settings = {
+            'online': {
+                'geodataServer': geodata_server if geodata_server != self.COMBO_NOTSET_DATA else None,
+                'metadataServer': metadata_server if metadata_server != self.COMBO_NOTSET_META else None,
+                'symbologyOnly': self.chkOnlySymbology.isChecked()
+            },
+            'offline': {
+                'exportFolder': self.txtExportFolder.text().strip(),
+                'exportGeodata': self.chkExportGeodata.isChecked(),
+                'exportMetadata': self.chkExportMetadata.isChecked(),
+                'exportSymbology': self.chkExportSymbology.isChecked()
+            },
+            'currentTab': min(max(0, self.tabOnOffline.currentIndex()), self.tabOnOffline.count() - 1)
+        }
+
+        # Serialize as JSON and save string
+        try:
+            config_str = json.dumps(settings)
+        except TypeError as e:
+            self.logError(f"Failed to serialize publish settings as JSON: {e}")
+            return
+        QSettings().setValue(PUBLISH_SETTING, config_str)
+
     def selectExportFolder(self):
         folder = QFileDialog.getExistingDirectory(self, self.tr("Export to folder"))
         if folder:
             self.txtExportFolder.setText(folder)
 
     def geodataServerChanged(self):
-        self.updateLayersPublicationStatus(True, False)
+        self.updateOnlineLayersPublicationStatus(True, False)
 
     def metadataServerChanged(self):
-        self.updateLayersPublicationStatus(False, True)
+        self.updateOnlineLayersPublicationStatus(False, True)
         md_combo = self.comboMetadataServer.currentText()
         profile = 0
         if md_combo != self.COMBO_NOTSET_META:
@@ -256,7 +331,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.fieldsToPublish[layer] = {f: True for f in fields}
             self.metadata[layer] = layer.metadata().clone()
             self.addLayerListItem(layer)
-        self.updateLayersPublicationStatus()
+        self.updateOnlineLayersPublicationStatus()
 
     def addLayerListItem(self, layer):
         widget = LayerItemWidget(layer)
@@ -292,12 +367,12 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.comboMetadataServer.setCurrentText(current)
 
     def updateServers(self):
-        # TODO: do not call updateLayersPublicationStatus if not really needed
+        # TODO: do not call updateOnlineLayersPublicationStatus if not really needed
         self.comboGeodataServer.currentIndexChanged.disconnect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.disconnect(self.metadataServerChanged)
         self.populateComboGeodataServer()
         self.populateComboMetadataServer()
-        self.updateLayersPublicationStatus()
+        self.updateOnlineLayersPublicationStatus()
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
 
@@ -337,13 +412,13 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                 self.logError(err)
                 self.showWarningBar(
                     "Error importing metadata",
-                    "Cannot convert metadata file. Is it really an ISO19139 or ESRI-ISO format?"
+                    "Cannot convert metadata file. Does it have an ISO19139 or ESRI-ISO format?"
                 )
                 return
 
             self.metadata[self.currentLayer] = self.currentLayer.metadata().clone()
             self.populateLayerMetadata()
-            self.showSuccessBar("", "Metadata correctly imported")
+            self.showSuccessBar("", "Successfully imported metadata")
 
     def validateMetadata(self):
         if self.currentLayer is None:
@@ -405,7 +480,48 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             server = manager.getGeodataServer(self.comboGeodataServer.currentText())
             widget.setMetadataPublished(True if server and value else False)
 
-    def updateLayersPublicationStatus(self, data=True, metadata=True):
+    def exportFolderChanged(self):
+        """ Resets visual appearance of export folder text box. """
+        self.txtExportFolder.setStyleSheet("QLineEdit { }")
+
+    def checkOnlinePublicationStatus(self) -> bool:
+        """ Checks if all required online publish fields have been set. """
+        if self.tabOnOffline.currentWidget() != self.tabOnline:
+            # Current tab is not the online publishing tab
+            return True
+
+        if self.comboGeodataServer.currentText() == self.COMBO_NOTSET_DATA and self.comboMetadataServer.currentText() and not self.chkOnlySymbology.isChecked():
+            self.showWarningBar("Nothing to publish",
+                                "Please select a geodata and/or metadata server to use.")
+            return False
+        return True
+
+    def checkOfflinePublicationStatus(self) -> bool:
+        """ Checks if all required offline publish fields have been set. """
+        if self.tabOnOffline.currentWidget() != self.tabOffline:
+            # Current tab is not the offline publishing tab
+            return True
+
+        checked_items = any((
+            self.chkExportGeodata.isChecked(),
+            self.chkExportMetadata.isChecked(),
+            self.chkExportSymbology.isChecked()
+        ))
+        if not checked_items:
+            self.showWarningBar("Nothing to export",
+                                "Please select the things you wish to export (geodata, metadata or symbology).")
+        dir_set = len((self.txtExportFolder.text() or '').strip()) > 0
+        if not dir_set:
+            self.txtExportFolder.setStyleSheet("QLineEdit { border: 2px solid red; }")
+        return dir_set and checked_items and self.listLayers.count()
+
+    def updateOnlineLayersPublicationStatus(self, data: bool = True, metadata: bool = True) -> bool:
+        """ Validates online tab servers and updates layer status. """
+
+        if self.tabOnOffline.currentWidget() != self.tabOnline:
+            # Current tab is not the online publish tab
+            return True
+
         can_publish = True
         data_server = manager.getGeodataServer(self.comboGeodataServer.currentText())
         metadata_server = manager.getMetadataServer(self.comboMetadataServer.currentText())
@@ -440,7 +556,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                 widget.setMetadataPublished(server)
 
         can_publish = can_publish and self.listLayers.count()
-        self.btnPublish.setEnabled(can_publish)
+        return can_publish
 
     def unpublishAll(self):
         for name in self.isDataPublished:
@@ -493,60 +609,82 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         server.openMetadata(uuid)
 
     def publish(self):
+        """ Publish/export the selected layers. """
+
+        online = self.tabOnOffline.currentWidget() == self.tabOnline
+        action = 'publish' if online else 'export'
         to_publish = self._toPublish()
-        style_only = self.chkOnlySymbology.isChecked()
-        if not self.validateBeforePublication(to_publish, style_only):
+        if not to_publish:
+            self.showWarningBar(f"Nothing to {action}", "Please select one or more layers.")
             return
 
+        if not online and not self.checkOfflinePublicationStatus():
+            # Offline tab active: check if required offline publish settings have been set
+            return
+
+        if online:
+            # Online tab active
+            if not self.checkOnlinePublicationStatus():
+                # No server nor "only_symbology" has been selected
+                return
+            if not self.validateBeforePublication(to_publish, self.chkOnlySymbology.isChecked()):
+                # No data is valid for online publishing
+                return
+
         if self.chkBackground.isChecked():
-            return self.publishOnBackground()
+            # User wants to publish in the background: close dialog
+            return self.publishOnBackground(to_publish)
 
         progress_dialog = ProgressDialog(to_publish, self.parent)
-        task = self.getPublishTask(self.parent)
+        task = self.getPublishTask(self.parent, to_publish)
         task.stepStarted.connect(progress_dialog.setInProgress)
         task.stepSkipped.connect(progress_dialog.setSkipped)
         task.stepFinished.connect(progress_dialog.setFinished)
         progress_dialog.show()
         ret = gui.execute(task.run)
         progress_dialog.close()
-        task.finished(ret)
         if task.exception is not None:
-            if task.exc_type == requests.exceptions.ConnectionError:
-                self.showErrorBox("Error while publishing",
-                                  "Connection error. Server unavailable.\nSee QGIS log for details",
+            if getattr(task, 'exc_type', None) == requests.exceptions.ConnectionError:
+                self.showErrorBox(f"Error while {action}ing",
+                                  "Connection error: server unavailable.\nPlease check QGIS log for details.",
                                   propagate=task.exception)
             else:
-                self.showErrorBar("Error while publishing", "See QGIS log for details", propagate=task.exception)
-        if isinstance(task, PublishTask):
-            self.updateLayersPublicationStatus(task.geodata_server is not None, task.metadata_server is not None)
+                self.showErrorBar(f"Error while {action}ing",
+                                  "Please check QGIS log for details.", propagate=task.exception)
+        elif isinstance(task, ExportTask):
+            self.showSuccessBar(f"{action.capitalize()} completed", "No issues encountered.")
 
-    def publishOnBackground(self):
+        if isinstance(task, PublishTask):
+            # Show report dialog for publish tasks and update publication status
+            task.finished(ret)
+            self.updateOnlineLayersPublicationStatus(task.geodata_server is not None, task.metadata_server is not None)
+
+    def publishOnBackground(self, to_publish):
         self.parent.close()
-        task = self.getPublishTask(iface.mainWindow())
+        task = self.getPublishTask(iface.mainWindow(), to_publish)
+        action = 'publish' if hasattr(task, 'exc_type') else 'export'
+
+        def _aborted():
+            self.showErrorBar(f"{meta.getAppName()} background {action} failed",
+                              "Please check QGIS log for details.", main=True, propagate=task.exception)
 
         def _finished():
-            if task.exception is not None:
-                self.showErrorBar("Error while publishing", "See QGIS log for details",
-                                  main=True, propagate=task.exception)
+            self.showSuccessBar(f"{meta.getAppName()} background {action} completed",
+                                "No issues encountered.", main=True)
 
-        task.taskTerminated.connect(_finished)
-        QgsApplication().taskManager().addTask(task)
+        task.taskTerminated.connect(_aborted)
+        task.taskCompleted.connect(_finished)
+        QgsApplication.taskManager().addTask(task)
         QCoreApplication.processEvents()
 
     def validateBeforePublication(self, to_publish, style_only):
-        names = []
         errors = set()
-        for i in range(self.listLayers.count()):
-            item = self.listLayers.item(i)
-            widget = self.listLayers.itemWidget(item)
-            if widget.checked():
-                name = widget.name()
-                for c in "?&=#":
-                    if c in name:
-                        errors.add("Unsupported character in layer name: " + c)
-                if name in names:
-                    errors.add("Several layers with the same name")
-                names.append(name)
+        for name, n in ((k, v) for (k, v) in Counter(to_publish).items() if v > 1):
+            errors.add(f"Layer name '{name}' is not unique: found {n} duplicates")
+        for name in to_publish:
+            for c in "?&=#":
+                if c in name:
+                    errors.add(f"Unsupported character in layer '{name}': '{c}'")
 
         geodata_server = manager.getServer(self.comboGeodataServer.currentText())
         if geodata_server:
@@ -576,19 +714,18 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                 to_publish.append(name)
         return to_publish
 
-    def getPublishTask(self, parent):
+    def getPublishTask(self, parent, to_publish):
         self.storeMetadata()
         self.storeFieldsToPublish()
-        to_publish = self._toPublish()
 
-        if self.tabOnOffline.currentIndex() == 0:
+        if self.tabOnOffline.currentWidget() == self.tabOnline:
             geodata_server = manager.getServer(self.comboGeodataServer.currentText())
             metadata_server = manager.getServer(self.comboMetadataServer.currentText())
             style_only = self.chkOnlySymbology.isChecked()
             return PublishTask(to_publish, self.fieldsToPublish, style_only, geodata_server, metadata_server, parent)
 
         return ExportTask(self.txtExportFolder.text(), to_publish, self.fieldsToPublish,
-                          self.chkExportData.isChecked(),
+                          self.chkExportGeodata.isChecked(),
                           self.chkExportMetadata.isChecked(), self.chkExportSymbology.isChecked())
 
     def layerFromName(self, name):

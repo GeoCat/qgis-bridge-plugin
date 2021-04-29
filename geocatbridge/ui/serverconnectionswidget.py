@@ -17,7 +17,7 @@ from geocatbridge.utils import gui
 from geocatbridge.utils.feedback import FeedbackMixin
 
 from geocatbridge.servers import manager
-from geocatbridge.servers.bases import ServerWidgetBase
+from geocatbridge.servers.bases import ServerWidgetBase, ServerBase
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
@@ -32,12 +32,12 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self.addMenuToButtonNew()
         self.buttonRemove.clicked.connect(self.removeButtonClicked)
         self.populateServerList()
-        # self.listServers.currentItemChanged.connect(self.currentServerChanged)
         self.showServerWidget()
         self.buttonSave.clicked.connect(self.saveServer)
         self.buttonImport.clicked.connect(self.importServers)
         self.buttonExport.clicked.connect(self.exportServers)
         self.buttonDuplicate.clicked.connect(self.duplicateServer)
+        self.btnClose.clicked.connect(parent.close)
 
         # Connect event handlers for server widget activation
         self.listServers.itemClicked.connect(partial(self.listItemClicked))
@@ -74,7 +74,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
 
         config_str = manager.serializeServers()
         if not config_str:
-            self.showErrorBar("Error", "Failed to export server configuration")
+            self.showErrorBar("Error", "Failed to export server configuration. Please check QGIS log.")
             return
 
         if not filename.endswith("json"):
@@ -85,7 +85,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.showSuccessBar("Success", "Successfully exported server configuration to JSON file")
         except Exception as err:
             self.logError(err)
-            self.showErrorBar("Error", "Failed to write server configuration JSON file")
+            self.showErrorBar("Error", "Failed to write server configuration JSON file. Please check QGIS log.")
 
     def importServers(self):
         filename = QFileDialog.getOpenFileName(self, self.tr("Import servers"),
@@ -100,10 +100,11 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
                 config_str = f.read()
         except Exception as err:
             self.logError(err)
-            self.showErrorBar("Error", "Unable to read server configuration JSON file")
+            self.showErrorBar("Error", "Unable to read server configuration JSON file. Please check QGIS log.")
 
         if not manager.deserializeServers(config_str):
-            self.showErrorBar("Error", "Failed to import server configuration from JSON file")
+            self.showErrorBar("Error", "Failed to import server configuration from JSON file. "
+                                       "Please check QGIS log.")
             return
 
         self.populateServerList()
@@ -137,16 +138,17 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self.listServers.setCurrentItem(item)
         self.listServers.blockSignals(False)
 
-    def getListItemFromServerWidget(self, widget):
-        if not hasattr(widget, 'getName'):
-            return None
-        server_name = widget.getName()
+    def getListItemFromServerWidget(self, server_widget):
+        """ Finds the list item that matches the given server widget. """
+        if not hasattr(server_widget, 'getId'):
+            # The current widget likely is the empty widget
+            return
         for i in range(self.listServers.count()):
             item = self.listServers.item(i)
             widget = self.listServers.itemWidget(item)
-            if widget.serverName == server_name:
+            if widget.serverName == server_widget.getId():
                 return item
-        return None
+        return
 
     def listKeyPressed(self, event: QKeyEvent):
         """ Activates the server widget matching a key press event if the QListWidget has focus.
@@ -190,7 +192,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         if not new_server and list_item == old_item:
             # User clicked the same list item again, but it was not saved yet: do nothing
             return
-        if new_server.serverName == cur_widget.getName():
+        if new_server.serverName == cur_widget.getId():
             # User clicked the same list item again: do nothing
             return
 
@@ -209,7 +211,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         # Match server widget to selected server list item
         self.showServerWidget(new_server)
 
-    def testConnection(self, server):
+    def testConnection(self, server: ServerBase):
         """ Tests if the server instance can actually connect to it.
 
         .. note::   Not all servers might support this. Servers that don't support it,
@@ -217,12 +219,14 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
                     the method should simply always return `True`.
         """
         if server is None:
-            self.showErrorBar("Error", "Wrong value(s) in current server settings")
+            # Server is usually None when createServerInstance() call failed.
+            self.showErrorBar("Error", "Wrong value(s) in current server settings. Please check QGIS log.")
         else:
+            # Run the actual connection test method on the server instance.
             if gui.execute(server.testConnection):
                 self.showSuccessBar("Success", "Successfully established server connection")
             else:
-                self.showErrorBar("Error", "Could not connect to server")
+                self.showErrorBar("Error", "Could not connect to server. Please check QGIS log.")
 
     def persistServer(self, list_item=None) -> bool:
         """ Tells the server manager to store the server in the QGIS settings. """
@@ -238,7 +242,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.showErrorBar("Error", f"Current server does not implement {ServerWidgetBase.__name__}")
             return False
         if not server:
-            self.showErrorBar("Error", "Wrong values in current server settings")
+            self.showErrorBar("Error", "Wrong values in current server settings. Please check QGIS log.")
             return False
 
         list_widget = self.getListWidgetItem(list_item)
@@ -295,7 +299,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             target_instance = server_type(**settings)
         except Exception as err:
             self.logError(err)
-            self.showErrorBar("Error", f"Failed to duplicate server {source_name}. Please check logs.")
+            self.showErrorBar("Error", f"Failed to duplicate server {source_name}. Please check QGIS log.")
             return
 
         # Populate server widget with duplicated instance values and set dirty
@@ -305,7 +309,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.toggleServerList()
         else:
             manager.removeServer(target_name, True)
-            self.showErrorBar("Error", f"Failed to duplicate server {source_name}. Please check logs.")
+            self.showErrorBar("Error", f"Failed to duplicate server {source_name}. Please check QGIS log.")
 
     def addMenuToButtonNew(self):
         """ Populate "New Server" menu button with available server types. """
@@ -397,7 +401,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.addServerListItem(cls, assigned_name, True)
             self.toggleServerList()
         else:
-            self.showErrorBar("Error", f"Failed to add {cls.getServerTypeLabel()} server. Please check logs.")
+            self.showErrorBar("Error", f"Failed to add {cls.getServerTypeLabel()} server. Please check QGIS log.")
 
     def showServerWidget(self, server=None, force_dirty: bool = False) -> Union[str, None]:
         """ Sets the current server configuration widget for the given server instance or class.
@@ -444,10 +448,12 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         if server_cls == server:
             srv_name = manager.getUniqueName(server_cls.getServerTypeLabel())
             widget.newFromName(srv_name)
+            widget.setId(srv_name)
             widget.setDirty()
         else:
             srv_name = server.serverName
             widget.loadFromInstance(server)
+            widget.setId(srv_name)
             if force_dirty:
                 widget.setDirty()
 

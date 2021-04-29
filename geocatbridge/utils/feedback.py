@@ -71,10 +71,10 @@ class FeedbackMixin:
         # No translation without context or QTranslator
         return message
 
-    def _log(self, message, level, context):
+    def _log(self, message, level, context=None):
         if isinstance(message, Exception):
             message = str(message)
-        text = self.translate(context, message)
+        text = self.translate(context or getAppName(), message)
         _log(text, level)
         if level == Qgis.Warning:
             self._warnings.append(text)
@@ -85,7 +85,7 @@ class FeedbackMixin:
         value = kwargs.get("propagate")
         if not value or level not in (Qgis.Critical, Qgis.Warning):
             return
-        self._log(message if value is True else value, level, None)
+        self._log(message if value is True else value, level)
 
     def _show_bar(self, title, message, level, **kwargs):
         title = self._translate(title)

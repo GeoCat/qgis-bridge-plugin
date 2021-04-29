@@ -17,11 +17,11 @@ class GeoserverDatastoreDialog(BASE, WIDGET):
         self.password = None
 
     def accept(self):
-        self.name = self.txtName.text()
-        self.host = self.txtHost.text()
-        self.port = self.txtPort.text()
-        self.schema = self.txtSchema.text()
-        self.database = self.txtDatabase.text()
-        self.username = self.txtUsername.text()
-        self.password = self.txtPassword.text()
+        self.name = self.txtName.text().strip()
+        self.host = self.txtHost.text().strip()
+        self.port = self.txtPort.text().strip()
+        self.schema = self.txtSchema.text().strip()
+        self.database = self.txtDatabase.text().strip()
+        self.username = self.txtUsername.text().strip()
+        self.password = self.txtPassword.text().strip()
         self.close()

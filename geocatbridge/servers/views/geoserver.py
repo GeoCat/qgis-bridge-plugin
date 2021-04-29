@@ -12,6 +12,7 @@ from geocatbridge.servers.models.gs_storage import GeoserverStorage
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.servers.views.geoserver_ds import GeoserverDatastoreDialog
 from geocatbridge.utils import gui
+from geocatbridge.utils.meta import getAppName
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
@@ -30,15 +31,15 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.comboStorageType.currentIndexChanged.connect(self.datastoreChanged)
         self.btnConnectGeoserver.clicked.connect(self.testConnection)
         self.btnRefreshDatabases.clicked.connect(partial(self.updateDbServersCombo, True))
+        self.btnAddDatastore.clicked.connect(self.addPostgisDatastore)
         self.txtGeoserverName.textChanged.connect(self.setDirty)
         self.txtGeoserverUrl.textChanged.connect(self.setDirty)
+        self.chkUseOriginalDataSource.stateChanged.connect(self.setDirty)
+        self.chkUseVectorTiles.stateChanged.connect(self.setDirty)
         self.comboGeoserverDatabase.currentIndexChanged.connect(self.setDirty)
 
         # Declare progress dialog
         self._pgdialog = None
-
-    def getName(self):
-        return self.txtGeoserverName.text().strip()
 
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
@@ -49,7 +50,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
 
         try:
             return self.serverType(
-                name=self.getName(),
+                name=self.txtGeoserverName.text().strip(),
                 authid=self.geoserverAuth.configId() or None,
                 url=self.txtGeoserverUrl.text().strip(),
                 storage=storage,
@@ -127,7 +128,6 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
             self.comboGeoserverDatabase.setVisible(False)
             self.labelGeoserverDatastore.setVisible(False)
             self.datastoreControls.setVisible(False)
-        self.adjustSize()
         self.setDirty()
 
     def addGeoserverPgDatastores(self, current, result):
@@ -144,7 +144,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
 
     def showProgressDialog(self, text, length, handler):
         self._pgdialog = QProgressDialog(text, "Cancel", 0, length, self)
-        self._pgdialog.setWindowTitle("GeoCat Bridge")
+        self._pgdialog.setWindowTitle(getAppName())
         self._pgdialog.setWindowModality(QtCore.Qt.WindowModal)
         self._pgdialog.canceled.connect(handler, type=QtCore.Qt.DirectConnection)
         self._pgdialog.forceShow()

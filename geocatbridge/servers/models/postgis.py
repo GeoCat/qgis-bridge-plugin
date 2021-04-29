@@ -1,9 +1,9 @@
 import psycopg2
 from qgis.core import QgsVectorLayerExporter, QgsFeatureSink, QgsFields
-from qgis.PyQt.QtCore import QCoreApplication
 
 from geocatbridge.servers.bases import DbServerBase
 from geocatbridge.servers.views.postgis import PostgisWidget
+from geocatbridge.utils.meta import getAppName
 
 
 class PostgisServer(DbServerBase):
@@ -46,18 +46,15 @@ class PostgisServer(DbServerBase):
                                           layer.wkbType(), layer.sourceCrs(), True, {})
 
         if exporter.errorCode() != QgsVectorLayerExporter.NoError:
-            raise Exception(QCoreApplication.translate("GeoCat Bridge", 'Error importing to PostGIS: {0}').format(
-                exporter.errorMessage()))
+            raise Exception(self.translate(getAppName(), f'Error importing to PostGIS: {exporter.errorMessage()}'))
 
         features = layer.getFeatures()
         for f in features:
             if not exporter.addFeature(f, QgsFeatureSink.FastInsert):
-                raise Exception(QCoreApplication.translate("GeoCat Bridge", 'Error importing to PostGIS: {0}').format(
-                    exporter.errorMessage()))
+                raise Exception(self.translate(getAppName(), f'Error importing to PostGIS: {exporter.errorMessage()}'))
         exporter.flushBuffer()
         if exporter.errorCode() != QgsVectorLayerExporter.NoError:
-            raise Exception(QCoreApplication.translate("GeoCat Bridge", 'Error importing to PostGIS: {0}').format(
-                exporter.errorMessage()))
+            raise Exception(self.translate(getAppName(), f'Error importing to PostGIS: {exporter.errorMessage()}'))
 
     def testConnection(self):
         username, password = self.getCredentials()

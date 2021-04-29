@@ -1,5 +1,3 @@
-from ..utils import layers
-
 from osgeo import gdal
 from qgis.core import (
     QgsVectorFileWriter,
@@ -9,7 +7,8 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication
 
-from geocatbridge.utils import layers as layerUtils
+from geocatbridge.utils.meta import getAppName
+from geocatbridge.utils import layers as lyr_utils
 from geocatbridge.utils.files import tempFilenameInTempFolder
 
 EXT_SHAPEFILE = ".shp"
@@ -26,10 +25,10 @@ def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, 
     def safeLog(message):
         if not logger or not hasattr(logger, 'logInfo'):
             return
-        logger.logInfo(message)
+        logger.logInfo(QCoreApplication.translate(getAppName(), message))
 
-    filepath, _, ext = layers.getLayerSourceInfo(layer)
-    lyr_name, safe_name = layerUtils.getLayerTitleAndName(layer)
+    filepath, _, ext = lyr_utils.getLayerSourceInfo(layer)
+    lyr_name, safe_name = lyr_utils.getLayerTitleAndName(layer)
     fields = fields or []
     if layer.type() == layer.VectorLayer:
         if to_shapefile and (force or layer.fields().count() != len(fields) or ext != EXT_SHAPEFILE):
@@ -40,8 +39,7 @@ def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, 
             ext = EXT_GEOPACKAGE
         else:
             # No need to export
-            safeLog(QCoreApplication.translate("GeoCat Bridge",
-                                               f"No need to export layer {lyr_name} stored at {filepath}"))
+            safeLog(f"No need to export layer {lyr_name} stored at {filepath}")
             return filepath
 
         # Perform GeoPackage or Shapefile export
@@ -63,7 +61,7 @@ def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, 
             options.attributes = attrs
             options.driverName = "ESRI Shapefile" if ext == EXT_SHAPEFILE else ""
             QgsVectorFileWriter().writeAsVectorFormatV2(layer, output, transform_ctx, options)
-        safeLog(QCoreApplication.translate("GeoCat Bridge", f"Layer {lyr_name} exported to {output}"))
+        safeLog(f"Layer {lyr_name} exported to {output}")
         return output
     else:
         # Export raster
@@ -73,9 +71,8 @@ def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, 
             writer.setOutputFormat("GTiff")
             writer.writeRaster(layer.pipe(), layer.width(), layer.height(), layer.extent(), layer.crs())
             del writer
-            safeLog(QCoreApplication.translate("GeoCat Bridge", f"Layer {lyr_name} exported to {output}"))
+            safeLog(f"Layer {lyr_name} exported to {output}")
             return output
         else:
-            safeLog(QCoreApplication.translate("GeoCat Bridge",
-                                               f"No need to export layer {lyr_name} stored at {filepath}"))
+            safeLog(f"No need to export layer {lyr_name} stored at {filepath}")
             return filepath
