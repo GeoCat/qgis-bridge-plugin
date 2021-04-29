@@ -26,13 +26,15 @@ def _fix_ext(name, ext):
 
 
 def tempFolder():
+    """ Creates a directory for Bridge within the QGIS temp folder and returns the path. """
     temp_dir = os.path.join(QDir.tempPath(), meta.PLUGIN_NAMESPACE)
     if not QDir(temp_dir).exists():
         QDir().mkpath(temp_dir)
     return os.path.abspath(temp_dir)
 
 
-def tempFolderInTempFolder():
+def tempSubFolder():
+    """ Creates a temporary directory within the QGIS Bridge temp folder and returns the path. """
     path = tempFolder()
     folder = os.path.join(path, uuid.uuid4().hex)
     if not QDir(folder).exists():
@@ -40,17 +42,19 @@ def tempFolderInTempFolder():
     return folder
 
 
-def tempFilenameInTempFolder(basename):
-    folder = tempFolderInTempFolder()    
+def tempFileInSubFolder(basename):
+    """ Returns a temporary file path in a temporary subfolder of the QGIS Bridge temp folder. """
+    folder = tempSubFolder()
     filename = os.path.join(folder, basename)
     return filename
 
 
-def removeTempFolder():    
+def removeTempFolder():
+    """ Recursively deletes the QGIS Bridge temp folder. """
     shutil.rmtree(tempFolder())
 
 
-def getResourcePath(name, ext=".xsl"):
+def getResourcePath(name, ext=".xsl") -> str:
     """
     Constructs the full resource path for a given base name.
     If `name` does not have an extension, the given `ext` will be appended.
@@ -61,7 +65,7 @@ def getResourcePath(name, ext=".xsl"):
     return str(BRIDGE_ROOT_DIR / _DIR_NAME_RESOURCES / _fix_ext(name, ext))
 
 
-def getIconPath(name, ext=".png"):
+def getIconPath(name, ext=".png") -> str:
     """
     Constructs the full icon path for a given base name.
     If `name` does not have an extension, the given `ext` will be appended.
@@ -72,7 +76,7 @@ def getIconPath(name, ext=".png"):
     return str(BRIDGE_ROOT_DIR / _DIR_NAME_ICONS / _fix_ext(name, ext))
 
 
-def getViewPath(controller, ext=".ui"):
+def getViewPath(controller, ext=".ui") -> str:
     """
     Constructs the full Qt UI file path for a given view controller (*.py).
     UI files should always be stored in the same folder as the controller
@@ -82,10 +86,10 @@ def getViewPath(controller, ext=".ui"):
     :param ext:         The default UI extension (if not specified in the name).
     :returns:           An Qt UI file path string.
     """
-    return Path(controller).with_suffix(ext)
+    return str(Path(controller).with_suffix(ext))
 
 
-def getLocalePath(name, ext=".qm"):
+def getLocalePath(name, ext=".qm") -> str:
     """
     Constructs the full Qt Locale (translation) file path for a given base name.
     If `name` does not have an extension, the given `ext` will be appended.
@@ -96,6 +100,7 @@ def getLocalePath(name, ext=".qm"):
     return str(BRIDGE_ROOT_DIR / _DIR_NAME_TRANSLATIONS / _fix_ext(name, ext))
 
 
-def getDirectory(path):
+def getDirectory(path) -> str:
     """ Returns the parent directory path to the given file or directory path. """
-    return str(Path(path).resolve().parent)
+    fix_path = Path(str(path).split('|')[0])  # Fix for GeoPackage layer paths
+    return str(fix_path.resolve().parent)

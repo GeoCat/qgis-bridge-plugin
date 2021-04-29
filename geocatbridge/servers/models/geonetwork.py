@@ -1,4 +1,5 @@
 import webbrowser
+
 import requests
 from qgis.core import (
     QgsProcessingParameterMapLayer,
@@ -6,12 +7,12 @@ from qgis.core import (
     QgsProcessingParameterAuthConfig
 )
 
-from geocatbridge.utils.sessions import TokenizedSession
+from geocatbridge.process.algorithm import BridgeAlgorithm
 from geocatbridge.publish.metadata import saveMetadata
 from geocatbridge.servers.bases import MetaCatalogServerBase
-from geocatbridge.servers.views.geonetwork import GeoNetworkWidget
 from geocatbridge.servers.models.gn_profile import GeoNetworkProfiles
-from geocatbridge.process.algorithm import BridgeAlgorithm
+from geocatbridge.servers.views.geonetwork import GeoNetworkWidget
+from geocatbridge.utils.sessions import TokenizedSession
 
 
 class GeonetworkServer(MetaCatalogServerBase):
@@ -138,7 +139,7 @@ class GeonetworkAlgorithm(BridgeAlgorithm):
         authid = self.parameterAsString(parameters, self.AUTHID, context)
         layer = self.parameterAsLayer(parameters, self.INPUT, context)
 
-        feedback.pushInfo(f'Publishing {layer} to GeoNetwork...')
+        feedback.pushInfo(f'Publishing {layer} metadata to GeoNetwork...')
         try:
             server = GeonetworkServer(GeonetworkServer.__name__, authid, url)
             server.publishLayerMetadata(layer, None, None, None)

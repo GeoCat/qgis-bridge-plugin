@@ -31,7 +31,7 @@ class BridgeDialog(BASE, WIDGET):
         self.setWindowIcon(QIcon(files.getIconPath('geocat')))
 
         self.panel_widgets, self.keymap = self.addPanels()
-        self.panel_widgets[Panels.PUBLISH].setFromConfig()
+        self.panel_widgets[Panels.PUBLISH].restoreConfig()
 
         # Connect event handlers for panel activation
         self.listWidget.itemClicked.connect(partial(self.listItemClicked))

@@ -1,6 +1,6 @@
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.PyQt.QtWidgets import QSizePolicy
 from qgis.PyQt.QtWidgets import QMessageBox, QWidget
+from qgis.PyQt.QtWidgets import QSizePolicy
 from qgis.core import Qgis, QgsMessageLog, QgsMessageOutput
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
@@ -17,19 +17,24 @@ def _log(message, level):
     _LOGGER.logMessage(message, getAppName(), level)
 
 
+def _translate(message):
+    """ Tries to translate the given message within the GeoCat Bridge context. """
+    return QCoreApplication.translate(getAppName(), str(message))
+
+
 def logInfo(message):
     """ Logs a basic information message. """
-    _log(message, Qgis.Info)
+    _log(_translate(message), Qgis.Info)
 
 
 def logWarning(message):
     """ Logs a basic warning message. """
-    _log(message, Qgis.Warning)
+    _log(_translate(message), Qgis.Warning)
 
 
 def logError(message):
     """ Logs a basic error message. """
-    _log(message, Qgis.Critical)
+    _log(_translate(message), Qgis.Critical)
 
 
 class Buttons:
@@ -174,7 +179,7 @@ class FeedbackMixin:
         :param title:               Header of the message box (set to "" if no header is required).
         :param message:             The message that should be displayed in the message box.
         :keyword buttons:           Optional override of the standard warning box buttons (use BUTTONS.YES/NO/etc.).
-        :keyword default_button:    Optional override of the default button (use BUTTONS.YES/NO/etc.).
+        :keyword defaultButton:     Optional override of the default button (use BUTTONS.YES/NO/etc.).
         :keyword propagate:         When set to `True`, the message will also be logged.
                                     When set to a string or Exception, it's value will be logged.
         """
@@ -187,7 +192,7 @@ class FeedbackMixin:
         :param title:               Header of the message box (set to "" if no header is required).
         :param message:             The message that should be displayed in the message box.
         :keyword buttons:           Optional override of the standard warning box buttons (use BUTTONS.YES/NO/etc.).
-        :keyword default_button:    Optional override of the default button (use BUTTONS.YES/NO/etc.).
+        :keyword defaultButton:     Optional override of the default button (use BUTTONS.YES/NO/etc.).
         :keyword propagate:         When set to `True`, the message will also be logged.
                                     When set to a string or Exception, it's value will be logged.
         """
@@ -200,14 +205,17 @@ class FeedbackMixin:
         :param title:               Header of the message box (set to "" if no header is required).
         :param message:             The message that should be displayed in the message box.
         :keyword buttons:           Optional override of the standard warning box buttons (use BUTTONS.YES/NO/etc.).
-        :keyword default_button:    Optional override of the default button (use BUTTONS.YES/NO/etc.).
+        :keyword defaultButton:     Optional override of the default button (use BUTTONS.YES/NO/etc.).
         """
         return self._show_box(QMessageBox.question, title, message, **kwargs)
 
     def showHtmlMessage(self, title, html):
-        """ Show a message dialog with an HTML body. """
-        # noinspection PyArgumentList
-        dlg = QgsMessageOutput.createMessageOutput()
+        """ Show a message dialog with an HTML body. The title is automatically translated.
+
+        :param title:   Header of the HTML dialog (set to "" if no header is required).
+        :param html:    The HTML body to display.
+        """
+        dlg = QgsMessageOutput.createMessageOutput()  # noqa
         dlg.setTitle(self._translate(title))
         dlg.setMessage(html, QgsMessageOutput.MessageHtml)
         dlg.showMessage()

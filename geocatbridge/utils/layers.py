@@ -1,5 +1,8 @@
 import os
 import string
+from typing import Union
+
+from qgis.core import QgsProject, QgsMapLayer, QgsLayerTreeLayer, QgsLayerTreeGroup
 
 
 def getLayerTitleAndName(layer):
@@ -34,3 +37,38 @@ def getExportableLayer(layer, target_name):
     export_layer = layer.clone()
     export_layer.setName(target_name)
     return export_layer
+
+
+def getPublishableLayers() -> list:
+    """ Returns a flat list of supported publishable layers in the current QGIS project.
+
+    Supported layers are valid, non-temporary spatial vector or raster layers.
+    They can be from disk or a database, but they cannot be WM(T)S layers.
+    """
+    def _layersFromTree(layer_tree):
+        _layers = []
+        for child in layer_tree.children():
+            if isinstance(child, QgsLayerTreeLayer):
+                _layers.append(child.layer())
+            elif isinstance(child, QgsLayerTreeGroup):
+                _layers.extend(_layersFromTree(child))
+        return _layers
+
+    root = QgsProject().instance().layerTreeRoot()
+    return [layer for layer in _layersFromTree(root)
+            if layer and layer.isValid() and layer.isSpatial() and not layer.isTemporary()
+            and layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]
+            and layer.dataProvider().name() != "wms"]
+
+
+def getLayerById(layer_id: str, publishable_only: bool = True) -> Union[None, QgsMapLayer]:
+    """ Finds a layer object by QGIS ID and returns it.
+
+    :param layer_id:            The unique ID for the layer to search within the current QGIS project.
+    :param publishable_only:    If True, only search within publishable layers (default).
+    :returns:                   A QGIS layer object or None if not found.
+    """
+    layers = getPublishableLayers() if publishable_only else QgsProject().instance().mapLayers().values()
+    for lyr in (lyr for lyr in layers if lyr.id() == layer_id):
+        return lyr
+    return None

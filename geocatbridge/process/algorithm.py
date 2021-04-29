@@ -1,9 +1,9 @@
-from qgis.core import QgsProcessingAlgorithm
-from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtGui import QIcon
+from qgis.core import QgsProcessingAlgorithm
 
-from geocatbridge.utils.files import getIconPath
 from geocatbridge.utils import meta
+from geocatbridge.utils.files import getIconPath
 
 
 class BridgeAlgorithm(QgsProcessingAlgorithm):
@@ -17,6 +17,9 @@ class BridgeAlgorithm(QgsProcessingAlgorithm):
 
     def __init__(self):
         super().__init__()
+
+    def initAlgorithm(self, config=None):  # noqa
+        super().initAlgorithm(config)
 
     def createInstance(self):
         return type(self)()

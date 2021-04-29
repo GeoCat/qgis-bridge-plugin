@@ -2,14 +2,12 @@ from osgeo import gdal
 from qgis.core import (
     QgsVectorFileWriter,
     QgsRasterFileWriter,
-    QgsProject,
-    Qgis
+    QgsCoordinateTransformContext
 )
-from qgis.PyQt.QtCore import QCoreApplication
 
-from geocatbridge.utils.meta import getAppName
+from geocatbridge.utils import feedback
 from geocatbridge.utils import layers as lyr_utils
-from geocatbridge.utils.files import tempFilenameInTempFolder
+from geocatbridge.utils.files import tempFileInSubFolder
 
 EXT_SHAPEFILE = ".shp"
 EXT_GEOPACKAGE = ".gpkg"
@@ -21,12 +19,7 @@ def isSingleTableGpkg(layer):
 
 
 def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, logger=None):
-
-    def safeLog(message):
-        if not logger or not hasattr(logger, 'logInfo'):
-            return
-        logger.logInfo(QCoreApplication.translate(getAppName(), message))
-
+    logger = logger or feedback
     filepath, _, ext = lyr_utils.getLayerSourceInfo(layer)
     lyr_name, safe_name = lyr_utils.getLayerTitleAndName(layer)
     fields = fields or []
@@ -34,45 +27,55 @@ def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, 
         if to_shapefile and (force or layer.fields().count() != len(fields) or ext != EXT_SHAPEFILE):
             # Export with Shapefile extension
             ext = EXT_SHAPEFILE
-        elif force or ext != EXT_GEOPACKAGE or layer.fields().count() != len(fields) or not isSingleTableGpkg(filepath):
+        elif force or ext != EXT_GEOPACKAGE or layer.fields().count() != len(fields) \
+                or not isSingleTableGpkg(filepath):
             # Export with GeoPackage extension
             ext = EXT_GEOPACKAGE
         else:
             # No need to export
-            safeLog(f"No need to export layer {lyr_name} stored at {filepath}")
+            logger.logInfo(f"No need to export layer {lyr_name} stored at {filepath}")
             return filepath
 
         # Perform GeoPackage or Shapefile export
         attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
-        output = path or tempFilenameInTempFolder(safe_name + ext)
-
-        if Qgis.QGIS_VERSION_INT < 31003:
-            # Use writeAsVectorFormat for QGIS versions < 3.10.3 for backwards compatibility
-            # noinspection PyArgumentList
-            QgsVectorFileWriter().writeAsVectorFormat(
-                layer, output, fileEncoding="UTF-8", attributes=attrs,
-                driverName="ESRI Shapefile" if ext == EXT_SHAPEFILE else ""
-            )
-        else:
-            # Use writeAsVectorFormatV2 for QGIS versions >= 3.10.3 to avoid DeprecationWarnings
-            transform_ctx = QgsProject().instance().transformContext()
+        output = path or tempFileInSubFolder(safe_name + ext)
+        encoding = "UTF-8"
+        driver = "ESRI Shapefile" if ext == EXT_SHAPEFILE else "GPKG"
+        options = None
+        if hasattr(QgsVectorFileWriter, 'SaveVectorOptions'):
+            # QGIS v3.x has the SaveVectorOptions object
             options = QgsVectorFileWriter.SaveVectorOptions()
-            options.fileEncoding = "UTF-8"
+            options.fileEncoding = encoding
             options.attributes = attrs
-            options.driverName = "ESRI Shapefile" if ext == EXT_SHAPEFILE else ""
-            QgsVectorFileWriter().writeAsVectorFormatV2(layer, output, transform_ctx, options)
-        safeLog(f"Layer {lyr_name} exported to {output}")
+            options.driverName = driver
+        # Make sure that we are using the latest (non-deprecated) write method
+        if hasattr(QgsVectorFileWriter, 'writeAsVectorFormatV3'):
+            # Use writeAsVectorFormatV3 for QGIS versions >= 3.20 to avoid DeprecationWarnings
+            result = QgsVectorFileWriter.writeAsVectorFormatV3(layer, output, QgsCoordinateTransformContext(), options)  # noqa
+        elif hasattr(QgsVectorFileWriter, 'writeAsVectorFormatV2'):
+            # Use writeAsVectorFormatV2 for QGIS versions >= 3.10.3 to avoid DeprecationWarnings
+            result = QgsVectorFileWriter.writeAsVectorFormatV2(layer, output, QgsCoordinateTransformContext(), options)  # noqa
+        else:
+            # Use writeAsVectorFormat for QGIS versions < 3.10.3 for backwards compatibility
+            result = QgsVectorFileWriter.writeAsVectorFormat(layer, output,
+                                                             fileEncoding=encoding, attributes=attrs, driverName=driver)  # noqa
+        # Check if first item in result tuple is an error code
+        if result[0] == QgsVectorFileWriter.NoError:
+            logger.logInfo(f"Layer {lyr_name} exported to {output}")
+        else:
+            # Dump the result tuple as-is when there are errors (the tuple size depends on the QGIS version)
+            logger.logError(f"Layer {lyr_name} failed to export.\n\tResult object: {str(result)}")
         return output
     else:
         # Export raster
         if force or not filepath.lower().endswith("tif"):
-            output = path or tempFilenameInTempFolder(safe_name + ".tif")
+            output = path or tempFileInSubFolder(safe_name + ".tif")
             writer = QgsRasterFileWriter(output)
             writer.setOutputFormat("GTiff")
             writer.writeRaster(layer.pipe(), layer.width(), layer.height(), layer.extent(), layer.crs())
             del writer
-            safeLog(f"Layer {lyr_name} exported to {output}")
+            logger.logInfo(f"Layer {lyr_name} exported to {output}")
             return output
         else:
-            safeLog(f"No need to export layer {lyr_name} stored at {filepath}")
+            logger.logInfo(f"No need to export layer {lyr_name} stored at {filepath}")
             return filepath

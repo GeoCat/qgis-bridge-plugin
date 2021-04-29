@@ -1,6 +1,6 @@
-from typing import Union
-from functools import partial
 from copy import deepcopy
+from functools import partial
+from typing import Union
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QKeyEvent
@@ -13,11 +13,10 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog
 )
 
-from geocatbridge.utils import gui
-from geocatbridge.utils.feedback import FeedbackMixin
-
 from geocatbridge.servers import manager
 from geocatbridge.servers.bases import ServerWidgetBase, ServerBase
+from geocatbridge.utils import gui
+from geocatbridge.utils.feedback import FeedbackMixin
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
@@ -230,6 +229,12 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
 
     def persistServer(self, list_item=None) -> bool:
         """ Tells the server manager to store the server in the QGIS settings. """
+
+        list_widget = self.getListWidgetItem(list_item)
+        if not list_widget:
+            # No list widget selected
+            return False
+
         server_widget = self.stackedWidget.currentWidget()
         if not server_widget:
             # No current server widget set (should not happen)
@@ -245,7 +250,6 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.showErrorBar("Error", "Wrong values in current server settings. Please check QGIS log.")
             return False
 
-        list_widget = self.getListWidgetItem(list_item)
         try:
             result = manager.saveServer(server, list_widget.serverName)
         except ValueError as err:

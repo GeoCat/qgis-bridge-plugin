@@ -9,16 +9,10 @@ The current version ignores all elements except for MD_Metadata, which is copied
 
 author Heikki Doeleman
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<xsl:stylesheet version="2.0" 
-xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-xmlns:gmd="http://www.isotc211.org/2005/gmd"
-xmlns:gco="http://www.isotc211.org/2005/gco"
-xmlns:gml="http://www.opengis.net/gml"
-xmlns:gts="http://www.isotc211.org/2005/gts"               
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-exclude-result-prefixes="#all"
+<xsl:stylesheet version="2.0"
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:gmd="http://www.isotc211.org/2005/gmd"
+                exclude-result-prefixes="#all"
 >
 	<xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
   

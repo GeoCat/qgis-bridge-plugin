@@ -3,6 +3,7 @@ from qgis.PyQt.QtGui import QBrush, QIcon, QColor
 from qgis.PyQt.QtWidgets import QTreeWidgetItem
 
 from geocatbridge.utils import files, gui
+from geocatbridge.utils import layers as lyr_utils
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
@@ -17,19 +18,19 @@ CHECK_ICON = QIcon(files.getIconPath("checkmark"))
 
 class ProgressDialog(BASE, WIDGET):
 
-    def __init__(self, layers, parent=None):
+    def __init__(self, layer_ids, parent=None):
         super(ProgressDialog, self).__init__(parent)
         self.setupUi(self)
 
         self.setWindowIcon(QIcon(files.getIconPath('geocat')))
 
-        self.layers = layers
+        self.layer_ids = layer_ids
         self.populateTree()
 
     def populateTree(self):
-        for layer in self.layers:
+        for lyr_name in (lyr_utils.getLayerById(id_).name() for id_ in self.layer_ids):
             item = QTreeWidgetItem()
-            item.setText(0, layer)
+            item.setText(0, lyr_name)
             subitem = QTreeWidgetItem()
             subitem.setText(0, "Publish symbology")
             subitem.setIcon(0, SYMBOLOGY_ICON)
@@ -50,54 +51,49 @@ class ProgressDialog(BASE, WIDGET):
         self.treeWidget.addTopLevelItem(item)
         QCoreApplication.processEvents()
 
-    def setFinished(self, layer, category):
+    def getItem(self, layer_id, category, expand=False) -> tuple:
+        """ Toggles the tree appearance by setting the current layer item.
+        Returns the current item (if not a group) and sub-item.
+        """
         item = None
         if category == GROUPS:
-            subitem = self.treeWidget.topLevelItem(len(self.layers))
+            subitem = self.treeWidget.topLevelItem(len(self.layer_ids))
         else:
-            idx = self.layers.index(layer)
-            item = self.treeWidget.topLevelItem(idx)
+            item_pos = self.layer_ids.index(layer_id)
+            item = self.treeWidget.topLevelItem(item_pos)
+            if expand:
+                item.setExpanded(True)
+                self.treeWidget.resizeColumnToContents(0)
             subitem = item.child(category)
         self.treeWidget.scrollToItem(subitem)
+        return item, subitem
+
+    @staticmethod
+    def setMetadata(item, category):
+        if item and category == METADATA:
+            item.setForeground(1, QBrush(Qt.blue))
+            item.setIcon(1, CHECK_ICON)
+
+    def setFinished(self, layer_id, category):
+        item, subitem = self.getItem(layer_id, category)
         green = QColor()
         green.setNamedColor("#00851F")
         subitem.setForeground(1, QBrush(green))
         subitem.setText(1, "Finished")
         subitem.setBackground(0, QBrush(Qt.white))
         subitem.setBackground(1, QBrush(Qt.white))
-        if item and category == METADATA:
-            item.setForeground(1, QBrush(Qt.blue))
-            item.setIcon(1, CHECK_ICON)
+        self.setMetadata(item, category)
         QCoreApplication.processEvents()
 
-    def setSkipped(self, layer, category):
-        item = None
-        if category == GROUPS:
-            subitem = self.treeWidget.topLevelItem(len(self.layers))
-        else:
-            idx = self.layers.index(layer)
-            item = self.treeWidget.topLevelItem(idx)
-            item.setExpanded(True)
-            self.treeWidget.resizeColumnToContents(0)
-            subitem = item.child(category)
-        self.treeWidget.scrollToItem(subitem)
+    def setSkipped(self, layer_id, category):
+        item, subitem = self.getItem(layer_id, category, True)
         subitem.setForeground(1, QBrush(Qt.gray))
         subitem.setText(1, "Skipped")
-        if item and category == METADATA:
-            item.setForeground(1, QBrush(Qt.blue))
-            item.setIcon(1, CHECK_ICON)
+        self.setMetadata(item, category)
         QCoreApplication.processEvents()
 
-    def setInProgress(self, layer, category):
-        if category == GROUPS:
-            subitem = self.treeWidget.topLevelItem(len(self.layers))
-        else:
-            idx = self.layers.index(layer)
-            item = self.treeWidget.topLevelItem(idx)
-            item.setExpanded(True)
-            self.treeWidget.resizeColumnToContents(0)
-            subitem = item.child(category)
-        self.treeWidget.scrollToItem(subitem)
+    def setInProgress(self, layer_id, category):
+        item, subitem = self.getItem(layer_id, category, True)
         subitem.setText(1, "In progress...")
         grey = QColor()
         grey.setNamedColor("#cccccc")

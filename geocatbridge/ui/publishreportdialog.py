@@ -1,15 +1,15 @@
 from functools import partial
 
-from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import (
-    QPushButton,
     QHBoxLayout,
     QHeaderView,
     QTableWidgetItem,
-    QWidget
+    QWidget, QLabel, QToolButton
 )
 
+from geocatbridge.servers import bases
 from geocatbridge.utils import gui, files
 from geocatbridge.utils.feedback import FeedbackMixin
 
@@ -22,59 +22,61 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         super(PublishReportDialog, self).__init__(parent)
         self.results = results
         self.setupUi(self)
+
+        txt_on = self.tr('on')
+        txt_off = self.tr('off')
+
         self.setWindowIcon(QIcon(files.getIconPath('geocat')))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        if geodata_server is not None:
-            url = geodata_server.url
+        if isinstance(geodata_server, bases.DataCatalogServerBase):
+            url = geodata_server.baseUrl
             self.labelUrlMapServer.setText(f'<a href="{url}">{url}</a>')
         else:
             self.labelUrlMapServer.setText("----")
-        if metadata_server is not None:
-            url = metadata_server.url
+        if isinstance(metadata_server, bases.MetaCatalogServerBase):
+            url = metadata_server.baseUrl
             self.labelUrlMetadataServer.setText(f'<a href="{url}">{url}</a>')
         else:
             self.labelUrlMetadataServer.setText("----")
         publish_data = geodata_server is not None
-        self.labelPublishMapData.setText("ON" if publish_data and not only_symbology else "OFF")
-        self.labelPublishSymbology.setText("ON" if publish_data or only_symbology else "OFF")
-        self.labelPublishMetadata.setText("ON" if metadata_server is not None else "OFF")
+        self.labelPublishMapData.setText(txt_on.upper() if publish_data and not only_symbology else txt_off.upper())
+        self.labelPublishSymbology.setText(txt_on.upper() if publish_data or only_symbology else txt_off.upper())
+        self.labelPublishMetadata.setText(txt_on.upper() if metadata_server is not None else txt_off.upper())
         self.tableWidget.setRowCount(len(results))
+
+        # Populate report table
         for i, name in enumerate(results.keys()):
+            # Add layer name item
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(name))
+
+            # Just show "success" in the last column if there are no errors and warnings
             warnings, errors = results[name]
-            item = QTableWidgetItem(name)
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-            self.tableWidget.setItem(i, 0, item)
-            if geodata_server is not None:
-                data_published = geodata_server.layerExists(name)
-                style_published = geodata_server.styleExists(name)
-            else:
-                data_published = False
-                style_published = False
-            item = QTableWidgetItem("Yes" if data_published else "No")
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-            self.tableWidget.setItem(i, 1, item)
-            item = QTableWidgetItem("Yes" if style_published else "No")
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-            self.tableWidget.setItem(i, 2, item)            
-            metadata_published = metadata_server is not None
-            item = QTableWidgetItem(self.tr("Yes") if metadata_published else self.tr("No"))
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-            self.tableWidget.setItem(i, 3, item)
-            txt = self.tr(f"warnings({len(warnings)}), errors({len(errors)})")
-            widget = QWidget()
-            button = QPushButton()
-            button.setText(txt)
+            if not (warnings or errors):
+                self.tableWidget.setItem(i, 1, QTableWidgetItem(self.tr('Success')))
+                continue
+
+            # Show error and warning count and dialog button (for details) in the last column if there are issues
+            status_widget = QWidget()
+            status_lbl = QLabel()
+            status_lbl.setText(self.tr(f"{len(warnings)} warnings, {len(errors)} errors"))
+            if errors:
+                # Also render text in red if there are any errors
+                status_lbl.setStyleSheet("QLabel { color: red; }")
+            layout = QHBoxLayout(status_widget)
+            layout.addWidget(status_lbl)
+            button = QToolButton()
+            button.setIcon(QIcon(files.getIconPath("attention")))
             button.clicked.connect(partial(self.openDetails, name))
-            layout = QHBoxLayout(widget)
             layout.addWidget(button)
             layout.setAlignment(Qt.AlignCenter)
             layout.setContentsMargins(0, 0, 0, 0)
-            widget.setLayout(layout)
-            self.tableWidget.setCellWidget(i, 4, widget)
+            status_widget.setLayout(layout)
+            self.tableWidget.setCellWidget(i, 1, status_widget)
 
     def openDetails(self, name):
+        """ Populates and shows a HTML dialog with errors and warnings. """
         warnings, errors = self.results[name]
         w = "".join(f"<p>{w}</p>" for w in warnings).replace("\n", "\n<br>")
         e = "".join(f"<p>{e}</p>" for e in errors).replace("\n", "\n<br>")
         html = f"<p><b>{self.tr('Warnings:')}</b></p>\n{w}\n<p><b>{self.tr('Errors:')}</b></p>\n{e}"
-        self.showHtmlMessage("Errors and warnings", html)
+        self.showHtmlMessage(f"Issues for layer {name}", html)

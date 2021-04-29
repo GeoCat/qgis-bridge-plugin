@@ -9,8 +9,8 @@ from qgis.PyQt.QtCore import QSettings
 
 from geocatbridge.servers import bases
 from geocatbridge.servers import models
-from geocatbridge.utils import meta
 from geocatbridge.utils import feedback
+from geocatbridge.utils import meta
 from geocatbridge.utils.enum_ import LabeledIntEnum
 
 # QGIS setting that stores all configured Bridge servers

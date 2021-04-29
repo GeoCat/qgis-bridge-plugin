@@ -10,14 +10,10 @@ The current version ignores all elements except for MD_Metadata, which is copied
 author Heikki Doeleman
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <xsl:stylesheet version="2.0" 
-xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-xmlns:gmd="http://www.isotc211.org/2005/gmd"
+xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:gmd="http://www.isotc211.org/2005/gmd"
 xmlns:gco="http://www.isotc211.org/2005/gco"
-xmlns:gml="http://www.opengis.net/gml"
-xmlns:gts="http://www.isotc211.org/2005/gts"               
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 exclude-result-prefixes="#all"
 >
 	<xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
@@ -30,15 +26,10 @@ exclude-result-prefixes="#all"
 	<!-- the wrapped <MD_Metadata> is copied in its entirety to the output -->
 	<xsl:template match="gmd:MD_Metadata" priority ="10">
     <gmd:MD_Metadata
-       xmlns:gml="http://www.opengis.net/gml"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:gmd="http://www.isotc211.org/2005/gmd"
-       xmlns:gmx="http://www.isotc211.org/2005/gmx"
-       xmlns:gts="http://www.isotc211.org/2005/gts"
-       xmlns:gco="http://www.isotc211.org/2005/gco"
-       xmlns:xlink="http://www.w3.org/1999/xlink"
-       xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://schemas.opengis.net/iso/19139/20060504/gmd/gmd.xsd
-                           http://www.isotc211.org/2005/gmx http://schemas.opengis.net/iso/19139/20060504/gmx/gmx.xsd">
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:gmd="http://www.isotc211.org/2005/gmd"
+            xmlns:gco="http://www.isotc211.org/2005/gco"
+            xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://schemas.opengis.net/iso/19139/20060504/gmd/gmd.xsd">
       
       <xsl:apply-templates/>
     </gmd:MD_Metadata>
