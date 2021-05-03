@@ -135,7 +135,7 @@ class PublishTask(QgsTask):
                         warnings.append("Layer name contains characters that might cause issues")
                 md_valid, _ = validator.validate(layer.metadata())
                 if self.geodata_server is not None:
-                    self.geodata_server.resetLog()
+                    self.geodata_server.resetLogIssues()
 
                     # Publish style
                     self.stepStarted.emit(name, SYMBOLOGY)
@@ -171,7 +171,7 @@ class PublishTask(QgsTask):
 
                 if self.metadata_server is not None:
                     try:
-                        self.metadata_server.resetLog()
+                        self.metadata_server.resetLogIssues()
                         if md_valid or allow_without_md == ALLOW:
                             wms = None
                             wfs = None
