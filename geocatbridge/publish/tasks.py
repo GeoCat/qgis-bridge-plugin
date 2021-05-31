@@ -207,6 +207,11 @@ class PublishTask(TaskBase):
                     # TODO: figure out where to properly put a warning or error message for this
                     feedback.logError(f"Could not create layer groups: {err}")
                 finally:
+                    try:
+                        # Call closePublishing(): for GeoServer, this will set up vector tiles, if enabled
+                        self.geodataServer.closePublishing()
+                    except Exception as err:
+                        feedback.logError(f"Failed to finalize publish task: {err}")
                     self.stepFinished.emit(None, GROUPS)
             else:
                 self.stepSkipped.emit(None, GROUPS)

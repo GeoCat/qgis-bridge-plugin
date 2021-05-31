@@ -183,6 +183,12 @@ class DataCatalogServerBase(CatalogServerBase, ABC):
         """ Publishes a style (symbology) for the given QGIS layer to the server. """
         raise NotImplementedError
 
+    def closePublishing(self):
+        """ This method is called after a publish task has finished.
+        It may be implemented to do some clean up or perform other tasks.
+        """
+        pass
+
     def getPreviewUrl(self, layer_names: list, bbox: str, crs_authid: str) -> str:
         """ This method may be implemented for servers that support previewing published layers.
         It should return a URL to get a preview map for the given layers.

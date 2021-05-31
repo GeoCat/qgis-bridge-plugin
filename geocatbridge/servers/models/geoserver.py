@@ -137,7 +137,7 @@ class GeoserverServer(DataCatalogServerBase):
         style_filename = os.path.join(folder, "style.mapbox")
         with open(style_filename) as f:
             style = f.read()
-        template = "var style = %s;\nvar map = olms.apply('map', style);" % style
+        template = f"var style = {style};\nvar map = olms.apply('map', style);"
 
         js_filename = os.path.join(folder, "mapbox.js")
         with open(js_filename, "w") as f:
@@ -145,8 +145,8 @@ class GeoserverServer(DataCatalogServerBase):
         src = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "openlayers", "index.html")
         dst = os.path.join(folder, "index.html")
         shutil.copyfile(src, dst)
-        self.uploadResource("%s/index.html" % self.workspace, src)
-        self.uploadResource("%s/mapbox.js" % self.workspace, js_filename)
+        self.uploadResource(f"{self.workspace}/index.html", src)
+        self.uploadResource(f"{self.workspace}/mapbox.js", js_filename)
 
     def uploadResource(self, path, file):
         with open(file) as f:
@@ -195,7 +195,7 @@ class GeoserverServer(DataCatalogServerBase):
         lyr_title, safe_name = lyr_utils.getLayerTitleAndName(layer)
         if layer.type() == layer.VectorLayer:
             if layer.featureCount() == 0:
-                self.logError("Layer '%s' contains zero features and cannot be published" % lyr_title)
+                self.logError(f"Layer '{lyr_title}' contains zero features and cannot be published")
                 return
 
             if layer.dataProvider().name() == "postgres" and self.useOriginalDataSource:
@@ -318,7 +318,7 @@ class GeoserverServer(DataCatalogServerBase):
             return False
 
     def _publishVectorLayerFromFile(self, layer, filename):
-        self.logInfo("Publishing layer from file: %s" % filename)
+        self.logInfo(f"Publishing layer from file: %{filename}")
         title, name = lyr_utils.getLayerTitleAndName(layer)
         is_data_uploaded = filename in self._uploaded_data
         if not is_data_uploaded:
@@ -396,7 +396,7 @@ class GeoserverServer(DataCatalogServerBase):
         task = self.request(f"{self.apiUrl}/imports/{import_id}/tasks/{task_id}").json()["task"] or {}
         err_msg = task.get("errorMessage", "")
         if err_msg:
-            err_msg = "GeoServer Importer Extension error:\n%s" % err_msg
+            err_msg = f"GeoServer Importer Extension error:\n{err_msg}"
         return err_msg, task["layer"]["name"]
 
     def _publishVectorLayerFromFileToPostgis(self, layer, filename):
@@ -505,7 +505,8 @@ class GeoserverServer(DataCatalogServerBase):
         # compute actual style
         mbstylestring, warnings, obj, sprite_sheet = \
             mapboxgl.fromgeostyler.convertGroup(
-                group, qgis_layers, self.apiUrl, self.workspace, group["name"])
+                group, qgis_layers, self.apiUrl, self.workspace, group["name"]
+            )
 
         # publish to geoserver
         self._ensureWorkspaceExists()
@@ -550,23 +551,28 @@ class GeoserverServer(DataCatalogServerBase):
         return img_bytes
 
     def _publishGroup(self, group, qgis_layers):
-        # TODO: Should the following line really always be called?
         if self.useVectorTiles:
             self._publishGroupMapBox(group, qgis_layers)
 
         layers = []
         for layer in group["layers"]:
             if isinstance(layer, dict):
-                layers.append({"@type": "layerGroup", "name": "%s:%s" % (self.workspace, layer["name"])})
+                layers.append({"@type": "layerGroup", "name": f"{self.workspace}:{layer['name']}"})
                 self._publishGroup(layer, qgis_layers)
             else:
-                layers.append({"@type": "layer", "name": "%s:%s" % (self.workspace, layer)})
+                layers.append({"@type": "layer", "name": f"{self.workspace}:{layer}"})
 
-        groupdef = {"layerGroup": {"name": group["name"],
-                                   "title": group["title"],
-                                   "abstractTxt": group["abstract"],
-                                   "mode": "NAMED",
-                                   "publishables": {"published": layers}}}
+        groupdef = {
+            "layerGroup": {
+                "name": group["name"],
+                "title": group["title"],
+                "abstractTxt": group["abstract"],
+                "mode": "NAMED",
+                "publishables": {
+                    "published": layers
+                }
+            }
+        }
 
         url = f"{self.apiUrl}/workspaces/{self.workspace}/layergroups"
         try:
@@ -962,7 +968,7 @@ class GeoserverServer(DataCatalogServerBase):
                 )
         except Exception as e:
             # Failed to retrieve Version. It could be a RC or dev version: warn but consider OK.
-            self.logWarning("Failed to retrieve GeoServer version info:\n%s" % e)
+            self.logWarning(f"Failed to retrieve GeoServer version info:\n{e}")
 
     def validateBeforePublication(self, errors, to_publish, only_symbology):
         if not self.workspace:
