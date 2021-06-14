@@ -4,6 +4,7 @@ import shutil
 import sqlite3
 from zipfile import ZipFile
 
+import requests
 from qgis.PyQt.QtCore import QByteArray, QBuffer, QIODevice, QSettings
 from qgis.core import (
     QgsProject,
@@ -126,11 +127,15 @@ class GeoserverServer(DataCatalogServerBase):
         if not self.useVectorTiles:
             return
         folder = tempSubFolder()
+        self.logInfo(f"Creating layer styles for Mapbox vector tiles in {folder}...")
         warnings = layerStyleAsMapboxFolder(self._published_layers, folder)
         for w in warnings:
             self.logWarning(w)
+        self.logInfo(f"Editing Mapbox files...")
         self._editMapboxFiles(folder)
+        self.logInfo(f"Publishing Mapbox styles...")
         self.publishMapboxGLStyle(folder)
+        self.logInfo(f"Publishing OpenLayers vector tile preview...")
         self._publishOpenLayersPreview(folder)
 
     def _publishOpenLayersPreview(self, folder):
@@ -318,7 +323,7 @@ class GeoserverServer(DataCatalogServerBase):
             return False
 
     def _publishVectorLayerFromFile(self, layer, filename):
-        self.logInfo(f"Publishing layer from file: %{filename}")
+        self.logInfo(f"Publishing layer from file: {filename}")
         title, name = lyr_utils.getLayerTitleAndName(layer)
         is_data_uploaded = filename in self._uploaded_data
         if not is_data_uploaded:
@@ -617,7 +622,7 @@ class GeoserverServer(DataCatalogServerBase):
         try:
             if category != "layer" or not self._existing_layers:
                 r = self.request(url)
-                root = r.json()[f"{category}s"]  # make plural (TODO: improve robustness)
+                root = r.json()[f"{category}s"]  # make plural -> TODO: improve robustness?
                 if category in root:
                     items = frozenset(s["name"] for s in root[category])
                     if category == "layer":
@@ -627,7 +632,8 @@ class GeoserverServer(DataCatalogServerBase):
             else:
                 items = self._existing_layers
             return name in items
-        except (HTTPError, AttributeError, KeyError):
+        except Exception as err:
+            self.logError(err)
             return False
 
     def layerExists(self, name):

@@ -17,6 +17,23 @@ from geocatbridge.ui.styleviewerwidget import StyleviewerWidget
 from geocatbridge.utils import meta, files, feedback
 
 
+
+# Enable PyCharm remote debugger, if debug folder exists
+_debug_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '_debug'))
+if os.path.isdir(_debug_dir):
+    sys.path.append(_debug_dir)
+    import pydevd_pycharm
+    from warnings import simplefilter
+    try:
+        # Suppress ResourceWarning when remote debug server is not running
+        simplefilter('ignore', category=ResourceWarning)
+        pydevd_pycharm.settrace('localhost', True, True, 53100)
+    except (ConnectionRefusedError, AttributeError):
+        # PyCharm remote debug server is not running on localhost:53100
+        # Restore ResourceWarnings
+        simplefilter('default', category=ResourceWarning)    
+
+
 class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
@@ -72,9 +89,7 @@ class GeocatBridge:
     @staticmethod
     def openDocUrl():
         """ Opens the web-based documentation in a new tab of the default browser. """
-        doc_url = meta.getProperty('docs').rstrip('/')
-        version = meta.getProperty('version')
-        full_url = f"{doc_url}/v{version}/"
+        full_url = f"{meta.getDocsUrl()}/v{meta.getVersion()}/"
         webbrowser.open_new_tab(full_url)
 
     def initProcessing(self):

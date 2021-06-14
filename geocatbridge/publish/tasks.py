@@ -209,7 +209,7 @@ class PublishTask(TaskBase):
                 finally:
                     try:
                         # Call closePublishing(): for GeoServer, this will set up vector tiles, if enabled
-                        self.geodataServer.closePublishing()
+                        self.geodata_server.closePublishing()
                     except Exception as err:
                         feedback.logError(f"Failed to finalize publish task: {err}")
                     self.stepFinished.emit(None, GROUPS)
