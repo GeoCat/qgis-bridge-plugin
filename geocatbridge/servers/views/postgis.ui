@@ -117,6 +117,9 @@
        <height>100</height>
       </size>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
     </widget>
    </item>
    <item row="7" column="2">
@@ -137,6 +140,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>txtPostgisName</tabstop>
+  <tabstop>txtPostgisServerAddress</tabstop>
+  <tabstop>postgisAuthWidget</tabstop>
+  <tabstop>txtPostgisPort</tabstop>
+  <tabstop>txtPostgisDatabase</tabstop>
+  <tabstop>txtPostgisSchema</tabstop>
+  <tabstop>btnConnectPostgis</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -143,6 +143,9 @@
               <height>22</height>
              </size>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
             <property name="text">
              <string>Refresh</string>
             </property>
@@ -161,6 +164,9 @@
               <width>105</width>
               <height>22</height>
              </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
             </property>
             <property name="text">
              <string>Add datastore</string>
@@ -242,6 +248,9 @@
          <width>16777215</width>
          <height>20</height>
         </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
        </property>
       </widget>
      </item>

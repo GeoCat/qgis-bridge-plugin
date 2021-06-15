@@ -57,6 +57,9 @@
          <height>20</height>
         </size>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
       </widget>
      </item>
      <item row="2" column="1">
@@ -136,6 +139,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>txtGeonetworkName</tabstop>
+  <tabstop>txtGeonetworkUrl</tabstop>
+  <tabstop>txtGeonetworkNode</tabstop>
+  <tabstop>geonetworkAuthWidget</tabstop>
+  <tabstop>comboMetadataProfile</tabstop>
+  <tabstop>btnConnectGeonetwork</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -47,6 +47,9 @@
      <property name="echoMode">
       <enum>QLineEdit::PasswordEchoOnEdit</enum>
      </property>
+     <property name="cursorPosition">
+      <number>0</number>
+     </property>
     </widget>
    </item>
    <item row="8" column="0">
@@ -57,12 +60,19 @@
     </widget>
    </item>
    <item row="9" column="1">
-    <widget class="QLineEdit" name="txtUsername"/>
+    <widget class="QLineEdit" name="txtUsername">
+     <property name="cursorPosition">
+      <number>0</number>
+     </property>
+    </widget>
    </item>
    <item row="7" column="1">
     <widget class="QLineEdit" name="txtSchema">
      <property name="text">
       <string>public</string>
+     </property>
+     <property name="cursorPosition">
+      <number>4</number>
      </property>
     </widget>
    </item>
@@ -71,10 +81,17 @@
      <property name="text">
       <string>5432</string>
      </property>
+     <property name="cursorPosition">
+      <number>3</number>
+     </property>
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QLineEdit" name="txtName"/>
+    <widget class="QLineEdit" name="txtName">
+     <property name="cursorPosition">
+      <number>0</number>
+     </property>
+    </widget>
    </item>
    <item row="6" column="0">
     <widget class="QLabel" name="label_2">
@@ -107,7 +124,11 @@
     </spacer>
    </item>
    <item row="8" column="1">
-    <widget class="QLineEdit" name="txtDatabase"/>
+    <widget class="QLineEdit" name="txtDatabase">
+     <property name="cursorPosition">
+      <number>0</number>
+     </property>
+    </widget>
    </item>
    <item row="3" column="0">
     <widget class="QLabel" name="label_7">
@@ -127,6 +148,9 @@
     <widget class="QLineEdit" name="txtHost">
      <property name="text">
       <string>localhost</string>
+     </property>
+     <property name="cursorPosition">
+      <number>1</number>
      </property>
     </widget>
    </item>
@@ -169,6 +193,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>txtName</tabstop>
+  <tabstop>txtHost</tabstop>
+  <tabstop>txtPort</tabstop>
+  <tabstop>txtSchema</tabstop>
+  <tabstop>txtDatabase</tabstop>
+  <tabstop>txtUsername</tabstop>
+  <tabstop>txtPassword</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

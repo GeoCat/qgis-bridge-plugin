@@ -250,6 +250,9 @@
          <height>20</height>
         </size>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
       </widget>
      </item>
     </layout>
@@ -279,6 +282,18 @@
    <header>qgsfilewidget.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>txtMapserverName</tabstop>
+  <tabstop>txtMapserverUrl</tabstop>
+  <tabstop>txtMapServicesPath</tabstop>
+  <tabstop>txtProjFolder</tabstop>
+  <tabstop>radioLocalPath</tabstop>
+  <tabstop>radioFtp</tabstop>
+  <tabstop>txtRemoteFolder</tabstop>
+  <tabstop>txtMapserverHost</tabstop>
+  <tabstop>txtMapserverPort</tabstop>
+  <tabstop>mapserverAuthWidget</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
