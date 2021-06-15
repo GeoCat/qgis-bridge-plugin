@@ -75,11 +75,12 @@ class GeocatBridge:
                 except Exception as err:
                     # Swallow all exceptions here, to avoid entering an endless loop
                     feedback.logWarning(f"A failure occurred while handling an exception: {err}")
-                try:
-                    # Close/disable the plugin to avoid messing up things
-                    self.unload()
-                except Exception as err:
-                    feedback.logWarning(f"A failure occurred while unloading the Bridge plugin: {err}")
+                # TODO: Once Bridge is more mature, the code below should be uncommented
+                # try:
+                #     # Close/disable the plugin to avoid messing up things
+                #     self.unload()
+                # except Exception as err:
+                #     feedback.logWarning(f"A failure occurred while unloading the Bridge plugin: {err}")
             else:
                 # Handle regular QGIS exception
                 self.qgis_hook(t, value, tb)          

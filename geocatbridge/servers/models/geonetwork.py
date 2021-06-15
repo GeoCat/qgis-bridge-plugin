@@ -57,11 +57,16 @@ class GeonetworkServer(MetaCatalogServerBase):
         mef_filename = saveMetadata(layer, None, self.apiUrl, wms, wfs, layer_name)
         self.publishMetadata(mef_filename)
 
-    def testConnection(self):
+    def testConnection(self, errors: set):
         try:
             self.me()
         except Exception as e:
-            self.logWarning(e)
+            self.logError(e)
+            msg = f'Could not connect to {self.serverName}'
+            if isinstance(e, requests.HTTPError) and e.response.status_code == 401:
+                errors.add(f'{msg}: please check credentials')
+            else:
+                errors.add(f'{msg}: {e}')
             return False
         return True
 

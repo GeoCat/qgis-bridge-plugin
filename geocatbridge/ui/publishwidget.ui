@@ -247,7 +247,7 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
          <item>
           <widget class="QTabWidget" name="tabWidgetMetadata">
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="tabMetadataGeneral">
             <attribute name="title">
@@ -629,7 +629,7 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tabOnline">
         <property name="sizePolicy">
@@ -829,6 +829,9 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="standardButtons">
         <set>QDialogButtonBox::Close</set>
        </property>
@@ -838,6 +841,53 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>listLayers</tabstop>
+  <tabstop>tabLayerInfo</tabstop>
+  <tabstop>btnPreview</tabstop>
+  <tabstop>btnValidate</tabstop>
+  <tabstop>btnImport</tabstop>
+  <tabstop>btnOpenQgisMetadataEditor</tabstop>
+  <tabstop>tabWidgetMetadata</tabstop>
+  <tabstop>txtMetadataTitle</tabstop>
+  <tabstop>txtAbstract</tabstop>
+  <tabstop>txtIsoTopic</tabstop>
+  <tabstop>btnIsoTopic</tabstop>
+  <tabstop>txtKeywords</tabstop>
+  <tabstop>btnKeywords</tabstop>
+  <tabstop>txtDataContact</tabstop>
+  <tabstop>btnDataContact</tabstop>
+  <tabstop>txtMetadataContact</tabstop>
+  <tabstop>btnMetadataContact</tabstop>
+  <tabstop>txtAccessConstraints</tabstop>
+  <tabstop>btnAccessConstraints</tabstop>
+  <tabstop>txtUseConstraints</tabstop>
+  <tabstop>btnUseConstraints</tabstop>
+  <tabstop>comboLanguage</tabstop>
+  <tabstop>tableFields</tabstop>
+  <tabstop>tabOnOffline</tabstop>
+  <tabstop>comboGeodataServer</tabstop>
+  <tabstop>chkOnlySymbology</tabstop>
+  <tabstop>comboMetadataServer</tabstop>
+  <tabstop>btnRemoveAll</tabstop>
+  <tabstop>chkExportGeodata</tabstop>
+  <tabstop>chkExportMetadata</tabstop>
+  <tabstop>chkExportSymbology</tabstop>
+  <tabstop>txtExportFolder</tabstop>
+  <tabstop>btnExportFolder</tabstop>
+  <tabstop>chkBackground</tabstop>
+  <tabstop>btnPublish</tabstop>
+  <tabstop>btnClose</tabstop>
+  <tabstop>dateBeginTemporalExtent</tabstop>
+  <tabstop>dateEndTemporalExtent</tabstop>
+  <tabstop>datePublication</tabstop>
+  <tabstop>dateLastRevision</tabstop>
+  <tabstop>dateCreation</tabstop>
+  <tabstop>txtSpatialResolution</tabstop>
+  <tabstop>txtLineage</tabstop>
+  <tabstop>comboStatus</tabstop>
+  <tabstop>comboResourceLanguage</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

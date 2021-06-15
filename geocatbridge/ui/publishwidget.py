@@ -505,14 +505,18 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             return False
 
         # Test connections of selected servers
+        errors = set()
+        success = []
         data_server = manager.getGeodataServer(data_server)
         meta_server = manager.getMetadataServer(meta_server)
-        if data_server and not data_server.testConnection():
-            return False
-        if meta_server and not meta_server.testConnection():
-            return False
+        if data_server:
+            success.append(data_server.testConnection(errors))
+        if meta_server:
+            success.append(meta_server.testConnection(errors))
+        for e in errors:
+            self.showErrorBar("Error", e)
 
-        return True
+        return all(success)
 
     def checkOfflinePublicationStatus(self) -> bool:
         """ Checks if all required offline publish fields have been set. """
@@ -544,17 +548,22 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         data_server = manager.getGeodataServer(self.comboGeodataServer.currentText())
         metadata_server = manager.getMetadataServer(self.comboMetadataServer.currentText())
 
+        errors = set()
         if data:
             self.comboGeodataServer.setStyleSheet("QComboBox { }")
-            if data_server and not data_server.testConnection():
+            if data_server and not data_server.testConnection(errors):
                 self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
                 can_publish = False
 
         if metadata:
             self.comboMetadataServer.setStyleSheet("QComboBox { }")
-            if metadata_server and not metadata_server.testConnection():
+            if metadata_server and not metadata_server.testConnection(errors):
                 self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
                 can_publish = False
+
+        # Show errors (if there are any)
+        for e in errors:
+            self.showErrorBar("Error", e)
 
         for i in range(self.listLayers.count()):
             item = self.listLayers.item(i)

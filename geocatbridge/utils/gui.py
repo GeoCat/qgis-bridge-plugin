@@ -19,11 +19,11 @@ def loadUiType(controller) -> tuple:
     return uic.loadUiType(ui_file)
 
 
-def execute(func):
+def execute(func, *args, **kwargs):
     """ Blocks GUI thread (and sets a wait cursor) while `func` is being executed. """
     QApplication.setOverrideCursor(QCursor(QtCore.Qt.WaitCursor))
     try:
-        return func()
+        return func(*args, **kwargs)
     finally:
         QApplication.restoreOverrideCursor()
         QtCore.QCoreApplication.processEvents()

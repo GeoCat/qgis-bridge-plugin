@@ -80,11 +80,13 @@ class ServerBase(AbstractServer, FeedbackMixin, ABC):
         return self._authid
 
     @abstractmethod
-    def testConnection(self) -> bool:
+    def testConnection(self, errors: set) -> bool:
         """ This abstract method must be implemented on all server instances.
         It tests if the connection to the server can be established.
 
-        :returns:   True if the connection is established, False otherwise.
+        :params errors: A Python set in which all error messages are collected.
+                        No messages will be added to the set if the connection was successful.
+        :returns:       True if the connection is established, False otherwise.
         """
         pass
 
@@ -125,7 +127,8 @@ class CatalogServerBase(ServerBase, ABC):
             data = json.dumps(data)
             headers["Content-Type"] = "application/json"
         self.logInfo(f"{method.upper()} {url}")
-        r = req_method(url, headers=headers, files=files_, data=data, auth=auth)
+        # Perform actual request with a default timeout of 5 seconds
+        r = req_method(url, headers=headers, files=files_, data=data, auth=auth, timeout=5)
         r.raise_for_status()
         return r
 

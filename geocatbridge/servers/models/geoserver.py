@@ -308,19 +308,28 @@ class GeoserverServer(DataCatalogServerBase):
         self.request(url, "post", datastore)
         return self.workspace
 
-    def testConnection(self):
+    def testConnection(self, errors: set):
         if not self.postgisdb:
             if self.storage == GeoserverStorage.POSTGIS_BRIDGE:
-                raise RuntimeError('GeoServer instance with database storage has missing PostGIS server name')
+                errors.add(f'Server {self.serverName} configured with database storage, '
+                           f'but without PostGIS server name')
+                return False
             elif self.storage == GeoserverStorage.POSTGIS_GEOSERVER:
-                raise RuntimeError('GeoServer instance with database storage has missing datastore name')
+                errors.add(f'Server {self.serverName} configured with database storage, but without datastore name')
+                return False
         try:
             url = f"{self.apiUrl}/about/version"
             self.request(url)
             return True
-        except (ConnectionError, HTTPError) as e:
-            self.logError(f"Failed to connect to {self.serverName}:\n{e}")
-            return False
+        except Exception as e:
+            msg = f'Could not connect to {self.serverName}'
+            if isinstance(e, requests.HTTPError) and e.response.status_code == 401:
+                msg = f'{msg}: please check credentials'
+            else:
+                msg = f'{msg}: {e}'
+        self.logError(msg)
+        errors.add(msg)
+        return False
 
     def _publishVectorLayerFromFile(self, layer, filename):
         self.logInfo(f"Publishing layer from file: {filename}")

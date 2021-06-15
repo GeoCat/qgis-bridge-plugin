@@ -56,7 +56,7 @@ class PostgisServer(DbServerBase):
         if exporter.errorCode() != QgsVectorLayerExporter.NoError:
             raise Exception(self.translate(getAppName(), f'Error importing to PostGIS: {exporter.errorMessage()}'))
 
-    def testConnection(self):
+    def testConnection(self, errors: set):
         username, password = self.getCredentials()
         con = None
         try:
@@ -64,10 +64,15 @@ class PostgisServer(DbServerBase):
                                    port=self.port)
             cur = con.cursor()
             cur.execute('SELECT version()')
-            cur.fetchone()[0]
+            cur.fetchone()[0]  # noqa
             return True
-        except psycopg2.Error:
-            return False
+        except psycopg2.Error as e:
+            errors.add(f'Could not connect to {self.serverName}: {e}')
+        except IndexError:
+            errors.add(f'Failed to retrieve version info for {self.serverName}')
+        except Exception as e:
+            errors.add(f'Unknown error while connecting to {self.serverName}: {e}')
         finally:
             if con:
                 con.close()
+        return False

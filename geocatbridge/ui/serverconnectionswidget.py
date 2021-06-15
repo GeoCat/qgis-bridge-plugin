@@ -221,11 +221,13 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             # Server is usually None when createServerInstance() call failed.
             self.showErrorBar("Error", "Wrong value(s) in current server settings. Please check QGIS log.")
         else:
+            errors = set()
             # Run the actual connection test method on the server instance.
-            if gui.execute(server.testConnection):
+            if gui.execute(server.testConnection, errors):
                 self.showSuccessBar("Success", "Successfully established server connection")
-            else:
-                self.showErrorBar("Error", "Could not connect to server. Please check QGIS log.")
+                return
+            for e in errors:
+                self.showErrorBar("Error", e)
 
     def persistServer(self, list_item=None) -> bool:
         """ Tells the server manager to store the server in the QGIS settings. """
