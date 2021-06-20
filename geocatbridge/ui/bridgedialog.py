@@ -10,7 +10,7 @@ from geocatbridge.ui.serverconnectionswidget import ServerConnectionsWidget
 from geocatbridge.utils import files, gui, meta
 from geocatbridge.utils.enum_ import LabeledIntEnum
 
-FIRSTTIME_SETTING = f"{meta.PLUGIN_NAMESPACE}/FirstTimeRun"
+VERSION_SETTING = f"{meta.PLUGIN_NAMESPACE}/currentVersion"
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
@@ -37,8 +37,8 @@ class BridgeDialog(BASE, WIDGET):
         self.listWidget.itemClicked.connect(partial(self.listItemClicked))
         self.listWidget.keyPressEvent = partial(self.listKeyPressed)
 
-        if self.isFirstTime():
-            # First-time users should see the About panel first
+        if self.showAbout():
+            # Show About panel first on fresh install or update
             self.listWidget.setCurrentRow(Panels.ABOUT)
         else:
             self.listWidget.setCurrentRow(Panels.PUBLISH)
@@ -58,13 +58,16 @@ class BridgeDialog(BASE, WIDGET):
         return panels, keymap
 
     @staticmethod
-    def isFirstTime() -> bool:
-        """ Checks if the FirstTimeRun QSetting exists. If not, it is set to False. """
-        if QSettings().contains(FIRSTTIME_SETTING):
-            return False
-        else:
-            QSettings().setValue(FIRSTTIME_SETTING, False)
+    def showAbout() -> bool:
+        """ Checks if the currentVersion QSetting exists and the Bridge version matches the current one.
+        If the versions do NOT match, it means that the About screen should be shown.
+        """
+        cur_version = meta.getVersion()
+        old_version = QSettings().value(VERSION_SETTING)
+        if old_version != cur_version:
+            QSettings().setValue(VERSION_SETTING, cur_version)
             return True
+        return False
 
     def listSelectNoSignals(self, index: int):
         self.listWidget.blockSignals(True)

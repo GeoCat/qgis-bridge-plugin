@@ -13,7 +13,7 @@ from qgis.core import (
     QgsProcessingParameterString,
     QgsProcessingParameterAuthConfig
 )
-from requests.exceptions import ConnectionError, HTTPError
+from requests.exceptions import HTTPError
 
 from bridgestyle import mapboxgl
 from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder
@@ -987,11 +987,10 @@ class GeoserverServer(DataCatalogServerBase):
 
     def validateBeforePublication(self, errors, to_publish, only_symbology):
         if not self.workspace:
-            errors.add("QGIS Project is not saved. "
-                       "Project must be saved before publishing layers to GeoServer.")
-        if "." in self.workspace:
-            errors.add("QGIS project name contains unsupported characters ('.'). "
-                       "Please save with a different name and try again.")
+            errors.add("QGIS project must be saved before publishing layers to GeoServer.")
+        if self.workspace[0].isdigit() or self.workspace[0] in '.-_':
+            errors.add("GeoServer workspace names may not start with a digit or .-_. "
+                       "Please save QGIS project under a different name and retry.")
         if self.willDeleteLayersOnPublication(to_publish) and not only_symbology:
             ret = self.showQuestionBox("Workspace", f"A workspace named '{self.workspace}' "
                                                     f"already exists and contains layers that "

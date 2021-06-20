@@ -42,8 +42,8 @@ def getExportableLayer(layer, target_name):
 def getPublishableLayers() -> list:
     """ Returns a flat list of supported publishable layers in the current QGIS project.
 
-    Supported layers are valid, non-temporary spatial vector or raster layers.
-    They can be from disk or a database, but they cannot be WM(T)S layers.
+    Supported layers are valid, non-temporary spatial vector or raster layers with a spatial reference.
+    Their source can be taken from disk or a database, but not from a web service (e.g. WM(T)S).
     """
     def _layersFromTree(layer_tree):
         _layers = []
@@ -56,7 +56,7 @@ def getPublishableLayers() -> list:
 
     root = QgsProject().instance().layerTreeRoot()
     return [layer for layer in _layersFromTree(root)
-            if layer and layer.isValid() and layer.isSpatial() and not layer.isTemporary()
+            if layer and layer.isValid() and layer.isSpatial() and layer.crs().isValid() and not layer.isTemporary()
             and layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]
             and layer.dataProvider().name() != "wms"]
 
