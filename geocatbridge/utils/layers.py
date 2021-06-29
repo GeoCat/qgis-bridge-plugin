@@ -39,12 +39,24 @@ def getExportableLayer(layer, target_name):
     return export_layer
 
 
-def getPublishableLayers() -> list:
-    """ Returns a flat list of supported publishable layers in the current QGIS project.
+def isSupported(layer):
+    """ Returns True if the given layer is supported by Bridge.
 
     Supported layers are valid, non-temporary spatial vector or raster layers with a spatial reference.
     Their source can be taken from disk or a database, but not from a web service (e.g. WM(T)S).
     """
+    if not layer:
+        return False
+    return layer.isValid() and layer.isSpatial() and layer.crs().isValid() and not layer.isTemporary() and \
+        layer.type() in (QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer) and layer.dataProvider().name() != "wms"
+
+
+def getPublishableLayers() -> list:
+    """ Returns a flat list of supported publishable layers in the current QGIS project.
+
+    See `isSupported()` to find out which layers are supported.
+    """
+
     def _layersFromTree(layer_tree):
         _layers = []
         for child in layer_tree.children():
@@ -55,10 +67,7 @@ def getPublishableLayers() -> list:
         return _layers
 
     root = QgsProject().instance().layerTreeRoot()
-    return [layer for layer in _layersFromTree(root)
-            if layer and layer.isValid() and layer.isSpatial() and layer.crs().isValid() and not layer.isTemporary()
-            and layer.type() in [QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer]
-            and layer.dataProvider().name() != "wms"]
+    return [layer for layer in _layersFromTree(root) if isSupported(layer)]
 
 
 def getLayerById(layer_id: str, publishable_only: bool = True) -> Union[None, QgsMapLayer]:

@@ -3,11 +3,11 @@ import json
 from qgis.PyQt.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
 from qgis.PyQt.QtGui import QFont, QColor, QFontMetrics
 from qgis.PyQt.QtWidgets import QVBoxLayout
-from qgis.core import QgsVectorLayer, QgsRasterLayer
 from qgis.utils import iface
 
 from bridgestyle.qgis import layerStyleAsSld, layerStyleAsMapbox, layerStyleAsMapfile
 from bridgestyle.qgis.togeostyler import convert
+from geocatbridge.utils.layers import isSupported
 from geocatbridge.utils import gui
 
 WIDGET, BASE = gui.loadUiType(__file__)
@@ -53,19 +53,17 @@ class StyleviewerWidget(BASE, WIDGET):
         mapbox = ""
         mapserver = ""
         warnings = []
-        if layer is not None:
-            if (isinstance(layer, QgsRasterLayer) or
-                    (isinstance(layer, QgsVectorLayer) and layer.isSpatial())):
-                sld, _, sld_warnings = layerStyleAsSld(layer)
-                geostyler, icons, sprites, geostyler_warnings = convert(layer)
-                geostyler = json.dumps(geostyler, indent=4)
-                mapbox, _, mapbox_warnings = layerStyleAsMapbox(layer)
-                mapserver, _, _, mapserverWarnings = layerStyleAsMapfile(layer)
-                warnings = set()
-                warnings.update(sld_warnings)
-                warnings.update(geostyler_warnings)
-                warnings.update(mapbox_warnings)
-                warnings.update(mapserverWarnings)
+        if isSupported(layer):
+            sld, _, sld_warnings = layerStyleAsSld(layer)
+            geostyler, icons, sprites, geostyler_warnings = convert(layer)
+            geostyler = json.dumps(geostyler, indent=4)
+            mapbox, _, mapbox_warnings = layerStyleAsMapbox(layer)
+            mapserver, _, _, mapserver_warnings = layerStyleAsMapfile(layer)
+            warnings = set()
+            warnings.update(sld_warnings)
+            warnings.update(geostyler_warnings)
+            warnings.update(mapbox_warnings)
+            warnings.update(mapserver_warnings)
         self.txtSld.setText(sld)
         self.txtGeostyler.setText(geostyler)
         self.txtMapbox.setText(mapbox)
