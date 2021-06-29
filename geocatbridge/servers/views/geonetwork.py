@@ -18,7 +18,6 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         self.geonetworkAuth.selectedConfigIdChanged.connect(self.setDirty)
         self.addAuthWidget()
 
-        self.btnConnectGeonetwork.clicked.connect(self.testConnection)
         self.txtGeonetworkName.textChanged.connect(self.setDirty)
         self.txtGeonetworkNode.textChanged.connect(self.setDirty)
         self.txtGeonetworkUrl.textChanged.connect(self.setDirty)
@@ -33,15 +32,22 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
         try:
+            name = self.txtGeonetworkName.text().strip()
+            url = self.txtGeonetworkUrl.text().strip()
+            if not name:
+                raise RuntimeError(f'missing {self.serverType.getLabel()} name')
+            if not url:
+                raise RuntimeError(f'missing {self.serverType.getLabel()} URL')
+
             return self.serverType(
-                name=self.txtGeonetworkName.text().strip(),
+                name=name,
                 authid=self.geonetworkAuth.configId() or None,
-                url=self.txtGeonetworkUrl.text().strip(),
+                url=url,
                 # profile=self.comboMetadataProfile.currentIndex(),
                 node=self.txtGeonetworkNode.text().strip() or 'srv'
             )
         except Exception as e:
-            self.parent.logError(f"Failed to create server instance:\n{e}")
+            self.parent.logError(f"Failed to create {self.serverType.getLabel()} instance: {e}")
             return None
 
     def newFromName(self, name: str):
@@ -76,10 +82,6 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         layout.addWidget(self.geonetworkAuth)
         self.geonetworkAuthWidget.setLayout(layout)
         self.geonetworkAuthWidget.setFixedHeight(self.txtGeonetworkUrl.height())
-
-    def testConnection(self):
-        server = self.createServerInstance()
-        self.parent.testConnection(server)
 
     def populateProfileCombo(self):
         self.comboMetadataProfile.clear()

@@ -25,7 +25,7 @@ from geocatbridge.servers.models.gs_storage import GeoserverStorage
 from geocatbridge.servers.views.geoserver import GeoServerWidget
 from geocatbridge.utils import layers as lyr_utils
 from geocatbridge.utils.files import tempFileInSubFolder, tempSubFolder, Path
-from geocatbridge.utils.meta import getAppName
+from geocatbridge.utils.meta import getAppName, semanticVersion
 
 
 class GeoserverServer(DataCatalogServerBase):
@@ -78,20 +78,23 @@ class GeoserverServer(DataCatalogServerBase):
         return GeoServerWidget
 
     @classmethod
-    def getServerTypeLabel(cls) -> str:
+    def getLabel(cls) -> str:
         return 'GeoServer'
 
     @property
     def workspace(self):
-        if self._workspace is not None:
-            return self._workspace
+        if self._workspace is None:
+            self.refreshWorkspaceName()
+        return self._workspace
 
+    def refreshWorkspaceName(self):
+        """ Resets the QGIS Project (file) name. Can be `None` if not found/saved. """
+        self._workspace = None
         path = QgsProject().instance().absoluteFilePath()
         if path:
             self._workspace = Path(path).stem
-        else:
-            raise RuntimeError("Workspace name could not be determined from QGIS project")
-        return self._workspace
+        if not self._workspace:
+            self.logWarning("Workspace name could not be derived from QGIS project: please save the project")
 
     def forceWorkspace(self, workspace):
         self._workspace = workspace
@@ -116,7 +119,7 @@ class GeoserverServer(DataCatalogServerBase):
 
     def prepareForPublishing(self, only_symbology):
         if not only_symbology:
-            self.clearTarget()
+            self.clearWorkspace()
         self._ensureWorkspaceExists()
         self._uploaded_data = {}
         self._exported_layers = {}
@@ -270,7 +273,7 @@ class GeoserverServer(DataCatalogServerBase):
             # Only yield dataStore if it is enabled and the "dbtype" parameter equals "postgis"
             # Using the "type" property does not work in all cases (e.g. for JNDI connection pools or NG)
             entries = {e["@key"]: e["$"] for e in params.get("entry", [])}
-            if enabled and entries.get("dbtype").startswith("postgis"):
+            if enabled and entries.get("dbtype", "").startswith("postgis"):
                 yield ds_name
 
     def createPostgisDatastore(self):
@@ -410,7 +413,7 @@ class GeoserverServer(DataCatalogServerBase):
         task = self.request(f"{self.apiUrl}/imports/{import_id}/tasks/{task_id}").json()["task"] or {}
         err_msg = task.get("errorMessage", "")
         if err_msg:
-            err_msg = f"GeoServer Importer Extension error:\n{err_msg}"
+            err_msg = f"GeoServer Importer Extension error: {err_msg}"
         return err_msg, task["layer"]["name"]
 
     def _publishVectorLayerFromFileToPostgis(self, layer, filename):
@@ -498,7 +501,7 @@ class GeoserverServer(DataCatalogServerBase):
         try:
             self._fixLayerStyle(tmp_name, ft_name)
         except HTTPError as e:
-            self.logWarning(f"Failed to clean up layer styles:\n{e}")
+            self.logWarning(f"Failed to clean up layer styles: {e}")
         else:
             self.logInfo(f"Successfully published layer '{title}'")
 
@@ -663,6 +666,8 @@ class GeoserverServer(DataCatalogServerBase):
         return self._exists(url, "style", name)
 
     def workspaceExists(self):
+        if not self.workspace:
+            return False
         url = f"{self.apiUrl}/workspaces.json"
         return self._exists(url, "workspace", self.workspace)
 
@@ -726,9 +731,9 @@ class GeoserverServer(DataCatalogServerBase):
                 }
             ]
         }
-        self.request(resource_url, data=layer, method="put")
+        self.request(resource_url, "put", layer)
 
-    def clearTarget(self, recreate=True) -> bool:
+    def clearWorkspace(self, recreate=True) -> bool:
         """
         Clears all feature types and coverages (rasters) and their corresponding layers.
         Leaves styles and datastore definitions in tact.
@@ -829,7 +834,7 @@ class GeoserverServer(DataCatalogServerBase):
                 self.request(style_url, method, f.read(), headers=headers)
         except HTTPError as e:
             self.logError(f"Failed to {'update' if update else 'create new'} style '{name}' in workspace "
-                          f"'{self.workspace}' using {filetype} file '{style_filepath}':\n{e}")
+                          f"'{self.workspace}' using {filetype} file '{style_filepath}': {e}")
             return
 
         self.logInfo(f"Successfully {'updated' if update else 'created new'} style '{name}' from "
@@ -917,7 +922,9 @@ class GeoserverServer(DataCatalogServerBase):
         try:
             res = self.request(url).json().get("workspaces", {})
         except HTTPError as e:
-            self.logError(f"Failed to retrieve workspaces from {self.apiUrl}:\n{e}")
+            if e.response.status_code == 401:
+                self.showErrorBar("Error", f"Failed to connect to {self.serverName}: bad or missing credentials")
+            self.logError(f"Failed to retrieve workspaces from {self.apiUrl}: {e}")
             return []
         if not res:
             self.logWarning(f"GeoServer instance at {self.apiUrl} does not seem to have any workspaces")
@@ -973,9 +980,9 @@ class GeoserverServer(DataCatalogServerBase):
             ver = next((r["Version"] for r in resources if r["@name"] == 'GeoServer'), None)
             if ver is None:
                 raise Exception('No GeoServer resource found or empty Version string')
-            major, minor = [int(p) for p in ver.split('.')][:2]
+            major, minor = semanticVersion(ver)
             if major < 2 or (major == 2 and minor <= 13):
-                # GeoServer instance is too old
+                # GeoServer instance is too old (or bad)
                 info_url = 'https://my.geocat.net/knowledgebase/100/Bridge-4-compatibility-with-Geoserver-2134-and-before.html'  # noqa
                 errors.add(
                     f"Geoserver 2.14.0 or later is required, but the detected version is {ver}.\n"
@@ -983,12 +990,13 @@ class GeoserverServer(DataCatalogServerBase):
                 )
         except Exception as e:
             # Failed to retrieve Version. It could be a RC or dev version: warn but consider OK.
-            self.logWarning(f"Failed to retrieve GeoServer version info:\n{e}")
+            self.logWarning(f"Failed to retrieve GeoServer version info: {e}")
 
     def validateBeforePublication(self, errors, to_publish, only_symbology):
+        self.refreshWorkspaceName()
         if not self.workspace:
             errors.add("QGIS project must be saved before publishing layers to GeoServer.")
-        if self.workspace[0].isdigit() or self.workspace[0] in '.-_':
+        elif self.workspace[0].isdigit() or self.workspace[0] in '.-_':
             errors.add("GeoServer workspace names may not start with a digit or .-_. "
                        "Please save QGIS project under a different name and retry.")
         if self.willDeleteLayersOnPublication(to_publish) and not only_symbology:

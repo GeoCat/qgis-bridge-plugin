@@ -42,9 +42,16 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
             folder = self.txtRemoteFolder.text()
 
         try:
+            name = self.txtMapserverName.text().strip()
+            url = self.txtMapserverUrl.text().strip()
+            if not name:
+                raise RuntimeError(f'missing {self.serverType.getLabel()} name')
+            if not url:
+                raise RuntimeError(f'missing {self.serverType.getLabel()} URL')
+
             return self.serverType(
-                name=self.txtMapserverName.text().strip(),
-                url=self.txtMapserverUrl.text().strip(),
+                name=name,
+                url=url,
                 useLocalFolder=local_storage,
                 folder=folder,
                 authid=self.mapserverAuth.configId(),
@@ -54,7 +61,7 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
                 projFolder=self.txtProjFolder.text().strip()
             )
         except Exception as e:
-            self.parent.logError(f"Failed to create server instance:\n{e}")
+            self.parent.logError(f"Failed to create {self.serverType.getLabel()} instance: {e}")
             return None
 
     def newFromName(self, name: str):

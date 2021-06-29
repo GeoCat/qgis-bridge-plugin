@@ -119,7 +119,7 @@ def _transformMetadata(filename, uuid, api_url, wms, wfs, layer_name):
         csname.text = md_layer
 
     iso_filename = tempFileInSubFolder("metadata.xml")
-    out_dom = _transformDom(filename, iso_filename)
+    out_dom = _transformDom(filename, QMD_TO_ISO19139_XSLT)
 
     for ident in out_dom.iter(_ns("fileIdentifier")):
         ident[0].text = uuid

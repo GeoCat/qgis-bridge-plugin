@@ -2,6 +2,7 @@ import json
 import os
 import webbrowser
 from collections import Counter
+from functools import partial
 
 import requests
 from qgis.PyQt.QtCore import (
@@ -104,14 +105,15 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.btnImport.setIcon(IMPORT_ICON)
         self.btnImport.clicked.connect(self.importMetadata)
         self.btnValidate.clicked.connect(self.validateMetadata)
-        self.btnUseConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
-        self.btnAccessConstraints.clicked.connect(lambda: self.openMetadataEditor(ACCESS))
-        self.btnIsoTopic.clicked.connect(lambda: self.openMetadataEditor(CATEGORIES))
-        self.btnKeywords.clicked.connect(lambda: self.openMetadataEditor(KEYWORDS))
-        self.btnDataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
-        self.btnMetadataContact.clicked.connect(lambda: self.openMetadataEditor(CONTACT))
+        self.btnUseConstraints.clicked.connect(partial(self.openMetadataEditor, ACCESS))
+        self.btnAccessConstraints.clicked.connect(partial(self.openMetadataEditor, ACCESS))
+        self.btnIsoTopic.clicked.connect(partial(self.openMetadataEditor, CATEGORIES))
+        self.btnKeywords.clicked.connect(partial(self.openMetadataEditor, KEYWORDS))
+        self.btnDataContact.clicked.connect(partial(self.openMetadataEditor, CONTACT))
+        self.btnMetadataContact.clicked.connect(partial(self.openMetadataEditor, CONTACT))
         self.btnExportFolder.clicked.connect(self.selectExportFolder)
         self.btnClose.clicked.connect(self.parent.close)
+        self.tabOnOffline.currentChanged.connect(partial(self.tabOnOfflineChanged))
 
         if self.listLayers.count():
             item = self.listLayers.item(0)
@@ -139,7 +141,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         try:
             settings = json.loads(config_str)
         except json.JSONDecodeError as e:
-            self.logError(f"Failed to parse publish settings:\n{e}")
+            self.logError(f"Failed to parse publish settings: {e}")
             return
 
         # Set online settings
@@ -156,7 +158,6 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             update_meta = True
         style_only = online_settings.get('symbologyOnly', False)
         self.chkOnlySymbology.setCheckState(Qt.Checked if style_only else Qt.Unchecked)
-        self.updateOnlineLayersPublicationStatus(update_data, update_meta)
 
         # Set offline settings
         offline_settings = settings.get('offline', {})
@@ -198,6 +199,12 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.logError(f"Failed to serialize publish settings as JSON: {e}")
             return
         QSettings().setValue(PUBLISH_SETTING, config_str)
+
+    def tabOnOfflineChanged(self, tab_index: int):
+        """ Refreshes the layer publication status. """
+        if tab_index < 0:
+            return
+        self.updateOnlineLayersPublicationStatus()
 
     def selectExportFolder(self):
         folder = QFileDialog.getExistingDirectory(self, self.tr("Export to folder"))
@@ -316,11 +323,11 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         layer_id = self.listLayers.itemWidget(item).id
         menu = QMenu()
         if self.isDataPublished.get(layer_id):
-            menu.addAction(self.tr("View WMS layer"), lambda: self.viewWms(layer_id))
-            # menu.addAction(self.tr("Unpublish data"), lambda: self.unpublishData(layer_id))
+            menu.addAction(self.tr("View WMS layer"), partial(self.viewWms, layer_id))
+            # menu.addAction(self.tr("Unpublish data"), lambda: self.unpublishData(layer_id))  TODO
         if self.isMetadataPublished.get(layer_id):
-            menu.addAction(self.tr("View metadata"), lambda: self.viewMetadata(layer_id))
-            # menu.addAction(self.tr("Unpublish metadata"), lambda: self.unpublishMetadata(layer_id))
+            menu.addAction(self.tr("View metadata"), partial(self.viewMetadata, layer_id))
+            # menu.addAction(self.tr("Unpublish metadata"), lambda: self.unpublishMetadata(layer_id))  TODO
         if any(self.isDataPublished.values()):
             menu.addAction(self.tr("View all WMS layers"), self.viewAllWms)
         menu.exec_(self.listLayers.mapToGlobal(pos))
@@ -601,7 +608,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         data_server = manager.getGeodataServer(self.comboGeodataServer.currentText())
         if not data_server:
             return
-        result = data_server.clearTarget(False)
+        result = data_server.clearWorkspace(False)
         if result:
             for layer_id in self.isDataPublished.keys():
                 self.isDataPublished[layer_id] = False
@@ -748,13 +755,9 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                 if c in name:
                     errors.add(f"Unsupported character in layer '{name}': '{c}'")
 
-        geodata_server = manager.getServer(self.comboGeodataServer.currentText())
+        geodata_server = manager.getGeodataServer(self.comboGeodataServer.currentText())
         if geodata_server:
             geodata_server.validateBeforePublication(errors, to_publish, style_only)
-
-        # if self.comboMetadataServer.currentIndex() != 0:
-        #     metadata_server = metadataServers()[self.comboMetadataServer.currentText()]
-        #     metadata_server.validateMetadataBeforePublication(errors)
 
         if errors:
             html = f"<p><b>Cannot publish data.</b></p>"
@@ -785,8 +788,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.storeFieldsToPublish()
 
         if self.tabOnOffline.currentWidget() == self.tabOnline:
-            geodata_server = manager.getServer(self.comboGeodataServer.currentText())
-            metadata_server = manager.getServer(self.comboMetadataServer.currentText())
+            geodata_server = manager.getGeodataServer(self.comboGeodataServer.currentText())
+            metadata_server = manager.getMetadataServer(self.comboMetadataServer.currentText())
             style_only = self.chkOnlySymbology.isChecked()
             return PublishTask(to_publish, self.fieldsToPublish, style_only, geodata_server, metadata_server, parent)
 

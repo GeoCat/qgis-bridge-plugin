@@ -40,13 +40,24 @@ class AbstractServer(ABC):
 
     @classmethod
     @abstractmethod
-    def getServerTypeLabel(cls) -> str:
+    def getLabel(cls) -> str:
         """ This abstract class method must be implemented on all server subclasses.
         It should return the server type label (e.g. "GeoServer" for the GeoServerServer class).
 
         :returns:   A string with the server type label.
         """
-        raise NotImplementedError(f"{cls.__name__} must implement getServerTypeLabel()")
+        raise NotImplementedError(f"{cls.__name__} must implement getLabel()")
+
+    @classmethod
+    def getAlgorithmInstance(cls) -> Union[QgsProcessingAlgorithm, None]:
+        """ This abstract class method can be implemented on all server classes, if needed.
+        If the server class can also be used by a QGIS processing provider, this method should
+        return a new processing algorithm instance that exposes its functionality.
+
+        :returns:   A new algorithm instance that inherits from QgsProcessingAlgorithm.
+                    If the server class does not support this, return None.
+        """
+        return
 
 
 class ServerBase(AbstractServer, FeedbackMixin, ABC):
@@ -90,16 +101,86 @@ class ServerBase(AbstractServer, FeedbackMixin, ABC):
         """
         pass
 
-    @classmethod
-    def getAlgorithmInstance(cls) -> Union[QgsProcessingAlgorithm, None]:
-        """ This abstract class method can be implemented on all server classes, if needed.
-        If the server class can also be used by a QGIS processing provider, this method should
-        return a new processing algorithm instance that exposes its functionality.
 
-        :returns:   A new algorithm instance that inherits from QgsProcessingAlgorithm.
-                    If the server class does not support this, return None.
+class CombiServerBase(AbstractServer, FeedbackMixin, ABC):
+
+    def __init__(self, name, **servers):
+        super().__init__()
+        self._name = name
+        self._servers = {}
+
+        # Lazy import getModelLookup to avoid cyclic imports
+        from geocatbridge.servers import getModelLookup
+
+        supported_types = self.getCatalogTypes()
+        for type_name, params in servers.items():
+            try:
+                server_type = getModelLookup().get(type_name)
+                if not issubclass(server_type, supported_types):
+                    self.logError(f'{type_name} type was not found or not supported')
+                    continue
+                instance = server_type(**params)  # noqa
+                self.setServer(instance)  # noqa
+            except Exception as err:
+                self.logError(f'{type_name} type failed to initialize: {err}')
+                continue
+
+    @classmethod
+    @abstractmethod
+    def getCatalogTypes(cls) -> tuple:
+        """ This class method must be implemented on each CombiServerBase implementation.
+        It should return a tuple of allowed catalog server sub types (added by setServer(), which means
+        that the types should inherit from CatalogServerBase.
         """
-        return
+        raise NotImplementedError(f"{cls.__name__} must implement getCatalogTypes()")
+
+    @abstractmethod
+    def testConnection(self, errors: set) -> bool:
+        """ This abstract method must be implemented on all server instances.
+        It tests if the connection to the server can be established.
+
+        :params errors: A Python set in which all error messages are collected.
+                        No messages will be added to the set if the connection was successful.
+        :returns:       True if the connection is established, False otherwise.
+        """
+        pass
+
+    @property
+    def serverName(self):
+        return self._name
+
+    def setServer(self, server):
+        """ Sets (adds or overwrites) the given server instance. """
+        allowed_types = (CatalogServerBase,) + self.getCatalogTypes()
+        if not isinstance(server, allowed_types):
+            raise TypeError(f'{self.getLabel()} must implement one of '
+                            f'({", ".join(t.__name__ for t in allowed_types)})')
+        server._name = self._name
+        self._servers[type(server)] = server
+
+    def getServer(self, server_type: type):
+        """ Returns the first server by the given type (exact match).
+        If the server was not found, the first instance type match is returned.
+        If that was not found either, None is returned.
+        """
+        server = self._servers.get(server_type)
+        if server:
+            return server
+        for inst in self._servers.values():
+            if isinstance(inst, server_type):
+                return inst
+        return None
+
+    def serverItems(self):
+        return self._servers.items()
+
+    def getSettings(self) -> dict:
+        settings = {
+            'name': self.serverName
+        }
+        for server_type, instance in self._servers.items():
+            settings[server_type.__name__] = instance.getSettings()
+        return settings
 
 
 class CatalogServerBase(ServerBase, ABC):
@@ -109,28 +190,35 @@ class CatalogServerBase(ServerBase, ABC):
         self._baseurl = urlparse(url).geturl()
 
     def request(self, url, method="get", data=None, **kwargs):
-        headers = kwargs.get("headers") or {}
-        files_ = kwargs.get("files") or {}
-        session = kwargs.get("session")
+        """ Wrapper function for HTTP requests. """
         # TODO: Use qgis.core.QgsBlockingNetworkRequest in later QGIS versions.
         #       This should improve proxy and authentication handling.
         #       Currently, only 3.18+ supports the PUT request (3.16 LTR does not).
+
+        headers = kwargs.get("headers") or {}
+        files_ = kwargs.get("files") or {}
+        session = kwargs.get("session")
+
+        if isinstance(data, dict) and not files_:
+            try:
+                data = json.dumps(data)
+                headers["Content-Type"] = "application/json"
+            except:  # noqa
+                pass
+
+        self.logInfo(f"{method.upper()} {url}")
         if session and isinstance(session, requests.Session):
+            # A Session was passed-in: call Request on Session object (handle auth in session!)
             auth = None
-            if hasattr(session, 'setTokenHeader'):
-                session.setTokenHeader(*self.getCredentials())
             req_method = getattr(session, method.casefold())
         else:
+            # Perform a regular Request with basic auth
             auth = self.getCredentials()
             req_method = getattr(requests, method.casefold())
-        if isinstance(data, dict):
-            data = json.dumps(data)
-            headers["Content-Type"] = "application/json"
-        self.logInfo(f"{method.upper()} {url}")
-        # Perform actual request with a default timeout of 5 seconds
-        r = req_method(url, headers=headers, files=files_, data=data, auth=auth, timeout=5)
-        r.raise_for_status()
-        return r
+
+        result = req_method(url, headers=headers, files=files_, data=data, auth=auth, timeout=10)
+        result.raise_for_status()
+        return result
 
     @property
     def baseUrl(self):
@@ -145,7 +233,6 @@ class CatalogServerBase(ServerBase, ABC):
 
 
 class MetaCatalogServerBase(CatalogServerBase, ABC):
-    _METACAT = True
 
     def __init__(self, name, authid="", url=""):
         super().__init__(name, authid, url)
@@ -155,7 +242,6 @@ class MetaCatalogServerBase(CatalogServerBase, ABC):
 
 
 class DataCatalogServerBase(CatalogServerBase, ABC):
-    _DATACAT = True
 
     def __init__(self, name, authid="", url=""):
         super().__init__(name, authid, url)
@@ -167,7 +253,7 @@ class DataCatalogServerBase(CatalogServerBase, ABC):
         """
         pass
 
-    def clearTarget(self, recreate: bool = True) -> bool:
+    def clearWorkspace(self, recreate: bool = True) -> bool:
         """ This method is called by the publish widget (among others) to clear a destination
         workspace or folder. All data, layers and styling within the target workspace/folder is removed.
 

@@ -1,14 +1,9 @@
 import json
-from importlib import import_module
-from inspect import isclass
-from pathlib import Path
-from pkgutil import iter_modules
 from typing import Union
 
 from qgis.PyQt.QtCore import QSettings
 
-from geocatbridge.servers import bases
-from geocatbridge.servers import models
+from geocatbridge.servers import bases, getModelLookup
 from geocatbridge.utils import feedback
 from geocatbridge.utils import meta
 from geocatbridge.utils.enum_ import LabeledIntEnum
@@ -16,8 +11,7 @@ from geocatbridge.utils.enum_ import LabeledIntEnum
 # QGIS setting that stores all configured Bridge servers
 SERVERS_SETTING = f"{meta.PLUGIN_NAMESPACE}/BridgeServers"
 
-# Globals for server model and instance lookup
-_types = {}
+# Global for server instance lookup
 _instances = {}
 
 
@@ -31,44 +25,6 @@ class ServerInitError(TypeError):
     pass
 
 
-def _loadServerTypes(force: bool = False):
-    """ Load all supported server class models from the `servers.models` folder.
-
-    :param force:   When True (default is False), all server models will be reloaded.
-    """
-    global _types
-
-    if force:
-        # Reset the available server types
-        _types = {}
-
-    if _types:
-        # Do nothing if the server types were already loaded
-        return
-
-    # Iterate all modules in the models folder
-    package_dir = Path(models.__file__).resolve().parent
-    for (_, module_name, _) in iter_modules([package_dir]):
-        module = import_module(f"{models.__name__}.{module_name}")
-        # Iterate all non-imported classes in the module
-        for name, cls in ((k, v) for k, v in module.__dict__.items() if isclass(v) and v.__module__ == module.__name__):  # noqa
-            # Server class must inherit from ServerBase
-            if not issubclass(cls, bases.ServerBase):
-                continue
-            # Concrete server classes that do NOT implement the AbstractServer methods
-            # will raise a TypeError once the class is being initialized.
-            # However, that error message is rather obscure, so we will check beforehand
-            # if the methods have been implemented and log warnings.
-            add_type = True
-            for method in getattr(bases.AbstractServer, '__abstractmethods__'):
-                if hasattr(getattr(cls, method, None), '__isabstractmethod__'):
-                    feedback.logWarning(f"{name} class does not implement {method}() method")
-                    add_type = False
-            # Add type to dictionary if tests passed
-            if add_type:
-                _types[name] = cls
-
-
 def _initServer(type_name: str, **props):
     """ Look up the given server type name and initialize the corresponding server class.
 
@@ -76,22 +32,19 @@ def _initServer(type_name: str, **props):
     :param props:       The keyword arguments required for the __init__ call.
     :return:            An instance of type `type_name`.
     """
-    global _types
-
-    _loadServerTypes()
-    cls = _types.get(type_name)
+    cls = getModelLookup().get(type_name)
     if not cls:
         raise UnknownServerError(f"unsupported '{type_name}' server in {SERVERS_SETTING} configuration: "
-                                 f"must be one of [{', '.join(sorted(_types.keys()))}]")
+                                 f"must be one of [{', '.join(sorted(getModelLookup().keys()))}]")
     try:
         return cls(**props)
     except (TypeError, AttributeError) as e:
         call_params = ', '.join(f"{k}={v}" for k, v in props.items())
-        raise ServerInitError(f"could not initialize {type_name}({call_params}):\n{e}")
+        raise ServerInitError(f"could not initialize {type_name}({call_params}): {e}")
 
 
 def _getServerAsTuple(server):
-    """ Verifies that the given server can be recreated using the values from `getSettings()`.
+    """ Verifies that the given server instance can be recreated using the values from `getSettings()`.
         If this is the case, a tuple of (type, params) will be returned. Otherwise, None is returned.
     """
     try:
@@ -100,23 +53,21 @@ def _getServerAsTuple(server):
         # This should not happen if the server properly implements AbstractServer
         feedback.logError(f"Server does not implement {bases.AbstractServer.__name__}.getSettings")
         return
+
     server_type = server.__class__.__name__
     try:
         # Test that the server class can be instantiated again using the output from getSettings()
         _initServer(server_type, **params)
     except ServerInitError as e:
         # Report error that the server cannot be initialized with the given parameters
-        feedback.logError(f"{server_type}.getSettings() returns bad parameters:\n{e}")
+        feedback.logError(f"{server_type}.getSettings() returned bad parameters: {e}")
         return
     return server_type, params
 
 
 def getServerTypes():
     """ Returns a generator of available server types (model) to use in a UI menu. """
-    global _types
-
-    _loadServerTypes()
-    for t in _types.values():
+    for t in getModelLookup().values():
         yield t
 
 
@@ -161,7 +112,7 @@ def deserializeServers(config_str: str) -> bool:
     try:
         stored_servers = json.loads(config_str)
     except json.JSONDecodeError as e:
-        feedback.logError(f"Failed to parse servers configuration:\n{e}")
+        feedback.logError(f"Failed to parse servers configuration: {e}")
         return False
 
     # It is expected that `stored_servers` is a list
@@ -182,11 +133,11 @@ def deserializeServers(config_str: str) -> bool:
         try:
             s = _initServer(server_type, **properties)
         except (UnknownServerError, ServerInitError) as e:
-            feedback.logError(f"Failed to load server:\n{e}")
+            feedback.logError(f"Failed to load {server_type} type: {e}")
             continue
         if key != name:
             feedback.logWarning(f"Changed name from '{name}' to '{key}' for "
-                                f"non-unique {s.getServerTypeLabel()} entry")
+                                f"non-unique {s.getLabel()} entry")
         _instances[key] = s
         num_added += 1
 
@@ -222,20 +173,28 @@ def getServer(name: str):
     return _instances.get(name)
 
 
+def _refineByType(server, type_: type):
+    """ Retrieves a nested server instance by `type_` if the given `server` implements CombiServerBase.
+    If the given `server` does not implement CombiServerBase, it is returned as-is if it implements `type_`.
+    In all other cases, `None` is returned.
+    """
+    if isinstance(server, type_):
+        return server
+    elif isinstance(server, bases.CombiServerBase):
+        return server.getServer(type_)
+    return None
+
+
 def getGeodataServer(name: str):
     """ Returns the geodata server instance with the given name (or `None` when not found). """
     server = getServer(name)
-    if isinstance(server, bases.DataCatalogServerBase):
-        return server
-    return None
+    return _refineByType(server, bases.DataCatalogServerBase)
 
 
 def getMetadataServer(name: str):
     """ Returns the metadata server instance with the given name (or `None` when not found). """
     server = getServer(name)
-    if isinstance(server, bases.MetaCatalogServerBase):
-        return server
-    return None
+    return _refineByType(server, bases.MetaCatalogServerBase)
 
 
 def getServers():
@@ -246,12 +205,12 @@ def getServers():
 
 def getMetadataServers():
     """ Retrieves all available metadata server instances. """
-    return [s for s in getServers() if isinstance(s, bases.MetaCatalogServerBase)]
+    return [s for s in (_refineByType(s, bases.MetaCatalogServerBase) for s in getServers()) if s]
 
 
 def getGeodataServers():
     """ Retrieves all available (geo)data server instances. """
-    return [s for s in getServers() if isinstance(s, bases.DataCatalogServerBase)]
+    return [s for s in (_refineByType(s, bases.DataCatalogServerBase) for s in getServers()) if s]
 
 
 def getDbServers():
@@ -288,7 +247,7 @@ def getMetadataProfile(server_name: str) -> LabeledIntEnum:
     :returns:   The metadata profile (integer-like `LabeledIntEnum`).
     :raises:    Exception if server was not found or not a metadata catalog server.
     """
-    server = getServer(server_name)
+    server = getMetadataServer(server_name)
     if server and hasattr(server, 'profile'):
         return server.profile
     raise Exception('Server is not a metadata catalog server')
@@ -324,10 +283,10 @@ def saveServer(server, replace_key: str) -> bool:
     """
     global _instances
 
-    if not isinstance(server, bases.ServerBase):
-        # This should not happen if the server properly implements ServerBase
+    if not isinstance(server, (bases.ServerBase, bases.CombiServerBase)):
+        # This should not happen if the server properly implements (Combi)ServerBase
         feedback.logError(f"Cannot store server of type '{server.__class__.__name__}': "
-                          f"must implement {bases.ServerBase.__name__}")
+                          f"must implement {bases.ServerBase.__name__} or {bases.CombiServerBase.__name__}")
         return False
 
     if not server.serverName:

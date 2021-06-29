@@ -1,8 +1,0 @@
-[
-	{"name":"allowWithoutMetadata",
-	 "label": "Allow publication with invalid metadata",
-	 "type": "choice",
-	 "default": "Allow",
-	 "options":["Do not allow", "Allow", "Allow publishing only data"]
-	}
-]

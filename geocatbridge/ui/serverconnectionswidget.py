@@ -3,7 +3,7 @@ from functools import partial
 from typing import Union
 
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QKeyEvent
+from qgis.PyQt.QtGui import QKeyEvent, QIcon
 from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -14,8 +14,8 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from geocatbridge.servers import manager
-from geocatbridge.servers.bases import ServerWidgetBase, ServerBase
-from geocatbridge.utils import gui
+from geocatbridge.servers.bases import ServerWidgetBase
+from geocatbridge.utils import gui, files
 from geocatbridge.utils.feedback import FeedbackMixin
 
 WIDGET, BASE = gui.loadUiType(__file__)
@@ -36,11 +36,15 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self.buttonImport.clicked.connect(self.importServers)
         self.buttonExport.clicked.connect(self.exportServers)
         self.buttonDuplicate.clicked.connect(self.duplicateServer)
-        self.btnClose.clicked.connect(parent.close)
+        self.buttonClose.clicked.connect(parent.close)
+        self.buttonTest.clicked.connect(self.testConnection)
+        self.buttonTest.setVisible(False)
+        self.buttonTest.setIcon(QIcon(files.getIconPath("connect")))
 
         # Connect event handlers for server widget activation
         self.listServers.itemClicked.connect(partial(self.listItemClicked))
         self.listServers.keyPressEvent = partial(self.listKeyPressed)
+        self.stackedWidget.currentChanged.connect(partial(self.toggleTestButton))
 
     @property
     def serverManager(self):
@@ -59,9 +63,14 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self.buttonExport.setEnabled(has_servers)
         self.buttonDuplicate.setEnabled(has_servers)
         self.buttonRemove.setEnabled(has_servers)
+        self.buttonTest.setEnabled(has_servers)
         if not has_servers:
             # If there are no servers (anymore), show empty widget
             self.stackedWidget.setCurrentWidget(self.widgetEmpty)
+
+    def toggleTestButton(self, widget_index: int):
+        """ Shows/hides the connection test button if a server widget is visible. """
+        self.buttonTest.setVisible(self.stackedWidget.widget(widget_index) not in (None, self.widgetEmpty))
 
     def exportServers(self):
         filename = QFileDialog.getSaveFileName(self, self.tr("Export servers"),
@@ -210,13 +219,19 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         # Match server widget to selected server list item
         self.showServerWidget(new_server)
 
-    def testConnection(self, server: ServerBase):
+    def testConnection(self):
         """ Tests if the server instance can actually connect to it.
 
         .. note::   Not all servers might support this. Servers that don't support it,
                     should still implement :func:`testConnection`, but in that case,
                     the method should simply always return `True`.
         """
+        server_widget = self.stackedWidget.currentWidget()
+        if not server_widget or not hasattr(server_widget, 'createServerInstance'):
+            # No current server widget set or empty widget
+            return
+
+        server = server_widget.createServerInstance()
         if server is None:
             # Server is usually None when createServerInstance() call failed.
             self.showErrorBar("Error", "Wrong value(s) in current server settings. Please check QGIS log.")
@@ -232,11 +247,6 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
     def persistServer(self, list_item=None) -> bool:
         """ Tells the server manager to store the server in the QGIS settings. """
 
-        list_widget = self.getListWidgetItem(list_item)
-        if not list_widget:
-            # No list widget selected
-            return False
-
         server_widget = self.stackedWidget.currentWidget()
         if not server_widget:
             # No current server widget set (should not happen)
@@ -249,17 +259,19 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.showErrorBar("Error", f"Current server does not implement {ServerWidgetBase.__name__}")
             return False
         if not server:
-            self.showErrorBar("Error", "Wrong values in current server settings. Please check QGIS log.")
+            self.showErrorBar("Error", "Bad or missing values in current server settings. Please check QGIS log.")
             return False
 
         try:
-            result = manager.saveServer(server, list_widget.serverName)
+            result = manager.saveServer(server, server_widget.getId())
         except ValueError as err:
             # Show error bar if user set a bad name
             self.showErrorBar("Error", f"Invalid name: {err}")
             return False
-        if result:
-            # Update list view item if server was successfully saved
+
+        # Update list view item if selected and server was successfully saved
+        list_widget = self.getListWidgetItem(list_item)
+        if result and list_widget:
             list_widget.serverName = server.serverName
         return result
 
@@ -318,10 +330,10 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.showErrorBar("Error", f"Failed to duplicate server {source_name}. Please check QGIS log.")
 
     def addMenuToButtonNew(self):
-        """ Populate "New Server" menu button with available server types. """
+        """ Populate "New Server" menu button with available server types (in alphabetical order). """
         menu = QMenu()
-        for s in manager.getServerTypes():
-            menu.addAction(s.getServerTypeLabel(), partial(self.addNewServer, deepcopy(s)))
+        for label, server_type in sorted((s.getLabel(), deepcopy(s)) for s in manager.getServerTypes()):
+            menu.addAction(label, partial(self.addNewServer, server_type))
         self.buttonNew.setMenu(menu)
 
     def selectItemAbove(self, index: int):
@@ -372,10 +384,10 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         return index
 
     def populateServerList(self):
-        """ Populates the list widget with all available server instances. """
+        """ Populates the list widget with all available server instances (in alphabetical order). """
         self.listServers.clear()
-        for server in manager.getServers():
-            self.addServerListItem(server.__class__, server.serverName)
+        for name, server_type in sorted((s.serverName, s.__class__) for s in manager.getServers()):
+            self.addServerListItem(server_type, name)
         self.toggleServerList()
 
     def addServerListItem(self, server_class, server_name: str, set_active: bool = False):
@@ -407,7 +419,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.addServerListItem(cls, assigned_name, True)
             self.toggleServerList()
         else:
-            self.showErrorBar("Error", f"Failed to add {cls.getServerTypeLabel()} server. Please check QGIS log.")
+            self.showErrorBar("Error", f"Failed to add {cls.getLabel()} server. Please check QGIS log.")
 
     def showServerWidget(self, server=None, force_dirty: bool = False) -> Union[str, None]:
         """ Sets the current server configuration widget for the given server instance or class.
@@ -426,7 +438,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.stackedWidget.setCurrentWidget(self.widgetEmpty)
             return
 
-        if isinstance(server, manager.bases.ServerBase):
+        if isinstance(server, (manager.bases.ServerBase, manager.bases.CombiServerBase)):
             # 'server' argument is a model instance (existing servers)
             server_cls = type(server)
         else:
@@ -452,7 +464,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         # Set as current widget and populate its form fields
         self.stackedWidget.setCurrentWidget(widget)
         if server_cls == server:
-            srv_name = manager.getUniqueName(server_cls.getServerTypeLabel())
+            srv_name = manager.getUniqueName(server_cls.getLabel())
             widget.newFromName(srv_name)
             widget.setId(srv_name)
             widget.setDirty()
@@ -494,6 +506,12 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
                 self.cleanupServerItem()
             return res != self.BUTTONS.CANCEL
         return True
+
+    def destroy(self):
+        self._server_widgets = None
+        for i in range(len(self.listServers) - 1, -1, -1):
+            item_widget = self.listServers.item(i)
+            self.removeServer(item_widget)
 
 
 class ServerItemWidget(QWidget):

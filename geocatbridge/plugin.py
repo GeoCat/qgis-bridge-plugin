@@ -17,23 +17,6 @@ from geocatbridge.ui.styleviewerwidget import StyleviewerWidget
 from geocatbridge.utils import meta, files, feedback
 
 
-
-# Enable PyCharm remote debugger, if debug folder exists
-_debug_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '_debug'))
-if os.path.isdir(_debug_dir):
-    sys.path.append(_debug_dir)
-    import pydevd_pycharm
-    from warnings import simplefilter
-    try:
-        # Suppress ResourceWarning when remote debug server is not running
-        simplefilter('ignore', category=ResourceWarning)
-        pydevd_pycharm.settrace('localhost', True, True, 53100)
-    except (ConnectionRefusedError, AttributeError):
-        # PyCharm remote debug server is not running on localhost:53100
-        # Restore ResourceWarnings
-        simplefilter('default', category=ResourceWarning)    
-
-
 class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
@@ -178,6 +161,7 @@ class GeocatBridge:
         """ Opens the Bridge Publish dialog. This will always create a new BridgeDialog instance."""
         # Since the BridgeDialog is a modal window, the Bridge button cannot be clicked if the dialog is open.
         # Therefore, we don't need to check if there is a current (open) dialog or not.
+        self.closeDialog(self.main_dialog)
         self.main_dialog = BridgeDialog(self.iface.mainWindow())
         self.main_dialog.show()
 
@@ -202,11 +186,11 @@ class GeocatBridge:
 
     @staticmethod
     def closeDialog(dialog: QWidget):
-        """ Closes (hides) and unsets the given dialog. """
+        """ Closes (hides) and destroys the given dialog. """
         if dialog is None:
-            return
+            return None
         dialog.hide()
-        dialog = None  # noqa
+        dialog.destroy()
 
 
 class LayerStyleEventManager:

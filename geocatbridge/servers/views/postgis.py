@@ -17,7 +17,6 @@ class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
         self.postgisAuth.selectedConfigIdChanged.connect(self.setDirty)
         self.addAuthWidget()
 
-        self.btnConnectPostgis.clicked.connect(self.testConnection)
         self.txtPostgisName.textChanged.connect(self.setDirty)
         self.txtPostgisServerAddress.textChanged.connect(self.setDirty)
         self.txtPostgisPort.textChanged.connect(self.setDirty)
@@ -27,22 +26,28 @@ class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
         try:
-            port = int(self.txtPostgisPort.text())
-        except (ValueError, TypeError):
-            self.parent.logError('Invalid PostGIS port specified')
-            return None
+            name = self.txtPostgisName.text().strip()
+            host = self.txtPostgisServerAddress.text().strip()
+            if not name:
+                raise RuntimeError(f'missing {self.serverType.getLabel()} name')
+            if not host:
+                raise RuntimeError(f'missing {self.serverType.getLabel()} host address')
 
-        try:
+            try:
+                port = int(self.txtPostgisPort.text())
+            except (ValueError, TypeError):
+                raise RuntimeError(f'missing or invalid {self.serverType.getLabel()} port')
+
             return self.serverType(
-                name=self.txtPostgisName.text().strip(),
+                name=name,
                 authid=self.postgisAuth.configId(),
-                host=self.txtPostgisServerAddress.text().strip(),
+                host=host,
                 port=port,
                 schema=self.txtPostgisSchema.text().strip(),
                 database=self.txtPostgisDatabase.text().strip()
             )
         except Exception as e:
-            self.parent.logError(f"Failed to create server instance:\n{e}")
+            self.parent.logError(f"Failed to create {self.serverType.getLabel()} instance: {e}")
             return None
 
     def newFromName(self, name: str):
@@ -72,7 +77,3 @@ class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
         layout.addWidget(self.postgisAuth)
         self.postgisAuthWidget.setLayout(layout)
         self.postgisAuthWidget.setFixedHeight(self.txtPostgisServerAddress.height())
-
-    def testConnection(self):
-        server = self.createServerInstance()
-        self.parent.testConnection(server)

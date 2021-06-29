@@ -1,8 +1,13 @@
 import configparser
 from pathlib import Path
+from typing import Tuple
+from re import compile
 
 #: GeoCat Bridge plugin namespace
 PLUGIN_NAMESPACE = "geocatbridge"
+
+#: Semantic version regex
+VERSION_REGEX = compile(r'^(\d+)\.(\d+).*')
 
 _prop_cache = {}
 _meta_parser = configparser.ConfigParser()
@@ -10,6 +15,14 @@ _meta_parser = configparser.ConfigParser()
 
 def _load():
     _meta_parser.read(str(Path(__file__).parent.parent / 'metadata.txt'))
+
+
+def semanticVersion(version: str) -> Tuple[int, int]:
+    """ Converts a version string to a (major, minor) version tuple. """
+    m = VERSION_REGEX.match(version)
+    if not m or len(m.groups()) != 2:
+        return 0, 0
+    return tuple(int(v) for v in m.groups())  # noqa
 
 
 def getProperty(name, section='general'):

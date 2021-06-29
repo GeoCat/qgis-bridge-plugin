@@ -156,7 +156,7 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
      <item>
       <widget class="QTabWidget" name="tabLayerInfo">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -247,7 +247,7 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
          <item>
           <widget class="QTabWidget" name="tabWidgetMetadata">
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tabMetadataGeneral">
             <attribute name="title">
@@ -629,7 +629,7 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabOnline">
         <property name="sizePolicy">

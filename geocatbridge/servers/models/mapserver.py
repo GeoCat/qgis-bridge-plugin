@@ -53,7 +53,7 @@ class MapserverServer(DataCatalogServerBase):
         return MapServerWidget
 
     @classmethod
-    def getServerTypeLabel(cls) -> str:
+    def getLabel(cls) -> str:
         return 'MapServer'
 
     def publishStyle(self, layer):

@@ -139,3 +139,14 @@ class BridgeDialog(BASE, WIDGET):
             evt.ignore()
         else:
             evt.accept()
+
+    def destroy(self):
+        """ Releases all resources used by the BridgeDialog. """
+        for i in range(len(self.panel_widgets)):
+            panel = self.panel_widgets.pop()
+            if i in (Panels.PUBLISH, Panels.SERVERS):
+                panel.destroy()
+            del panel
+        self.listWidget.destroy()
+        self.stackedWidget.destroy()
+        super().destroy()

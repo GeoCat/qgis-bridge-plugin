@@ -23,8 +23,8 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         self.results = results
         self.setupUi(self)
 
-        txt_on = self.tr('on')
-        txt_off = self.tr('off')
+        txt_on = self.tr('on').upper()
+        txt_off = self.tr('off').upper()
 
         self.setWindowIcon(QIcon(files.getIconPath('geocat')))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -39,9 +39,9 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         else:
             self.labelUrlMetadataServer.setText("----")
         publish_data = geodata_server is not None
-        self.labelPublishMapData.setText(txt_on.upper() if publish_data and not only_symbology else txt_off.upper())
-        self.labelPublishSymbology.setText(txt_on.upper() if publish_data or only_symbology else txt_off.upper())
-        self.labelPublishMetadata.setText(txt_on.upper() if metadata_server is not None else txt_off.upper())
+        self.labelPublishMapData.setText(txt_on if publish_data and not only_symbology else txt_off)
+        self.labelPublishSymbology.setText(txt_on if publish_data or only_symbology else txt_off)
+        self.labelPublishMetadata.setText(txt_on if metadata_server is not None else txt_off)
         self.tableWidget.setRowCount(len(results))
 
         # Populate report table
@@ -52,23 +52,23 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
             # Just show "success" in the last column if there are no errors and warnings
             warnings, errors = results[name]
             if not (warnings or errors):
-                self.tableWidget.setItem(i, 1, QTableWidgetItem(self.tr('Success')))
+                self.tableWidget.setItem(i, 1, QTableWidgetItem('OK'))
                 continue
 
             # Show error and warning count and dialog button (for details) in the last column if there are issues
             status_widget = QWidget()
+            layout = QHBoxLayout(status_widget)
+            button = QToolButton()
+            button.setIcon(QIcon(files.getIconPath("attention")))
+            button.clicked.connect(partial(self.openDetails, name))
+            layout.addWidget(button)
             status_lbl = QLabel()
             status_lbl.setText(self.tr(f"{len(warnings)} warnings, {len(errors)} errors"))
             if errors:
                 # Also render text in red if there are any errors
                 status_lbl.setStyleSheet("QLabel { color: red; }")
-            layout = QHBoxLayout(status_widget)
             layout.addWidget(status_lbl)
-            button = QToolButton()
-            button.setIcon(QIcon(files.getIconPath("attention")))
-            button.clicked.connect(partial(self.openDetails, name))
-            layout.addWidget(button)
-            layout.setAlignment(Qt.AlignCenter)
+            layout.setAlignment(Qt.AlignLeft)
             layout.setContentsMargins(0, 0, 0, 0)
             status_widget.setLayout(layout)
             self.tableWidget.setCellWidget(i, 1, status_widget)

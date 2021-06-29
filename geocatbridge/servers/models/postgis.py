@@ -30,7 +30,7 @@ class PostgisServer(DbServerBase):
         return PostgisWidget
 
     @classmethod
-    def getServerTypeLabel(cls) -> str:
+    def getLabel(cls) -> str:
         return 'PostGIS'
 
     def importLayer(self, layer, fields):

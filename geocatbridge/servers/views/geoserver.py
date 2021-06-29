@@ -1,5 +1,6 @@
 from functools import partial
 from itertools import chain
+from requests import HTTPError
 
 from qgis.PyQt import QtCore
 from qgis.PyQt.QtWidgets import (
@@ -29,7 +30,6 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
 
         self.populateStorageCombo()
         self.comboStorageType.currentIndexChanged.connect(self.datastoreChanged)
-        self.btnConnectGeoserver.clicked.connect(self.testConnection)
         self.btnRefreshDatabases.clicked.connect(partial(self.updateDbServersCombo, True))
         self.btnAddDatastore.clicked.connect(self.addPostgisDatastore)
         self.txtGeoserverName.textChanged.connect(self.setDirty)
@@ -49,17 +49,24 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
             db = self.comboGeoserverDatabase.currentText()
 
         try:
+            name = self.txtGeoserverName.text().strip()
+            url = self.txtGeoserverUrl.text().strip()
+            if not name:
+                raise RuntimeError(f'missing {self.serverType.getLabel()} name')
+            if not url:
+                raise RuntimeError(f'missing {self.serverType.getLabel()} URL')
+
             return self.serverType(
-                name=self.txtGeoserverName.text().strip(),
+                name=name,
                 authid=self.geoserverAuth.configId() or None,
-                url=self.txtGeoserverUrl.text().strip(),
+                url=url,
                 storage=storage,
                 postgisdb=db,
                 useOriginalDataSource=self.chkUseOriginalDataSource.isChecked(),
                 useVectorTiles=self.chkUseVectorTiles.isChecked()
             )
         except Exception as e:
-            self.parent.logError(f"Failed to create server instance:\n{e}")
+            self.parent.logError(f"Failed to create {self.serverType.getLabel()} instance: {e}")
             return None
 
     def newFromName(self, name: str):
@@ -99,10 +106,6 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         layout.addWidget(self.geoserverAuth)
         self.geoserverAuthWidget.setLayout(layout)
         self.geoserverAuthWidget.setFixedHeight(self.txtGeoserverUrl.height())
-
-    def testConnection(self):
-        server = self.createServerInstance()
-        self.parent.testConnection(server)
 
     def populateStorageCombo(self):
         self.comboStorageType.clear()
@@ -193,7 +196,12 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                 worker.finished.connect(partial(self.addGeoserverPgDatastores, current_db))
                 worker.run()
             except Exception as e:
-                self.parent.logError(f"Failed to retrieve datastores:\n{e}")
+                msg = f'Failed to retrieve datastores for {self.serverName}'
+                if isinstance(e, HTTPError) and e.response.status_code == 401:
+                    msg = f'{msg}: please check credentials'
+                else:
+                    msg = f'{msg}: {e}'
+                self.parent.showErrorBar(msg)
 
         else:
             # Database is managed by Bridge: iterate over all user-defined database connections
