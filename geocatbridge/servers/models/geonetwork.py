@@ -86,8 +86,11 @@ class GeonetworkServer(MetaCatalogServerBase):
         version = self.getVersion() or ''
         if version:
             major, minor = semanticVersion(version)
-            if not (major >= 3 and minor >= 4):
-                errors.add(f'{msg}: {self.getLabel()} instances prior to version 3.4 are not supported')
+            if not (major == 3 and minor >= 4):
+                if major == 4:
+                    errors.add(f'{msg}: {self.getLabel()} version 4 instances are not supported yet')
+                else:
+                    errors.add(f'{msg}: {self.getLabel()} instances prior to version 3.4 are not supported')
                 return False
         else:
             errors.add(f'{msg}: please check URL')
