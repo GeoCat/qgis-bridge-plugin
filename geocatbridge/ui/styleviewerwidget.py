@@ -1,4 +1,5 @@
 import json
+from itertools import chain
 
 from qgis.PyQt.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
 from qgis.PyQt.QtGui import QFont, QColor, QFontMetrics
@@ -52,18 +53,14 @@ class StyleviewerWidget(BASE, WIDGET):
         geostyler = ""
         mapbox = ""
         mapserver = ""
-        warnings = []
+        warnings = set()
         if isSupported(layer):
             sld, _, sld_warnings = layerStyleAsSld(layer)
-            geostyler, icons, sprites, geostyler_warnings = convert(layer)
+            geostyler, _, _, geostyler_warnings = convert(layer)
             geostyler = json.dumps(geostyler, indent=4)
             mapbox, _, mapbox_warnings = layerStyleAsMapbox(layer)
             mapserver, _, _, mapserver_warnings = layerStyleAsMapfile(layer)
-            warnings = set()
-            warnings.update(sld_warnings)
-            warnings.update(geostyler_warnings)
-            warnings.update(mapbox_warnings)
-            warnings.update(mapserver_warnings)
+            warnings.update(chain(sld_warnings, geostyler_warnings, mapbox_warnings, mapserver_warnings))
         self.txtSld.setText(sld)
         self.txtGeostyler.setText(geostyler)
         self.txtMapbox.setText(mapbox)

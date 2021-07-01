@@ -22,7 +22,7 @@ class GeoCatWidget(WIDGET, BASE):
         self.txtAbout.linkClicked.connect(partial(self.open_link))
 
         # Add version info
-        name = meta.getAppName()
+        name = meta.getLongAppName()
         version = meta.getVersion()
         if version and name:
             self.txtInfo.setText(f'{name} v{version}')

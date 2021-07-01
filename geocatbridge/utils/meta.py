@@ -27,17 +27,27 @@ def semanticVersion(version: str) -> Tuple[int, int]:
 
 def getProperty(name, section='general'):
     """ Reads the property with the given name from the **local** plugin metadata. """
+    key = f'{section}.{name}'
     try:
-        value = _prop_cache.get(name, _meta_parser.get(section, name))
+        value = _prop_cache.get(key, _meta_parser.get(section, name))
     except (configparser.NoOptionError, configparser.NoSectionError):
         value = None
-    _prop_cache[name] = value
+    _prop_cache[key] = value
     return value
 
 
 def getAppName() -> str:
-    """ Returns the full name of the QGIS Bridge plugin. """
+    """ Returns the name of the QGIS Bridge plugin. """
     return getProperty("name")
+
+
+def getLongAppName() -> str:
+    """ Returns the full name of the QGIS Bridge plugin.
+    Depending on the settings, this may return the same as calling getAppName(). """
+    long_name = getProperty("name", "bridge")
+    if long_name:
+        return long_name
+    return getAppName()
 
 
 def getTrackerUrl() -> str:

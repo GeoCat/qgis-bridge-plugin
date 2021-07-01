@@ -11,12 +11,10 @@ from qgis.PyQt.QtCore import QSize
 from qgis.PyQt.QtGui import QImage, QColor, QPainter
 from qgis.core import (
     QgsMapSettings,
-    QgsMapRendererCustomPainterJob,
-    Qgis,
-    QgsMessageLog
+    QgsMapRendererCustomPainterJob
 )
 
-from geocatbridge.utils import meta
+from geocatbridge.utils import meta, feedback
 from geocatbridge.utils.files import tempFileInSubFolder, getResourcePath
 from geocatbridge.utils.layers import getLayerTitleAndName
 
@@ -50,29 +48,28 @@ def _convertMetadata(input_file, output_file, xslt_file):
 
 def _loadMetadataFromIsoXml(layer, filename):
     qmd_filename = tempFileInSubFolder("fromiso.qmd")
-    QgsMessageLog.logMessage(f"Exporting ISO19193 metadata to {qmd_filename}", meta.getAppName(), level=Qgis.Info)
+    feedback.logInfo(f"Exporting ISO19193 metadata to {qmd_filename}")
     _convertMetadata(filename, qmd_filename, ISO19139_TO_QMD_XSLT)
     layer.loadNamedMetadata(qmd_filename)
 
 
 def _loadMetadataFromEsriXml(layer, filename):
     iso_filename = tempFileInSubFolder("fromesri.xml")
-    QgsMessageLog.logMessage(f"Exporting ISO19115 metadata to {iso_filename}", meta.getAppName(), level=Qgis.Info)
+    feedback.logInfo(f"Exporting ISO19115 metadata to {iso_filename}")
     _convertMetadata(filename, iso_filename, ISO19115_TO_ISO19139_XSLT)
     _loadMetadataFromIsoXml(layer, iso_filename)
 
 
 def _loadMetadataFromWrappingEsriXml(layer, filename):
     iso_filename = tempFileInSubFolder("fromesri.xml")
-    QgsMessageLog.logMessage(f"Exporting Wrapping-ISO19115 metadata to {iso_filename}", meta.getAppName(),
-                             level=Qgis.Info)
+    feedback.logInfo(f"Exporting Wrapping-ISO19115 metadata to {iso_filename}")
     _convertMetadata(filename, iso_filename, WRAPPING_ISO19115_TO_ISO19139_XSLT)
     _loadMetadataFromIsoXml(layer, iso_filename)
 
 
 def _loadMetadataFromFgdcXml(layer, filename):
     iso_filename = tempFileInSubFolder("fromfgdc.xml")
-    QgsMessageLog.logMessage(f"Exporting FGDC metadata to {iso_filename}", meta.getAppName(), level=Qgis.Info)
+    feedback.logInfo(f"Exporting FGDC metadata to {iso_filename}")
     _convertMetadata(filename, iso_filename, FGDC_TO_ISO19115)
     _loadMetadataFromEsriXml(layer, iso_filename)
 
@@ -119,6 +116,7 @@ def _transformMetadata(filename, uuid, api_url, wms, wfs, layer_name):
         csname.text = md_layer
 
     iso_filename = tempFileInSubFolder("metadata.xml")
+    feedback.logInfo(f"Creating metadata export file {iso_filename}")
     out_dom = _transformDom(filename, QMD_TO_ISO19139_XSLT)
 
     for ident in out_dom.iter(_ns("fileIdentifier")):
@@ -142,6 +140,7 @@ def _transformMetadata(filename, uuid, api_url, wms, wfs, layer_name):
 
 
 def _createMef(uuid, md_filename, mef_filename, thumb_filename):
+    feedback.logInfo(f"Creating MEF file {mef_filename}")
     z = zipfile.ZipFile(mef_filename, "w")
     z.write(md_filename, os.path.join(uuid, "metadata", os.path.basename(md_filename)))
     z.write(thumb_filename, os.path.join(uuid, "public", os.path.basename(thumb_filename)))
@@ -190,43 +189,39 @@ def uuidForLayer(layer):
 
 
 def loadMetadataFromXml(layer, filename):
+    filename = str(filename)  # make sure that it's not a Path
     root = ElementTree.parse(filename).getroot()
+    tags = set()
 
-    def _casefoldRoot():
-        """ Returns a lowercase version of the entire XML tree.
-        As this also changes the case of the element values, *don't* use this function to retrieve data.
-        """
-        t = ElementTree.tostring(root)
-        return ET.fromstring(t.lower())
-
-    def _hasTag(tag, case_insensitive=False):
+    def _hasTag(tag):
         """ Checks if the given tag exists in the XML document.
 
-        :param case_insensitive:    If True (default = False), the tag is also checked in a case-insensitive manner
-                                    if no match was found in the original case.
+        Title-case tags (capital followed by lowercase only) will be also be searched in a lowercase.
+        Tags prefixed by a namespace will also be searched without the namespace.
         """
-        # Always find tag in original case first
-        for _ in root.iter(tag):
-            return True
-        if case_insensitive:
-            # Tag not found, try case-insensitive search
-            for _ in _casefoldRoot().iter(tag.lower()):
-                return True
-        return False
+        if not tags:
+            tags.update(e.tag for e in root.iter())
+            tags.update(t[t.find('}') + 1:] for t in tags.copy() if
+                        t.startswith('{') and t.count('}') == 1 and not t.endswith('}'))
+            tags.update(t.lower() for t in tags.copy() if t.istitle())
 
-    if _hasTag("Esri", True):
-        if _hasTag("gmd:MD_Metadata"):
+        return tag in tags or tag.lower() in tags
+
+    if _hasTag("Esri"):
+        if _hasTag("MD_Metadata"):
             _loadMetadataFromWrappingEsriXml(layer, filename)
         else:
             _loadMetadataFromEsriXml(layer, filename)
-    elif _hasTag("MD_Metadata") or _hasTag("gmd:MD_Metadata"):
+    elif _hasTag("MD_Metadata"):
         _loadMetadataFromIsoXml(layer, filename)
-    elif _hasTag("metadata/mdStanName"):
-        schema_name = list(root.iter("metadata/mdStanName"))[0].text
-        if "FGDC-STD" in schema_name:
-            _loadMetadataFromFgdcXml(layer, filename)
-        elif "19115" in schema_name:
-            _loadMetadataFromIsoXml(layer, filename)
+    elif _hasTag("metadata") and _hasTag("mdStanName"):
+        md_standard = next(root.iter("metadata/mdStanName"))
+        if md_standard:
+            schema_name = md_standard.text
+            if "FGDC-STD" in schema_name:
+                _loadMetadataFromFgdcXml(layer, filename)
+            elif "19115" in schema_name:
+                _loadMetadataFromIsoXml(layer, filename)
     else:
         _loadMetadataFromFgdcXml(layer, filename)
 

@@ -4,6 +4,7 @@ from importlib import import_module
 from pathlib import Path
 from typing import Union
 from urllib.parse import urlparse
+from requests.auth import HTTPBasicAuth
 
 import requests
 from qgis.PyQt.QtGui import QPixmap
@@ -206,14 +207,16 @@ class CatalogServerBase(ServerBase, ABC):
             except:  # noqa
                 pass
 
+        auth = None
         self.logInfo(f"{method.upper()} {url}")
         if session and isinstance(session, requests.Session):
             # A Session was passed-in: call Request on Session object (handle auth in session!)
-            auth = None
             req_method = getattr(session, method.casefold())
         else:
-            # Perform a regular Request with basic auth
-            auth = self.getCredentials()
+            # Perform a regular Request with basic auth if credentials were set
+            user, pwd = self.getCredentials()
+            if user and pwd:
+                auth = HTTPBasicAuth(user, pwd)
             req_method = getattr(requests, method.casefold())
 
         result = req_method(url, headers=headers, files=files_, data=data, auth=auth, timeout=10)

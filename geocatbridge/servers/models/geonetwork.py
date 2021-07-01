@@ -259,7 +259,7 @@ class GeonetworkSession(requests.Session):
         """ Parses the token URL and returns a tuple of (sign in URL, validated token URL). """
         parsed_url = urlparse(token_url)
         inst_name = next(p for p in parsed_url.path.split('/') if p)
-        signin_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{inst_name}/signin"
+        signin_url = f"{parsed_url.scheme}://{parsed_url.netloc}/{inst_name}/signin"
         return signin_url, parsed_url.geturl()
 
     @property

@@ -27,7 +27,7 @@ class BridgeDialog(BASE, WIDGET):
         super().__init__(parent)
         self.setupUi(self)
 
-        self.setWindowTitle(meta.getAppName())
+        self.setWindowTitle(meta.getLongAppName())
         self.setWindowIcon(QIcon(files.getIconPath('geocat')))
 
         self.panel_widgets, self.keymap = self.addPanels()

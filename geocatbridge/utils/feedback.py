@@ -60,11 +60,8 @@ class FeedbackMixin:
 
     def _updateWidgetBar(self):
         """ Updates the _widget_bar property if the widget layout has been initialized. """
-        if self._widget_bar != self._main_bar:
-            # Widget bar already set: no need to update
-            return
         if hasattr(self, 'layout') and self.layout():
-            self._widget_bar = QgsMessageBar()
+            self._widget_bar = QgsMessageBar(self if isinstance(self, QWidget) else None)
             self._widget_bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
             self.layout().insertWidget(0, self._widget_bar)
 

@@ -1,5 +1,5 @@
 import json
-import os
+from pathlib import Path
 import webbrowser
 from collections import Counter
 from functools import partial
@@ -401,15 +401,18 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
     def importMetadata(self):
         if self.currentLayer is None:
             return
-        metadata_file = os.path.splitext(self.currentLayer.source())[0] + ".xml"
-        if not os.path.exists(metadata_file):
-            metadata_file = self.currentLayer.source() + ".xml"
-            if not os.path.exists(metadata_file):
+        layer_source = Path(self.currentLayer.source())
+        metadata_file = layer_source.with_suffix(".xml")
+        if not metadata_file.exists():
+            # First find XML using source path with extension replaced for .xml, then use path with .xml appended
+            metadata_file = layer_source.with_suffix(f"{layer_source.suffix}.xml")
+            if not metadata_file.exists():
                 metadata_file = None
 
         if metadata_file is None:
             res = self.showQuestionBox("Metadata",
-                                       "Could not find a suitable metadata file.\nDo you want to select it manually?")
+                                       "Could not find a suitable metadata XML file.\n"
+                                       "Would you like to select it manually?")
             if res == self.BUTTONS.YES:
                 metadata_file, _ = QFileDialog.getOpenFileName(self, self.tr("Metadata file"),
                                                                files.getDirectory(self.currentLayer.source()), '*.xml')

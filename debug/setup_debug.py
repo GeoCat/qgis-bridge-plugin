@@ -43,7 +43,7 @@ _SEARCH = 'class GeoCatBridge:'
 
 # Default remote debug server settings
 _HOST = 'localhost'
-_PORT = 53100
+_PORT = 63100
 
 # Default folder name
 _REMOTE_DEBUG_DIR = '_debug'
