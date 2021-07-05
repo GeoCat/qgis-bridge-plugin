@@ -30,7 +30,6 @@ from qgis.core import (
     QgsApplication,
     QgsRectangle
 )
-from qgis.gui import QgsMetadataWidget
 from qgis.utils import iface
 
 from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromXml
@@ -38,7 +37,7 @@ from geocatbridge.publish.tasks import PublishTask, ExportTask
 from geocatbridge.servers import manager
 from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.progressdialog import ProgressDialog
-from geocatbridge.utils import files, gui, meta
+from geocatbridge.utils import files, gui, meta, l10n
 from geocatbridge.utils.feedback import FeedbackMixin
 from geocatbridge.utils.layers import getPublishableLayers, getLayerById, getLayerTitleAndName
 
@@ -77,7 +76,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.isMetadataPublished = {}
         self.isDataPublished = {}
 
-        # Default "not set" values for publish comboboxes
+        # Default "not set" values for comboboxes
+        self.COMBO_NOTSET_LANG = self.tr("Not specified")
         self.COMBO_NOTSET_DATA = self.tr("Do not publish data")
         self.COMBO_NOTSET_META = self.tr("Do not publish metadata")
 
@@ -273,7 +273,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.txtAccessConstraints.setText(licenses[0])
         else:
             self.txtAccessConstraints.setText("")
-        self.comboLanguage.setCurrentText(metadata.language())
+        lang = l10n.code2label.get(metadata.language(), self.COMBO_NOTSET_LANG)
+        self.comboLanguage.setCurrentText(lang)
         # TODO: Use default values if no values in QGIS metadata object
 
     def populateLayerFields(self):
@@ -301,7 +302,9 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         metadata = self.metadata[self.currentLayer.id()]
         metadata.setTitle(self.txtMetadataTitle.text())
         metadata.setAbstract(self.txtAbstract.toPlainText())
-        metadata.setLanguage(self.comboLanguage.currentText())
+        lang = l10n.label2code.get(self.comboLanguage.currentText())
+        if lang:
+            metadata.setLanguage(lang)
         self.currentLayer.setMetadata(metadata)
 
     def storeFieldsToPublish(self):
@@ -353,8 +356,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.populateComboMetadataServer()
         self.populateComboGeodataServer()
         self.comboLanguage.clear()
-        for lang in QgsMetadataWidget().parseLanguages():
-            self.comboLanguage.addItem(lang)
+        self.comboLanguage.addItem(self.COMBO_NOTSET_LANG)
+        self.comboLanguage.addItems(l10n.label2code.keys())
 
     def populateComboGeodataServer(self):
         servers = manager.getGeodataServerNames()

@@ -210,6 +210,8 @@ def loadMetadataFromXml(layer, filename):
     if _hasTag("Esri"):
         if _hasTag("MD_Metadata"):
             _loadMetadataFromWrappingEsriXml(layer, filename)
+        elif not _hasTag("mdContact") and _hasTag("cntinfo"):
+            _loadMetadataFromFgdcXml(layer, filename)
         else:
             _loadMetadataFromEsriXml(layer, filename)
     elif _hasTag("MD_Metadata"):

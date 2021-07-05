@@ -13,7 +13,7 @@
 
             <identifier><xsl:value-of select="gmd:fileIdentifier/gco:CharacterString"/></identifier>
             <parentidentifier><xsl:value-of select="gmd:parentIdentifier/gco:CharacterString"/></parentidentifier>
-            <language><xsl:value-of select="gmd:language/gco:CharacterString|gmd:LanguageCode"/></language>
+            <language><xsl:value-of select="gmd:language/gmd:LanguageCode/@codeListValue"/></language>
             <type><xsl:value-of select="gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue"/></type>
             
             <title><xsl:value-of select="gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString"/></title>
@@ -21,9 +21,9 @@
             
             <xsl:if test="count(gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords[not(gmd:MD_Keywords/gmd:thesaurusName)]) > 0">
                 <keywords vocabulary="">
-                    <xsl:for-each select="gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords[not(gmd:MD_Keywords/gmd:thesaurusName)]">
+                    <xsl:for-each select="gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword">
                         <keyword>
-                            <xsl:value-of select="gmd:keyword/gco:CharacterString" />
+                            <xsl:value-of select="gco:CharacterString" />
                         </keyword>
                     </xsl:for-each>            
                 </keywords>
