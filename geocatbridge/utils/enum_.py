@@ -95,8 +95,7 @@ class LabeledIntEnumType(type):
 
 
 class LabeledIntEnum(metaclass=LabeledIntEnumType):
-    def __init__(self):
-        raise NotImplementedError(f'{LabeledIntEnum.__name__} types cannot be instantiated')
+    pass
 
 
 __all__ = [LabeledIntEnum.__name__]

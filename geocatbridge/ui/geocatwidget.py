@@ -13,6 +13,7 @@ class GeoCatWidget(WIDGET, BASE):
 
     def __init__(self, parent=None):
         super(GeoCatWidget, self).__init__(parent)
+        self.parent = parent
         self.setupUi(self)
 
         path = files.getResourcePath(files.Path("geocat") / "index.html")
@@ -25,7 +26,8 @@ class GeoCatWidget(WIDGET, BASE):
         name = meta.getLongAppName()
         version = meta.getVersion()
         if version and name:
-            self.txtInfo.setText(f'{name} v{version}')
+            info = getattr(self.parent, 'info', '')
+            self.txtInfo.setText(f'{name} v{version} {info}')
 
         self.btnClose.clicked.connect(parent.close)
 

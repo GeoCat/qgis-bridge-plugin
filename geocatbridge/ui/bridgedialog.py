@@ -23,15 +23,16 @@ class Panels(LabeledIntEnum):
 
 class BridgeDialog(BASE, WIDGET):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, info=None):
         super().__init__(parent)
+        self.info = info
         self.setupUi(self)
 
         self.setWindowTitle(meta.getLongAppName())
         self.setWindowIcon(QIcon(files.getIconPath('geocat')))
 
         self.panel_widgets, self.keymap = self.addPanels()
-        self.panel_widgets[Panels.PUBLISH].restoreConfig()
+        self.panel_widgets[Panels.PUBLISH].restoreConfig()  # noqa
 
         # Connect event handlers for panel activation
         self.listWidget.itemClicked.connect(partial(self.listItemClicked))
@@ -119,7 +120,7 @@ class BridgeDialog(BASE, WIDGET):
             return
         if isinstance(current_panel, Panels.SERVERS.value) and not current_panel.canClose():
             # User wants to edit/save Server settings: reselect Servers list item
-            self.listSelectNoSignals(Panels.SERVERS)
+            self.listSelectNoSignals(Panels.SERVERS)  # noqa
             return
 
         # Match panel to selected list item and populate/update if needed
@@ -131,8 +132,8 @@ class BridgeDialog(BASE, WIDGET):
 
     def closeEvent(self, evt):
         """ Triggered whenever the user closes the dialog. """
-        self.panel_widgets[Panels.PUBLISH].storeMetadata()
-        self.panel_widgets[Panels.PUBLISH].saveConfig()
+        self.panel_widgets[Panels.PUBLISH].storeMetadata()  # noqa
+        self.panel_widgets[Panels.PUBLISH].saveConfig()  # noqa
         current_panel = self.stackedWidget.currentWidget()
         if isinstance(current_panel, Panels.SERVERS.value) and not current_panel.canClose():
             # Abort dialog close if the user decided that a server still needs editing
