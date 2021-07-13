@@ -47,10 +47,13 @@ def clear_target(folder: Path):
 
 def build_docs(version: str, folder: Path):
     """ Build HTML docs for the given version type in the given target folder. """
-    tags = get_tags()
     if version in (V_LATEST, V_ALLVER):
         # Also build latest if "all versions" was specified
         build_tag(folder, V_LATEST)
+        if version == V_LATEST:
+            return
+
+    tags = get_tags()
     if version == V_STABLE:
         latest_key = next(sorted(tags, reverse=True))
         latest_tag = tags[latest_key]
@@ -62,8 +65,13 @@ def build_docs(version: str, folder: Path):
 
 
 def current_branch():
-    """ Gets the current branch name. Returns None if the current branch is in a detached HEAD state. """
-    return sh("git branch --show-current").strip() or None
+    """ Gets the current branch name. Returns None if the current branch could not be determined. """
+    # return sh("git branch --show-current").strip() or None
+    sym_ref = sh("git symbolic-ref HEAD")
+    try:
+        return sym_ref.strip().split('/')[-1]
+    except (AttributeError, ValueError, TypeError, IndexError):
+        return
 
 
 def is_dirty() -> bool:
