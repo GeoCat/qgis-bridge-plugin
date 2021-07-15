@@ -12,8 +12,14 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import datetime
 import sys
 import os
+
+
+#Current year
+now = datetime.datetime.now()
+year = now.year
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -47,8 +53,12 @@ source_suffix = {
 master_doc = 'index'
 
 # General information about the project.
+commit_id = os.popen('git rev-parse --short HEAD').read().strip()
+
 project = u'GeoCat Bridge'
-copyright = u'2020, GeoCat'
+author = 'GeoCat BV'
+copyright = u'{}, {}. Built from {}'.format(year, author, commit_id)
+
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
