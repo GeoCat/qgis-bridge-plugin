@@ -26,8 +26,11 @@ class GeoCatWidget(WIDGET, BASE):
         name = meta.getLongAppName()
         version = meta.getVersion()
         if version and name:
-            info = getattr(self.parent, 'info', '')
-            self.txtInfo.setText(f'{name} v{version} {info}')
+            info_txt = f'{name} v{version}'
+            aux_info = getattr(self.parent, 'info', None)
+            if aux_info:
+                info_txt += f'  \u2192  {aux_info}'
+            self.txtInfo.setText(info_txt)
 
         self.btnClose.clicked.connect(parent.close)
 

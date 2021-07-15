@@ -20,4 +20,5 @@ hasProcessingProvider=yes
 deprecated=False
 
 [bridge]
+shortName=Bridge
 docs=https://www.geocat.net/docs/bridge/qgis

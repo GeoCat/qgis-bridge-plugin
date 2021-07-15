@@ -44,9 +44,18 @@ def getAppName() -> str:
 def getLongAppName() -> str:
     """ Returns the full name of the QGIS Bridge plugin.
     Depending on the settings, this may return the same as calling getAppName(). """
-    long_name = getProperty("name", "bridge")
+    long_name = getProperty("longName", "bridge")
     if long_name:
         return long_name
+    return getAppName()
+
+
+def getShortAppName() -> str:
+    """ Returns the short name of the QGIS Bridge plugin.
+    Depending on the settings, this may return the same as calling getAppName(). """
+    short_name = getProperty("shortName", "bridge")
+    if short_name:
+        return short_name
     return getAppName()
 
 
