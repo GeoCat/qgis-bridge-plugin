@@ -5,13 +5,14 @@ without arguments), all available tags (if run with the '--version all' argument
 or the latest available tag (if the '--version stable' argument is used)
 
 The script file should be located in the documentation folder (with sphinx files
-under ./source folder)
+under ./content folder)
 
 You can specify the output folder in which docs are to be produced, by using the
 '--output [path]' argument. If not used, the documentation will be created under the
 ./build folder.
 """
 
+import sys
 import argparse
 import os
 import shutil
@@ -20,7 +21,9 @@ from pathlib import Path
 from re import compile
 
 NAME = "GeoCat Bridge"
-DEFAULT_DIR = "build"
+DEFAULT_DIR = "../build/docs"
+THEMES_DIRNAME = "themes"
+THEMES_REPO = "git@github.com:GeoCat/geocat-themes.git"
 VERSION_PREFIX = "v"
 VERSION_REGEX = compile(rf"^{VERSION_PREFIX}(\d+)\.(\d+)\.(\d+)[-.]?(\w*)$")
 
@@ -41,7 +44,7 @@ def sh(commands):
 
 def clear_target(folder: Path):
     """ Empties (clears) the given target folder. """
-    print("Cleaning output folder")
+    print(f"Removing folder '{folder}'...")
     shutil.rmtree(folder, ignore_errors=True)
 
 
@@ -108,7 +111,7 @@ def build_tag(folder, version: str):
     if version != V_LATEST:
         # Check out the correct tag
         sh(f"git checkout tags/{version} --recurse-submodules")
-    src_dir = os.path.join(os.getcwd(), "source")
+    src_dir = os.path.join(os.getcwd(), "content")
     bld_dir = os.path.join(folder, version)
     if os.path.exists(bld_dir):
         shutil.rmtree(bld_dir)
@@ -119,32 +122,57 @@ def build_tag(folder, version: str):
 
 def main():
     parser = argparse.ArgumentParser(description=f'Build {NAME} HTML documentation')
-    parser.add_argument('--output', help=f'Output directory (default=./{DEFAULT_DIR})')
-    parser.add_argument('--clean', action='store_true', help='Clear output directory before run')
-    parser.add_argument('--version', choices=(V_LATEST, V_STABLE, V_ALLVER), default=V_LATEST,
-                        help=f'Version to build (default={V_LATEST})')
+    parser.add_argument('--output', help=f'Output directory (default={DEFAULT_DIR})')
+    parser.add_argument('--clean', action='store_true', help='Clear entire output directory before run')
+    parser.add_argument('--version', default=V_LATEST,
+                        help=f"Version to build: must be a tag (e.g. '{VERSION_PREFIX}1.2.3') or "
+                             f"'{V_LATEST}' (default if omitted), '{V_STABLE}' or '{V_ALLVER}')")
     parser.add_argument('--branch', help='Optional branch to check out (if not the default branch)')
     parser.set_defaults(clean=False)
 
+    # Parse arguments, check version arg
     args = parser.parse_args()
-    folder = Path(args.output) if args.output else Path.cwd() / DEFAULT_DIR
+    version = args.version.strip() or V_LATEST
+    if version not in (V_LATEST, V_STABLE, V_ALLVER) and not VERSION_REGEX.match(version):
+        print(f"--version must be a tag (e.g. '{VERSION_PREFIX}1.2.3') or "
+              f"'{V_LATEST}' (default if omitted), '{V_STABLE}' or '{V_ALLVER}'")
+        sys.exit(2)
+
+    curdir = Path.cwd()
+    docsrc_dir = Path(__file__).parent.resolve()
+    themes_dir = docsrc_dir / THEMES_DIRNAME
+    folder = Path(args.output).resolve() if args.output else (docsrc_dir / DEFAULT_DIR).resolve()
     if args.clean:
         clear_target(folder)
 
+    # Update/clone themes
+    if (themes_dir / '.git').exists():
+        os.chdir(themes_dir)
+        checkout()
+    else:
+        clear_target(themes_dir)
+        os.chdir(docsrc_dir)
+        sh(f'git clone {THEMES_REPO} {THEMES_DIRNAME}')
+    os.chdir(curdir)
+
+    # Checkout tag/latest
     has_edits = is_dirty()
     current = current_branch()
-    version = args.version
     working = current or args.branch
     if has_edits:
         print(f"Current branch{f' {repr(current)}' or ''} has edits: can only build {V_LATEST} version")
         if version == V_STABLE:
             print(f"Cannot build {V_STABLE} version")
-            return
+            sys.exit(1)
         # If user selected "all", only build "latest"
         version = V_LATEST
     else:
         checkout(working)
+
+    # Build HTML docs
     build_docs(version, folder)
+
+    # Restore Git repo if needed
     if current and not has_edits:
         print(f"Restoring previously checked out branch '{current}'")
         checkout(current)

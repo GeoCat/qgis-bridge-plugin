@@ -1,73 +1,81 @@
-Requirements
-############
-
-Client requirements
-*******************
-
-Bridge requires QGIS 3.6 or more recent.
-
-Server requirements
-*******************
-
-GeoNetwork
-----------
-
-GeoCat Bridge is officially supported on any GeoNetwork latest (3.8)_ and
-2 versions before (3.4 and 3.6)_. However most of the functionality will
-be operational from GeoNetwork version 2.6+.
-
-MapServer
----------
-
-Requirement for MapServer are:
-
--   Officially supported is the latest minor version of MapServer and 2
-    versions before, currently 7.0, 6.4 and 6.2. However, any version
-    from 5.6.0 is expected to operate fine in most of the cases.
--   FTP connection or file write access to MapServer project path
-
-
-GeoServer
----------
-
-Requirements for GeoServer are:
-
--   Official supported versions are 2.15, 2.14 and 2.13. However, other
-    versions since 2.4 are expected to operate fine in most of the
-    cases.
-
-
 Installation
 ############
 
-To install the Bridge plugin for QGIS, follow these steps:
+Requirements
+************
 
-1. Open the :guilabel:`QGIS Plugin Manager`. The Plugin Manager can be opened using the :menuselection:`Plugins-->Manage and install plugins` menu entry.
+Client-side
+-----------
 
-	.. image:: ./img/pluginmanagermenu.png
+|app_name| requires QGIS |min_qgis_ver| or newer.
+Both the standalone QGIS installation or the OSGeo distribution should work.
 
-	You will see the following dialog:
+.. note::   If you access the internet through a proxy server,
+            you might experience some issues while publishing data or connecting to a server.
 
-	.. image:: ./img/pluginmanager.png
+Server-side
+-----------
+
+GeoNetwork
+^^^^^^^^^^
+
+|app_name| currently supports GeoNetwork 3 starting at version 3.4 and higher.
+GeoNetwork 2 support has been deprecated and version 4 is not supported yet.
+
+GeoServer
+^^^^^^^^^
+
+-   Support starts at GeoServer version 2.13 and up. However, other
+    versions since 2.4 are expected to run fine in most of the
+    cases.
+-   If you wish to use a direct connection to PostGIS (i.e. let |short_name|
+    handle the data upload instead of the GeoServer REST API), you will
+    need to have access to that database instance.
+-   If you wish to let GeoServer import your data into PostGIS (i.e. through
+    the REST API), you need to make sure that the
+    `Importer extension <https://docs.geoserver.org/latest/en/user/extensions/importer/index.html>`_
+    is available on GeoServer.
+
+MapServer
+^^^^^^^^^
+
+-   MapServer support starts at version 6.2 and up.
+    However, other versions since 5.6 are expected to run fine in most of the cases.
+-   FTP connection or file write access to MapServer project path.
+
+
+How to install
+**************
+
+To install the |plugin_name|, please follow these steps:
+
+1. Open the :guilabel:`QGIS Plugin Manager`. The Plugin Manager can be opened using the :menuselection:`Plugins --> Manage and Install plugins` menu entry.
+
+    .. image:: ./img/pluginmanagermenu.png
+
+    You will see the following dialog:
+
+    .. image:: ./img/pluginmanager.png
 
 2. Select the :guilabel:`all` section to show all available plugins.
 
-	.. image:: ./img/pluginmanagerall.png
+    .. image:: ./img/pluginmanagerall.png
 
 3. In the search box, type `bridge` to filter the list of available plugins.
 
-	.. image:: ./img/pluginmanagerfiltered.png
+    .. image:: ./img/pluginmanagerfiltered.png
 
-4. Click on the :guilabel:`GeoCat Bridge` plugin entry to display the information about the plugin:
+4. Click on the |gui_name| plugin entry to display the information about the plugin:
 
-	.. image:: ./img/pluginmanagerbridge.png
+    .. image:: ./img/pluginmanagerbridge.png
 
 5. Click on :guilabel:`Install` to install the plugin.
 
-6. Once the plugin is installed, close the Plugin Manager and you will find a new menu entry under the :menuselection:`Web` menu, which contains the menus from the Bridge plugin.
+6. Once the plugin is installed, close the Plugin Manager and you will find a new menu entry under the :menuselection:`Web` menu,
+which contains the menu items for the |short_name| plugin.
 
-	.. image:: ./img/bridgemenuentry.png
+    .. image:: ./img/bridgemenuentry.png
 
-7. You will also find a new toolbar button.
+7. You'll also notice a new toolbar button, that will open the |short_name| Publish dialog.
 
-	.. image:: ./img/bridgetoolbarbutton.png
+    .. image:: ./img/bridgetoolbarbutton.png
