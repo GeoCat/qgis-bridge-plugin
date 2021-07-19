@@ -3,98 +3,122 @@
 Server Connections
 ==================
 
-Configure your server connections to publish your data and metadata to. To do it, move to the *Servers* section of the Bridge dialog
+Before you can publish data with |app_name|, you will have to configure one or more server connections.
+This can be achieved in the *Servers* section of the |short_name| dialog:
 
 .. image:: ./img/servers.png
 
 Add new connection
 ##################
 
-Click *New Server* and choose one of the supported
-server connection types to create a new server:
+Click :guilabel:`New Server` and choose one of the supported server types to create a new server connection:
 
 -   GeoServer
 -   MapServer
 -   PostGIS
 -   GeoNetwork
 
+| Fill in the required parameters and click the :guilabel:`Save` button to store the connection details.
+| You can edit the parameters of a server at any given time. Just select the server connection in the left panel, and edit the fields you wish to change in the right panel.
 
-.. image:: ./img/new_server.png
+If you wish to remove a server connection, select it from the left panel and click the :guilabel:`Remove` button.
+The :guilabel:`Duplicate` button may come in handy if you wish to try out an alternative configuration based on an existing
+server connection.
 
-Fill the required parameters and then click on the *Save* button to save the server. You can edit the parameters of a given server at anytime, just selecting its name, changing the corresponding values and then clicking on the *Save* button.
+| |short_name| will automatically store all server connections in the QGIS settings for later use.
+| However, sometimes you might want to backup or share all the configured server connections. The :guilabel:`Export` button will
+  allow you to *save* a JSON file of the current configuration.
+| The :guilabel:`Import` button will do the opposite and *load* server connections from a JSON file. Note that the imported connections will be
+  *added* to the list (i.e. no existing connections will be removed). |short_name| will append a numeric suffix to server connections
+  with a name that already exists.
 
-Below you can find more detail about the different types of services and connections supported in Bridge.
+Below you can find more info about the different types of services and connections supported by |short_name|.
 
 
-GeoNetwork server
------------------
+GeoNetwork
+----------
 
-Configure a GeoNetwork connection to publish your metadata to an online catalogue. 
+Configure a GeoNetwork connection to publish your metadata to an online catalog (CSW).
 
 .. image:: ./img/servers_geonetwork.png
 
-You must enter a name the URL of the server and the corresponding credentials (with publish permission)
+| You can set a (unique) name to identify the connection, the server URL, and the corresponding credentials (user with publish permissions).
+| The default GeoNetwork node is ``srv``, which will be used if you leave the *Node* field empty.
 
-Click *Connect* to test the server connection.
+Click :guilabel:`Test Connection` to verify that the connection can be established.
 
 
-GeoServer connection
---------------------
+GeoServer
+---------
 
-Configure a GeoServer connection to publish your data to GeoServer.
+| Configure a GeoServer connection to publish your geodata (layers and symbology) as a map service.
+| When you add a new GeoServer connection, |short_name| will automatically add the corresponding WMS and/or WFS endpoints to QGIS, so you can easily add to the server layers to your project, if needed.
 
 .. image:: ./img/servers_geoserver.png
 
-Provide a name for the server, its URL and the corresponding credentials. 
+| You can set a (unique) name to identify the connection, the server URL, and the corresponding credentials (user with publish permissions).
+| The URL can point to the GeoServer base URL (e.g. ``http://localhost:8080/geoserver``) or the REST API URL (e.g. ``http://localhost:8080/geoserver/rest``). Both URLs will work.
 
-URL can point to the GeoServer location (i.e. ``http://localhost:8080/geoserver``) or the REST API endpoint (i.e. ``http://localhost:8080/geoserver/rest``)
+Click :guilabel:`Test Connection` to verify that the connection can be established.
 
-Finally, you must select how data will be stored in the server. Three different methods are available:
+You should also specify how layer data will be stored on the server. Three different methods are available:
 
-- File based. Files are uploaded to GeoServer and stored in the GeoServer instance.
+File-based storage
+^^^^^^^^^^^^^^^^^^
 
-- Import into a PostGIS DB (handled by Bridge): You must select a PostGIS server to import your data into it. PostGIS servers are defined in the *Servers* section of the Bridge dialog as well, as explained later on in this same chapter. Your layer data is imported into the PostGIS server, and no data is uploaded to GeoServer. GeoServer layers are created pointing to the table that has been created in the selected PostGIS DB, which contains the layer data.
+| The layer data is uploaded and stored as files (e.g. Shapefile, GeoPackage) in the GeoServer target workspace on the server.
+| If multiple layer data sources are uploaded, |short_name| will try to combine them all in a single GeoPackage, regardless of the original input format.
+| If a single layer is uploaded, |short_name| will prefer to upload a file in the original input format (i.e. a Shapefile will be uploaded as a Shapefile).
 
-- Import into a PostGIS DB (handled by GeoServer): Layer data is uploaded to GeoServer, and GeoServer itself takes care of importing into the DB. A PostGIS DB must be selected from the datastores available in the GeoServer instance. If you want to add a new one, use the *Add datastore* button.
+.. _PostGISDirectOption:
 
-When you add a new GeoServer server, Bridge will automatically add the corresponding WMS and WFS endpoints to QGIS, so you can easily add to your project the layers that are available in the server.
+Import into PostGIS database (direct connect)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Bridge and GeoServer workspaces
-*******************************
+| The layer data is uploaded to tables in a PostGIS database directly (i.e. by |short_name|, see `PostGIS`_).
+| GeoServer will *not* handle the database upload, but merely establish a link to the database table in the created layer(s). This will require a direct PostGIS connection, which you can set up in the *Servers* section of |short_name| as well (see below).
+| Note that GeoServer should also have read access to that PostGIS connection.
 
-Layers will be published to a workspace with the name of the current QGIS project. If you are trying to publish layers and your current project is not saved yet, you won't be able to start the publication process. A warning message will be shown.
+Import into PostGIS database (handled by GeoServer)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: ./img/project_not_saved.png
+| The layer data is uploaded to tables in a PostGIS database by GeoServer.
+| You must select a suitable PostGIS datastore on the GeoServer instance. Selecting this option will trigger a process that lists all the available datastores in each GeoServer workspace (which might take some time):
 
-If the workspace exists, it will be deleted before publishing, so its content after publishing will be just the selected layers and its symbology. If the *Only symbology* option is selected in the publish section, no data is removed before uploading the symbology of the selected layers.
+.. image:: ./img/servers_geoserver2.png
+
+.. note::   | The listed datastores will be prefixed by the workspace name to which they belong.
+            | This does **not** mean that the layers will be published to that workspace as well.
+            | |short_name| always publishes layers to a (new) workspace named after the QGIS project name
+              (see :ref:`HowToPublish`), but it will use the same datastore *connection details* as
+              the datastore that you have selected.
+
+| If you wish to add a new PostGIS-backed datastore, click the :guilabel:`Add datastore` button.
+| This will open a dialog that allows you to specify the connection details. Make sure that GeoServer has full access to the specified PostGIS instance.
+| For more options (or if you wish to specify a JNDI connection pool) please create the datastore using the GeoServer admin page instead.
 
 
-PostGIS connection
-------------------
+PostGIS
+-------
 
-Configure a PostGIS connection to publish your map data to PostGIS. The
-PostGIS connection can be used in two different publish scenarios:
-
-1.  Publish only map data to PostGIS
-2.  Publish map layers to GeoServer and store data directly in PostGIS
-    using a direct database connection (as explained in `GeoServer connection`_)
-
+Configure a PostGIS connection if you wish to upload layer data to PostGIS directly.
+Setting up this connection is required when using the :ref:`PostGISDirectOption` in a `GeoServer`_ connection.
 
 .. image:: ./img/servers_postgis.png
 
-MapServer connection
---------------------
+.. note::   JNDI connection pool support is currently unavailable.
 
-Configure a MapServer connection to publish your map data to PostGIS. A MapServer
-endpoint (mapfile) is created for each QGIS project.
 
-In the *MapServer details* enter the information about your MapServer instance, to which you want to publish.
+MapServer
+---------
+
+Configure a MapServer connection to publish your map (layer data and symbology).
+A MapServer endpoint (Mapfile) is created for each QGIS project.
 
 .. image:: ./img/servers_mapserver.png
 
-In the *Uploading data* tab configure how Bridge stores data for your
-MapServer connection. Choose *Local path* to store the files in a
-location on the local file system. Choose *FTP service* to transmit the
-files over FTP to the MapServer server. Depending on which option is selected, you will see additional parameters to configure
+Under *Storage*, configure how |short_name| should save the MapServer data.
+Choose *Local path* to store all files on the local file system. Choose *FTP service* to transmit the
+files over FTP to the online MapServer instance. Depending on which option is selected, you will see some additional parameters that must be configured:
 
 .. image:: ./img/servers_mapserver2.png
