@@ -17,7 +17,7 @@ from geocatbridge.publish.exporter import exportLayer
 from geocatbridge.publish.ftpupload import uploadFolder
 from geocatbridge.servers.bases import DataCatalogServerBase
 from geocatbridge.servers.views.mapserver import MapServerWidget
-from geocatbridge.utils.files import tempFolder
+from geocatbridge.utils import files
 
 
 class MapserverServer(DataCatalogServerBase):
@@ -30,10 +30,10 @@ class MapserverServer(DataCatalogServerBase):
         self.host = host
         self.port = port
         self.servicesPath = servicesPath
-        self.projFolder = projFolder or "/usr/share/proj"
+        self.projFolder = projFolder or "/usr/share/proj"  # FTP project folder (not local)
         self._layers = []
         self._metadataLinks = {}
-        self._folder = tempFolder()
+        self._folder = files.tempFolder()
 
     def getSettings(self) -> dict:
         return {
@@ -68,14 +68,14 @@ class MapserverServer(DataCatalogServerBase):
         username, password = self.getCredentials()
         uploadFolder(folder, self.host, self.port, self.folder, username, password)
 
-    def testConnection(self):
+    def testConnection(self, errors):
         # MapServer connections are not tested
         return True
 
     def prepareForPublishing(self, only_symbology):
         self._layers = []
         self._metadataLinks = {}
-        self._folder = self.folder if self.useLocalFolder else tempFolder()
+        self._folder = self.folder if self.useLocalFolder else files.tempFolder()
 
     @property
     def projectName(self):
@@ -154,7 +154,7 @@ class MapserverServer(DataCatalogServerBase):
                "IMAGEURL": '"http://localhost/images"',
                "METADATA": {
                    '"wms_title"': _quote(name),
-                   '"wms_onlineresource"': _quote(self.layerWmsUrl(layer.name())),
+                   '"wms_onlineresource"': _quote(f"{self.getWmsUrl()}&layers={layer.name()}"),
                    '"ows_enable_request"': '"*"',
                    '"ows_srs"': '"EPSG:4326"',
                    '"wms_feature_info_mime_type"': '"text/html"'
@@ -177,7 +177,7 @@ class MapserverServer(DataCatalogServerBase):
         with open(mapfilePath, "w") as f:
             f.write(s)
 
-        src = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "mapserver", "symbols.txt")
+        src = files.getResourcePath(files.Path("mapserver") / "symbols.txt")
         dst = self.mapsFolder()
         shutil.copy2(src, dst)
 

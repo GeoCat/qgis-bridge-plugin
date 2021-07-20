@@ -30,16 +30,24 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
 
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
-        try:
-            port = int(self.txtMapserverPort.text())
-        except (ValueError, TypeError):
-            self.parent.logError('Invalid MapServer port specified')
-            return None
+        options = {
+            'authid': self.mapserverAuth.configId(),
+            'servicesPath': self.txtMapServicesPath.text().strip(),
+            'projFolder': self.txtProjFolder.text().strip()
+        }
+
+        port = None
+        host = None
         local_storage = self.radioLocalPath.isChecked()
         if local_storage:
             folder = self.fileMapserver.filePath()
         else:
-            folder = self.txtRemoteFolder.text()
+            folder = self.txtRemoteFolder.text().strip()
+            host = self.txtMapserverHost.text().strip()
+            try:
+                port = int(self.txtMapserverPort.text())
+            except (ValueError, TypeError):
+                pass
 
         try:
             name = self.txtMapserverName.text().strip()
@@ -48,18 +56,21 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
                 raise RuntimeError(f'missing {self.serverType.getLabel()} name')
             if not url:
                 raise RuntimeError(f'missing {self.serverType.getLabel()} URL')
+            if not local_storage:
+                if not host:
+                    raise RuntimeError(f'missing FTP host address')
+                if not port:
+                    raise RuntimeError(f'missing or invalid FTP port specified')
 
-            return self.serverType(
-                name=name,
-                url=url,
-                useLocalFolder=local_storage,
-                folder=folder,
-                authid=self.mapserverAuth.configId(),
-                host=self.txtMapserverHost.text().strip(),
-                port=port,
-                servicesPath=self.txtMapServicesPath.text().strip(),
-                projFolder=self.txtProjFolder.text().strip()
-            )
+            options.update({
+                'name': name,
+                'url': url,
+                'useLocalFolder': local_storage,
+                'folder': folder,
+                'port': port
+            })
+
+            return self.serverType(**{k: v for k, v in options.items() if v})
         except Exception as e:
             self.parent.logError(f"Failed to create {self.serverType.getLabel()} instance: {e}")
             return None

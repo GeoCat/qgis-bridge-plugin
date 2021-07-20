@@ -603,10 +603,11 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if self.tabOnOffline.currentWidget() != self.tabOnline:
             return
 
-        res = self.showQuestionBox(meta.getAppName(),
-                                   "Are you sure you want to remove all geodata (clear workspace) "
-                                   "and/or published metadata from the specified server(s)?",
-                                   buttons=self.BUTTONS.YES | self.BUTTONS.NO)
+        res = self.showWarningBox(meta.getAppName(),
+                                  "Are you sure you want to remove all geodata (clear workspace) "
+                                  "and/or published metadata from the specified server(s)?",
+                                  buttons=self.BUTTONS.YES | self.BUTTONS.NO,
+                                  defaultButton=self.BUTTONS.NO)
         if res != self.BUTTONS.YES:
             return
 

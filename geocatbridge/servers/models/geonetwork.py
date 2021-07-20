@@ -36,6 +36,11 @@ class GeonetworkApiError(Exception):
     pass
 
 
+class GeonetworkAuthError(Exception):
+    """ Error raised when the sign in process for GeoNetwork failed. """
+    pass
+
+
 class GeonetworkServer(MetaCatalogServerBase):
 
     def __init__(self, name, authid="", url="", profile=GeoNetworkProfiles.DEFAULT, node="srv"):
@@ -97,8 +102,13 @@ class GeonetworkServer(MetaCatalogServerBase):
             return False
 
         # Do an authenticated "me" request
-        result = self.sessionRequest(self.meUrl)
-        auth = parseMe(result)
+        try:
+            result = self.sessionRequest(self.meUrl)
+        except GeonetworkAuthError as err:
+            self.logError(err)
+            auth = None
+        else:
+            auth = parseMe(result)
         if not auth or result.status_code == 401:
             errors.add(f'{msg}: please check credentials')
         return auth
@@ -198,7 +208,7 @@ class GeonetworkServer(MetaCatalogServerBase):
         if self._session.signIn(*self.getCredentials()):
             return self.request(url, method, **kwargs)
         else:
-            raise RuntimeError(f'{self.getLabel()} user failed to authenticate')
+            raise GeonetworkAuthError(f'{self.getLabel()} user failed to authenticate')
 
     @classmethod
     def getAlgorithmInstance(cls):

@@ -20,14 +20,14 @@ def isSingleTableGpkg(layer):
 
 def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, logger=None):
     logger = logger or feedback
-    filepath, _, ext = lyr_utils.getLayerSourceInfo(layer)
+    filepath, _, orig_ext = lyr_utils.getLayerSourceInfo(layer)
     lyr_name, safe_name = lyr_utils.getLayerTitleAndName(layer)
     fields = fields or []
     if layer.type() == layer.VectorLayer:
-        if to_shapefile and (force or layer.fields().count() != len(fields) or ext != EXT_SHAPEFILE):
+        if to_shapefile and (force or layer.fields().count() != len(fields) or orig_ext != EXT_SHAPEFILE):
             # Export with Shapefile extension
             ext = EXT_SHAPEFILE
-        elif force or ext != EXT_GEOPACKAGE or layer.fields().count() != len(fields) \
+        elif force or orig_ext != EXT_GEOPACKAGE or layer.fields().count() != len(fields) \
                 or not isSingleTableGpkg(filepath):
             # Export with GeoPackage extension
             ext = EXT_GEOPACKAGE
@@ -37,10 +37,15 @@ def exportLayer(layer, fields=None, to_shapefile=False, path=None, force=False, 
             return filepath
 
         # Perform GeoPackage or Shapefile export
-        attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
+        if orig_ext == EXT_SHAPEFILE and ext == EXT_GEOPACKAGE:
+            # Shapefiles: FID fields should not be exported to GeoPackage (causes conflicts)
+            attrs = [i for i, f in enumerate(layer.fields()) if
+                     (len(fields) == 0 or f.name() in fields) and f.name().lower() != 'fid']
+        else:
+            attrs = [i for i, f in enumerate(layer.fields()) if len(fields) == 0 or f.name() in fields]
+        driver = "ESRI Shapefile" if ext == EXT_SHAPEFILE else "GPKG"
         output = path or tempFileInSubFolder(safe_name + ext)
         encoding = "UTF-8"
-        driver = "ESRI Shapefile" if ext == EXT_SHAPEFILE else "GPKG"
         options = None
         if hasattr(QgsVectorFileWriter, 'SaveVectorOptions'):
             # QGIS v3.x has the SaveVectorOptions object
