@@ -1,6 +1,3 @@
 [submodule "geocatbridge/libs/bridgestyle"]
 	path = geocatbridge/libs/bridgestyle
 	url = https://github.com/GeoCat/bridge-style.git
-[submodule "docs/themes"]
-	path = docs/themes
-	url = https://github.com/GeoCat/geocat-themes

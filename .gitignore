@@ -64,8 +64,11 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
-docs/tmp
+docsrc/_build/
+docsrc/themes/
+docsrc/tmp
+!.nojekyll
+docs/
 
 # PyBuilder
 target/
