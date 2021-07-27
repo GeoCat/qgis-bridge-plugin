@@ -81,8 +81,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.COMBO_NOTSET_DATA = self.tr("Do not publish data")
         self.COMBO_NOTSET_META = self.tr("Do not publish metadata")
 
-        # Initialize the UI and populate with data on the GUI thread
-        gui.execute(self._setupUi)
+        # Initialize the UI and populate with data
+        self._setupUi()
 
     def _setupUi(self):
         self.setupUi(self)
@@ -145,17 +145,13 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             return
 
         # Set online settings
-        update_meta = False
-        update_data = False
         online_settings = settings.get('online', {})
         geodata_server = online_settings.get('geodataServer')
         if geodata_server and geodata_server in manager.getGeodataServerNames():
             self.comboGeodataServer.setCurrentText(geodata_server)
-            update_data = True
         metadata_server = online_settings.get('metadataServer')
         if metadata_server and metadata_server in manager.getMetadataServerNames():
             self.comboMetadataServer.setCurrentText(metadata_server)
-            update_meta = True
         style_only = online_settings.get('symbologyOnly', False)
         self.chkOnlySymbology.setCheckState(Qt.Checked if style_only else Qt.Unchecked)
 
@@ -327,10 +323,10 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         menu = QMenu()
         if self.isDataPublished.get(layer_id):
             menu.addAction(self.tr("View WMS layer"), partial(self.viewWms, layer_id))
-            # menu.addAction(self.tr("Unpublish data"), lambda: self.unpublishData(layer_id))  TODO
+            # menu.addAction(self.tr("Unpublish geodata"), partial(self.unpublishData, layer_id))
         if self.isMetadataPublished.get(layer_id):
             menu.addAction(self.tr("View metadata"), partial(self.viewMetadata, layer_id))
-            # menu.addAction(self.tr("Unpublish metadata"), lambda: self.unpublishMetadata(layer_id))  TODO
+            # menu.addAction(self.tr("Unpublish metadata"), partial(self.unpublishMetadata, layer_id))
         if any(self.isDataPublished.values()):
             menu.addAction(self.tr("View all WMS layers"), self.viewAllWms)
         menu.exec_(self.listLayers.mapToGlobal(pos))
@@ -459,10 +455,10 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.metadata[self.currentLayer.id()] = w.metadata
             self.populateLayerMetadata()
 
-    def unpublishData(self, layer_id):
+    def unpublishData(self, layer_id) -> bool:
         server = manager.getGeodataServer(self.comboGeodataServer.currentText())
         if not server:
-            return
+            return False
         layer = getLayerById(layer_id)
         _, name = getLayerTitleAndName(layer)
         if server.deleteLayer(name):
@@ -470,15 +466,22 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             server.deleteStyle(name)
             # Mark layer as deleted
             self.updateLayerIsDataPublished(layer_id, None)
+            return True
+        return False
 
-    def unpublishMetadata(self, layer_id):
+    def unpublishMetadata(self, layer_id) -> bool:
         server = manager.getMetadataServer(self.comboMetadataServer.currentText())
         if not server:
             return False
         uuid = uuidForLayer(getLayerById(layer_id))
-        server.deleteMetadata(uuid)
-        self.updateLayerIsMetadataPublished(layer_id, None)
-        return True
+        try:
+            server.deleteMetadata(uuid)
+        except Exception as err:
+            self.logError(f"Failed to delete metadata on '{server.serverName}': {err}")
+            return False
+        else:
+            self.updateLayerIsMetadataPublished(layer_id, None)
+            return True
 
     def updateLayerIsMetadataPublished(self, layer_id, server):
         self.isMetadataPublished[layer_id] = server is not None
@@ -601,39 +604,58 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
     def unpublishAll(self):
         """ Removes all geodata from the current server workspace and clears all metadata (published layers only). """
         if self.tabOnOffline.currentWidget() != self.tabOnline:
+            # This should not happen (clear all button is visible on online tab only)
             return
 
+        data_server = manager.getGeodataServer(self.comboGeodataServer.currentText())
+        meta_server = manager.getMetadataServer(self.comboMetadataServer.currentText())
+
+        if data_server:
+            q_msg = "all geodata (i.e. clear workspace)"
+            if meta_server:
+                q_msg += " \nand published metadata"
+        elif meta_server:
+            q_msg = "all published metadata"
+        suffix = " from the specified server"
+        suffix += "s" if data_server and meta_server else ""
+
         res = self.showWarningBox(meta.getAppName(),
-                                  "Are you sure you want to remove all geodata (clear workspace) "
-                                  "and/or published metadata from the specified server(s)?",
+                                  f"Are you sure you want to remove {q_msg}{suffix}?",
                                   buttons=self.BUTTONS.YES | self.BUTTONS.NO,
                                   defaultButton=self.BUTTONS.NO)
         if res != self.BUTTONS.YES:
             return
 
         # Clear all geodata for the current workspace
-        data_server = manager.getGeodataServer(self.comboGeodataServer.currentText())
-        if not data_server:
-            return
-        result = data_server.clearWorkspace(False)
-        if result:
-            for layer_id in self.isDataPublished.keys():
-                self.isDataPublished[layer_id] = False
+        data_deleted = False
+        if data_server:
+            try:
+                data_deleted = data_server.clearWorkspace(False)
+                if data_deleted:
+                    for layer_id in self.isDataPublished.keys():
+                        self.isDataPublished[layer_id] = False
+            except Exception as err:
+                self.logError(f"Failed to clear geodata on '{data_server.serverName}': {err}")
+                self.showErrorBar("Error", "Failed to remove geodata from the specified server")
+                data_deleted = None
 
         # Clear metadata (only what has been published)
-        meta_server = manager.getMetadataServer(self.comboMetadataServer.currentText())
-        for layer_id, status in self.isMetadataPublished.items():
-            if status:
-                self.isMetadataPublished[layer_id] = not self.unpublishMetadata(layer_id)
+        if meta_server:
+            for layer_id, status in self.isMetadataPublished.items():
+                if status:
+                    self.isMetadataPublished[layer_id] = not self.unpublishMetadata(layer_id)
 
-        if result:
-            if meta_server:
-                self.showSuccessBar("Success", "Removed geodata and/or metadata from the selected server(s)")
-            else:
-                self.showSuccessBar("Success", "Removed geodata from the selected server")
+        r_msg = "Removed "
+        if data_deleted and meta_server:
+            r_msg += "geodata and metadata"
+        elif data_deleted:
+            r_msg += "geodata"
+        elif meta_server:
+            r_msg += "metadata"
+        self.showSuccessBar("Success", f"{r_msg}{suffix}")
 
         # Update layer item widgets
-        self.updateOnlineLayersPublicationStatus(data_server is not None, meta_server is not None)
+        self.updateOnlineLayersPublicationStatus(data_deleted, meta_server is not None)
 
     def viewWms(self, layer_id):
         server = manager.getGeodataServer(self.comboGeodataServer.currentText())

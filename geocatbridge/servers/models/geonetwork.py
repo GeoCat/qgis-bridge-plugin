@@ -15,6 +15,7 @@ from geocatbridge.publish.metadata import saveMetadata
 from geocatbridge.servers.bases import MetaCatalogServerBase
 from geocatbridge.servers.models.gn_profile import GeoNetworkProfiles
 from geocatbridge.servers.views.geonetwork import GeoNetworkWidget
+from geocatbridge.utils.network import BridgeSession
 from geocatbridge.utils.meta import semanticVersion
 from geocatbridge.utils import feedback
 
@@ -106,10 +107,11 @@ class GeonetworkServer(MetaCatalogServerBase):
             result = self.sessionRequest(self.meUrl)
         except GeonetworkAuthError as err:
             self.logError(err)
+            result = None
             auth = None
         else:
             auth = parseMe(result)
-        if not auth or result.status_code == 401:
+        if not auth or (result and result.status_code == 401):
             errors.add(f'{msg}: please check credentials')
         return auth
 
@@ -132,7 +134,7 @@ class GeonetworkServer(MetaCatalogServerBase):
         try:
             self.getMetadata(uuid)
             return True
-        except requests.HTTPError:
+        except requests.RequestException:
             return False
 
     def getMetadata(self, uuid):
@@ -164,7 +166,12 @@ class GeonetworkServer(MetaCatalogServerBase):
         """ Checks if the GeoNetwork API returned any errors in the response object.
         If it did, a GeonetworkApiError is raised. Otherwise, it only logs the info messages. """
         exceptions = []
-        body = result.json() or {}
+        try:
+            body = result.json() or {}
+        except Exception as err:
+            if result.content:
+                self.logWarning(f"Failed to parse valid JSON from response '{result.text or ''}': {err}")
+            body = {}
         errors = body.get('errors', [])
         infos = body.get('infos', [])
         if len(errors) == len(infos) > 0:
@@ -251,7 +258,7 @@ class GeonetworkAlgorithm(BridgeAlgorithm):
         return {self.OUTPUT: True}
 
 
-class GeonetworkSession(requests.Session):
+class GeonetworkSession(BridgeSession):
     COOKIE_TOKEN = 'XSRF-TOKEN'
     HEADER_TOKEN = 'X-XSRF-TOKEN'
 

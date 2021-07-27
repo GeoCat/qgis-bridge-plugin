@@ -4,7 +4,6 @@ import shutil
 import sqlite3
 from zipfile import ZipFile
 
-import requests
 from qgis.PyQt.QtCore import QByteArray, QBuffer, QIODevice, QSettings
 from qgis.core import (
     QgsProject,
@@ -13,7 +12,7 @@ from qgis.core import (
     QgsProcessingParameterString,
     QgsProcessingParameterAuthConfig
 )
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, RequestException
 
 from bridgestyle import mapboxgl
 from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder
@@ -324,9 +323,9 @@ class GeoserverServer(DataCatalogServerBase):
             url = f"{self.apiUrl}/about/version"
             self.request(url)
             return True
-        except Exception as e:
+        except RequestException as e:
             msg = f'Could not connect to {self.serverName}'
-            if isinstance(e, requests.HTTPError) and e.response.status_code == 401:
+            if isinstance(e, HTTPError) and e.response.status_code == 401:
                 msg = f'{msg}: please check credentials'
             else:
                 msg = f'{msg}: {e}'
@@ -477,10 +476,10 @@ class GeoserverServer(DataCatalogServerBase):
         url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{datastore}/featuretypes/{tmp_name}.json"
         try:
             ret = self.request(url + "?quietOnNotFound=true")
-        except HTTPError as e:
+        except RequestException as e:
             # Something unexpected happened: failure cannot be retrieved from import task,
             # so the user should check the GeoServer logs to find out what caused it.
-            if e.response.status_code == 404:
+            if isinstance(e, HTTPError) and e.response.status_code == 404:
                 self.logError(f"Failed to publish QGIS layer '{title}' as '{ft_name}' due to an unknown error.\n"
                               "Please check the GeoServer logs.")
                 return
@@ -500,7 +499,7 @@ class GeoserverServer(DataCatalogServerBase):
         self.logInfo("Performing style cleanup...")
         try:
             self._fixLayerStyle(tmp_name, ft_name)
-        except HTTPError as e:
+        except RequestException as e:
             self.logWarning(f"Failed to clean up layer styles: {e}")
         else:
             self.logInfo(f"Successfully published layer '{title}'")
@@ -603,7 +602,11 @@ class GeoserverServer(DataCatalogServerBase):
             self.request(url, "post", groupdef)
         except HTTPError:
             # Update group if it already exists
-            self.request(url, "put", groupdef)
+            try:
+                self.request(url, "put", groupdef)
+            except HTTPError as err:
+                self.logError(f"Failed to update layer group: {err}")
+                return
 
         # make sure there is VT format tiling
         if self.useVectorTiles:
@@ -622,7 +625,7 @@ class GeoserverServer(DataCatalogServerBase):
         url = f"{self.apiUrl}/workspaces/{self.workspace}/styles/{name}?purge=true&recurse=true"
         try:
             self.request(url, method="delete")
-        except HTTPError as e:
+        except RequestException as e:
             self.logError(f"Failed to delete style '{name}': {e}")
             return False
         return True
@@ -692,10 +695,10 @@ class GeoserverServer(DataCatalogServerBase):
     def deleteLayer(self, name) -> bool:
         if not self.layerExists(name):
             return True
-        url = f"{self.baseUrl}/workspaces/{self.workspace}/layers/{name}.json?recurse=true"
+        url = f"{self.apiUrl}/workspaces/{self.workspace}/layers/{name}.json?recurse=true"
         try:
             self.request(url, method="delete")
-        except HTTPError as e:
+        except RequestException as e:
             self.logError(f"Failed to delete layer '{name}': {e}")
             return False
         return True
@@ -798,6 +801,9 @@ class GeoserverServer(DataCatalogServerBase):
                 if err.response.status_code == 404:
                     self.logWarning(f"GeoServer workspace '{self.workspace}' does not exist")
                 return False
+            except RequestException as err:
+                self.logError(f"Failed to query GeoServer workspace {self.workspace}: {err}")
+                return False
             uri = ns.get("namespace", {}).get("uri")
             if uri:
                 entry["$"] = uri
@@ -832,7 +838,7 @@ class GeoserverServer(DataCatalogServerBase):
         try:
             with open(style_filepath, filemode) as f:
                 self.request(style_url, method, f.read(), headers=headers)
-        except HTTPError as e:
+        except RequestException as e:
             self.logError(f"Failed to {'update' if update else 'create new'} style '{name}' in workspace "
                           f"'{self.workspace}' using {filetype} file '{style_filepath}': {e}")
             return
@@ -859,7 +865,7 @@ class GeoserverServer(DataCatalogServerBase):
             if not self.styleExists(style_name):
                 self.logWarning(f"Style '{style_name}' does not exist in workspace '{self.workspace}'")
                 raise KeyError()
-        except (HTTPError, KeyError):
+        except (RequestException, KeyError):
             return {}
 
         # Copy current default style and update for layer
@@ -872,7 +878,7 @@ class GeoserverServer(DataCatalogServerBase):
         }
         try:
             self.request(url, data=layer_def, method="put")
-        except HTTPError:
+        except RequestException:
             return {}
         return old_style
 
@@ -902,7 +908,7 @@ class GeoserverServer(DataCatalogServerBase):
             try:
                 # Delete old style
                 self.request(remove_url, method="delete")
-            except HTTPError:
+            except RequestException:
                 # Bad request or style is still in use by other layers: do nothing
                 pass
 
@@ -921,8 +927,8 @@ class GeoserverServer(DataCatalogServerBase):
         url = f"{self.apiUrl}/workspaces.json"
         try:
             res = self.request(url).json().get("workspaces", {})
-        except HTTPError as e:
-            if e.response.status_code == 401:
+        except RequestException as e:
+            if isinstance(e, HTTPError) and e.response.status_code == 401:
                 self.showErrorBar("Error", f"Failed to connect to {self.serverName}: bad or missing credentials")
             self.logError(f"Failed to retrieve workspaces from {self.apiUrl}: {e}")
             return []
@@ -969,7 +975,7 @@ class GeoserverServer(DataCatalogServerBase):
         try:
             url = f"{self.apiUrl}/about/version.json"
             result = self.request(url).json()
-        except HTTPError:
+        except RequestException:
             errors.add("Could not connect to Geoserver."
                        "Please check the server settings (including password).")
             return

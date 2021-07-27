@@ -15,6 +15,7 @@ from qgis.core import (
 )
 
 from geocatbridge.utils import files
+from geocatbridge.utils.network import BridgeSession
 from geocatbridge.utils.feedback import FeedbackMixin
 
 
@@ -210,16 +211,17 @@ class CatalogServerBase(ServerBase, ABC):
         auth = None
         self.logInfo(f"{method.upper()} {url}")
         if session and isinstance(session, requests.Session):
-            # A Session was passed-in: call Request on Session object (handle auth in session!)
+            # An existing Session was passed-in: call request method on it (handle auth in session!)
             req_method = getattr(session, method.casefold())
         else:
-            # Perform a regular Request with basic auth if credentials were set
+            # Perform a regular request on temp session with basic auth if credentials were set
             user, pwd = self.getCredentials()
             if user and pwd:
                 auth = HTTPBasicAuth(user, pwd)
-            req_method = getattr(requests, method.casefold())
+            with BridgeSession() as session:
+                req_method = getattr(session, method.casefold())
 
-        result = req_method(url, headers=headers, files=files_, data=data, auth=auth, timeout=10)
+        result = req_method(url, headers=headers, files=files_, data=data, auth=auth)
         result.raise_for_status()
         return result
 
