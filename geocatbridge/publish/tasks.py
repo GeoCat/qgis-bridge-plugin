@@ -275,7 +275,7 @@ class ExportTask(TaskBase, feedback.FeedbackMixin):
                 if self.isCanceled():
                     return False
                 self.setProgress(i * 100 / len(self.layer_ids))
-                layer = self.getLayerById(id_)
+                layer = lyr_utils.getLayerById(id_)
                 name, safe_name = lyr_utils.getLayerTitleAndName(layer)
                 if self.export_symbology:
                     style_filename = os.path.join(self.folder, safe_name + "_style.zip")

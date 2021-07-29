@@ -9,6 +9,8 @@ WIDGET, BASE = gui.loadUiType(__file__)
 
 class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
 
+    DEFAULT_PORT = 5432
+
     def __init__(self, parent, server_type):
         super().__init__(parent, server_type)
         self.setupUi(self)
@@ -34,9 +36,10 @@ class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
                 raise RuntimeError(f'missing {self.serverType.getLabel()} host address')
 
             try:
-                port = int(self.txtPostgisPort.text())
-            except (ValueError, TypeError):
-                raise RuntimeError(f'missing or invalid {self.serverType.getLabel()} port')
+                port = int(self.txtPostgisPort.text().strip() or self.DEFAULT_PORT)
+            except ValueError:
+                self.parent.logError(f'invalid {self.serverType.getLabel()} port: defaulting to {self.DEFAULT_PORT}')
+                port = self.DEFAULT_PORT
 
             return self.serverType(
                 name=name,
@@ -63,7 +66,7 @@ class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
         """ Populates the form fields with the values from the given server instance. """
         self.txtPostgisName.setText(server.serverName)
         self.txtPostgisDatabase.setText(server.database)
-        self.txtPostgisPort.setText(server.port)
+        self.txtPostgisPort.setText(str(server.port))
         self.txtPostgisServerAddress.setText(server.host)
         self.txtPostgisSchema.setText(server.schema)
         self.postgisAuth.setConfigId(server.authid)

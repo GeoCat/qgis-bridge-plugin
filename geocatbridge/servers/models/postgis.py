@@ -8,7 +8,7 @@ from geocatbridge.utils.meta import getAppName
 
 class PostgisServer(DbServerBase):
 
-    def __init__(self, name, authid="", host="localhost", port=5432, schema="public", database="db"):  # noqa
+    def __init__(self, name, authid="", host="localhost", port=PostgisWidget.DEFAULT_PORT, schema="public", database="db"):  # noqa
         super().__init__(name, authid)
         self.host = host
         self.port = port
