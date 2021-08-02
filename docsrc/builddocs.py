@@ -23,7 +23,7 @@ from re import compile
 NAME = "GeoCat Bridge"
 DEFAULT_DIR = "../build/docs"
 THEMES_DIRNAME = "themes"
-THEMES_REPO = "git@github.com:GeoCat/geocat-themes.git"
+THEMES_REPO = "https://github.com/GeoCat/geocat-themes.git"
 VERSION_PREFIX = "v"
 VERSION_REGEX = compile(rf"^{VERSION_PREFIX}(\d+)\.(\d+)\.(\d+)[-.]?(\w*)$")
 
@@ -48,11 +48,11 @@ def clear_target(folder: Path):
     shutil.rmtree(folder, ignore_errors=True)
 
 
-def build_docs(version: str, folder: Path):
+def build_docs(src_dir: Path, dst_dir: Path, version: str):
     """ Build HTML docs for the given version type in the given target folder. """
     if version in (V_LATEST, V_ALLVER):
         # Also build latest if "all versions" was specified
-        build_tag(folder, V_LATEST)
+        build_tag(src_dir, dst_dir, V_LATEST)
         if version == V_LATEST:
             return
 
@@ -61,10 +61,10 @@ def build_docs(version: str, folder: Path):
         latest_key = next(sorted(tags, reverse=True))
         latest_tag = tags[latest_key]
         print(f"Latest stable tag is {latest_tag}")
-        build_tag(folder, latest_tag)
+        build_tag(src_dir, dst_dir, latest_tag)
     elif version == V_ALLVER:
         for _, tag in sorted(tags.items()):
-            build_tag(folder, tag)
+            build_tag(src_dir, dst_dir, tag)
 
 
 def current_branch():
@@ -106,13 +106,13 @@ def get_tags():
     return result
 
 
-def build_tag(folder, version: str):
+def build_tag(src_dir: Path, dst_dir: Path, version: str):
     """ Checks out a specific version tag on the current branch and builds the documentation. """
     if version != V_LATEST:
         # Check out the correct tag
         sh(f"git checkout tags/{version} --recurse-submodules")
-    src_dir = os.path.join(os.getcwd(), "content")
-    bld_dir = os.path.join(folder, version)
+    src_dir = src_dir / "content"
+    bld_dir = dst_dir / version
     if os.path.exists(bld_dir):
         shutil.rmtree(bld_dir)
     os.makedirs(bld_dir)
@@ -170,7 +170,7 @@ def main():
         checkout(working)
 
     # Build HTML docs
-    build_docs(version, folder)
+    build_docs(docsrc_dir, folder, version)
 
     # Restore Git repo if needed
     if current and not has_edits:
