@@ -21,7 +21,7 @@ from pathlib import Path
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 src_dir = Path(__file__).parent
-sys.path.insert(0, src_dir.parent.parent.resolve())
+sys.path.insert(0, str(src_dir.parent.parent.resolve(strict=True)))
 
 from geocatbridge.utils import meta
 

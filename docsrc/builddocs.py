@@ -19,6 +19,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from re import compile
+from typing import Tuple
 
 NAME = "GeoCat Bridge"
 DEFAULT_DIR = "../build/docs"
@@ -33,13 +34,13 @@ V_STABLE = 'stable'
 V_LATEST = 'latest'
 
 
-def sh(commands):
+def sh(commands) -> Tuple[int, str]:
     """ Execute a shell command. """
     if isinstance(commands, str):
         commands = commands.split()
     out = subprocess.Popen(commands, stdout=subprocess.PIPE)
     stdout, stderr = out.communicate()
-    return stdout.decode("utf-8")
+    return out.returncode, stdout.decode("utf-8")
 
 
 def clear_target(folder: Path):
@@ -48,29 +49,34 @@ def clear_target(folder: Path):
     shutil.rmtree(folder, ignore_errors=True)
 
 
-def build_docs(src_dir: Path, dst_dir: Path, version: str):
+def build_docs(src_dir: Path, dst_dir: Path, version: str) -> int:
     """ Build HTML docs for the given version type in the given target folder. """
+    results = []
     if version in (V_LATEST, V_ALLVER):
         # Also build latest if "all versions" was specified
-        build_tag(src_dir, dst_dir, V_LATEST)
+        result = build_tag(src_dir, dst_dir, V_LATEST)
         if version == V_LATEST:
-            return
+            return result
+        results.append(result)
 
     tags = get_tags()
     if version == V_STABLE:
         latest_key = next(sorted(tags, reverse=True))
         latest_tag = tags[latest_key]
         print(f"Latest stable tag is {latest_tag}")
-        build_tag(src_dir, dst_dir, latest_tag)
+        results.append(build_tag(src_dir, dst_dir, latest_tag))
     elif version == V_ALLVER:
         for _, tag in sorted(tags.items()):
-            build_tag(src_dir, dst_dir, tag)
+            results.append(build_tag(src_dir, dst_dir, tag))
+    return 1 if any(results) else 0
 
 
 def current_branch():
     """ Gets the current branch name. Returns None if the current branch could not be determined. """
     # return sh("git branch --show-current").strip() or None
-    sym_ref = sh("git symbolic-ref HEAD")
+    exit_code, sym_ref = sh("git symbolic-ref HEAD")
+    if exit_code:
+        return
     try:
         return sym_ref.strip().split('/')[-1]
     except (AttributeError, ValueError, TypeError, IndexError):
@@ -79,7 +85,11 @@ def current_branch():
 
 def is_dirty() -> bool:
     """ Returns True if the current branch is dirty (i.e. has uncommitted edits). """
-    return sh("git diff --stat").strip() != ''
+    exit_code, result = sh("git diff --stat")
+    if exit_code:
+        # Presume dirty if git command failed
+        return True
+    return result.strip() != ''
 
 
 def checkout(branch: str = None):
@@ -93,8 +103,10 @@ def get_tags():
     """ Returns a dictionary of {(major, minor, build, suffix): tag-string} for all valid Git tags. """
     print(f"Listing available git tags with '{VERSION_PREFIX}' prefix...")
     result = {}
-    tags = sh("git tag -l") or ''
-    for tag in (t.strip() for t in tags.splitlines()):
+    exit_code, tags = sh("git tag -l")
+    if exit_code:
+        return result
+    for tag in (t.strip() for t in (tags or '').splitlines()):
         m = VERSION_REGEX.match(tag)
         if not m or not len(m.groups()) == 4:
             # Skip non-(stable-)version tags
@@ -106,18 +118,19 @@ def get_tags():
     return result
 
 
-def build_tag(src_dir: Path, dst_dir: Path, version: str):
+def build_tag(src_root: Path, dst_root: Path, version: str) -> int:
     """ Checks out a specific version tag on the current branch and builds the documentation. """
     if version != V_LATEST:
         # Check out the correct tag
         sh(f"git checkout tags/{version} --recurse-submodules")
-    src_dir = src_dir / "content"
-    bld_dir = dst_dir / version
+    src_dir = src_root / "content"
+    bld_dir = dst_root / version
     if os.path.exists(bld_dir):
         shutil.rmtree(bld_dir)
     os.makedirs(bld_dir)
     print(f"Building HTML documentation for {NAME} {version if version != V_LATEST else f'({V_LATEST})'}")
-    sh(f"sphinx-build -a {src_dir} {bld_dir}")
+    exit_code, result = sh(f"sphinx-build -a {src_dir} {bld_dir}")
+    return exit_code
 
 
 def main():
@@ -138,44 +151,63 @@ def main():
               f"'{V_LATEST}' (default if omitted), '{V_STABLE}' or '{V_ALLVER}'")
         sys.exit(2)
 
-    curdir = Path.cwd()
-    docsrc_dir = Path(__file__).parent.resolve()
-    themes_dir = docsrc_dir / THEMES_DIRNAME
-    folder = Path(args.output).resolve() if args.output else (docsrc_dir / DEFAULT_DIR).resolve()
-    if args.clean:
-        clear_target(folder)
+    result = 1
+    current = None
+    has_edits = None
+    try:
+        curdir = Path.cwd().resolve(strict=True)
+        sys.path.insert(0, str(curdir))
+        docsrc_dir = Path(__file__).parent.resolve(strict=True)
+        if docsrc_dir.parent != curdir:
+            sys.path.insert(1, str(docsrc_dir.parent))
+        themes_dir = docsrc_dir / THEMES_DIRNAME
 
-    # Update/clone themes
-    if (themes_dir / '.git').exists():
-        os.chdir(themes_dir)
-        checkout()
-    else:
-        clear_target(themes_dir)
-        os.chdir(docsrc_dir)
-        sh(f'git clone {THEMES_REPO} {THEMES_DIRNAME}')
-    os.chdir(curdir)
+        # Try import something from geocatbridge (conf.py requires it)
+        from geocatbridge.utils import meta
 
-    # Checkout tag/latest
-    has_edits = is_dirty()
-    current = current_branch()
-    working = current or args.branch
-    if has_edits:
-        print(f"Current branch{f' {repr(current)}' or ''} has edits: can only build {V_LATEST} version")
-        if version == V_STABLE:
-            print(f"Cannot build {V_STABLE} version")
-            sys.exit(1)
-        # If user selected "all", only build "latest"
-        version = V_LATEST
-    else:
-        checkout(working)
+        folder = Path(args.output).resolve() if args.output else (docsrc_dir / DEFAULT_DIR).resolve()
+        if args.clean:
+            clear_target(folder)
 
-    # Build HTML docs
-    build_docs(docsrc_dir, folder, version)
+        # Update/clone themes
+        if (themes_dir / '.git').exists():
+            os.chdir(themes_dir)
+            checkout()
+        else:
+            clear_target(themes_dir)
+            os.chdir(docsrc_dir)
+            sh(f'git clone {THEMES_REPO} {THEMES_DIRNAME}')
+        os.chdir(curdir)
 
-    # Restore Git repo if needed
-    if current and not has_edits:
-        print(f"Restoring previously checked out branch '{current}'")
-        checkout(current)
+        # Checkout tag/latest
+        has_edits = is_dirty()
+        current = current_branch()
+        working = current or args.branch
+        if has_edits:
+            print(f"Current branch{f' {repr(current)}' or ''} has edits: can only build {V_LATEST} version")
+            if version == V_STABLE:
+                print(f"Cannot build {V_STABLE} version")
+                sys.exit(1)
+            # If user selected "all", only build "latest"
+            version = V_LATEST
+        else:
+            checkout(working)
+
+        # Build HTML docs
+        result = build_docs(docsrc_dir, folder, version)
+
+    except Exception as err:
+        print(f"Aborted script because of unhandled error: {err}")
+        if isinstance(err, (ImportError, ModuleNotFoundError)):
+            sep = '\n\t'
+            print(f"Python paths:{sep}{f'{sep}'.join(sys.path)}")
+
+    finally:
+        # Restore Git repo if needed
+        if current and not has_edits:
+            print(f"Restoring previously checked out branch '{current}'")
+            checkout(current)
+        sys.exit(result)
 
 
 if __name__ == "__main__":
