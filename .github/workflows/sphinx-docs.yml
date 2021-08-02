@@ -5,10 +5,13 @@ name: Build HTML Docs
 on:
   push:
     branches: [ master ]
-  release:
-    types: [ created ]
   workflow_dispatch:
-  # Workflow can also be triggered manually (will build latest docs)
+    # Workflow can also be triggered manually
+    inputs:
+      version:
+        description: 'Doc version(s) to build (latest, all, stable, <tag>)'
+        required: true
+        default: 'latest'
 
 jobs:
   build:
@@ -26,8 +29,24 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Run builddocs script
         run: |
-          if ${GITHUB_REF}; then
-            python docsrc/builddocs.py --output ../docs --version ${GITHUB_REF}
+          if [[ ! -z "${INPUT_VERSION}" ]]; then
+            python docs/builddocs.py --version ${INPUT_VERSION}
           else
-            python docsrc/builddocs.py --output ../docs
+            python docs/builddocs.py
           fi
+      - name: Commit documentation changes
+        run: |
+          git clone https://github.com/GeoCat/qgis-bridge-plugin.git --branch gh-pages --single-branch gh-pages
+          cp -r build/docs/* gh-pages/
+          cd gh-pages
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Update documentation" -a || true
+          # Above command will fail if there are no changes: ignore return code
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: gh-pages
+          directory: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}

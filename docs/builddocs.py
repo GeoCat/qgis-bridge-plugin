@@ -5,7 +5,7 @@ without arguments), all available tags (if run with the '--version all' argument
 or the latest available tag (if the '--version stable' argument is used)
 
 The script file should be located in the documentation folder (with sphinx files
-under ./content folder)
+under ./source folder)
 
 You can specify the output folder in which docs are to be produced, by using the
 '--output [path]' argument. If not used, the documentation will be created under the
@@ -40,6 +40,8 @@ def sh(commands) -> Tuple[int, str]:
         commands = commands.split()
     out = subprocess.Popen(commands, stdout=subprocess.PIPE)
     stdout, stderr = out.communicate()
+    if stderr:
+        print(stderr.decode("utf-8"))
     return out.returncode, stdout.decode("utf-8")
 
 
@@ -123,7 +125,7 @@ def build_tag(src_root: Path, dst_root: Path, version: str) -> int:
     if version != V_LATEST:
         # Check out the correct tag
         sh(f"git checkout tags/{version} --recurse-submodules")
-    src_dir = src_root / "content"
+    src_dir = src_root / "source"
     bld_dir = dst_root / version
     if os.path.exists(bld_dir):
         shutil.rmtree(bld_dir)
@@ -143,10 +145,21 @@ def main():
     parser.add_argument('--branch', help='Optional branch to check out (if not the default branch)')
     parser.set_defaults(clean=False)
 
-    # Parse arguments, check version arg
+    # Parse arguments, get version
     args = parser.parse_args()
     version = args.version.strip() or V_LATEST
+
+    # Get GitHub ref tag override, if any
+    gh_ref = os.environ.get('GITHUB_REF', '')
+    if version == V_LATEST and gh_ref.startswith('refs/tags/'):
+        tag = gh_ref[10:]
+        if VERSION_REGEX.match(tag):
+            print(f"Found tag in $GITHUB_REF {gh_ref}: using {tag} as --version argument")
+            version = tag
+
+    # Check final version argument
     if version not in (V_LATEST, V_STABLE, V_ALLVER) and not VERSION_REGEX.match(version):
+        print(f"incorrect --version '{version}' specified")
         print(f"--version must be a tag (e.g. '{VERSION_PREFIX}1.2.3') or "
               f"'{V_LATEST}' (default if omitted), '{V_STABLE}' or '{V_ALLVER}'")
         sys.exit(2)
