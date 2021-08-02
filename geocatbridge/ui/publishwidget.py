@@ -1,8 +1,8 @@
 import json
-from pathlib import Path
 import webbrowser
 from collections import Counter
 from functools import partial
+from pathlib import Path
 
 import requests
 from qgis.PyQt.QtCore import (
@@ -87,7 +87,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
     def _setupUi(self):
         self.setupUi(self)
         self.txtNoLayers.setVisible(False)
-        self.populateComboBoxes()
+        self.populateComboBoxes(languages=True)
         self.populateLayers()
         self.listLayers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.listLayers.customContextMenuRequested.connect(self.showContextMenu)
@@ -348,12 +348,13 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.listLayers.setItemWidget(item, widget)
         return item
 
-    def populateComboBoxes(self):
+    def populateComboBoxes(self, languages=False):
+        if languages:
+            self.comboLanguage.clear()
+            self.comboLanguage.addItem(self.COMBO_NOTSET_LANG)
+            self.comboLanguage.addItems(l10n.label2code.keys())
         self.populateComboMetadataServer()
         self.populateComboGeodataServer()
-        self.comboLanguage.clear()
-        self.comboLanguage.addItem(self.COMBO_NOTSET_LANG)
-        self.comboLanguage.addItems(l10n.label2code.keys())
 
     def populateComboGeodataServer(self):
         servers = manager.getGeodataServerNames()
@@ -377,25 +378,10 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         # TODO: do not call updateOnlineLayersPublicationStatus if not really needed
         self.comboGeodataServer.currentIndexChanged.disconnect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.disconnect(self.metadataServerChanged)
-        self.populateComboGeodataServer()
-        self.populateComboMetadataServer()
+        self.populateComboBoxes()
         self.updateOnlineLayersPublicationStatus()
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
-
-    def isMetadataOnServer(self, layer):
-        server = manager.getMetadataServer(self.comboMetadataServer.currentText())
-        if not server:
-            return False
-        uuid = uuidForLayer(layer)
-        return server.metadataExists(uuid)
-
-    def isDataOnServer(self, layer):
-        server = manager.getGeodataServer(self.comboGeodataServer.currentText())
-        if not server:
-            return False
-        _, name = getLayerTitleAndName(layer)
-        return server.layerExists(name)
 
     def importMetadata(self):
         if self.currentLayer is None:
@@ -507,32 +493,12 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
     def checkOnlinePublicationStatus(self) -> bool:
         """ Checks if all required online publish fields have been set. """
-        if self.tabOnOffline.currentWidget() != self.tabOnline:
-            # Current tab is not the online publishing tab
-            return True
-
-        # Test if servers (or symbology) have been selected
         data_server = self.comboGeodataServer.currentText()
         meta_server = self.comboMetadataServer.currentText()
-        if data_server == self.COMBO_NOTSET_DATA and meta_server == self.COMBO_NOTSET_META \
-                and not self.chkOnlySymbology.isChecked():
-            self.showWarningBar("Nothing to publish",
-                                "Please select a geodata and/or metadata server to use.")
+        if data_server == self.COMBO_NOTSET_DATA and meta_server == self.COMBO_NOTSET_META:
+            self.showWarningBar("Nothing to publish", "Please select at least one target server.")
             return False
-
-        # Test connections of selected servers
-        errors = set()
-        success = []
-        data_server = manager.getGeodataServer(data_server)
-        meta_server = manager.getMetadataServer(meta_server)
-        if data_server:
-            success.append(data_server.testConnection(errors))
-        if meta_server:
-            success.append(meta_server.testConnection(errors))
-        for e in errors:
-            self.showErrorBar("Error", e)
-
-        return all(success)
+        return True
 
     def checkOfflinePublicationStatus(self) -> bool:
         """ Checks if all required offline publish fields have been set. """
@@ -553,53 +519,54 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.txtExportFolder.setStyleSheet("QLineEdit { border: 2px solid red; }")
         return dir_set and checked_items and self.listLayers.count()
 
-    def updateOnlineLayersPublicationStatus(self, data: bool = True, metadata: bool = True) -> bool:
+    def updateOnlineLayersPublicationStatus(self, data: bool = True, metadata: bool = True):
         """ Validates online tab servers and updates layer status. """
+
+        def _isMetadataOnServer(server_, layer_):
+            if not server_:
+                return False
+            uuid = uuidForLayer(layer_)
+            return server_.metadataExists(uuid)
+
+        def _isDataOnServer(server_, layer_):
+            if not server_:
+                return False
+            _, name = getLayerTitleAndName(layer_)
+            return server_.layerExists(name)
+
+        def _refreshStatus(server_, combo):
+            errors = set()
+            combo.setStyleSheet("QComboBox { }")
+            if server_ and not server_.testConnection(errors) and errors:
+                combo.setStyleSheet("QComboBox { border: 2px solid red; }")
+                for e in errors:
+                    self.showErrorBar("Error", e)
+
+            # Update layer publication status
+            for i in range(self.listLayers.count()):
+                item = self.listLayers.item(i)
+                widget = self.listLayers.itemWidget(item)
+                layer = getLayerById(widget.id)
+                if isinstance(server_, manager.bases.DataCatalogServerBase):
+                    self.isDataPublished[layer.id()] = _isDataOnServer(server_, layer)
+                    state = server_ if self.isDataPublished.get(layer.id()) else None
+                    widget.setDataPublished(state)
+                elif isinstance(server_, manager.bases.MetaCatalogServerBase):
+                    self.isMetadataPublished[layer.id()] = _isMetadataOnServer(server_, layer)
+                    state = server_ if self.isMetadataPublished.get(layer.id()) else None
+                    widget.setMetadataPublished(state)
+
+        def _processAll():
+            _refreshStatus(data_server, self.comboGeodataServer)
+            _refreshStatus(metadata_server, self.comboMetadataServer)
 
         if self.tabOnOffline.currentWidget() != self.tabOnline:
             # Current tab is not the online publish tab
-            return True
+            return
 
-        can_publish = True
-        data_server = manager.getGeodataServer(self.comboGeodataServer.currentText())
-        metadata_server = manager.getMetadataServer(self.comboMetadataServer.currentText())
-
-        errors = set()
-        if data:
-            self.comboGeodataServer.setStyleSheet("QComboBox { }")
-            if data_server and not data_server.testConnection(errors):
-                self.comboGeodataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
-                can_publish = False
-
-        if metadata:
-            self.comboMetadataServer.setStyleSheet("QComboBox { }")
-            if metadata_server and not metadata_server.testConnection(errors):
-                self.comboMetadataServer.setStyleSheet("QComboBox { border: 2px solid red; }")
-                can_publish = False
-
-        # Show errors (if there are any)
-        for e in errors:
-            self.showErrorBar("Error", e)
-
-        for i in range(self.listLayers.count()):
-            item = self.listLayers.item(i)
-            widget = self.listLayers.itemWidget(item)
-            layer = getLayerById(widget.id)
-            if data:
-                server = None
-                if data_server:
-                    self.isDataPublished[layer.id()] = self.isDataOnServer(layer)
-                    server = data_server if self.isDataPublished.get(layer.id()) else None
-                widget.setDataPublished(server)
-            if metadata:
-                server = None
-                if metadata_server:
-                    self.isMetadataPublished[layer.id()] = self.isMetadataOnServer(layer)
-                    server = metadata_server if self.isMetadataPublished[layer.id()] else None
-                widget.setMetadataPublished(server)
-
-        can_publish = can_publish and self.listLayers.count()
-        return can_publish
+        data_server = manager.getGeodataServer(self.comboGeodataServer.currentText()) if data else None
+        metadata_server = manager.getMetadataServer(self.comboMetadataServer.currentText()) if metadata else None
+        gui.execute(_processAll)
 
     def unpublishAll(self):
         """ Removes all geodata from the current server workspace and clears all metadata (published layers only). """

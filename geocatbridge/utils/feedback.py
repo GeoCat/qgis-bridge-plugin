@@ -1,5 +1,5 @@
-from qgis.PyQt.QtCore import QCoreApplication
-from qgis.PyQt.QtWidgets import QMessageBox, QWidget
+from qgis.PyQt import QtCore
+from qgis.PyQt.QtWidgets import QMessageBox, QWidget, QProgressDialog
 from qgis.PyQt.QtWidgets import QSizePolicy
 from qgis.core import Qgis, QgsMessageLog, QgsMessageOutput
 from qgis.gui import QgsMessageBar
@@ -19,7 +19,7 @@ def _log(message, level):
 
 def _translate(message):
     """ Tries to translate the given message within the GeoCat Bridge context. """
-    return QCoreApplication.translate(getAppName(), str(message))
+    return QtCore.QCoreApplication.translate(getAppName(), str(message))
 
 
 def logInfo(message):
@@ -67,7 +67,7 @@ class FeedbackMixin:
 
     def _translate(self, message, context=None):
         if context:
-            return QCoreApplication.translate(context, message)
+            return QtCore.QCoreApplication.translate(context, message)
         if self.tr:
             return self.tr(message)
         # No translation without context or QTranslator
@@ -168,6 +168,23 @@ class FeedbackMixin:
                             When set to a string or Exception, it's value will be logged.
         """
         self._show_bar(title, message, Qgis.Critical, **kwargs)
+
+    def getProgressDialog(self, label, max_length, callback=None) -> QProgressDialog:
+        """
+        Sets up a modal progress dialog, shows it and returns the dialog instance for control.
+
+        :param label:           Message to show above the progress bar.
+        :param max_length:      Maximum number of steps of the progress bar (at 100%).
+        :param callback:        Callback function to be executed when the user presses "Cancel".
+        :return:                A QProgressDialog instance.
+        """
+        pg_dialog = QProgressDialog(label, self.tr("Cancel"), 0, max_length,
+                                    self if isinstance(self, QWidget) else None)
+        pg_dialog.canceled.connect(callback, type=QtCore.Qt.DirectConnection)  # noqa
+        pg_dialog.setWindowModality(QtCore.Qt.WindowModal)
+        pg_dialog.setWindowTitle(getAppName())
+        pg_dialog.open()
+        return pg_dialog
 
     def showErrorBox(self, title, message, **kwargs):
         """

@@ -4,7 +4,6 @@ from importlib import import_module
 from pathlib import Path
 from typing import Union
 from urllib.parse import urlparse
-from requests.auth import HTTPBasicAuth
 
 import requests
 from qgis.PyQt.QtGui import QPixmap
@@ -13,10 +12,11 @@ from qgis.core import (
     QgsApplication,
     QgsProcessingAlgorithm
 )
+from requests.auth import HTTPBasicAuth
 
 from geocatbridge.utils import files
-from geocatbridge.utils.network import BridgeSession
 from geocatbridge.utils.feedback import FeedbackMixin
+from geocatbridge.utils.network import BridgeSession
 
 
 class AbstractServer(ABC):
@@ -197,9 +197,9 @@ class CatalogServerBase(ServerBase, ABC):
         #       This should improve proxy and authentication handling.
         #       Currently, only 3.18+ supports the PUT request (3.16 LTR does not).
 
-        headers = kwargs.get("headers") or {}
-        files_ = kwargs.get("files") or {}
-        session = kwargs.get("session")
+        headers = kwargs.pop("headers", {})
+        files_ = kwargs.pop("files", {})
+        session = kwargs.pop("session", {})
 
         if isinstance(data, dict) and not files_:
             try:
@@ -221,7 +221,7 @@ class CatalogServerBase(ServerBase, ABC):
             with BridgeSession() as session:
                 req_method = getattr(session, method.casefold())
 
-        result = req_method(url, headers=headers, files=files_, data=data, auth=auth)
+        result = req_method(url, headers=headers, files=files_, data=data, auth=auth, **kwargs)
         result.raise_for_status()
         return result
 
@@ -244,6 +244,10 @@ class MetaCatalogServerBase(CatalogServerBase, ABC):
 
     def openMetadata(self, uuid):
         pass
+
+    def metadataExists(self, uuid: str) -> bool:
+        """ This method must be implemented if the server offers a way to check if a metadata record was published. """
+        raise NotImplementedError
 
 
 class DataCatalogServerBase(CatalogServerBase, ABC):

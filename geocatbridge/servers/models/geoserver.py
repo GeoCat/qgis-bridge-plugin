@@ -25,6 +25,7 @@ from geocatbridge.servers.views.geoserver import GeoServerWidget
 from geocatbridge.utils import layers as lyr_utils
 from geocatbridge.utils.files import tempFileInSubFolder, tempSubFolder, Path
 from geocatbridge.utils.meta import getAppName, semanticVersion
+from geocatbridge.utils.network import TESTCON_TIMEOUT
 
 
 class GeoserverServer(DataCatalogServerBase):
@@ -321,7 +322,7 @@ class GeoserverServer(DataCatalogServerBase):
                 return False
         try:
             url = f"{self.apiUrl}/about/version"
-            self.request(url)
+            self.request(url, timeout=TESTCON_TIMEOUT)
             return True
         except RequestException as e:
             msg = f'Could not connect to {self.serverName}'

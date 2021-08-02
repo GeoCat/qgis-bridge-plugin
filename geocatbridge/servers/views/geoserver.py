@@ -38,9 +38,6 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.chkUseVectorTiles.stateChanged.connect(self.setDirty)
         self.comboGeoserverDatabase.currentIndexChanged.connect(self.setDirty)
 
-        # Declare progress dialog
-        self._pgdialog = None
-
     def createServerInstance(self):
         """ Reads the settings form fields and returns a new server instance with these settings. """
         db = None
@@ -133,25 +130,6 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
             self.datastoreControls.setVisible(False)
         self.setDirty()
 
-    def addGeoserverPgDatastores(self, current, result):
-        if self._pgdialog and self._pgdialog.isVisible():
-            self._pgdialog.hide()
-        if result:
-            # Worker result might be a list of lists, so we should flatten it
-            datastores = list(chain.from_iterable(result))
-            self.comboGeoserverDatabase.addItems(datastores)
-            if current:
-                self.comboGeoserverDatabase.setCurrentText(current)
-        else:
-            self.parent.showWarningBar("Warning", "No PostGIS datastores on server or could not retrieve them")
-
-    def showProgressDialog(self, text, length, handler):
-        self._pgdialog = QProgressDialog(text, "Cancel", 0, length, self)
-        self._pgdialog.setWindowTitle(getAppName())
-        self._pgdialog.setWindowModality(QtCore.Qt.WindowModal)
-        self._pgdialog.canceled.connect(handler, type=QtCore.Qt.DirectConnection)
-        self._pgdialog.forceShow()
-
     def updateDbServersCombo(self, managed_by_geoserver: bool, init_value=None):
         """ (Re)populate the combobox with database-driven datastores.
 
@@ -160,6 +138,16 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                                         this value can be set immediately as the only available and selected item.
                                         Doing so prevents a full refresh of GeoServer datastores.
         """
+        def addGeoserverPgDatastores(current_db_: str, worker_result):
+            if worker_result:
+                # Worker result might be a list of lists, so we should flatten it
+                datastores = list(chain.from_iterable(worker_result))
+                self.comboGeoserverDatabase.addItems(datastores)
+                if current_db_:
+                    self.comboGeoserverDatabase.setCurrentText(current_db_)
+            else:
+                self.parent.showWarningBar("Warning", "No PostGIS datastores on server or failed to retrieve any")
+
         if managed_by_geoserver and init_value:
             if self.comboGeoserverDatabase.count() == 0:
                 # Only add the given init_value item to the empty combo (user should manually refresh)
@@ -191,9 +179,10 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                 # Retrieve datastores for each workspace:
                 # This is a potentially long-running operation and uses a separate QThread
                 worker = gui.ItemProcessor(workspaces, server.getPostgisDatastores)
-                self.showProgressDialog("Fetching PostGIS datastores...", len(workspaces), worker.stop)
-                worker.progress.connect(self._pgdialog.setValue)
-                worker.finished.connect(partial(self.addGeoserverPgDatastores, current_db))
+                pg_dialog = self.parent.getProgressDialog("Retrieving PostGIS datastores...",
+                                                          len(workspaces), worker.requestInterruption)
+                worker.progress.connect(pg_dialog.setValue)
+                worker.resultReady.connect(partial(addGeoserverPgDatastores, current_db))
                 worker.run()
             except Exception as e:
                 msg = f'Failed to retrieve datastores for {self.serverName}'

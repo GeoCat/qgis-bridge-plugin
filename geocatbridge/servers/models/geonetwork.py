@@ -18,6 +18,7 @@ from geocatbridge.servers.views.geonetwork import GeoNetworkWidget
 from geocatbridge.utils.network import BridgeSession
 from geocatbridge.utils.meta import semanticVersion
 from geocatbridge.utils import feedback
+from geocatbridge.utils.network import TESTCON_TIMEOUT
 
 
 def parseMe(response: requests.Response) -> bool:
@@ -104,7 +105,7 @@ class GeonetworkServer(MetaCatalogServerBase):
 
         # Do an authenticated "me" request
         try:
-            result = self.sessionRequest(self.meUrl)
+            result = self.sessionRequest(self.meUrl, timeout=TESTCON_TIMEOUT)
         except GeonetworkAuthError as err:
             self.logError(err)
             result = None
@@ -195,7 +196,7 @@ class GeonetworkServer(MetaCatalogServerBase):
         url = f"{self.apiUrl}/site/info/build"
         headers = {"Accept": "application/json"}
         try:
-            result = self.request(url, headers=headers)
+            result = self.request(url, headers=headers, timeout=TESTCON_TIMEOUT)
             return result.json().get('version')
         except Exception as err:
             self.logError(f"Failed to retrieve {self.getLabel()} version for '{self.serverName}': {err}")

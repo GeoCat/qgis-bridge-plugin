@@ -3,10 +3,12 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 DEFAULT_RETRIES = 2
-DEFAULT_TIMEOUT = 10  # seconds
+DEFAULT_TIMEOUT = 10  # timeout in seconds for regular requests
+TESTCON_TIMEOUT = 2   # timeout in seconds for connection tests
 RETRY_STRATEGY = Retry(
     total=DEFAULT_RETRIES,
-    status_forcelist=[429, 500, 502, 503, 504]
+    status_forcelist=[429, 500, 502, 503, 504],
+    respect_retry_after_header=False
 )
 
 

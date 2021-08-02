@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from qgis.PyQt import QtCore
 from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QCursor
@@ -34,28 +36,37 @@ class ItemProcessor(QtCore.QThread):
 
     The processing is done on a separate (non-blocking) thread and emits signals,
     which can be connected to a progress indicator for example.
+    The processor can be aborted by calling requestInterruption().
+
+    :param items:       Iterable of items to process.
+    :param processor:   The processor function to call on each item. This function must accept one argument.
+    :returns:           The resultReady signal slot receives a list of results for each processed item.
     """
     progress = QtCore.pyqtSignal(int)
-    finished = QtCore.pyqtSignal(list)
+    resultReady = QtCore.pyqtSignal(list)
 
-    def __init__(self, items: list, func):
+    def __init__(self, items: Iterable, processor):
         super().__init__()
         self._items = items
-        self._func = func
-        self._stop = False
+        self._func = processor
 
     def run(self):
         results = []
-        for count, item in enumerate(self._items, 1):
+        total_steps = 0
+        QApplication.processEvents()
+        for step, item in enumerate(self._items):
+            total_steps += 1
+            self.progress.emit(step)  # noqa
             try:
                 results.append(self._func(item))
             except Exception as e:
                 # Log a QGIS error message (should be thread-safe)
                 logError(e)
-            self.progress.emit(count)
-            if self._stop:
+            if self.isInterruptionRequested():
                 break
-        self.finished.emit(results)
-
-    def stop(self):
-        self._stop = True
+        if not self.isInterruptionRequested():
+            # Emit 100% progress and wait briefly so that user sees it
+            self.progress.emit(total_steps)  # noqa
+            self.msleep(500)
+        self.resultReady.emit(results)  # noqa
+        self.finished.emit()  # noqa
