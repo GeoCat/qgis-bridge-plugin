@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Metadata Editing &mdash; GeoCatBridge 4.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="My GeoCat" href="mygeocat.html" />
+    <link rel="prev" title="Server Connections" href="server_configuration.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/bridge.svg" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bridge_dialog.html">The Bridge dialog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish.html">Publish data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_configuration.html">Server Connections</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Metadata Editing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#preview-metadata">Preview metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metadata-validation">Metadata validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-metadata">Load metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mygeocat.html">My GeoCat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_symbology.html">Supported Symbology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeoCatBridge</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Metadata Editing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/metadata_editing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="metadata-editing">
+<span id="metadataediting"></span><h1>Metadata Editing<a class="headerlink" href="#metadata-editing" title="Permalink to this headline">¶</a></h1>
+<p>Bridge provides a basic editor for metadata properties to create
+ISO19139 metadata records. The purpose of this editor is to easily
+complete a minimal subset of required metadata elements.</p>
+<ul class="simple">
+<li><p>Title</p></li>
+<li><p>Abstract</p></li>
+<li><p>ISO topic category</p></li>
+<li><p>Keywords</p></li>
+<li><p>Metadata contact</p></li>
+<li><p>Data contact</p></li>
+<li><p>Access constraints (used for data license)</p></li>
+<li><p>Use constraints (also known as Fees)</p></li>
+<li><p>Metadata language</p></li>
+</ul>
+<p>When publishing metadata to GeoNetwork, Bridge will
+convert the metadata to ISO19139 format.</p>
+<p>You can edit the metadata fields directly or click on the buttons beside each parameter to open the QGIS metadata editor.</p>
+<section id="preview-metadata">
+<h2>Preview metadata<a class="headerlink" href="#preview-metadata" title="Permalink to this headline">¶</a></h2>
+<p>To show a preview of the metadata of the selected layer, click on the <img alt="previewmetadata" src="_images/preview_metadata_button.png" /> button</p>
+<p>You will see the metadata in a new dialog formatted as a HTML webpage</p>
+<img alt="_images/metadata_preview.png" src="_images/metadata_preview.png" />
+</section>
+<section id="metadata-validation">
+<h2>Metadata validation<a class="headerlink" href="#metadata-validation" title="Permalink to this headline">¶</a></h2>
+<p>Bridge can use QGIS built-in validation tools and display the result of metadata validation. Click on the <img alt="validatemetadata" src="_images/validation.png" /> button to validate your metadata.</p>
+<p>After validation a dialog with validation results is displayed.</p>
+<img alt="_images/metadata_validation.png" src="_images/metadata_validation.png" />
+</section>
+<section id="load-metadata">
+<h2>Load metadata<a class="headerlink" href="#load-metadata" title="Permalink to this headline">¶</a></h2>
+<p>If your layer has metadata in ISO19139 format, and that metadata is available in an additional file stored along with the data file, QGIS will not automatically read it (QGIS only has native support for its own <cite>qmd</cite> format), but Bridge can import it. Select the layer in the Bridge dialog and then click on the <span class="guilabel">Load metadata button</span> <img alt="loadmetadata" src="_images/loadmetadata.png" /></p>
+<p>Bridge will look in the folder where the layer file is stored, and it will try to find a metadata file named either <cite>[layer_filename].[extension].xml</cite> or [layer_filename].xml` (that is, for a layer stored in <cite>countries.shp</cite> it will search for both <cite>countries.shp.xml</cite> or <cite>countries.xml</cite>). If such a file exist, and it is formatted as ISO19139, it will convert it to the QGIS metadata format and load it.
+Note that aspects of the original ISO19139 metadata may get lost in the transformation. Also consider that changes in the metadata will not be automatically stored in the file where the metadata has been imported from.</p>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mygeocat.html" class="btn btn-neutral float-right" title="My GeoCat" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="server_configuration.html" class="btn btn-neutral float-left" title="Server Connections" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, GeoCat.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

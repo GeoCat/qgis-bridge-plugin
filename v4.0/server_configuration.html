@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Server Connections &mdash; GeoCatBridge 4.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Metadata Editing" href="metadata_editing.html" />
+    <link rel="prev" title="Publish data" href="publish.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/bridge.svg" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bridge_dialog.html">The Bridge dialog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish.html">Publish data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Server Connections</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#add-new-connection">Add new connection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#geocat-live">GeoCat Live</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geonetwork-server">GeoNetwork server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geoserver-connection">GeoServer connection</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bridge-and-geoserver-workspaces">Bridge and GeoServer workspaces</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#postgis-connection">PostGIS connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mapserver-connection">MapServer connection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="metadata_editing.html">Metadata Editing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygeocat.html">My GeoCat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_symbology.html">Supported Symbology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeoCatBridge</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Server Connections</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/server_configuration.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="server-connections">
+<span id="serverconnections"></span><h1>Server Connections<a class="headerlink" href="#server-connections" title="Permalink to this headline">¶</a></h1>
+<p>Configure your server connections to publish your data and metadata to. To do it, move to the <em>Servers</em> section of the Bridge dialog</p>
+<img alt="_images/servers.png" src="_images/servers.png" />
+<section id="add-new-connection">
+<h2>Add new connection<a class="headerlink" href="#add-new-connection" title="Permalink to this headline">¶</a></h2>
+<p>Click <em>New Server</em> and choose one of the supported
+server connection types to create a new server:</p>
+<ul class="simple">
+<li><p>GeoCat Live</p></li>
+<li><p>GeoServer</p></li>
+<li><p>MapServer</p></li>
+<li><p>PostGIS</p></li>
+<li><p>GeoNetwork</p></li>
+</ul>
+<img alt="_images/new_server.png" src="_images/new_server.png" />
+<p>Fill the required parameters and then click on the <em>Save</em> button to save the server. You can edit the parameters of a given server at anytime, just selecting its name, changing the corresponding values and then clicking on the <em>Save</em> button.</p>
+<p>Below you can find more detail about the different types of services and connections supported in Bridge.</p>
+<section id="geocat-live">
+<h3>GeoCat Live<a class="headerlink" href="#geocat-live" title="Permalink to this headline">¶</a></h3>
+<p>GeoCat Live is a SDI platform hosted by GeoCat. Depending on your GeoCat
+Live configuration Bridge is able to publish metadata to a catalogue
+server (CSW) and the layers of the map to a mapserver
+(WMS/WFS/WCS/WMTS). Components used</p>
+<img alt="_images/geocatlive_server.png" src="_images/geocatlive_server.png" />
+<p>To configure a GeoCat Live connection, enter your Live id and a name for the server. You can then click on
+the <em>Connect</em> button to verify that Bridge can connect to the Live instance and retrieve the URLs of the associated data and metadata servers.</p>
+<p>When you add a Live server, two new servers will be added to the list of available ones in the <em>Publish</em> section: a geodata server and a metadata server.</p>
+<p>You don’t need to supply the URLs of those servers (as it would be the case if you wanted to manually add each of them), but you must supply their credentials.</p>
+</section>
+<section id="geonetwork-server">
+<h3>GeoNetwork server<a class="headerlink" href="#geonetwork-server" title="Permalink to this headline">¶</a></h3>
+<p>Configure a GeoNetwork connection to publish your metadata to an online catalogue.</p>
+<img alt="_images/servers_geonetwork.png" src="_images/servers_geonetwork.png" />
+<p>You must enter a name the URL of the server and the corresponding credentials (with publish permission)</p>
+<p>Click <em>Connect</em> to test the server connection.</p>
+</section>
+<section id="geoserver-connection">
+<h3>GeoServer connection<a class="headerlink" href="#geoserver-connection" title="Permalink to this headline">¶</a></h3>
+<p>Configure a GeoServer connection to publish your data to GeoServer.</p>
+<img alt="_images/servers_geoserver.png" src="_images/servers_geoserver.png" />
+<p>Provide a name for the server, its URL and the corresponding credentials.</p>
+<p>URL can point to theGeoServer location (i.e. <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/geoserver</span></code>) or the REST API endpoint (i.e. <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/geoserver/rest</span></code>)</p>
+<p>Finally, you must select how data will be stored in the server. Three different methods are available:</p>
+<ul class="simple">
+<li><p>File based. Files are uploaded to GeoServer and stored in the GeoServer instance.</p></li>
+<li><p>Import into a PostGIS DB (handled by Bridge): You must select a PostGIS server to import your data into it. PostGIS servers are defined in the <em>Servers</em> section of the Bridge dialog as well, as explained later on in this same chapter. Your layer data is imported into the PostGIS server, and no data is uploaded to GeoServer. GeoServer layers are created pointing to the table that has been created in the selected PostGIS DB, which contains the layer data.</p></li>
+<li><p>Import into a PostGIS DB (handled by GeoServer): Layer data is uploaded to GeoServer, and GeoServer itself takes care of importing into the DB. A PostGIS DB must be selected from the datastores available in the GeoServer instance. If you want to add a new one, use the <em>Add datastore</em> button.</p></li>
+</ul>
+<p>When you add a new GeoServer server, Bridge will automatically add the corresponding WMS and WFS endpoints to QGIS, so you can easily add to your project the layers that are available in the server.</p>
+<section id="bridge-and-geoserver-workspaces">
+<h4>Bridge and GeoServer workspaces<a class="headerlink" href="#bridge-and-geoserver-workspaces" title="Permalink to this headline">¶</a></h4>
+<p>Layers will be published to a workspace with the name of the current QGIS project. If you are trying to publish layers and your current project is not saved yet, you won’t be able to start the publication process. A warning message will be shown.</p>
+<img alt="_images/project_not_saved.png" src="_images/project_not_saved.png" />
+<p>If the workspace exists, it will be deleted before publishing, so its content after publishing will be just the selected layers and its symbology. If the <em>Only symbology</em> option is selected in the publish section, no data is removed before uploading the symbology of the selected layers.</p>
+</section>
+</section>
+<section id="postgis-connection">
+<h3>PostGIS connection<a class="headerlink" href="#postgis-connection" title="Permalink to this headline">¶</a></h3>
+<p>Configure a PostGIS connection to publish your map data to PostGIS. The
+PostGIS connection can be used in two different publish scenarios:</p>
+<ol class="arabic simple">
+<li><p>Publish only map data to PostGIS</p></li>
+<li><p>Publish map layers to GeoServer and store data directly in PostGIS
+using a direct database connection (as explained in <a class="reference internal" href="#geoserver-connection">GeoServer connection</a>)</p></li>
+</ol>
+<img alt="_images/servers_postgis.png" src="_images/servers_postgis.png" />
+</section>
+<section id="mapserver-connection">
+<h3>MapServer connection<a class="headerlink" href="#mapserver-connection" title="Permalink to this headline">¶</a></h3>
+<p>Configure a MapServer connection to publish your map data to PostGIS. A mapserver
+endpoint (mapfile) is created for each QGIS project.</p>
+<p>In the <em>MapServer details</em> enter the information about your MapServer instance, to which you want to publish.</p>
+<img alt="_images/servers_mapserver.png" src="_images/servers_mapserver.png" />
+<p>In the <em>Uploading data</em> tab configure how Bridge stores data for your
+MapServer connection. Choose <em>Local path</em> to store the files in a
+location on the local file system. Choose <em>FTP service</em> to transmit the
+files over FTP to the MapServer server. Depending on which option is selected, you will see additional parameters to configure</p>
+<img alt="_images/servers_mapserver2.png" src="_images/servers_mapserver2.png" />
+</section>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="metadata_editing.html" class="btn btn-neutral float-right" title="Metadata Editing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="publish.html" class="btn btn-neutral float-left" title="Publish data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, GeoCat.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

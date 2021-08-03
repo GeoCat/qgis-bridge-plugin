@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Publish data &mdash; GeoCatBridge 4.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Server Connections" href="server_configuration.html" />
+    <link rel="prev" title="The Bridge dialog" href="bridge_dialog.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/bridge.svg" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bridge_dialog.html">The Bridge dialog</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Publish data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#supported-layers">Supported Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-publish">How to publish</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#view-published-layers-on-server-s">View published layers on server(s)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unpublish-data-and-metadata">Unpublish data and metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#remove-data-and-metadata-all-layers">Remove data and metadata all layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-data-and-metadata-individual-layers">Remove data and metadata individual layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#export-files">Export files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="server_configuration.html">Server Connections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata_editing.html">Metadata Editing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mygeocat.html">My GeoCat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_symbology.html">Supported Symbology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeoCatBridge</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Publish data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/publish.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="publish-data">
+<h1>Publish data<a class="headerlink" href="#publish-data" title="Permalink to this headline">¶</a></h1>
+<section id="supported-layers">
+<h2>Supported Layers<a class="headerlink" href="#supported-layers" title="Permalink to this headline">¶</a></h2>
+<p>GeoCat Bridge supports the following layer types:</p>
+<ul class="simple">
+<li><p>Vector layers from any source</p></li>
+<li><p>Raster layers from any source</p></li>
+<li><p>Layer groups</p></li>
+</ul>
+</section>
+<section id="how-to-publish">
+<h2>How to publish<a class="headerlink" href="#how-to-publish" title="Permalink to this headline">¶</a></h2>
+<p>In the Bridge dialog, move to the <em>Publish</em> section.</p>
+<img alt="_images/publish_section.png" src="_images/publish_section.png" />
+<p>You can select the layers from the list to publish:</p>
+<img alt="_images/publish_layers_list.png" src="_images/publish_layers_list.png" />
+<p>In the <em>Layer panel</em>, for each layer you can:</p>
+<ul class="simple">
+<li><p>Edit the metadata (see <a class="reference internal" href="metadata_editing.html#metadataediting"><span class="std std-ref">Metadata Editing</span></a>)</p></li>
+<li><p>Select the attributes to publish as part of the map service.
+Attributes can only be selected for vector data.</p></li>
+</ul>
+<img alt="_images/publish_metadata.png" src="_images/publish_metadata.png" />
+<img alt="_images/publish_fields.png" src="_images/publish_fields.png" />
+<p>When you have finished configuring the properties for all map layers, select the destinations server(s) that you want to use.</p>
+<p>You can publish your layers to a geodata server, or their metadata to a metadata server, or both. Those servers must be selected from the two available drop-down lists. Servers in this list are added using the <em>Servers</em> section on the Bridge dialog. See <a class="reference internal" href="server_configuration.html#serverconnections"><span class="std std-ref">Server Connections</span></a> for more information about how to add new servers.</p>
+<p>When a data or metadata server is selected and there are issues connecting to it, the server
+box appears framed in a red box.</p>
+<img alt="_images/publish_server_error.png" src="_images/publish_server_error.png" />
+<p>Once you have selected what to publish and the destination servers, click
+on the <em>Publish</em> button to start the publishing process. During this
+process, a progress bar is shown to indicate the status of the
+publication process:</p>
+<img alt="_images/publish_layers_progress.png" src="_images/publish_layers_progress.png" />
+<p>When the publication process is finished, a summary of the result is
+shown:</p>
+<img alt="_images/publish_layers_report.png" src="_images/publish_layers_report.png" />
+<p>If you have already uploaded your data and only want to update the symbology of your server layers without uploading layer data again, check the <em>Only symbology</em> option. The styles of the selected layers willbe published, but no layer data will be uploaded.</p>
+<p>When you are uploading a large number of layers, or your layers are large, the publishing process might take time. If you want to continue working with QGIS while layer data is uploaded, you can click the <em>Publish on background</em> button instead of the <em>Publish</em> one. The Bridge will close and you will be able to use QGIS normally. Once the publishing process is finished, the summary dialog will be shown.</p>
+</section>
+<section id="view-published-layers-on-server-s">
+<h2>View published layers on server(s)<a class="headerlink" href="#view-published-layers-on-server-s" title="Permalink to this headline">¶</a></h2>
+<p>The context menu in the layers list provides a quick access to view the
+published data on the server(s):</p>
+<img alt="_images/publish_layers_context_menu.png" src="_images/publish_layers_context_menu.png" />
+<ul class="simple">
+<li><p><em>View metadata</em>: If the metadata is already published in a catalogue
+server, this option opens a browser to show the metadata from the
+server.</p></li>
+</ul>
+<img alt="_images/preview_gnmetadata.png" src="_images/preview_gnmetadata.png" />
+<ul class="simple">
+<li><p><em>View WMS layer</em>: Opens up a layer preview page for the selected map
+server with the selected layer.</p></li>
+<li><p><em>View all WMS layers</em>: Opens up a layer preview page for the
+selected map server with all published layer in the map project
+(MXD).</p></li>
+</ul>
+<img alt="_images/preview_layers.png" src="_images/preview_layers.png" />
+</section>
+<section id="unpublish-data-and-metadata">
+<h2>Unpublish data and metadata<a class="headerlink" href="#unpublish-data-and-metadata" title="Permalink to this headline">¶</a></h2>
+<section id="remove-data-and-metadata-all-layers">
+<h3>Remove data and metadata all layers<a class="headerlink" href="#remove-data-and-metadata-all-layers" title="Permalink to this headline">¶</a></h3>
+<p><img alt="remove" src="_images/remove.png" /> removes both the metadata and map data of all
+selected layers from the publishing server(s).</p>
+<img alt="_images/remove_all.png" src="_images/remove_all.png" />
+</section>
+<section id="remove-data-and-metadata-individual-layers">
+<h3>Remove data and metadata individual layers<a class="headerlink" href="#remove-data-and-metadata-individual-layers" title="Permalink to this headline">¶</a></h3>
+<p>If you want to withdraw only metadata or map data for a specific layer,
+use the context menu in the layers list.</p>
+<ul class="simple">
+<li><p><em>Unpublish metadata</em>: remove the metadata from the selected
+catalogue server.</p></li>
+<li><p><em>Unpublish data</em>: remove the map data from the selected map server.</p></li>
+</ul>
+<img alt="_images/publish_layers_unpublish_data.png" src="_images/publish_layers_unpublish_data.png" />
+</section>
+<section id="export-files">
+<h3>Export files<a class="headerlink" href="#export-files" title="Permalink to this headline">¶</a></h3>
+<p>To export your files locally, use the offline export options in Bridge.
+The offline export makes it possible to export the metadata and
+symbology in the following formats:</p>
+<ul class="simple">
+<li><p>SLD (symbology)</p></li>
+<li><p>Geostyler (symbology)</p></li>
+<li><p>MapboxGL (symbology)</p></li>
+<li><p>ISO19319-XML (metadata)</p></li>
+</ul>
+<img alt="_images/offline_export.png" src="_images/offline_export.png" />
+<p>Select a folder and the corresponding files will be created in it for
+all the layers currently selected when you click on the Publish button</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="server_configuration.html" class="btn btn-neutral float-right" title="Server Connections" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="bridge_dialog.html" class="btn btn-neutral float-left" title="The Bridge dialog" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, GeoCat.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
