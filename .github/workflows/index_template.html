@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <link rel="stylesheet" href="latest/_static/css/theme.css" type="text/css"/>
+    <link rel="shortcut icon" href="latest/_static/favicon.ico"/>
+
+    <title>GeoCat Bridge for QGIS &mdash; community documentation</title>
+</head>
+<body class="wy-body-for-nav">
+
+    <div class="wy-nav-content">
+        <div class="rst-content">
+            <h1>GeoCat Bridge for QGIS &mdash; community docs</h1>
+            <p>
+                This is the index page of the community documentation for the GeoCat Bridge QGIS plugin.
+                The public Git repository for the software and the documentation source is hosted on
+                <a href="https://github.com/GeoCat/qgis-bridge-plugin">GitHub</a>.
+            </p>
+            <p>
+                Documentation is available for the following GeoCat Bridge versions:
+                <div class="toctree-wrapper compound">
+                    <ul>
+                        % for name in names:
+                        <li class="toctree-l1"><a href="${name}/">${name}</a></li>
+                        % endfor
+                    </ul>
+                </div>
+            </p>
+            <p>
+                If you are a using a development version of Bridge, you'll probably need the "latest" version
+                (i.e. built from the HEAD Git commit).
+            </p>
+        </div>
+        <div role="contentinfo">
+            <p><br>&#169; Copyright ${year}, <a href="https://www.geocat.net/">GeoCat BV</a>.</p>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -5,6 +5,8 @@ name: Build HTML Docs
 on:
   push:
     branches: [ master ]
+  release:
+    types: [ created ]
   workflow_dispatch:
     # Workflow can also be triggered manually
     inputs:
@@ -22,22 +24,27 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - name: Install pip and Sphinx
+      - name: Install pip and dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -U sphinx
+          pip install -U Mako
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Run builddocs script
         run: |
-          if [[ ! -z "${INPUT_VERSION}" ]]; then
-            python docs/builddocs.py --version ${INPUT_VERSION}
+          if [[ ! -z "${{github.event.inputs.version}}" ]]; then
+            python docs/builddocs.py --version ${{github.event.inputs.version}} --theme sphinx_rtd_theme
           else
-            python docs/builddocs.py
+            python docs/builddocs.py --theme sphinx_rtd_theme
           fi
-      - name: Commit documentation changes
+      - name: Clone gh-pages branch folder and copy built docs into it
         run: |
-          git clone https://github.com/GeoCat/qgis-bridge-plugin.git --branch gh-pages --single-branch gh-pages
+          git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git --branch gh-pages --single-branch gh-pages
           cp -r build/docs/* gh-pages/
+      - name: Update index.html for GitHub Pages
+        run: python .github/workflows/docs_index.py ./gh-pages
+      - name: Stage and commit gh-pages changes
+        run: |
           cd gh-pages
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
