@@ -55,27 +55,32 @@ def clear_target(folder: Path):
     shutil.rmtree(folder, ignore_errors=True)
 
 
-def build_docs(src_dir: Path, dst_dir: Path, version: str, html_theme: str = None) -> int:
+def build_docs(src_dir: Path, dst_dir: Path, version: str, html_theme: str = None, checkout_: bool = True) -> int:
     """ Build HTML docs for the given version type in the given target folder. """
     results = []
-    if version in (V_LATEST, V_ALLVER):
-        # Also build latest if "all versions" was specified
-        result = build_tag(src_dir, dst_dir, V_LATEST, html_theme)
-        if version == V_LATEST:
-            return result
-        results.append(result)
+    if VERSION_REGEX.match(version):
+        # Just build the version we were told
+        results.append(build_tag(src_dir, dst_dir, version, html_theme, checkout_))
+    else:
+        # Figure out the version to build
+        if version in (V_LATEST, V_ALLVER):
+            # Also build latest if "all versions" was specified
+            result = build_tag(src_dir, dst_dir, V_LATEST, html_theme)
+            if version == V_LATEST:
+                return result
+            results.append(result)
 
-    tags = get_tags()
-    if not tags:
-        return 1
-    if version == V_STABLE:
-        latest_key = sorted(tags.keys(), reverse=True)[0]
-        latest_tag = tags[latest_key]
-        print(f"Latest stable tag is {latest_tag}")
-        results.append(build_tag(src_dir, dst_dir, latest_tag, html_theme))
-    elif version == V_ALLVER:
-        for _, tag in sorted(tags.items(), reverse=True):
-            results.append(build_tag(src_dir, dst_dir, tag, html_theme))
+        tags = get_tags()
+        if not tags:
+            return 1
+        if version == V_STABLE:
+            latest_key = sorted(tags.keys(), reverse=True)[0]
+            latest_tag = tags[latest_key]
+            print(f"Latest stable tag is {latest_tag}")
+            results.append(build_tag(src_dir, dst_dir, latest_tag, html_theme))
+        elif version == V_ALLVER:
+            for _, tag in sorted(tags.items(), reverse=True):
+                results.append(build_tag(src_dir, dst_dir, tag, html_theme))
     return 1 if any(results) else 0
 
 
@@ -98,7 +103,7 @@ def is_dirty() -> bool:
     exit_code, result = sh("git diff --stat")
     if exit_code:
         # Presume dirty if git command failed
-        print('Failed to check if working branch is clean')
+        print('Failed to check if working branch is clean: assuming dirty')
         return True
     if not result.strip():
         # Empty response: no differences
@@ -151,7 +156,7 @@ def get_tags(retry: bool = True):
     return result
 
 
-def build_tag(src_root: Path, dst_root: Path, version: str, html_theme: str = None) -> int:
+def build_tag(src_root: Path, dst_root: Path, version: str, html_theme: str = None, checkout_: bool = True) -> int:
     """
     Checks out a specific version tag on the current branch and builds the documentation.
 
@@ -161,18 +166,24 @@ def build_tag(src_root: Path, dst_root: Path, version: str, html_theme: str = No
     :param version:     The version for which to build documentation ('latest' or a tag).
     :param html_theme:  An optional override to apply to the Sphinx HTML theme.
                         If omitted, the theme as configured in conf.py is used.
+    :param checkout_:   If False, no checkout for the given version will take place.
+                        This may be required when a specific version tag was checked out already,
+                        e.g. by a GitHub Action.
     """
+    version_dir = V_LATEST
     if version != V_LATEST:
-        # Check out the correct tag (use force option)
-        print(f"Checking out {version} tag...")
-        exit_code, result = checkout(f"-f tags/{version}")
-        if exit_code:
-            print(f"Failed to check out tag '{version}'", file=sys.stderr, flush=True)
-            return exit_code
-        # Remove patch suffix from version tag
-        version = '.'.join(version.split('.')[:2])
+        # Remove patch suffix from version tag and use as output directory name
+        version_dir = '.'.join(version.split('.')[:2])
+        print(f"Note: version '{version}' will update docs folder '{version_dir}'")
+        if checkout_:
+            # Check out the correct tag (use force option)
+            print(f"Checking out {version} tag...")
+            exit_code, result = checkout(f"-f tags/{version}")
+            if exit_code:
+                print(f"Failed to check out tag '{version}'", file=sys.stderr, flush=True)
+                return exit_code
     src_dir = src_root / "source"
-    bld_dir = dst_root / version
+    bld_dir = dst_root / version_dir
     if os.path.exists(bld_dir):
         shutil.rmtree(bld_dir)
     os.makedirs(bld_dir)
@@ -202,20 +213,24 @@ def main():
     # Parse arguments
     args = parser.parse_args()
     version = (args.version or '').strip() or None
+    theme_override = (args.theme or '').strip() or None
 
+    gh_ref = None
+    checkout_version = True
     if not version:
         # Get version from GitHub ref tag, if any (i.e. for release event)
         gh_ref = os.environ.get('GITHUB_REF', '')
         if gh_ref.startswith('refs/tags/'):
             tag = gh_ref[10:]
             if VERSION_REGEX.match(tag):
-                print(f"Found tag in $GITHUB_REF {gh_ref}: using {tag} as --version argument")
+                print(f"Found tag '{gh_ref}' in $GITHUB_REF: using '{tag}' as --version argument")
+                checkout_version = False
                 version = tag
 
     # Check final version argument
     if version not in (V_LATEST, V_STABLE, V_ALLVER, None) and not VERSION_REGEX.match(version):
-        print(f"incorrect --version '{version}' specified", file=sys.stdout, flush=True)
-        print(f"--version must be a tag (e.g. '{VERSION_PREFIX}1.2.3') or "
+        print(f"incorrect --version '{version}' specified", file=sys.stderr, flush=True)
+        print(f"version must be a tag (e.g. '{VERSION_PREFIX}1.2.3') or "
               f"'{V_LATEST}' (default if omitted), '{V_STABLE}' or '{V_ALLVER}'")
         sys.exit(2)
     else:
@@ -245,39 +260,43 @@ def main():
         # Temporarily disable detached HEAD warnings
         sh("git config advice.detachedHead false")
 
+        # Checkout tag/latest if not triggered by a GitHub Action
+        if not gh_ref:
+            has_edits = is_dirty()
+            current = current_branch()
+            working = current or args.branch
+            if has_edits:
+                print(f"Current branch{f' {repr(current)}' or ''} has edits: can only build {V_LATEST} version")
+                if version == V_STABLE:
+                    print(f"Cannot build {V_STABLE} version")
+                    sys.exit(1)
+                # If user selected "all", only build "latest"
+                version = V_LATEST
+            elif current != working:
+                print(f"Checking out {working if working else 'default'} branch...")
+                exit_code, output = checkout(working)
+                if exit_code:
+                    print(f"Failed to check out {working if working else 'default'} branch",
+                          file=sys.stderr, flush=True)
+                    sys.exit(exit_code)
+                else:
+                    print(output)
+
         # Clone themes from Git if not present
         if not (themes_dir / '.git').exists():
             clear_target(themes_dir)
             os.chdir(docsrc_dir)
-            print(f"Cloning '{THEMES_DIRNAME}' from {THEMES_REPO}...")
-            exit_code, _ = sh(f'git clone {THEMES_REPO} {THEMES_DIRNAME}')
+            print(f"Cloning from {THEMES_REPO} into '{THEMES_DIRNAME}' folder...")
+            exit_code, _ = sh(f'git clone -q {THEMES_REPO} --single-branch {THEMES_DIRNAME}')
             if exit_code:
-                print(f"Failed to clone {THEMES_REPO} into {docsrc_dir / THEMES_DIRNAME}", file=sys.stdout, flush=True)
-                sys.exit(exit_code)
-            os.chdir(curdir)
-
-        # Checkout tag/latest
-        has_edits = is_dirty()
-        current = current_branch()
-        working = current or args.branch
-        if has_edits:
-            print(f"Current branch{f' {repr(current)}' or ''} has edits: can only build {V_LATEST} version")
-            if version == V_STABLE:
-                print(f"Cannot build {V_STABLE} version")
-                sys.exit(1)
-            # If user selected "all", only build "latest"
-            version = V_LATEST
-        elif current != working:
-            print(f"Checking out {working if working else 'default'} branch...")
-            exit_code, output = checkout(working)
-            if exit_code:
-                print(f"Failed to check out {working if working else 'default'} branch", file=sys.stdout, flush=True)
+                print(f"Failed to clone {THEMES_REPO} into {docsrc_dir / THEMES_DIRNAME}", file=sys.stderr, flush=True)
                 sys.exit(exit_code)
             else:
-                print(output)
+                print(f"Successfully cloned {THEMES_DIRNAME}")
+            os.chdir(curdir)
 
         # Build HTML docs
-        result = build_docs(docsrc_dir, folder, version, (args.theme or '').strip() or None)
+        result = build_docs(docsrc_dir, folder, version, html_theme=theme_override, checkout_=checkout_version)
 
     except SystemExit as err:
         result = err.code
@@ -287,12 +306,14 @@ def main():
             sep = '\n\t'
             print(f"Python paths:{sep}{f'{sep}'.join(sys.path)}")
     finally:
-        # Restore Git repo if there were no errors
-        if not result and current and not has_edits:
-            print(f"Restoring initially checked out {current} branch...")
-            exit_code, output = checkout(current)
+        if not result and not gh_ref and current and not has_edits:
+            # Restore Git repo if there were no errors, the script was not triggered by a GitHub Action,
+            # the name of the working branch could be determined and the original working branch was clean.
+            print(f"Restoring initially checked out '{current}' branch...")
+            # Checkout using quiet option
+            exit_code, output = checkout(f'-q {current}')
             if exit_code:
-                print(f"Failed to check out {current if current else 'default'} branch", file=sys.stdout, flush=True)
+                print(f"Failed to check out '{current if current else 'default'}' branch", file=sys.stderr, flush=True)
             else:
                 print(output)
         print("Done")

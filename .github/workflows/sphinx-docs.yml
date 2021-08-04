@@ -4,9 +4,9 @@ name: Build HTML Docs
 
 on:
   push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+**
     branches: [ master ]
-  release:
-    types: [ created ]
   workflow_dispatch:
     # Workflow can also be triggered manually
     inputs:
@@ -37,6 +37,7 @@ jobs:
           else
             python docs/builddocs.py --theme sphinx_rtd_theme
           fi
+          # Always apply the theme override (in case of older builds with a different theme in conf.py)
       - name: Clone gh-pages branch folder and copy built docs into it
         run: |
           git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git --branch gh-pages --single-branch gh-pages
