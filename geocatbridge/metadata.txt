@@ -8,12 +8,12 @@ about=GeoCat is pleased to offer the Bridge plugin to its customers and the QGIS
  
 experimental=False
 category=Web
-qgisMinimumVersion=3.6
-version=4.1.2
+qgisMinimumVersion=3.10
+version=4.1.3
 email=support@geocat.net
 icon=icons/geocat.png
 tags=GeoServer, MapServer, GeoNetwork, Mapbox style, Geostyler, ISO19139, SLD, GeoPackage, PostGIS
-homepage=http://geocat.net/bridge
+homepage=https://www.geocat.net/bridge
 tracker=https://my.geocat.net/submitticket.php?step=2&deptid=4
 repository=https://github.com/geocat/qgis-bridge-plugin
 hasProcessingProvider=yes
@@ -21,4 +21,4 @@ deprecated=False
 
 [bridge]
 shortName=Bridge
-docs=https://www.geocat.net/docs/bridge/qgis
+docs=https://geocat.github.io/qgis-bridge-plugin/v4.1
