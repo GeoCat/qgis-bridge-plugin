@@ -23,8 +23,10 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         self.results = results
         self.setupUi(self)
 
-        txt_on = self.tr('on').upper()
-        txt_off = self.tr('off').upper()
+        txt_on = self.translate('on').upper()
+        txt_off = self.translate('off').upper()
+        self._txt_warnings = self.translate('warnings')
+        self._txt_errors = self.translate('errors')
 
         self.setWindowIcon(QIcon(files.getIconPath('geocat')))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -56,18 +58,18 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
                 continue
 
             # Show error and warning count and dialog button (for details) in the last column if there are issues
-            status_widget = QWidget()
+            status_widget = QWidget()  # noqa
             layout = QHBoxLayout(status_widget)
             button = QToolButton()
             button.setIcon(QIcon(files.getIconPath("attention")))
-            button.clicked.connect(partial(self.openDetails, name))
-            layout.addWidget(button)
+            button.clicked.connect(partial(self.openDetails, name))  # noqa
+            layout.addWidget(button)  # noqa
             status_lbl = QLabel()
-            status_lbl.setText(self.tr(f"{len(warnings)} warnings, {len(errors)} errors"))
+            status_lbl.setText(f"{len(warnings)} {self._txt_warnings}, {len(errors)} {self._txt_errors}")
             if errors:
                 # Also render text in red if there are any errors
                 status_lbl.setStyleSheet("QLabel { color: red; }")
-            layout.addWidget(status_lbl)
+            layout.addWidget(status_lbl)  # noqa
             layout.setAlignment(Qt.AlignLeft)
             layout.setContentsMargins(0, 0, 0, 0)
             status_widget.setLayout(layout)
@@ -78,5 +80,5 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         warnings, errors = self.results[name]
         w = "".join(f"<p>{w}</p>" for w in warnings).replace("\n", "\n<br>")
         e = "".join(f"<p>{e}</p>" for e in errors).replace("\n", "\n<br>")
-        html = f"<p><b>{self.tr('Warnings:')}</b></p>\n{w}\n<p><b>{self.tr('Errors:')}</b></p>\n{e}"
+        html = f"<p><b>{self._txt_warnings.title()}:</b></p>\n{w}\n<p><b>{self._txt_errors.title()}:</b></p>\n{e}"
         self.showHtmlMessage(f"Issues for layer {name}", html)

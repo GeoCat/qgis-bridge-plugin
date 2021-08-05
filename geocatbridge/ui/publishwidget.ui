@@ -388,17 +388,17 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
                 <widget class="QComboBox" name="comboLanguage">
                  <item>
                   <property name="text">
-                   <string>English</string>
+                   <string notr="true">English</string>
                   </property>
                  </item>
                  <item>
                   <property name="text">
-                   <string>Spanish</string>
+                   <string notr="true">Spanish</string>
                   </property>
                  </item>
                  <item>
                   <property name="text">
-                   <string>French</string>
+                   <string notr="true">French</string>
                   </property>
                  </item>
                 </widget>

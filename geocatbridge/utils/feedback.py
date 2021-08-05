@@ -17,24 +17,24 @@ def _log(message, level):
     _LOGGER.logMessage(message, getAppName(), level)
 
 
-def _translate(message):
+def translate(message, *args, **kwargs):
     """ Tries to translate the given message within the GeoCat Bridge context. """
-    return QtCore.QCoreApplication.translate(getAppName(), str(message))
+    return QtCore.QCoreApplication.translate(getAppName(), str(message), *args, **kwargs)
 
 
 def logInfo(message):
     """ Logs a basic information message. """
-    _log(_translate(message), Qgis.Info)
+    _log(translate(message), Qgis.Info)
 
 
 def logWarning(message):
     """ Logs a basic warning message. """
-    _log(_translate(message), Qgis.Warning)
+    _log(translate(message), Qgis.Warning)
 
 
 def logError(message):
     """ Logs a basic error message. """
-    _log(_translate(message), Qgis.Critical)
+    _log(translate(message), Qgis.Critical)
 
 
 class Buttons:
@@ -54,9 +54,7 @@ class FeedbackMixin:
         self._warnings = []
         self._main_bar = iface.messageBar()
         self._widget_bar = self._main_bar
-        if not hasattr(self, 'tr'):
-            # Do not reset the translate function if it's already there
-            self.tr = None
+        self.translate = translate
 
     def _updateWidgetBar(self):
         """ Updates the _widget_bar property if the widget layout has been initialized. """
@@ -65,18 +63,10 @@ class FeedbackMixin:
             self._widget_bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
             self.layout().insertWidget(0, self._widget_bar)
 
-    def _translate(self, message, context=None):
-        if context:
-            return QtCore.QCoreApplication.translate(context, message)
-        if self.tr:
-            return self.tr(message)
-        # No translation without context or QTranslator
-        return message
-
-    def _log(self, message, level, context=None):
+    def _log(self, message, level):
         if isinstance(message, Exception):
             message = str(message)
-        text = self.translate(context or getAppName(), message)
+        text = self.translate(message)
         _log(text, level)
         if level == Qgis.Warning:
             self._warnings.append(text)
@@ -90,8 +80,8 @@ class FeedbackMixin:
         self._log(message if value is True else value, level)
 
     def _show_bar(self, title, message, level, **kwargs):
-        title = self._translate(title)
-        message = self._translate(message)
+        title = self.translate(title)
+        message = self.translate(message)
         self._updateWidgetBar()
         bar = self._main_bar if kwargs.get('main') else self._widget_bar
         bar.pushMessage(title, message, level=level, duration=5)
@@ -102,23 +92,19 @@ class FeedbackMixin:
         if not isinstance(parent, QWidget):
             parent = None
         self._propagate(message, getattr(Qgis, f.__name__.title(), None), **kwargs)
-        return f(parent, self._translate(title), self._translate(message), **kwargs)
+        return f(parent, self.translate(title), self.translate(message), **kwargs)
 
-    def translate(self, context, message):
-        """ Tries to translate a message within the provided context. """
-        return self._translate(message, context)
-
-    def logInfo(self, message, context=None):
+    def logInfo(self, message):
         """ Logs an information message. """
-        self._log(message, Qgis.Info, context)
+        self._log(message, Qgis.Info)
 
-    def logWarning(self, message, context=None):
+    def logWarning(self, message):
         """ Logs a warning message. """
-        self._log(message, Qgis.Warning, context)
+        self._log(message, Qgis.Warning)
 
-    def logError(self, message, context=None):
+    def logError(self, message):
         """ Logs an error message. """
-        self._log(message, Qgis.Critical, context)
+        self._log(message, Qgis.Critical)
 
     def getLogIssues(self):
         """ Returns a tuple of all logged (warnings, errors). """
@@ -178,7 +164,7 @@ class FeedbackMixin:
         :param callback:        Callback function to be executed when the user presses "Cancel".
         :return:                A QProgressDialog instance.
         """
-        pg_dialog = QProgressDialog(label, self.tr("Cancel"), 0, max_length,
+        pg_dialog = QProgressDialog(label, self.translate("Cancel"), 0, max_length,
                                     self if isinstance(self, QWidget) else None)
         pg_dialog.canceled.connect(callback, type=QtCore.Qt.DirectConnection)  # noqa
         pg_dialog.setWindowModality(QtCore.Qt.WindowModal)
@@ -230,6 +216,6 @@ class FeedbackMixin:
         :param html:    The HTML body to display.
         """
         dlg = QgsMessageOutput.createMessageOutput()  # noqa
-        dlg.setTitle(self._translate(title))
+        dlg.setTitle(self.translate(title))
         dlg.setMessage(html, QgsMessageOutput.MessageHtml)
         dlg.showMessage()
