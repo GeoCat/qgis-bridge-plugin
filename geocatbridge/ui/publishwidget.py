@@ -77,9 +77,9 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.isDataPublished = {}
 
         # Default "not set" values for comboboxes
-        self.COMBO_NOTSET_LANG = self.tr("Not specified")
-        self.COMBO_NOTSET_DATA = self.tr("Do not publish data")
-        self.COMBO_NOTSET_META = self.tr("Do not publish metadata")
+        self.COMBO_NOTSET_LANG = self.translate("Not specified")
+        self.COMBO_NOTSET_DATA = self.translate("Do not publish data")
+        self.COMBO_NOTSET_META = self.translate("Do not publish metadata")
 
         # Initialize the UI and populate with data
         self._setupUi()
@@ -203,7 +203,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.updateOnlineLayersPublicationStatus()
 
     def selectExportFolder(self):
-        folder = QFileDialog.getExistingDirectory(self, self.tr("Export to folder"))
+        folder = QFileDialog.getExistingDirectory(self, self.translate("Export to folder"))
         if folder:
             self.txtExportFolder.setText(folder)
 
@@ -225,7 +225,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         # TODO: implement other profile tabs
         if num_tabs == 1:
             self.tabWidgetMetadata.addTab(self.tabInspire, profile)
-            self.tabWidgetMetadata.addTab(self.tabTemporal, self.tr("Temporal"))
+            self.tabWidgetMetadata.addTab(self.tabTemporal, self.translate("Temporal"))
 
     def selectLabelClicked(self, url):
         """ Selects all layers if 'all' is clicked and deselects all layers if 'none' is clicked. """
@@ -322,13 +322,13 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         layer_id = self.listLayers.itemWidget(item).id
         menu = QMenu()
         if self.isDataPublished.get(layer_id):
-            menu.addAction(self.tr("View WMS layer"), partial(self.viewWms, layer_id))
-            # menu.addAction(self.tr("Unpublish geodata"), partial(self.unpublishData, layer_id))
+            menu.addAction(self.translate("View WMS layer"), partial(self.viewWms, layer_id))
+            # menu.addAction(self.translate("Unpublish geodata"), partial(self.unpublishData, layer_id))
         if self.isMetadataPublished.get(layer_id):
-            menu.addAction(self.tr("View metadata"), partial(self.viewMetadata, layer_id))
-            # menu.addAction(self.tr("Unpublish metadata"), partial(self.unpublishMetadata, layer_id))
+            menu.addAction(self.translate("View metadata"), partial(self.viewMetadata, layer_id))
+            # menu.addAction(self.translate("Unpublish metadata"), partial(self.unpublishMetadata, layer_id))
         if any(self.isDataPublished.values()):
-            menu.addAction(self.tr("View all WMS layers"), self.viewAllWms)
+            menu.addAction(self.translate("View all WMS layers"), self.viewAllWms)
         menu.exec_(self.listLayers.mapToGlobal(pos))
 
     def populateLayers(self):
@@ -399,7 +399,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                                        "Could not find a suitable metadata XML file.\n"
                                        "Would you like to select it manually?")
             if res == self.BUTTONS.YES:
-                metadata_file, _ = QFileDialog.getOpenFileName(self, self.tr("Metadata file"),
+                metadata_file, _ = QFileDialog.getOpenFileName(self, self.translate("Metadata file"),
                                                                files.getDirectory(self.currentLayer.source()), '*.xml')
 
         if metadata_file:
@@ -424,10 +424,12 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         validator = QgsNativeMetadataValidator()
         result, errors = validator.validate(self.metadata[self.currentLayer.id()])
         if result:
-            html = f"<p>{self.tr('No validation errors')}</p>"
+            tr_text = self.translate('No validation errors')
+            html = f"<p>{tr_text}</p>"
         else:
             issues = "".join(f"<li><b>{e.section}</b>: {e.note}</li>" for e in errors)
-            html = f"<p>{self.tr('The following issues were found')}:<ul>{issues}</ul></p>"
+            tr_text = self.translate('The following issues were found')
+            html = f"<p>{tr_text}:<ul>{issues}</ul></p>"
         self.showHtmlMessage("Metadata validation", html)
 
     def openMetadataEditor(self, tab):

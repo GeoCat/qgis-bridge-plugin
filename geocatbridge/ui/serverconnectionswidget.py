@@ -73,8 +73,8 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self.buttonTest.setVisible(self.stackedWidget.widget(widget_index) not in (None, self.widgetEmpty))
 
     def exportServers(self):
-        filename = QFileDialog.getSaveFileName(self, self.tr("Export servers"),
-                                               filter=self.tr("Server configuration (*.json)"),
+        filename = QFileDialog.getSaveFileName(self, self.translate("Export servers"),
+                                               filter=f'{self.translate("Server configuration")} (*.json)',
                                                options=QFileDialog.DontUseNativeDialog)[0]
         if not filename:
             self.logWarning("No export filename specified")
@@ -96,8 +96,8 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.showErrorBar("Error", "Failed to write server configuration JSON file. Please check QGIS log.")
 
     def importServers(self):
-        filename = QFileDialog.getOpenFileName(self, self.tr("Import servers"),
-                                               filter=self.tr("Server configuration (*.json)"),
+        filename = QFileDialog.getOpenFileName(self, self.translate("Import servers"),
+                                               filter=f'{self.translate("Server configuration")} (*.json)',
                                                options=QFileDialog.DontUseNativeDialog)[0]
         if not filename:
             self.logWarning("No export filename specified")

@@ -1,9 +1,9 @@
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingAlgorithm
 
 from geocatbridge.utils import meta
 from geocatbridge.utils.files import getIconPath
+from geocatbridge.utils.feedback import translate
 
 
 class BridgeAlgorithm(QgsProcessingAlgorithm):
@@ -17,6 +17,7 @@ class BridgeAlgorithm(QgsProcessingAlgorithm):
 
     def __init__(self):
         super().__init__()
+        self.tr = translate
 
     def initAlgorithm(self, config=None):  # noqa
         super().initAlgorithm(config)
@@ -32,12 +33,6 @@ class BridgeAlgorithm(QgsProcessingAlgorithm):
 
     def groupId(self):
         return meta.PLUGIN_NAMESPACE
-
-    def tr(self, string):
-        """
-        Returns a translatable string with the self.tr() function.
-        """
-        return QCoreApplication.translate('Processing', string)
 
     def tags(self):
         return []

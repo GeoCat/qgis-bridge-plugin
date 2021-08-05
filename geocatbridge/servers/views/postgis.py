@@ -69,7 +69,7 @@ class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
         self.txtPostgisPort.setText(str(server.port))
         self.txtPostgisServerAddress.setText(server.host)
         self.txtPostgisSchema.setText(server.schema)
-        self.postgisAuth.setConfigId(server.authid)
+        self.postgisAuth.setConfigId(server.authId)
 
         # After the data has loaded, the form is "clean"
         self.setClean()

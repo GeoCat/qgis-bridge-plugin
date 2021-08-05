@@ -106,6 +106,7 @@ venv.bak/
 .mypy_cache/
 
 # PyCharm IDE
+.run/
 .idea/
 *debug/
 

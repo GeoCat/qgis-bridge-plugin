@@ -1,5 +1,4 @@
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingProvider
 
@@ -15,12 +14,13 @@ class BridgeProvider(QgsProcessingProvider):
 
     def __init__(self):
         super().__init__()
+        self.tr = feedback.translate
 
     def id(self):
         return meta.PLUGIN_NAMESPACE
 
     def name(self):
-        return self.tr(meta.getAppName())
+        return meta.getAppName()
 
     def icon(self):
         return QIcon(getIconPath("geocat"))
@@ -59,6 +59,3 @@ class BridgeProvider(QgsProcessingProvider):
                                   f"instance does not inherit {BridgeAlgorithm.__name__}")
                 continue
             self.addAlgorithm(algorithm)
-
-    def tr(self, string, **kwargs):
-        return QCoreApplication.translate(meta.getAppName(), string)
