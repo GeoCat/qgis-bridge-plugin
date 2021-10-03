@@ -27,7 +27,7 @@ def getModelLookup(force: bool = False) -> dict:
         # Do nothing if the server types were already loaded
         return _types
 
-    package_dir = Path(models.__file__).resolve().parent
+    package_dir = str(Path(models.__file__).resolve().parent)
     for (_, module_name, _) in iter_modules([package_dir]):
         module = import_module(f"{models.__name__}.{module_name}")
         # Iterate all non-imported classes in the module
