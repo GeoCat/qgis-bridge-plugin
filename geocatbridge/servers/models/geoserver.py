@@ -14,8 +14,9 @@ from qgis.core import (
 )
 from requests.exceptions import HTTPError, RequestException
 
-from bridgestyle import mapboxgl
-from bridgestyle.qgis import saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder
+from geocatbridge.publish.style import (
+    saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder, convertMapboxGroup
+)
 from geocatbridge.process.algorithm import BridgeAlgorithm
 from geocatbridge.publish.exporter import exportLayer
 from geocatbridge.servers import manager
@@ -521,9 +522,9 @@ class GeoserverServer(DataCatalogServerBase):
         name = group["name"]
         # compute actual style
         mbstylestring, warnings, obj, sprite_sheet = \
-            mapboxgl.fromgeostyler.convertGroup(
+            convertMapboxGroup(
                 group, qgis_layers, self.apiUrl, self.workspace, group["name"]
-            )
+            )  # FIXME!
 
         # publish to geoserver
         self._ensureWorkspaceExists()
@@ -653,10 +654,14 @@ class GeoserverServer(DataCatalogServerBase):
             return False
 
     def layerExists(self, name):
+        if not self.workspace:
+            return False
         url = f"{self.apiUrl}/workspaces/{self.workspace}/layers.json"
         return self._exists(url, "layer", name)
 
     def layers(self):
+        if not self.workspace:
+            return []
         url = f"{self.apiUrl}/workspaces/{self.workspace}/layers.json"
         r = self.request(url)
         root = r.json()["layers"]
@@ -666,6 +671,8 @@ class GeoserverServer(DataCatalogServerBase):
             return []
 
     def styleExists(self, name):
+        if not self.workspace:
+            return False
         url = f"{self.apiUrl}/workspaces/{self.workspace}/styles.json"
         return self._exists(url, "style", name)
 

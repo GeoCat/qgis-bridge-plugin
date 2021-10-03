@@ -11,8 +11,7 @@ from qgis.core import (
     QgsWkbTypes
 )
 
-from bridgestyle.mapserver.fromgeostyler import convertDictToMapfile
-from bridgestyle.qgis import layerStyleAsMapfileFolder
+from geocatbridge.publish.style import convertDictToMapfile, layerStyleAsMapfileFolder
 from geocatbridge.publish.exporter import exportLayer
 from geocatbridge.publish.ftpupload import uploadFolder
 from geocatbridge.servers.bases import DataCatalogServerBase

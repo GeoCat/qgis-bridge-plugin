@@ -54,8 +54,8 @@ from qgis.core import (
     QgsVectorLayer
 )
 
-import bridgestyle
-from bridgestyle.qgis import layerStyleAsSld
+from geocatbridge.libs.bridgestyle import bridgestyle
+from geocatbridge.publish.style import layerStyleAsSld
 from geocatbridge.servers.models.geoserver import GeoserverServer
 
 

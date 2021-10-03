@@ -6,8 +6,9 @@ from qgis.PyQt.QtGui import QFont, QColor, QFontMetrics
 from qgis.PyQt.QtWidgets import QVBoxLayout
 from qgis.utils import iface
 
-from bridgestyle.qgis import layerStyleAsSld, layerStyleAsMapbox, layerStyleAsMapfile
-from bridgestyle.qgis.togeostyler import convert
+from geocatbridge.publish.style import (
+    layerStyleAsSld, layerStyleAsMapbox, layerStyleAsMapfile, convertStyle
+)
 from geocatbridge.utils.layers import isSupported
 from geocatbridge.utils import gui
 
@@ -56,7 +57,7 @@ class StyleviewerWidget(BASE, WIDGET):
         warnings = set()
         if isSupported(layer):
             sld, _, sld_warnings = layerStyleAsSld(layer)
-            geostyler, _, _, geostyler_warnings = convert(layer)
+            geostyler, _, _, geostyler_warnings = convertStyle(layer)
             geostyler = json.dumps(geostyler, indent=4)
             mapbox, _, mapbox_warnings = layerStyleAsMapbox(layer)
             mapserver, _, _, mapserver_warnings = layerStyleAsMapfile(layer)

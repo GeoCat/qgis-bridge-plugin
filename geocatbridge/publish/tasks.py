@@ -17,7 +17,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem
 )
 
-from bridgestyle.qgis import saveLayerStyleAsZippedSld
+from geocatbridge.publish.style import saveLayerStyleAsZippedSld
 from geocatbridge.publish.exporter import exportLayer
 from geocatbridge.publish.metadata import uuidForLayer, saveMetadata
 from geocatbridge.ui.progressdialog import DATA, METADATA, SYMBOLOGY, GROUPS
