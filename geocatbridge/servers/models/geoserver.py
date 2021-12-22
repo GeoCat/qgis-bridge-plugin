@@ -31,7 +31,8 @@ from geocatbridge.utils.network import TESTCON_TIMEOUT
 
 class GeoserverServer(DataCatalogServerBase):
 
-    def __init__(self, name, authid="", url="", storage=GeoserverStorage.FILE_BASED, postgisdb=None,
+    def __init__(self, name, authid="", url="", ignoreSSLErrors=False,
+                 storage=GeoserverStorage.FILE_BASED, postgisdb=None,
                  useOriginalDataSource=False, useVectorTiles=False):
         """
         Creates a new GeoServer model instance.
@@ -41,11 +42,12 @@ class GeoserverServer(DataCatalogServerBase):
         :param url:                     GeoServer base or REST API URL
         :param storage:                 Data storage type (default = FILE_BASED)
         :param postgisdb:               PostGIS database (required if `storage` is *not* FILE_BASED)
+        :param ignoreSSLErrors:         Instructs the requests lib to ignore SSL certificate errors, if any (unsafe!)
         :param useOriginalDataSource:   Set to True if original data source should be used.
                                         This means that no data will be uploaded.
         :param useVectorTiles:          Set to True if vector tiles need to be published.
         """
-        super().__init__(name, authid, url)
+        super().__init__(name, authid, url, ignoreSSLErrors)
         self.postgisdb = None
         try:
             self.storage = GeoserverStorage[storage]
@@ -68,6 +70,7 @@ class GeoserverServer(DataCatalogServerBase):
             'name': self.serverName,
             'authid': self.authId,
             'url': self.baseUrl,
+            'ignoreSSLErrors': self.ignoreSSLErrors,
             'storage': self.storage,
             'postgisdb': self.postgisdb,
             'useOriginalDataSource': self.useOriginalDataSource,

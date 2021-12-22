@@ -24,6 +24,7 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
 
         self.populateProfileCombo()
         self.comboMetadataProfile.currentIndexChanged.connect(self.setDirty)
+        self.chkIgnoreCertErrors.stateChanged.connect(self.setDirty)
 
         # TODO: implement profile stuff
         self.comboMetadataProfile.setVisible(False)
@@ -43,6 +44,7 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
                 name=name,
                 authid=self.geonetworkAuth.configId() or None,
                 url=url,
+                ignoreSSLErrors=self.chkIgnoreCertErrors.isChecked(),
                 # profile=self.comboMetadataProfile.currentIndex(),
                 node=self.txtGeonetworkNode.text().strip() or 'srv'
             )
@@ -56,6 +58,7 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         self.txtGeonetworkUrl.clear()
         self.txtGeonetworkNode.clear()
         self.geonetworkAuth.setConfigId(None)
+        self.chkIgnoreCertErrors.setChecked(False)
 
         # Reset profile combobox
         self.comboMetadataProfile.blockSignals(True)
@@ -67,6 +70,7 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         self.txtGeonetworkName.setText(server.serverName)
         self.txtGeonetworkUrl.setText(server.baseUrl)
         self.geonetworkAuth.setConfigId(server.authId)
+        self.chkIgnoreCertErrors.setChecked(server.ignoreSSLErrors)
 
         # Reset profile combobox
         self.comboMetadataProfile.blockSignals(True)

@@ -36,6 +36,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.txtGeoserverUrl.textChanged.connect(self.setDirty)
         self.chkUseOriginalDataSource.stateChanged.connect(self.setDirty)
         self.chkUseVectorTiles.stateChanged.connect(self.setDirty)
+        self.chkIgnoreCertErrors.stateChanged.connect(self.setDirty)
         self.comboGeoserverDatabase.currentIndexChanged.connect(self.setDirty)
 
     def createServerInstance(self):
@@ -57,6 +58,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                 name=name,
                 authid=self.geoserverAuth.configId() or None,
                 url=url,
+                ignoreSSLErrors=self.chkIgnoreCertErrors.isChecked(),
                 storage=storage,
                 postgisdb=db,
                 useOriginalDataSource=self.chkUseOriginalDataSource.isChecked(),
@@ -78,6 +80,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.datastoreChanged(GeoserverStorage.FILE_BASED)
         self.chkUseOriginalDataSource.setChecked(False)
         self.chkUseVectorTiles.setChecked(False)
+        self.chkIgnoreCertErrors.setChecked(False)
         self.comboStorageType.blockSignals(False)
 
     def loadFromInstance(self, server):
@@ -90,6 +93,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         self.comboStorageType.blockSignals(True)
         self.comboStorageType.setCurrentIndex(server.storage)
         self.datastoreChanged(server.storage, server.postgisdb)
+        self.chkIgnoreCertErrors.setChecked(server.ignoreSSLErrors)
         self.chkUseOriginalDataSource.setChecked(server.useOriginalDataSource)
         self.chkUseVectorTiles.setChecked(server.useVectorTiles)
         self.comboStorageType.blockSignals(False)

@@ -187,9 +187,10 @@ class CombiServerBase(AbstractServer, FeedbackMixin, ABC):
 
 class CatalogServerBase(ServerBase, ABC):
 
-    def __init__(self, name, authid="", url=""):
+    def __init__(self, name, authid="", url="", ignore_ssl_errors=False):
         super().__init__(name, authid)
         self._baseurl = urlparse(url).geturl()
+        self._sslverify = not ignore_ssl_errors
 
     def request(self, url, method="get", data=None, **kwargs):
         """ Wrapper function for HTTP requests. """
@@ -221,6 +222,7 @@ class CatalogServerBase(ServerBase, ABC):
             with BridgeSession() as session:
                 req_method = getattr(session, method.casefold())
 
+        kwargs['verify'] = self._sslverify
         result = req_method(url, headers=headers, files=files_, data=data, auth=auth, **kwargs)
         result.raise_for_status()
         return result
@@ -229,6 +231,11 @@ class CatalogServerBase(ServerBase, ABC):
     def baseUrl(self):
         """ Returns the base part of the server URL. """
         return self._baseurl
+
+    @property
+    def ignoreSSLErrors(self):
+        """ Returns if SSL errors should be ignored (unsafe!). """
+        return not self._sslverify
 
     def addOGCServices(self):
         pass
@@ -239,8 +246,8 @@ class CatalogServerBase(ServerBase, ABC):
 
 class MetaCatalogServerBase(CatalogServerBase, ABC):
 
-    def __init__(self, name, authid="", url=""):
-        super().__init__(name, authid, url)
+    def __init__(self, name, authid="", url="", ignore_ssl_errors=False):
+        super().__init__(name, authid, url, ignore_ssl_errors)
 
     def openMetadata(self, uuid):
         pass
@@ -252,8 +259,8 @@ class MetaCatalogServerBase(CatalogServerBase, ABC):
 
 class DataCatalogServerBase(CatalogServerBase, ABC):
 
-    def __init__(self, name, authid="", url=""):
-        super().__init__(name, authid, url)
+    def __init__(self, name, authid="", url="", ignore_ssl_errors=False):
+        super().__init__(name, authid, url, ignore_ssl_errors)
 
     def prepareForPublishing(self, only_symbology: bool):
         """ This method is called right before any publication takes place.

@@ -45,18 +45,20 @@ class GeonetworkAuthError(Exception):
 
 class GeonetworkServer(MetaCatalogServerBase):
 
-    def __init__(self, name, authid="", url="", profile=GeoNetworkProfiles.DEFAULT, node="srv"):
+    def __init__(self, name, authid="", url="", ignoreSSLErrors=False,
+                 profile=GeoNetworkProfiles.DEFAULT, node="srv"):
         """
         Creates a new GeoNetwork model instance.
 
-        :param name:    Descriptive server name (given by the user)
-        :param authid:  QGIS Authentication ID (optional)
-        :param url:     GeoNetwork base URL
-        :param profile: GeoNetwork metadata profile type (optional)
-        :param node:    GeoNetwork node name (default = srv)
+        :param name:            Descriptive server name (given by the user)
+        :param authid:          QGIS Authentication ID (optional)
+        :param url:             GeoNetwork base URL
+        :param ignoreSSLErrors: Instructs the requests lib to ignore SSL certificate errors, if any (unsafe!)
+        :param profile:         GeoNetwork metadata profile type (optional)
+        :param node:            GeoNetwork node name (default = srv)
         """
 
-        super().__init__(name, authid, url)
+        super().__init__(name, authid, url, ignoreSSLErrors)
         try:
             self.profile = GeoNetworkProfiles[profile]
         except IndexError:
@@ -70,6 +72,7 @@ class GeonetworkServer(MetaCatalogServerBase):
             'authid': self.authId,
             'url': self.baseUrl,
             'profile': self.profile,
+            'ignoreSSLErrors': self.ignoreSSLErrors,
             'node': self.node
         }
 
