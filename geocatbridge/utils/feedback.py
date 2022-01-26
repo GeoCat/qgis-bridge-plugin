@@ -1,3 +1,5 @@
+import inspect
+
 from qgis.PyQt import QtCore
 from qgis.PyQt.QtWidgets import QMessageBox, QWidget, QProgressDialog
 from qgis.PyQt.QtWidgets import QSizePolicy
@@ -19,7 +21,7 @@ def _log(message, level):
 
 def translate(message, *args, **kwargs):
     """ Tries to translate the given message within the GeoCat Bridge context. """
-    return QtCore.QCoreApplication.translate(getAppName(), str(message), *args, **kwargs)
+    return QtCore.QCoreApplication.translate(getAppName(), str(message), *args, **kwargs)  # noqa
 
 
 def logInfo(message):
@@ -35,6 +37,25 @@ def logWarning(message):
 def logError(message):
     """ Logs a basic error message. """
     _log(translate(message), Qgis.Critical)
+
+
+def inject(f, kwarg_name: str = 'feedback'):
+    """ Decorator that can be used to inject a FeedbackMixin instance into the 'feedback' keyword argument
+    of a wrapped function, if that function has **kwargs and the caller has/is a FeedbackMixin.
+    If the wrapped function already has a 'feedback' keyword argument or the caller does not have a FeedbackMixin,
+    this decorator does nothing. The wrapped function is responsible for handling the 'feedback' argument correctly.
+    """
+    def wrapper(*args, **kwargs):
+        try:
+            has_kwargs = inspect.getfullargspec(f).varkw is not None
+            caller = inspect.stack()[1][0].f_locals['self']
+        except (KeyError, IndexError, AttributeError):
+            has_kwargs = False
+            caller = None
+        if isinstance(caller, FeedbackMixin) and has_kwargs and kwarg_name not in kwargs:
+            kwargs[kwarg_name] = caller
+        return f(*args, **kwargs)
+    return wrapper
 
 
 class Buttons:

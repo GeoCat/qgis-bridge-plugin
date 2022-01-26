@@ -550,12 +550,12 @@
         <translation type="obsolete">Stijl conversie voorvertoning</translation>
     </message>
     <message>
-        <location filename="../publish/exporter.py" line="34"/>
+        <location filename="../publish/export.py" line="34"/>
         <source>Layer %s exported to %s</source>
         <translation type="obsolete">Laad %s geexporteerd naar %s</translation>
     </message>
     <message>
-        <location filename="../publish/exporter.py" line="37"/>
+        <location filename="../publish/export.py" line="37"/>
         <source>No need to export layer %s stored at %s</source>
         <translation type="obsolete">Niet nodig om laag %s te exporteren naar %s</translation>
     </message>

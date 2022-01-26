@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>495</width>
-    <height>180</height>
+    <height>148</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -52,10 +52,49 @@
       </property>
       <item>
        <layout class="QGridLayout" name="gridLayout_4">
+        <item row="4" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QComboBox" name="comboMetadataProfile"/>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="1">
+         <widget class="QWidget" name="geonetworkAuthWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="txtGeonetworkUrl"/>
+        </item>
         <item row="4" column="0">
-         <widget class="QLabel" name="label_17">
+         <widget class="QLabel" name="labelMetadataProfile">
           <property name="text">
-           <string>Credentials</string>
+           <string>Metadata profile</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="txtGeonetworkName"/>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_15">
+          <property name="text">
+           <string>Name</string>
           </property>
          </widget>
         </item>
@@ -83,59 +122,10 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_15">
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_17">
           <property name="text">
-           <string>Name</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_8">
-          <item>
-           <widget class="QComboBox" name="comboMetadataProfile"/>
-          </item>
-         </layout>
-        </item>
-        <item row="4" column="1">
-         <widget class="QWidget" name="geonetworkAuthWidget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="txtGeonetworkUrl"/>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="labelMetadataProfile">
-          <property name="text">
-           <string>Metadata profile</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="txtGeonetworkName"/>
-        </item>
-        <item row="3" column="1">
-         <widget class="QCheckBox" name="chkIgnoreCertErrors">
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>Ignore SSL certificate errors (unsafe)</string>
+           <string>Credentials</string>
           </property>
          </widget>
         </item>

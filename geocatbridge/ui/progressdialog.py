@@ -28,7 +28,7 @@ class ProgressDialog(BASE, WIDGET):
         self.populateTree()
 
     def populateTree(self):
-        for lyr_name in (lyr_utils.getLayerById(id_).name() for id_ in self.layer_ids):
+        for lyr_name in (lyr_utils.layerById(id_).name() for id_ in self.layer_ids):
             item = QTreeWidgetItem()
             item.setText(0, lyr_name)
             subitem = QTreeWidgetItem()

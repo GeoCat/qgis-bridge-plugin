@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 from xml.etree import ElementTree as ETree
 
 import requests
+from geocatbridge.utils.layers import BridgeLayer
 from qgis.core import (
     QgsProcessingParameterMapLayer,
     QgsProcessingParameterString,
@@ -45,20 +46,18 @@ class GeonetworkAuthError(Exception):
 
 class GeonetworkServer(MetaCatalogServerBase):
 
-    def __init__(self, name, authid="", url="", ignoreSSLErrors=False,
-                 profile=GeoNetworkProfiles.DEFAULT, node="srv"):
+    def __init__(self, name, authid="", url="", profile=GeoNetworkProfiles.DEFAULT, node="srv"):
         """
         Creates a new GeoNetwork model instance.
 
         :param name:            Descriptive server name (given by the user)
         :param authid:          QGIS Authentication ID (optional)
         :param url:             GeoNetwork base URL
-        :param ignoreSSLErrors: Instructs the requests lib to ignore SSL certificate errors, if any (unsafe!)
         :param profile:         GeoNetwork metadata profile type (optional)
         :param node:            GeoNetwork node name (default = srv)
         """
 
-        super().__init__(name, authid, url, ignoreSSLErrors)
+        super().__init__(name, authid, url)
         try:
             self.profile = GeoNetworkProfiles[profile]
         except IndexError:
@@ -72,7 +71,6 @@ class GeonetworkServer(MetaCatalogServerBase):
             'authid': self.authId,
             'url': self.baseUrl,
             'profile': self.profile,
-            'ignoreSSLErrors': self.ignoreSSLErrors,
             'node': self.node
         }
 
@@ -84,8 +82,9 @@ class GeonetworkServer(MetaCatalogServerBase):
     def getLabel(cls) -> str:
         return 'GeoNetwork'
 
-    def publishLayerMetadata(self, layer, wms, wfs, layer_name):
-        mef_filename = saveMetadata(layer, None, self.apiUrl, wms, wfs, layer_name)
+    def publishLayerMetadata(self, layer: BridgeLayer,
+                             wms_url: str = None, wfs_url: str = None, linked_name: str = None):
+        mef_filename = saveMetadata(layer, None, self.apiUrl, wms_url, wfs_url, linked_name)
         result = self.publishMetadata(mef_filename)
         self.processApiResult(result)
 
@@ -250,12 +249,12 @@ class GeonetworkAlgorithm(BridgeAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
         url = self.parameterAsString(parameters, self.URL, context)
         authid = self.parameterAsString(parameters, self.AUTHID, context)
-        layer = self.parameterAsLayer(parameters, self.INPUT, context)
+        layer = BridgeLayer(self.parameterAsLayer(parameters, self.INPUT, context))
 
-        feedback.pushInfo(f'Publishing {layer} metadata to GeoNetwork...')
+        feedback.pushInfo(f'Publishing {layer.name()} metadata to GeoNetwork...')
         try:
             server = GeonetworkServer(GeonetworkServer.__name__, authid, url)
-            server.publishLayerMetadata(layer, None, None, None)
+            server.publishLayerMetadata(layer)
         except Exception as err:
             feedback.reportError(err, True)
 

@@ -9,7 +9,7 @@ from qgis.utils import iface
 from geocatbridge.publish.style import (
     layerStyleAsSld, layerStyleAsMapbox, layerStyleAsMapfile, convertStyle
 )
-from geocatbridge.utils.layers import isSupported
+from geocatbridge.utils.layers import isSupportedLayer
 from geocatbridge.utils import gui
 
 WIDGET, BASE = gui.loadUiType(__file__)
@@ -55,11 +55,17 @@ class StyleviewerWidget(BASE, WIDGET):
         mapbox = ""
         mapserver = ""
         warnings = set()
-        if isSupported(layer):
-            sld, _, sld_warnings = layerStyleAsSld(layer)
+        if isSupportedLayer(layer):
+            try:
+                sld, _, sld_warnings = layerStyleAsSld(layer)
+            except Exception as e:
+                sld_warnings = [f"Failed to convert to SLD: {e}"]
             geostyler, _, _, geostyler_warnings = convertStyle(layer)
             geostyler = json.dumps(geostyler, indent=4)
-            mapbox, _, mapbox_warnings = layerStyleAsMapbox(layer)
+            try:
+                mapbox, _, mapbox_warnings = layerStyleAsMapbox(layer)
+            except Exception as e:
+                mapbox_warnings = [f"Failed to convert to Mapbox GL: {e}"]
             mapserver, _, _, mapserver_warnings = layerStyleAsMapfile(layer)
             warnings.update(chain(sld_warnings, geostyler_warnings, mapbox_warnings, mapserver_warnings))
         self.txtSld.setText(sld)

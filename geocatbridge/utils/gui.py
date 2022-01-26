@@ -28,7 +28,7 @@ def execute(func, *args, **kwargs):
         return func(*args, **kwargs)
     finally:
         QApplication.restoreOverrideCursor()
-        QtCore.QCoreApplication.processEvents()
+        QtCore.QCoreApplication.processEvents()  # noqa
 
 
 class ItemProcessor(QtCore.QThread):

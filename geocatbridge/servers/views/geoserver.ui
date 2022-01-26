@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>508</width>
-    <height>232</height>
+    <width>493</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -58,10 +58,39 @@
         <property name="horizontalSpacing">
          <number>6</number>
         </property>
-        <item row="4" column="1">
-         <widget class="QCheckBox" name="chkUseOriginalDataSource">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_3">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="txtGeoserverName"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="labelGeoserverDatastore">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Datastore</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QWidget" name="geoserverAuthWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -72,14 +101,14 @@
             <height>20</height>
            </size>
           </property>
-          <property name="baseSize">
+          <property name="maximumSize">
            <size>
-            <width>0</width>
-            <height>0</height>
+            <width>16777215</width>
+            <height>20</height>
            </size>
           </property>
-          <property name="text">
-           <string>Connect GeoServer to original data source if possible (do not upload)</string>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
           </property>
          </widget>
         </item>
@@ -171,6 +200,34 @@
           </item>
          </layout>
         </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="txtGeoserverUrl"/>
+        </item>
+        <item row="4" column="1">
+         <widget class="QCheckBox" name="chkUseOriginalDataSource">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Connect GeoServer to original data source if possible (do not upload)</string>
+          </property>
+         </widget>
+        </item>
         <item row="5" column="1">
          <widget class="QCheckBox" name="chkUseVectorTiles">
           <property name="sizePolicy">
@@ -200,77 +257,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="txtGeoserverUrl"/>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="labelGeoserverDatastore">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Datastore</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QWidget" name="geoserverAuthWidget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="txtGeoserverName"/>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Name</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_6">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Storage</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
+        <item row="6" column="0">
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>Credentials</string>
@@ -290,13 +277,16 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
-         <widget class="QCheckBox" name="chkIgnoreCertErrors">
-          <property name="contextMenuPolicy">
-           <enum>Qt::NoContextMenu</enum>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="text">
-           <string>Ignore SSL certificate errors (unsafe)</string>
+           <string>Storage</string>
           </property>
          </widget>
         </item>

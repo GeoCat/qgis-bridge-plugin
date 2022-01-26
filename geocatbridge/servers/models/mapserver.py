@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import List
 
 from qgis.core import (
     QgsProject,
@@ -11,12 +12,13 @@ from qgis.core import (
     QgsWkbTypes
 )
 
-from geocatbridge.publish.style import convertDictToMapfile, layerStyleAsMapfileFolder
-from geocatbridge.publish.exporter import exportLayer
+from geocatbridge.publish import export
 from geocatbridge.publish.ftpupload import uploadFolder
+from geocatbridge.publish.style import convertDictToMapfile, layerStyleAsMapfileFolder
 from geocatbridge.servers.bases import DataCatalogServerBase
 from geocatbridge.servers.views.mapserver import MapServerWidget
 from geocatbridge.utils import files
+from geocatbridge.utils.layers import BridgeLayer
 
 
 class MapserverServer(DataCatalogServerBase):
@@ -55,13 +57,21 @@ class MapserverServer(DataCatalogServerBase):
     def getLabel(cls) -> str:
         return 'MapServer'
 
-    def publishStyle(self, layer):
+    def vectorLayersAsShp(self) -> bool:
+        # MapServer exports should always be a Shapefile
+        return True
+
+    def publishStyle(self, layer: BridgeLayer):
+        # TODO?
         self._layers.append(layer)
 
-    def publishLayer(self, layer, fields=None):
-        layerFilename = layer.name() + ".shp"
-        layerPath = os.path.join(self.dataFolder(), layerFilename)
-        exportLayer(layer, fields, to_shapefile=True, path=layerPath, force=True, logger=self)
+    def publishLayer(self, layer: BridgeLayer, fields: List[str] = None, exporter=None):
+        if layer.is_vector:
+            shp_path = os.path.join(self.dataFolder(), f"{layer.file_slug}{export.EXT_SHAPEFILE}")
+            export.exportVector(layer, fields, force_shp=True, target_path=shp_path)
+        elif layer.type() == layer.RasterLayer:
+            tif_path = os.path.join(self.dataFolder(), f"{layer.file_slug}{export.EXT_GEOTIFF}")
+            export.exportRaster(layer, target_path=tif_path)
 
     def uploadFolder(self, folder):
         username, password = self.getCredentials()
@@ -117,7 +127,7 @@ class MapserverServer(DataCatalogServerBase):
 
         for layer in self._layers:
             add = {}
-            layerFilename = layer.name() + ".shp"
+            layerFilename = layer.file_slug + ".shp"
             add["DATA"] = _quote(layerFilename)
             if isinstance(layer, QgsRasterLayer):
                 layerType = "raster"
@@ -139,8 +149,9 @@ class MapserverServer(DataCatalogServerBase):
                 "wms_extent": _quote(" ".join([str(v) for v in [bbox.xMinimum(), bbox.yMinimum(),
                                                                 bbox.xMaximum(), bbox.yMaximum()]]))
             }
-            if layer.name() in self._metadataLinks:
-                metadata["ows_metadataurl_href"] = _quote(self._metadataLinks[layer.name()])
+            md_link = self._metadataLinks.get(layer.web_slug)
+            if md_link:
+                metadata["ows_metadataurl_href"] = _quote(md_link)
                 metadata["ows_metadataurl_type"] = _quote("TC211")
                 metadata["ows_metadataurl_format"] = _quote("XML")
 
@@ -153,7 +164,7 @@ class MapserverServer(DataCatalogServerBase):
                "IMAGEURL": '"http://localhost/images"',
                "METADATA": {
                    '"wms_title"': _quote(name),
-                   '"wms_onlineresource"': _quote(f"{self.getWmsUrl()}&layers={layer.name()}"),
+                   '"wms_onlineresource"': _quote(f"{self.getWmsUrl()}&layers={','.join(l.web_slug for l in self._layers)}"),  # noqa
                    '"ows_enable_request"': '"*"',
                    '"ows_srs"': '"EPSG:4326"',
                    '"wms_feature_info_mime_type"': '"text/html"'
@@ -166,8 +177,8 @@ class MapserverServer(DataCatalogServerBase):
                                        "IMAGEMODE": '"RGB"',
                                        "MIMETYPE": '"image/png"'}, "SCALEBAR": {"ALIGN": "CENTER",
                                                                                 "OUTLINECOLOR": "0 0 0"},
-                      "LAYERS": [{"INCLUDE": '"%s.txt"' % layer.name()} for layer in self._layers],
-                      "SYMBOLS": [{"INCLUDE": '"%s_symbols.txt"' % layer.name()} for layer in self._layers]}
+                      "LAYERS": [{"INCLUDE": '"%s.txt"' % layer.web_slug} for layer in self._layers],
+                      "SYMBOLS": [{"INCLUDE": '"%s_symbols.txt"' % layer.web_slug} for layer in self._layers]}
         mapfile = {"MAP": mapElement}
 
         s = convertDictToMapfile(mapfile)
@@ -182,6 +193,9 @@ class MapserverServer(DataCatalogServerBase):
 
         if not self.useLocalFolder:
             self.uploadFolder(dst)
+
+    def layerNames(self):
+        return
 
     def layerExists(self, name: str):
         return

@@ -3,8 +3,9 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 DEFAULT_RETRIES = 2
-DEFAULT_TIMEOUT = 10  # timeout in seconds for regular requests
-TESTCON_TIMEOUT = 2   # timeout in seconds for connection tests
+UPLOAD_TIMEOUT = 600    # timeout in seconds for upload requests
+DEFAULT_TIMEOUT = 60    # timeout in seconds for regular requests
+TESTCON_TIMEOUT = 5     # timeout in seconds for connection tests
 RETRY_STRATEGY = Retry(
     total=DEFAULT_RETRIES,
     status_forcelist=[429, 500, 502, 503, 504],
@@ -34,4 +35,4 @@ class BridgeSession(Session):
     def __init__(self):
         super().__init__()
         self.mount('https://', BRIDGE_ADAPTER)
-        self.mount('http://', BRIDGE_ADAPTER)
+        self.mount('http://', BRIDGE_ADAPTER)  # noqa

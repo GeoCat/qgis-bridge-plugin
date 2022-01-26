@@ -2,21 +2,22 @@ import json
 from abc import ABC, abstractmethod
 from importlib import import_module
 from pathlib import Path
-from typing import Union
+from typing import Union, List, Iterable
 from urllib.parse import urlparse
 
 import requests
+from requests.auth import HTTPBasicAuth
 from qgis.PyQt.QtGui import QPixmap
 from qgis.core import (
     QgsAuthMethodConfig,
     QgsApplication,
     QgsProcessingAlgorithm
 )
-from requests.auth import HTTPBasicAuth
 
 from geocatbridge.utils import files
 from geocatbridge.utils.feedback import FeedbackMixin
-from geocatbridge.utils.network import BridgeSession
+from geocatbridge.utils.layers import BridgeLayer
+from geocatbridge.utils.network import BridgeSession, UPLOAD_TIMEOUT
 
 
 class AbstractServer(ABC):
@@ -187,10 +188,9 @@ class CombiServerBase(AbstractServer, FeedbackMixin, ABC):
 
 class CatalogServerBase(ServerBase, ABC):
 
-    def __init__(self, name, authid="", url="", ignore_ssl_errors=False):
+    def __init__(self, name, authid="", url=""):
         super().__init__(name, authid)
         self._baseurl = urlparse(url).geturl()
-        self._sslverify = not ignore_ssl_errors
 
     def request(self, url, method="get", data=None, **kwargs):
         """ Wrapper function for HTTP requests. """
@@ -222,7 +222,10 @@ class CatalogServerBase(ServerBase, ABC):
             with BridgeSession() as session:
                 req_method = getattr(session, method.casefold())
 
-        kwargs['verify'] = self._sslverify
+        if (method.casefold() == 'put' and files_) or (isinstance(data, bytes) or hasattr(data, 'read')) or \
+                headers.get('Content-Type', '').endswith(('zip', 'octet-stream')):
+            # If it looks like we're going to transfer something (potentially) large, increase the timeout
+            kwargs['timeout'] = max(kwargs.get('timeout', 0), UPLOAD_TIMEOUT)
         result = req_method(url, headers=headers, files=files_, data=data, auth=auth, **kwargs)
         result.raise_for_status()
         return result
@@ -231,11 +234,6 @@ class CatalogServerBase(ServerBase, ABC):
     def baseUrl(self):
         """ Returns the base part of the server URL. """
         return self._baseurl
-
-    @property
-    def ignoreSSLErrors(self):
-        """ Returns if SSL errors should be ignored (unsafe!). """
-        return not self._sslverify
 
     def addOGCServices(self):
         pass
@@ -252,15 +250,24 @@ class MetaCatalogServerBase(CatalogServerBase, ABC):
     def openMetadata(self, uuid):
         pass
 
+    def metadataUrl(self, uuid: str) -> str:
+        """ This method must be implemented if the server has a REST API URL for the given record ID. """
+        raise NotImplementedError
+
     def metadataExists(self, uuid: str) -> bool:
         """ This method must be implemented if the server offers a way to check if a metadata record was published. """
+        raise NotImplementedError
+
+    def publishLayerMetadata(self, layer: BridgeLayer,
+                             wms_url: str = None, wfs_url: str = None, linked_name: str = None):
+        """ This method must be implemented if the server offers a way to publish a metadata record for a layer. """
         raise NotImplementedError
 
 
 class DataCatalogServerBase(CatalogServerBase, ABC):
 
-    def __init__(self, name, authid="", url="", ignore_ssl_errors=False):
-        super().__init__(name, authid, url, ignore_ssl_errors)
+    def __init__(self, name, authid="", url=""):
+        super().__init__(name, authid, url)
 
     def prepareForPublishing(self, only_symbology: bool):
         """ This method is called right before any publication takes place.
@@ -279,13 +286,22 @@ class DataCatalogServerBase(CatalogServerBase, ABC):
         pass
 
     @abstractmethod
-    def publishLayer(self, layer, fields=None):
-        """ Publishes the given QGIS layer (and specified fields) to the server. """
+    def vectorLayersAsShp(self) -> bool:
+        """ Returns True if vector layers must be exported as a Shapefile.
+        If False is returned, GeoPackage is preferred.
+
+        This method is called when a user starts a publish task.
+        """
         raise NotImplementedError
 
     @abstractmethod
-    def publishStyle(self, layer):
-        """ Publishes a style (symbology) for the given QGIS layer to the server. """
+    def publishLayer(self, layer: BridgeLayer, fields: Iterable[str] = None):
+        """ Publishes the given QGIS layer (and specified fields) to the server."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def publishStyle(self, layer: BridgeLayer):
+        """ Publishes a style (symbology) for the given QGIS layer to the server."""
         raise NotImplementedError
 
     def closePublishing(self):
@@ -303,6 +319,10 @@ class DataCatalogServerBase(CatalogServerBase, ABC):
         :param crs_authid:  The coordinate system ID (e.g. EPSG code) for the preview map.
         """
         pass
+
+    def layerNames(self) -> List[str]:
+        """ Returns a list of all layer names in the current workspace. """
+        raise NotImplementedError
 
     def layerExists(self, name: str) -> bool:
         """ This method must be implemented if the server offers a way to check if a layer was published. """

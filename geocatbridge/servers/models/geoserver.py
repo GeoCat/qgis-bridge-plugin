@@ -1,13 +1,12 @@
 import json
 import os
 import shutil
-import sqlite3
+from typing import List
 from zipfile import ZipFile
 
 from qgis.PyQt.QtCore import QByteArray, QBuffer, QIODevice, QSettings
 from qgis.core import (
     QgsProject,
-    QgsDataSourceUri,
     QgsProcessingParameterMapLayer,
     QgsProcessingParameterString,
     QgsProcessingParameterAuthConfig
@@ -18,12 +17,13 @@ from geocatbridge.publish.style import (
     saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder, convertMapboxGroup
 )
 from geocatbridge.process.algorithm import BridgeAlgorithm
-from geocatbridge.publish.exporter import exportLayer
+from geocatbridge.publish.export import exportVector, exportRaster
 from geocatbridge.servers import manager
 from geocatbridge.servers.bases import DataCatalogServerBase
 from geocatbridge.servers.models.gs_storage import GeoserverStorage
 from geocatbridge.servers.views.geoserver import GeoServerWidget
-from geocatbridge.utils import layers as lyr_utils
+from geocatbridge.utils.layers import BridgeLayer
+from geocatbridge.utils import strings
 from geocatbridge.utils.files import tempFileInSubFolder, tempSubFolder, Path
 from geocatbridge.utils.meta import getAppName, semanticVersion
 from geocatbridge.utils.network import TESTCON_TIMEOUT
@@ -31,7 +31,7 @@ from geocatbridge.utils.network import TESTCON_TIMEOUT
 
 class GeoserverServer(DataCatalogServerBase):
 
-    def __init__(self, name, authid="", url="", ignoreSSLErrors=False,
+    def __init__(self, name, authid="", url="",
                  storage=GeoserverStorage.FILE_BASED, postgisdb=None,
                  useOriginalDataSource=False, useVectorTiles=False):
         """
@@ -42,12 +42,11 @@ class GeoserverServer(DataCatalogServerBase):
         :param url:                     GeoServer base or REST API URL
         :param storage:                 Data storage type (default = FILE_BASED)
         :param postgisdb:               PostGIS database (required if `storage` is *not* FILE_BASED)
-        :param ignoreSSLErrors:         Instructs the requests lib to ignore SSL certificate errors, if any (unsafe!)
         :param useOriginalDataSource:   Set to True if original data source should be used.
                                         This means that no data will be uploaded.
         :param useVectorTiles:          Set to True if vector tiles need to be published.
         """
-        super().__init__(name, authid, url, ignoreSSLErrors)
+        super().__init__(name, authid, url)
         self.postgisdb = None
         try:
             self.storage = GeoserverStorage[storage]
@@ -60,8 +59,7 @@ class GeoserverServer(DataCatalogServerBase):
         self._workspace = None
         self._uploaded_data = {}
         self._existing_layers = frozenset()  # unique list of layers in workspace on server (refreshed all the time)
-        self._exported_layers = {}           # lookup of layer source path - exported file path
-        self._published_layers = set()       #
+        self._published_layers = set()       # lookup of layers that have been published
         self._pg_datastore_exists = False
         self._apiurl = self.fixRestApiUrl()
 
@@ -70,7 +68,6 @@ class GeoserverServer(DataCatalogServerBase):
             'name': self.serverName,
             'authid': self.authId,
             'url': self.baseUrl,
-            'ignoreSSLErrors': self.ignoreSSLErrors,
             'storage': self.storage,
             'postgisdb': self.postgisdb,
             'useOriginalDataSource': self.useOriginalDataSource,
@@ -91,14 +88,21 @@ class GeoserverServer(DataCatalogServerBase):
             self.refreshWorkspaceName()
         return self._workspace
 
-    def refreshWorkspaceName(self):
-        """ Resets the QGIS Project (file) name. Can be `None` if not found/saved. """
-        self._workspace = None
+    def workspaceFromProject(self):
+        """ Returns the workspace name derived from the QGIS Project path. """
         path = QgsProject().instance().absoluteFilePath()
         if path:
-            self._workspace = Path(path).stem
-        if not self._workspace:
-            self.logWarning("Workspace name could not be derived from QGIS project: please save the project")
+            return Path(path).stem
+        self.logWarning("Workspace name could not be derived from QGIS project path: please save the project")
+
+    def refreshWorkspaceName(self) -> bool:
+        """ Resets the QGIS Project (file) name. Can be `None` if not found/saved. """
+        self._workspace = None
+        name = self.workspaceFromProject()
+        if name and strings.validate(name, first_alpha=True, allowed_chars=strings.WORKSPACE_CHARS):
+            self._workspace = name
+            return True
+        return False
 
     def forceWorkspace(self, workspace):
         self._workspace = workspace
@@ -126,7 +130,6 @@ class GeoserverServer(DataCatalogServerBase):
             self.clearWorkspace()
         self._ensureWorkspaceExists()
         self._uploaded_data = {}
-        self._exported_layers = {}
         self._pg_datastore_exists = False
         self._published_layers = set()
 
@@ -135,7 +138,7 @@ class GeoserverServer(DataCatalogServerBase):
             return
         folder = tempSubFolder()
         self.logInfo(f"Creating layer styles for Mapbox vector tiles in {folder}...")
-        warnings = layerStyleAsMapboxFolder(self._published_layers, folder)
+        warnings = layerStyleAsMapboxFolder(self._published_layers, folder)  # FIXME: function does NOT want a layer set!
         for w in warnings:
             self.logWarning(w)
         self.logInfo(f"Editing Mapbox files...")
@@ -161,10 +164,9 @@ class GeoserverServer(DataCatalogServerBase):
         self.uploadResource(f"{self.workspace}/mapbox.js", js_filename)
 
     def uploadResource(self, path, file):
-        with open(file) as f:
-            content = f.read()
         url = f"{self.apiUrl}/resource/{path}"
-        self.request(url, "put", content)
+        with open(file) as f:
+            self.request(url, "put", f.read())
 
     def _editMapboxFiles(self, folder):
         filename = os.path.join(folder, "style.mapbox")
@@ -191,66 +193,65 @@ class GeoserverServer(DataCatalogServerBase):
         filename = os.path.join(folder, "style.mapbox")
         self._publishStyle(name, filename)
 
-    def publishStyle(self, layer):
-        lyr_title, lyr_name = lyr_utils.getLayerTitleAndName(layer)
-        export_layer = lyr_utils.getExportableLayer(layer, lyr_name)
-        style_filename = tempFileInSubFolder(lyr_name + ".zip")
-        warnings = saveLayerStyleAsZippedSld(export_layer, style_filename)
+    def vectorLayersAsShp(self) -> bool:
+        # When GeoServer imports to PostGIS using the Importer extension, we require a Shapefile
+        return self.storage == GeoserverStorage.POSTGIS_GEOSERVER
+
+    def publishStyle(self, layer: BridgeLayer):
+        style_file = tempFileInSubFolder(layer.file_slug + ".zip")
+        warnings = saveLayerStyleAsZippedSld(layer, style_file)
         for w in warnings:
             self.logWarning(w)
-        self.logInfo(f"Style for layer '{layer.name()}' exported as ZIP file to '{style_filename}'")
-        self._publishStyle(lyr_name, style_filename)
+        self.logInfo(f"Style for layer '{layer.name()}' exported as ZIP file to '{style_file}'")
+        self._publishStyle(layer.web_slug, style_file)
         self._published_layers.add(layer)
-        return style_filename
+        return style_file
 
-    def publishLayer(self, layer, fields=None):
-        lyr_title, safe_name = lyr_utils.getLayerTitleAndName(layer)
-        if layer.type() == layer.VectorLayer:
+    def publishLayer(self, layer: BridgeLayer, fields: List[str] = None):
+        if layer.is_vector:
+            # Export vector layer
             if layer.featureCount() == 0:
-                self.logError(f"Layer '{lyr_title}' contains zero features and cannot be published")
+                self.logWarning(f"Layer '{layer.name()}' contains no features and will not be published")
                 return
 
-            if layer.dataProvider().name() == "postgres" and self.useOriginalDataSource:
+            if layer.is_postgis_based and self.useOriginalDataSource:
+                # Reference existing PostGIS table (must have direct access)
                 try:
                     from geocatbridge.servers.models.postgis import PostgisServer
-                except (ImportError, ModuleNotFoundError):
+                except (ImportError, ModuleNotFoundError, NameError):
                     raise Exception(self.translate(getAppName(), "Cannot find or import PostgisServer class"))
                 else:
-                    uri = QgsDataSourceUri(layer.source())
                     db = PostgisServer(
-                        "temp", uri.authConfigId(), uri.host(), uri.port(), uri.schema(), uri.database())
+                        "temp",
+                        layer.uri.authConfigId(),
+                        layer.uri.host(),
+                        layer.uri.port(),
+                        layer.uri.schema(),
+                        layer.uri.database()
+                    )
                     self._publishVectorLayerFromPostgis(layer, db)
-            elif self.storage != GeoserverStorage.POSTGIS_BRIDGE:
-                src_path, src_name, src_ext = lyr_utils.getLayerSourceInfo(layer)
-                filename = self._exported_layers.get(src_path)
-                if not filename:
-                    if self.storage == GeoserverStorage.POSTGIS_GEOSERVER:
-                        shp_name = exportLayer(layer, fields, to_shapefile=True, force=True, logger=self)
-                        basename = os.path.splitext(shp_name)[0]
-                        filename = basename + ".zip"
-                        with ZipFile(filename, 'w') as z:
-                            for ext in (".shp", ".shx", ".prj", ".dbf"):
-                                filetozip = basename + ext
-                                z.write(filetozip, arcname=os.path.basename(filetozip))
-                    else:
-                        filename = exportLayer(layer, fields, logger=self)
-                self._exported_layers[src_path] = filename
-                if self.storage == GeoserverStorage.FILE_BASED:
-                    self._publishVectorLayerFromFile(layer, filename)
-                else:
-                    self._publishVectorLayerFromFileToPostgis(layer, filename)
+
             elif self.storage == GeoserverStorage.POSTGIS_BRIDGE:
+                # Export to PostGIS table (must have direct access)
                 db = manager.getServer(self.postgisdb)
                 if not db:
                     raise Exception(self.translate(getAppName(), "Cannot find the selected PostGIS database"))
                 db.importLayer(layer, fields)
                 self._publishVectorLayerFromPostgis(layer, db)
-        elif layer.type() == layer.RasterLayer:
-            if layer.source() not in self._exported_layers:
-                path = exportLayer(layer, fields, logger=self)
-                self._exported_layers[layer.source()] = path
-            filename = self._exported_layers[layer.source()]
-            self._publishRasterLayer(filename, safe_name)
+
+            elif self.storage == GeoserverStorage.POSTGIS_GEOSERVER:
+                # Export layer to Shapefile and publish to PostGIS using GeoServer Importer extension
+                self._publishVectorLayerFromShpToPostgis(layer, fields)
+
+            elif self.storage == GeoserverStorage.FILE_BASED:
+                # Export layer to GeoPackage datastore
+                self._publishVectorLayerFromGeoPackage(layer, fields)
+
+        elif layer.is_raster:
+            # Export GeoTIFF
+            filename = exportRaster(layer)
+            self._publishRasterLayer(filename, layer.web_slug)
+
         self._clearCache()
 
     def _getPostgisDatastores(self, ds_list_url=None):
@@ -280,12 +281,12 @@ class GeoserverServer(DataCatalogServerBase):
             if enabled and entries.get("dbtype", "").startswith("postgis"):
                 yield ds_name
 
-    def createPostgisDatastore(self):
+    def createPostgisDatastore(self) -> str:
         """
         Creates a new datastore based on the selected one in the Server widget
         if the workspace is created from scratch.
 
-        :returns:   The existing or created PostGIS datastore name.
+        :returns:   The existing or created PostGIS datastore name (which equals the workspace name).
         """
 
         # Check if current workspaces has a PostGIS datastore (use first)
@@ -338,27 +339,56 @@ class GeoserverServer(DataCatalogServerBase):
         errors.add(msg)
         return False
 
-    def _publishVectorLayerFromFile(self, layer, filename):
-        self.logInfo(f"Publishing layer from file: {filename}")
-        title, name = lyr_utils.getLayerTitleAndName(layer)
-        is_data_uploaded = filename in self._uploaded_data
-        if not is_data_uploaded:
-            with open(filename, "rb") as f:
-                self._deleteDatastore(name)
-                url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{name}/file.gpkg?update=overwrite"
-                self.request(url, "put", f.read())
-            conn = sqlite3.connect(filename)
-            cursor = conn.cursor()
-            cursor.execute("""SELECT table_name FROM gpkg_geometry_columns""")  # noqa
-            tablename = cursor.fetchall()[0][0]
-            self._uploaded_data[filename] = (name, tablename)
+    def _publishVectorLayerFromGeoPackage(self, layer: BridgeLayer, fields: List[str]):
+        """
+        Publishes the given layer to a GeoPackage (file-based) GeoServer datastore.
 
-        dataset_name, geoserver_layer_name = self._uploaded_data[filename]
-        url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{dataset_name}/featuretypes/{geoserver_layer_name}.json"  # noqa
-        r = self.request(url)
-        ft = r.json()
-        ft["featureType"]["name"] = name
-        ft["featureType"]["title"] = title
+        :param layer:   Vector layer to publish.
+        :param fields:  Field names to export.
+        """
+        gpkg_path = exportVector(layer, fields)
+        if not gpkg_path:
+            return
+
+        # Upload GeoPackage and create (overwrite) datastore
+        ds_name = layer.web_slug
+        self._deleteDatastore(ds_name)
+        with open(gpkg_path, "rb") as f:
+            url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{ds_name}/file.gpkg?update=overwrite"
+            try:
+                self.request(url, "put", f.read())
+            except Exception as err:
+                return self.logError(f"Failed to create datastore {ds_name} from {gpkg_path}: {err}")
+
+        # Make GeoPackage datastore readonly (huge performance boost!)
+        try:
+            url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{ds_name}.json"
+            body = self.request(url).json()
+            entries = body.get("dataStore", {}).get("connectionParameters", {}).get("entry", [])
+            entry_dict = {e["@key"]: e["$"] for e in entries}
+            if "read_only" not in entry_dict:
+                entries.append(self._connectionParamEntry("read_only", "true"))
+                body = {
+                    "dataStore": {
+                        "connectionParameters": {
+                            "entry": entries
+                        }
+                    }
+                }
+                self.request(url, "put", body)
+        except Exception as err:
+            self.logWarning(f"Failed to set read_only property of datastore {ds_name}: {err}")
+
+        # Get the created feature type for the current layer
+        url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{ds_name}/featuretypes/{ds_name}.json"
+        try:
+            ft = self.request(url).json()
+        except Exception as err:
+            return self.logError(f"Feature type {ds_name} was not found: {err}")
+
+        # Edit the feature type
+        ft["featureType"]["name"] = layer.web_slug
+        ft["featureType"]["title"] = layer.name()
         ext = layer.extent()
         ft["featureType"]["nativeBoundingBox"] = {
             "minx": round(ext.xMinimum(), 5),
@@ -367,64 +397,30 @@ class GeoserverServer(DataCatalogServerBase):
             "maxy": round(ext.yMaximum(), 5),
             "srs": layer.crs().authid()
         }
-        if is_data_uploaded:
-            url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{dataset_name}/featuretypes"
-            self.request(url, "post", ft)
-        else:
+        try:
             self.request(url, "put", ft)
-        self.logInfo(f"Successfully created feature type from GeoPackage file '{filename}'")
-        self._setLayerStyle(name)
+        except Exception as err:
+            return self.logError(f"Failed to update feature type {layer.web_slug} in datastore {ds_name}: {err}")
+        else:
+            self.logInfo(f"Successfully created feature type from GeoPackage file '{gpkg_path}'")
 
-    def _publishVectorLayerFromPostgis(self, layer, db):
-        name = layer.name()
-        username, password = db.getCredentials()
+        # Link style to layer
+        self._setLayerStyle(layer.web_slug)
 
-        def _entry(k, v):
-            return {"@key": k, "$": v}
+    def _publishVectorLayerFromShpToPostgis(self, layer: BridgeLayer, fields: List[str]):
+        """
+        Publishes the given vector layer to PostGIS using the GeoServer Importer extension.
+        The Importer extension expects a zipped Shapefile as input.
+        """
+        # First export layer data to a zipped Shapefile
+        shp_file = exportVector(layer, fields, force_shp=True)
+        filename = shp_file.with_suffix('.zip')
+        with ZipFile(filename, 'w') as z:
+            for ext in (".shp", ".shx", ".prj", ".dbf"):
+                z.write(shp_file.with_suffix(ext))
 
-        ds = {
-            "dataStore": {
-                "name": name,
-                "type": "PostGIS",
-                "enabled": True,
-                "connectionParameters": {
-                    "entry": [
-                        _entry("schema", db.schema),
-                        _entry("port", str(db.port)),
-                        _entry("database", db.database),
-                        _entry("passwd", password),
-                        _entry("user", username),
-                        _entry("host", db.host),
-                        _entry("dbtype", "postgis")
-                    ]
-                }
-            }
-        }
-        ds_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores"
-        self.request(ds_url, data=ds, method="post")
-        ft = {
-            "featureType": {
-                "name": name,
-                "srs": layer.crs().authid()
-            }
-        }
-        ft_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{name}/featuretypes"
-        self.request(ft_url, data=ft, method="post")
-        self._setLayerStyle(name)
-
-    def _getImportResult(self, import_id, task_id):
-        """ Get the error message on the import task (if any) and the resulting layer name. """
-        task = self.request(f"{self.apiUrl}/imports/{import_id}/tasks/{task_id}").json()["task"] or {}
-        err_msg = task.get("errorMessage", "")
-        if err_msg:
-            err_msg = f"GeoServer Importer Extension error: {err_msg}"
-        return err_msg, task["layer"]["name"]
-
-    def _publishVectorLayerFromFileToPostgis(self, layer, filename):
-        self.logInfo(f"Publishing layer '{layer.name()}' from file '{filename}'...")
+        self.logInfo(f"Publishing layer '{layer.name()}' from file '{shp_file}'...")
         datastore = self.createPostgisDatastore()
-        title, ft_name = lyr_utils.getLayerTitleAndName(layer)
-        source_name = os.path.splitext(os.path.basename(filename))[0]
 
         # Create a new import
         body = {
@@ -447,10 +443,11 @@ class GeoserverServer(DataCatalogServerBase):
         # Create a new task and upload ZIP
         self.logInfo("Uploading layer data...")
         import_id = ret.json()["import"]["id"]
-        zipname = os.path.basename(filename)
-        url = f"{self.apiUrl}/imports/{import_id}/tasks/{zipname}"
-        with open(filename, "rb") as f:
-            ret = self.request(url, method="put", files={zipname: (zipname, f, 'application/octet-stream')})
+        url = f"{self.apiUrl}/imports/{import_id}/tasks/{shp_file.name}"
+        with open(shp_file, "rb") as f:
+            ret = self.request(url, method="put", files={
+                shp_file.name: (shp_file.name, f, 'application/octet-stream')
+            })
 
         # Reassign PostGIS datastore as target (just to be sure)
         task_id = ret.json()["task"]["id"]
@@ -464,50 +461,82 @@ class GeoserverServer(DataCatalogServerBase):
         del ret
 
         # Start import execution
-        self.logInfo(f"Starting Importer task for layer '{ft_name}'...")
+        self.logInfo(f"Starting Importer task for layer '{layer.name()}'...")
         url = f"{self.apiUrl}/imports/{import_id}"
         self.request(url, method="post")
 
         # Get the import result (error message and target layer name)
-        import_err, tmp_name = self._getImportResult(import_id, task_id)
+        import_err, given_name = self._getImportResult(import_id, task_id)
         if import_err:
-            self.logError(f"Failed to publish QGIS layer '{title}' as '{ft_name}'.\n\n{import_err}")
+            self.logError(f"Failed to publish QGIS layer '{layer.name()}'.\n\n{import_err}")
             return
-
-        self._uploaded_data[filename] = (datastore, source_name)
 
         # Get the created feature type
         self.logInfo("Checking if feature type creation was successful...")
-        url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{datastore}/featuretypes/{tmp_name}.json"
+        url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{datastore}/featuretypes/{given_name}.json"
         try:
             ret = self.request(url + "?quietOnNotFound=true")
         except RequestException as e:
             # Something unexpected happened: failure cannot be retrieved from import task,
             # so the user should check the GeoServer logs to find out what caused it.
             if isinstance(e, HTTPError) and e.response.status_code == 404:
-                self.logError(f"Failed to publish QGIS layer '{title}' as '{ft_name}' due to an unknown error.\n"
-                              "Please check the GeoServer logs.")
+                self.logError(f"Failed to publish QGIS layer '{layer.name()}' as '{given_name}' "
+                              f"due to an unknown error.\nPlease check the GeoServer logs.")
                 return
             raise
 
         # Modify the feature type descriptions, but leave the name in tact to avoid db schema mismatches
         self.logInfo("Fixing feature type properties...")
         ft = ret.json()
-        ft["featureType"]["nativeName"] = tmp_name  # name given by Importer extension
-        ft["featureType"]["originalName"] = source_name  # source file name
-        ft["featureType"]["title"] = title  # layer name as displayed in QGIS
+        ft["featureType"]["nativeName"] = given_name  # name given by Importer extension
+        ft["featureType"]["originalName"] = layer.dataset_name  # source file name
+        ft["featureType"]["title"] = layer.name()  # layer name as displayed in QGIS
         self.request(url, "put", ft)
 
-        self.logInfo(f"Successfully created feature type from file '{filename}'")
+        self.logInfo(f"Successfully created feature type from file '{shp_file}'")
 
         # Fix layer style reference and remove unwanted global style
         self.logInfo("Performing style cleanup...")
         try:
-            self._fixLayerStyle(tmp_name, ft_name)
+            self._fixLayerStyle(given_name, layer.web_slug)
         except RequestException as e:
             self.logWarning(f"Failed to clean up layer styles: {e}")
         else:
-            self.logInfo(f"Successfully published layer '{title}'")
+            self.logInfo(f"Successfully published layer '{layer.name()}'")
+
+    def _publishVectorLayerFromPostgis(self, layer: BridgeLayer, db):
+        """ Creates a datastore and feature type for the given PostGIS layer and DB connection on GeoServer. """
+        username, password = db.getCredentials()
+
+        ds = {
+            "dataStore": {
+                "name": layer.web_slug,
+                "type": "PostGIS",
+                "enabled": True,
+                "connectionParameters": {
+                    "entry": [
+                        self._connectionParamEntry("schema", db.schema),
+                        self._connectionParamEntry("port", str(db.port)),
+                        self._connectionParamEntry("database", db.database),
+                        self._connectionParamEntry("passwd", password),
+                        self._connectionParamEntry("user", username),
+                        self._connectionParamEntry("host", db.host),
+                        self._connectionParamEntry("dbtype", "postgis")
+                    ]
+                }
+            }
+        }
+        ds_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores"
+        self.request(ds_url, data=ds, method="post")
+        ft = {
+            "featureType": {
+                "name": layer.name(),
+                "srs": layer.crs().authid()
+            }
+        }
+        ft_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{layer.web_slug}/featuretypes"
+        self.request(ft_url, data=ft, method="post")
+        self._setLayerStyle(layer.web_slug)
 
     def _publishRasterLayer(self, filename, layername):
         self._ensureWorkspaceExists()
@@ -517,17 +546,38 @@ class GeoserverServer(DataCatalogServerBase):
         self.logInfo(f"Successfully created coverage from TIFF file '{filename}'")
         self._setLayerStyle(layername)
 
+    def _getImportResult(self, import_id, task_id):
+        """ Get the error message on the import task (if any) and the resulting layer name. """
+        task = self.request(f"{self.apiUrl}/imports/{import_id}/tasks/{task_id}").json()["task"] or {}
+        err_msg = task.get("errorMessage", "")
+        if err_msg:
+            err_msg = f"GeoServer Importer Extension error: {err_msg}"
+        return err_msg, task["layer"]["name"]
+
+    @staticmethod
+    def _connectionParamEntry(key, value):
+        """ Creates a connection parameter JSON entry for datastore configurations. """
+        return {"@key": key, "$": value}
+
     def createGroups(self, groups, qgis_layers):
         for group in groups:
             self._publishGroup(group, qgis_layers)
 
     def _publishGroupMapBox(self, group, qgis_layers):
+
+        def getImageBytes(img) -> bytes:
+            ba = QByteArray()
+            buff = QBuffer(ba)
+            buff.open(QIODevice.WriteOnly)
+            img.save(buff, "png")
+            return ba.data()
+
         name = group["name"]
         # compute actual style
         mbstylestring, warnings, obj, sprite_sheet = \
             convertMapboxGroup(
-                group, qgis_layers, self.apiUrl, self.workspace, group["name"]
-            )  # FIXME!
+                group, qgis_layers, self.apiUrl, self.workspace, name
+            )
 
         # publish to geoserver
         self._ensureWorkspaceExists()
@@ -551,8 +601,8 @@ class GeoserverServer(DataCatalogServerBase):
         # save sprite sheet
         # get png -> bytes
         if sprite_sheet:
-            img_bytes = self.getImageBytes(sprite_sheet["img"])
-            img2x_bytes = self.getImageBytes(sprite_sheet["img2x"])
+            img_bytes = getImageBytes(sprite_sheet["img"])
+            img2x_bytes = getImageBytes(sprite_sheet["img2x"])
             url = f"{self.apiUrl}/resource/workspaces/{self.workspace}/styles/spriteSheet.png"
             self.request(url, "put", img_bytes)
             url = f"{self.apiUrl}/resource/workspaces/{self.workspace}/styles/spriteSheet@2x.png"
@@ -561,15 +611,6 @@ class GeoserverServer(DataCatalogServerBase):
             self.request(url, "put", sprite_sheet["json"])
             url = f"{self.apiUrl}/resource/workspaces/{self.workspace}/styles/spriteSheet@2x.json"
             self.request(url, "put", sprite_sheet["json2x"])
-
-    @staticmethod
-    def getImageBytes(img):
-        ba = QByteArray()
-        buff = QBuffer(ba)
-        buff.open(QIODevice.WriteOnly)
-        img.save(buff, "png")
-        img_bytes = ba.data()
-        return img_bytes
 
     def _publishGroup(self, group, qgis_layers):
         if self.useVectorTiles:
@@ -656,13 +697,13 @@ class GeoserverServer(DataCatalogServerBase):
             self.logError(err)
             return False
 
-    def layerExists(self, name):
+    def layerExists(self, name: str):
         if not self.workspace:
             return False
         url = f"{self.apiUrl}/workspaces/{self.workspace}/layers.json"
         return self._exists(url, "layer", name)
 
-    def layers(self):
+    def layerNames(self) -> List[str]:
         if not self.workspace:
             return []
         url = f"{self.apiUrl}/workspaces/{self.workspace}/layers.json"
@@ -673,7 +714,7 @@ class GeoserverServer(DataCatalogServerBase):
         else:
             return []
 
-    def styleExists(self, name):
+    def styleExists(self, name: str):
         if not self.workspace:
             return False
         url = f"{self.apiUrl}/workspaces/{self.workspace}/styles.json"
@@ -685,9 +726,9 @@ class GeoserverServer(DataCatalogServerBase):
         url = f"{self.apiUrl}/workspaces.json"
         return self._exists(url, "workspace", self.workspace)
 
-    def willDeleteLayersOnPublication(self, to_publish):
+    def willDeleteLayersOnPublication(self, to_publish: List[str]):
         if self.workspaceExists():
-            return bool(set(self.layers()) - set(to_publish))
+            return bool(set(self.layerNames()) - set(to_publish))
         return False
 
     def datastoreExists(self, name):
@@ -766,7 +807,9 @@ class GeoserverServer(DataCatalogServerBase):
                 url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{store['name']}.json"
                 ds = self.request(url).json()
                 params = ds["dataStore"].get("connectionParameters", {})
-                if any(entry["@key"] == "dbtype" for entry in params.get("entry", [])):
+                params_json = json.dumps(params)
+                # if any(entry["@key"] == "dbtype" for entry in params.get("entry", [])):
+                if 'dbtype' in params_json and 'postgis' in params_json:
                     # Fix namespace
                     if self._fixNamespaceParam(params):
                         self.request(url, "put", ds)
@@ -1009,14 +1052,11 @@ class GeoserverServer(DataCatalogServerBase):
             # Failed to retrieve Version. It could be a RC or dev version: warn but consider OK.
             self.logWarning(f"Failed to retrieve GeoServer version info: {e}")
 
-    def validateBeforePublication(self, errors, to_publish, only_symbology):
-        self.refreshWorkspaceName()
-        if not self.workspace:
-            errors.add("QGIS project must be saved before publishing layers to GeoServer.")
-        elif self.workspace[0].isdigit() or self.workspace[0] in '.-_':
-            errors.add("GeoServer workspace names may not start with a digit or .-_. "
-                       "Please save QGIS project under a different name and retry.")
-        if self.willDeleteLayersOnPublication(to_publish) and not only_symbology:
+    def validateBeforePublication(self, errors: set, to_publish: List[str], only_symbology: bool):
+        if not self.refreshWorkspaceName():
+            errors.add("QGIS project must be saved before publishing layers to GeoServer.\n"
+                       "Project name preferably is ASCII only, starts with a letter, and consists of letters, numbers, or .-_")  # noqa
+        elif self.willDeleteLayersOnPublication(to_publish) and not only_symbology:
             ret = self.showQuestionBox("Workspace", f"A workspace named '{self.workspace}' "
                                                     f"already exists and contains layers that "
                                                     f"will be deleted.\nDo you wish to proceed?",
@@ -1048,7 +1088,7 @@ class GeoserverAlgorithm(BridgeAlgorithm):
         self.addParameter(QgsProcessingParameterAuthConfig(self.AUTHID,
                                                            self.tr('Auth credentials')))
 
-    def name(self):
+    def name(self):  # noqa
         return 'publishtogeoserver'
 
     def displayName(self):

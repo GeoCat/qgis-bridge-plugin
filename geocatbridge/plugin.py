@@ -159,8 +159,10 @@ class GeocatBridge:
 
     def bridgeButtonClicked(self):
         """ Opens the Bridge Publish dialog. This will always create a new BridgeDialog instance."""
-        # Since the BridgeDialog is a modal window, the Bridge button cannot be clicked if the dialog is open.
-        # Therefore, we don't need to check if there is a current (open) dialog or not.
+        if self.main_dialog and self.main_dialog.isVisible():
+            # For macOS and Linux, we need to check if the window is visible. If it is, don't open another window.
+            # For Windows, the Qt window modality settings should take care of this.
+            return self.main_dialog.setFocus()
         self.closeDialog(self.main_dialog)
         self.main_dialog = BridgeDialog(self.iface.mainWindow())
         self.main_dialog.show()

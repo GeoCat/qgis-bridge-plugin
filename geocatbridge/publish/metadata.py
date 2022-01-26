@@ -16,7 +16,7 @@ from qgis.core import (
 
 from geocatbridge.utils import meta, feedback
 from geocatbridge.utils.files import tempFileInSubFolder, getResourcePath
-from geocatbridge.utils.layers import getLayerTitleAndName
+from geocatbridge.utils.layers import BridgeLayer
 
 QMD_TO_ISO19139_XSLT = getResourcePath("qgis-to-iso19139.xsl")
 ISO19139_TO_QMD_XSLT = getResourcePath("iso19139-to-qgis.xsl")
@@ -184,8 +184,14 @@ def _getInfoXmlContent(uuid, thumb_filename):
     return dom.toprettyxml(indent="  ")
 
 
-def uuidForLayer(layer):
-    return str(uuid.uuid5(uuid.NAMESPACE_DNS, layer.source()))
+def uuidForLayer(layer: BridgeLayer) -> str:
+    """ If the layer includes a valid UUID, use that ID. Otherwise, calculate a UUID from the layer source path. """
+    try:
+        # layer.id() should return something like "name_of_layer_123e4567_e89b_12d3_a456_426655440000"
+        lyr_id = uuid.UUID(layer.id()[-36:].replace('_', '-'))
+    except (ValueError, TypeError):
+        lyr_id = uuid.uuid5(uuid.NAMESPACE_DNS, layer.source())
+    return str(lyr_id)
 
 
 def loadMetadataFromXml(layer, filename):
@@ -228,14 +234,15 @@ def loadMetadataFromXml(layer, filename):
         _loadMetadataFromFgdcXml(layer, filename)
 
 
-def saveMetadata(layer, mefFilename=None, apiUrl=None, wms=None, wfs=None, layerName=None):
-    uuid = uuidForLayer(layer)
-    _, safe_name = getLayerTitleAndName(layer)
-    filename = tempFileInSubFolder(safe_name + ".qmd")
+def saveMetadata(layer: BridgeLayer, mef_file: str = None,
+                 api_url: str = None, wms_url: str = None, wfs_url: str = None, record_name: str = None):
+    uuid_ = uuidForLayer(layer)
+    filename = tempFileInSubFolder(layer.file_slug + ".qmd")
     layer.saveNamedMetadata(filename)
     thumbnail = _saveLayerThumbnail(layer)
-    apiUrl = apiUrl or ""
-    transformedFilename = _transformMetadata(filename, uuid, apiUrl, wms, wfs, layerName or safe_name)
-    mefFilename = mefFilename or tempFileInSubFolder(uuid + ".mef")
-    _createMef(uuid, transformedFilename, mefFilename, thumbnail)
-    return mefFilename
+    api_url = api_url or ""
+    record_name = record_name or layer.web_slug
+    md_result = _transformMetadata(filename, uuid_, api_url, wms_url, wfs_url, record_name)
+    mef_file = mef_file or tempFileInSubFolder(uuid_ + ".mef")
+    _createMef(uuid_, md_result, mef_file, thumbnail)
+    return mef_file

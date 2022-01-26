@@ -520,12 +520,12 @@
         <translation type="obsolete">Panel muti-estilos</translation>
     </message>
     <message>
-        <location filename="../publish/exporter.py" line="34"/>
+        <location filename="../publish/export.py" line="34"/>
         <source>Layer %s exported to %s</source>
         <translation type="obsolete">Capa %s exportada a %s</translation>
     </message>
     <message>
-        <location filename="../publish/exporter.py" line="37"/>
+        <location filename="../publish/export.py" line="37"/>
         <source>No need to export layer %s stored at %s</source>
         <translation type="obsolete">No es necesario exportar la capa %s almacenada en %s</translation>
     </message>
