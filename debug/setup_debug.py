@@ -13,10 +13,12 @@ Once you finished debugging, please make sure to rollback plugin.py before
 committing your changes to the Git repository.
 """
 
-from pathlib import Path
-import inspect
 import argparse
+import inspect
+import os
+import stat
 import shutil
+from pathlib import Path
 
 # This is the code that will be injected to enable remote debugging
 _CODE = """
@@ -43,7 +45,7 @@ _SEARCH = 'class GeoCatBridge:'
 
 # Default remote debug server settings
 _HOST = 'localhost'
-_PORT = 63100
+_PORT = 6666
 
 # Default folder name
 _REMOTE_DEBUG_DIR = '_debug'
@@ -74,13 +76,29 @@ def get_args() -> list:
 
 def extract_egg(source: Path, target: Path, work_dir: Path):
     """ Extracts a Python egg to a given target folder. """
+
+    def remove_readonly(func, path, _):
+        """ Clear the readonly bit and reattempt the removal. """
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+
     # First copy the egg to our debug directory and give it a zip extension
     pydevd_zip = work_dir / source.with_suffix('.zip').name
     shutil.copy2(source, pydevd_zip)
+    # Remove output directory
+    if target.is_dir():
+        print(f'Removing existing debugger directory {target}...')
+        try:
+            shutil.rmtree(target, onerror=remove_readonly)
+        except PermissionError as e:
+            print(e)
+            print('Existing debugger directory was NOT updated')
+            return
     # Now do the actual unzipping
     print(f'Extracting contents of {source} to {target}...')
     shutil.unpack_archive(pydevd_zip, target)
     print(f'Contents extracted successfully')
+    os.remove(pydevd_zip)
 
 
 def inject_debug(source: Path, target: Path, code: str):
@@ -119,9 +137,8 @@ def main(plugin_py: Path, pydevd_egg: Path, debug_dir: str = _REMOTE_DEBUG_DIR, 
     shutil.copy2(plugin_py, local_py)
     print(f'Using backup {local_py} for code injection')
 
-    # Extract PyCharm pydevd egg to destination debug directory
-    if not dest_debug_dir.exists():
-        extract_egg(pydevd_egg, dest_debug_dir, cur_dir)
+    # Extract PyCharm pydevd egg to destination debug directory (overwrite)
+    extract_egg(pydevd_egg, dest_debug_dir, cur_dir)
 
     # Inject debug code
     code = _CODE.format(debug_dir, host, port)
