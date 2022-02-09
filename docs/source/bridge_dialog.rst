@@ -12,6 +12,7 @@ products and how they can be used with |short_name|.
 
 .. image:: ./img/first_time.png
 
+
 .. tip::   At the bottom of the `About` panel, it should display the |app_name| version that you are currently running.
 
 

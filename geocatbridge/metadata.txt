@@ -12,10 +12,11 @@ about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 experimental=False
 category=Web
 qgisMinimumVersion=3.16
-version=4.2
+version=4.2.0
 email=support@geocat.net
 icon=icons/geocat.png
-tags=GeoServer, MapServer, GeoNetwork, Mapbox style, Geostyler, ISO19139, SLD, GeoPackage, PostGIS
+tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
+     GeoNetwork, GeoServer, Mapbox, GeoStyler, ISO19139, SLD, GeoPackage, PostGIS
 homepage=https://www.geocat.net/bridge
 tracker=https://my.geocat.net/submitticket.php?step=2&deptid=4
 repository=https://github.com/geocat/qgis-bridge-plugin
@@ -28,13 +29,21 @@ changelog=Version 4.2, February 2022
           - Improved window modality behavior for non-Windows users
           - Auto-rename fields for SHP exports and link to style fields
           - Fixed publication for multiple layers from the same GeoPackage
-          - Fixed MapBox VT publication process
-          - Improved robustness of StyleViewerWidget
+          - Fixes for MapBox VT publication process (groups)
+          - Improved robustness of StyleViewer
           - Fixed metadata editor dialog [#985702]
           - Fixed keyError when defaultStyle is missing [#894721]
           - Improved GeoServer-managed PostGIS publication process
           - Bridge should load own bridgestyle lib (not from Python path)
           - Minor bridgestyle fixes and updates
+
+          Version 4.1, August 2021
+          - Added MapBox VT support
+          - Renamed Multistyler to StyleViewer
+          - Pluggable servers modules
+          - Improved UI/UX of Bridge dialog
+          - Fixed "PostGIS managed by GeoServer" publish process
+          - Added minimal support for JNDI PostGIS datastores
 
 [bridge]
 shortName=Bridge

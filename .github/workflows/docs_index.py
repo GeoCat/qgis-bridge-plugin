@@ -2,7 +2,6 @@
 
 docs_index.py </path/to/directory>
 """
-import os
 import subprocess
 import sys
 import argparse
@@ -48,24 +47,6 @@ def sh(cmd: str) -> Tuple[int, str]:
     return proc.returncode, stdout.decode("utf-8")
 
 
-def is_dirty(git_dir: Path) -> bool:
-    """ Returns True if the current branch is dirty (i.e. has uncommitted edits). """
-    curdir = Path.cwd().resolve()
-    os.chdir(git_dir)
-    print(f"Checking if '{git_dir.name}' has updates...")
-    exit_code, result = sh("git diff --stat")
-    os.chdir(curdir)
-    if exit_code:
-        print('Failed to check if working branch is clean', file=sys.stderr, flush=True)
-        sys.exit(126)
-    if not result.strip():
-        # Empty response: no differences
-        print('Working branch is clean')
-        return False
-    print(result)
-    return True
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("directory", help="Directory path for which to index its folders "
@@ -76,11 +57,6 @@ def main():
     if not dir_path.exists():
         print(f"Directory path '{dir_path}' does not exist", file=sys.stderr, flush=True)
         sys.exit(2)
-
-    # If gh-pages branch is clean, there's no need to update the index
-    if not is_dirty(dir_path):
-        print(f"The {dir_path.name} directory is clean: no docs have been updated", file=sys.stderr, flush=True)
-        sys.exit(126)
 
     # Find local version folders and sort in appropriate order
     print("Listing available docs folders...")

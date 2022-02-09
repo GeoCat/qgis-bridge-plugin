@@ -32,7 +32,7 @@ GeoServer
     handle the data upload instead of the GeoServer REST API), you will
     need to have access to that database instance.
 -   If you wish to let GeoServer import your data into PostGIS (i.e. through
-    the REST API), you need to make sure that the
+    the REST API instead of direct access), you need to make sure that the
     `Importer extension <https://docs.geoserver.org/latest/en/user/extensions/importer/index.html>`_
     is available on GeoServer.
 

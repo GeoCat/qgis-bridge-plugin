@@ -23,16 +23,23 @@ def package():
         make_zip(f)
 
 
-def make_zip(zip_file, suffix=""):
+def make_zip(zip_file):
     print("Creating ZIP for GeoCat Bridge plugin...")
     file_excludes = {'*.pyc', "*.git*", "*.log"}
     dir_excludes = {"test", "tests", "_debug", "debug", "build", "__pycache__", ".github"}
-    src_dir = "./geocatbridge%s" % suffix
+    src_dir = f"./geocatbridge"
+    lic_txt = Path('./LICENSE.md')
 
     def filter_excludes(file_list):
         for fn in file_list:
             if not any([fnmatch(fn, e) for e in file_excludes]):
                 yield fn
+
+    if lic_txt.is_file():
+        # Include license file from repo root in package if it exists
+        dstpath = src_dir / lic_txt
+        print(f'\t{dstpath}')
+        zip_file.write(lic_txt.resolve(), dstpath)
 
     for root, dirs, files in os.walk(src_dir):
         if any(p in dir_excludes for p in Path(root).parts):

@@ -8,15 +8,16 @@ This can be achieved in the *Servers* section of the |short_name| dialog:
 
 .. image:: ./img/servers.png
 
-Add new connection
+
+Adding connections
 ##################
 
 Click :guilabel:`New Server` and choose one of the supported server types to create a new server connection:
 
--   GeoServer
--   MapServer
--   PostGIS
--   GeoNetwork
+- GeoServer
+- MapServer
+- PostGIS
+- GeoNetwork
 
 | Fill in the required parameters and click the :guilabel:`Save` button to store the connection details.
 | You can edit the parameters of a server at any given time. Just select the server connection in the left panel, and edit the fields you wish to change in the right panel.
@@ -42,6 +43,7 @@ Configure a GeoNetwork connection to publish your metadata to an online catalog 
 
 .. image:: ./img/servers_geonetwork.png
 
+
 | You can set a (unique) name to identify the connection, the server URL, and the corresponding credentials (user with publish permissions).
 | The default GeoNetwork node is ``srv``, which will be used if you leave the *Node* field empty.
 
@@ -56,8 +58,12 @@ GeoServer
 
 .. image:: ./img/servers_geoserver.png
 
+
 | You can set a (unique) name to identify the connection, the server URL, and the corresponding credentials (user with publish permissions).
 | The URL can point to the GeoServer base URL (e.g. ``http://localhost:8080/geoserver``) or the REST API URL (e.g. ``http://localhost:8080/geoserver/rest``). Both URLs will work.
+
+If required, you can create and publish Mapbox styles for vector tiles. Mapbox styles and sprite sheets will be processed
+after all layers were successfully published to GeoServer.
 
 Click :guilabel:`Test Connection` to verify that the connection can be established.
 
@@ -66,9 +72,8 @@ You should also specify how layer data will be stored on the server. Three diffe
 File-based storage
 ^^^^^^^^^^^^^^^^^^
 
-| The layer data is uploaded and stored as files (e.g. Shapefile, GeoPackage) in the GeoServer target workspace on the server.
-| If multiple layer data sources are uploaded, |short_name| will try to combine them all in a single GeoPackage, regardless of the original input format.
-| If a single layer is uploaded, |short_name| will prefer to upload a file in the original input format (i.e. a Shapefile will be uploaded as a Shapefile).
+| The layer data is uploaded and stored as files in the GeoServer target workspace on the server.
+| |short_name| prefers to upload vector data as GeoPackages and raster data as GeoTIFF files.
 
 .. _PostGISDirectOption:
 
@@ -82,10 +87,12 @@ Import into PostGIS database (direct connect)
 Import into PostGIS database (handled by GeoServer)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-| The layer data is uploaded to tables in a PostGIS database by GeoServer.
+| The layer data is uploaded to tables in a PostGIS database by GeoServer. This method requires the GeoServer Importer extension, which only handles Shapefile imports for vector data.
+| This means that if the data is stored in a GeoPackage originally, attribute names may be renamed due to the 10 character limit of the Shapefile `.dbf` file upon export. Bridge handles this automatically and also makes sure that field names referenced in styles renamed accordingly.
 | You must select a suitable PostGIS datastore on the GeoServer instance. Selecting this option will trigger a process that lists all the available datastores in each GeoServer workspace (which might take some time):
 
 .. image:: ./img/servers_geoserver2.png
+
 
 .. note::   | The listed datastores will be prefixed by the workspace name to which they belong.
             | This does **not** mean that the layers will be published to that workspace as well.
@@ -97,6 +104,13 @@ Import into PostGIS database (handled by GeoServer)
 | This will open a dialog that allows you to specify the connection details. Make sure that GeoServer has full access to the specified PostGIS instance.
 | For more options (or if you wish to specify a JNDI connection pool) please create the datastore using the GeoServer admin page instead.
 
+.. warning::    | Neither the GeoServer REST API nor the Importer extension is authorized to delete underlying PostGIS layer data tables.
+                | This means that Bridge also won't be able to clean up these data tables and that each publication will create new tables in the database,
+                  adding a numeric suffix to the table name and GeoServer feature type to avoid conflicts. If you (re)publish frequently,
+                  this may lead to a lot of redundant data!
+                | Therefore, it's recommended to create a clean-up script on the database side that will remove any "orphaned" tables
+                  that were created by GeoServer, but are no longer used by any feature type.
+
 
 PostGIS
 -------
@@ -105,6 +119,7 @@ Configure a PostGIS connection if you wish to upload layer data to PostGIS direc
 Setting up this connection is required when using the :ref:`PostGISDirectOption` in a `GeoServer`_ connection.
 
 .. image:: ./img/servers_postgis.png
+
 
 .. note::   JNDI connection pool support is currently unavailable.
 
@@ -117,8 +132,21 @@ A MapServer endpoint (Mapfile) is created for each QGIS project.
 
 .. image:: ./img/servers_mapserver.png
 
+
 Under *Storage*, configure how |short_name| should save the MapServer data.
 Choose *Local path* to store all files on the local file system. Choose *FTP service* to transmit the
 files over FTP to the online MapServer instance. Depending on which option is selected, you will see some additional parameters that must be configured:
 
 .. image:: ./img/servers_mapserver2.png
+
+
+Proxies & certificates
+######################
+
+The GeoNetwork and GeoServer connections mentioned above communicate with the server over HTTP(S) and all their outgoing traffic is handled by the Python ``requests`` library.
+Currently, |app_name| does *not* provide a way to set up a proxy server for these connections, and any QGIS proxy settings that may have been defined are ignored.
+There are plans to add proxy support in future QGIS |short_name| releases.
+
+Any QGIS SSL certificate settings are also ignored, which means that |short_name| will *not* be able to connect to servers that use self-signed certificates, for example.
+However, there is a workaround to this problem. You could set a system environment variable called ``REQUESTS_CA_BUNDLE`` that points to a *.pem* certificate bundle.
+This bundle should include the root certificate and any intermediate certificates that are required to verify the authenticity of the server certificate.

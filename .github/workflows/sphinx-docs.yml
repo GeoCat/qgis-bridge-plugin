@@ -28,8 +28,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -U sphinx
+          pip install -U sphinx-rtd-theme
           pip install -U Mako
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Make sure that the themes folder is empty so we get fresh stuff
+        run: rm -rf docs/themes/*
       - name: Run builddocs script
         run: |
           if [[ ! -z "${{github.event.inputs.version}}" ]]; then
@@ -38,7 +41,7 @@ jobs:
             python docs/builddocs.py --theme sphinx_rtd_theme
           fi
           # Always apply the theme override (in case of older builds with a different theme in conf.py)
-      - name: Clone gh-pages branch folder and copy built docs into it
+      - name: Clone gh-pages branch folder and copy HTML docs into it
         run: |
           git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git --branch gh-pages --single-branch gh-pages
           cp -r build/docs/* gh-pages/

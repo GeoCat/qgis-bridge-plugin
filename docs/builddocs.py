@@ -282,8 +282,8 @@ def main():
                 else:
                     print(output)
 
-        # Clone themes from Git if not present
-        if not (themes_dir / '.git').exists():
+        # Clone themes from Git if not present and we are NOT using the Sphinx RTD theme in a GitHub action
+        if not (themes_dir / '.git').exists() and not (theme_override == THEME_RTD and gh_ref):
             clear_target(themes_dir)
             os.chdir(docsrc_dir)
             print(f"Cloning from {THEMES_REPO} into '{THEMES_DIRNAME}' folder...")
@@ -294,6 +294,9 @@ def main():
             else:
                 print(f"Successfully cloned {THEMES_DIRNAME}")
             os.chdir(curdir)
+        else:
+            # Just create an empty themes dir so Sphinx won't complain
+            os.makedirs(themes_dir)
 
         # Build HTML docs
         result = build_docs(docsrc_dir, folder, version, html_theme=theme_override, checkout_=checkout_version)

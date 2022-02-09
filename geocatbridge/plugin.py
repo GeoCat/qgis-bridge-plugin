@@ -17,22 +17,6 @@ from geocatbridge.ui.styleviewerwidget import StyleviewerWidget
 from geocatbridge.utils import meta, files, feedback
 
 
-
-# Enable PyCharm remote debugger, if debug folder exists
-_debug_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '_debug'))
-if os.path.isdir(_debug_dir):
-    sys.path.append(_debug_dir)
-    import pydevd_pycharm
-    from warnings import simplefilter
-    try:
-        # Suppress ResourceWarning when remote debug server is not running
-        simplefilter('ignore', category=ResourceWarning)
-        pydevd_pycharm.settrace('localhost', True, True, 6666)
-    except (ConnectionRefusedError, AttributeError):
-        # PyCharm remote debug server is not running on localhost:6666
-        # Restore ResourceWarnings
-        simplefilter('default', category=ResourceWarning)    
-
 class GeocatBridge:
     def __init__(self, iface):
         self.iface = iface
