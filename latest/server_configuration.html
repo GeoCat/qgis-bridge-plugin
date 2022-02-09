@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Server Connections &mdash; GeoCat Bridge 4.1.4 documentation</title>
+  <title>Server Connections &mdash; GeoCat Bridge 4.2.0 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                4.1
+                4.2
               </div>
             
           
@@ -102,7 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bridge_dialog.html">The Bridge Dialog</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server Connections</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#add-new-connection">Add new connection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#adding-connections">Adding connections</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#geonetwork">GeoNetwork</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#geoserver">GeoServer</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#file-based-storage">File-based storage</a></li>
@@ -114,6 +114,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#mapserver">MapServer</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#proxies-certificates">Proxies &amp; certificates</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="publish.html">Publishing Data</a></li>
@@ -190,8 +191,8 @@
 <p>Before you can publish data with GeoCat Bridge, you will have to configure one or more server connections.
 This can be achieved in the <em>Servers</em> section of the Bridge dialog:</p>
 <img alt="_images/servers.png" src="_images/servers.png" />
-<section id="add-new-connection">
-<h2>Add new connection<a class="headerlink" href="#add-new-connection" title="Permalink to this headline">¶</a></h2>
+<section id="adding-connections">
+<h2>Adding connections<a class="headerlink" href="#adding-connections" title="Permalink to this headline">¶</a></h2>
 <p>Click <span class="guilabel">New Server</span> and choose one of the supported server types to create a new server connection:</p>
 <ul class="simple">
 <li><p>GeoServer</p></li>
@@ -236,14 +237,15 @@ with a name that already exists.</div>
 <div class="line">You can set a (unique) name to identify the connection, the server URL, and the corresponding credentials (user with publish permissions).</div>
 <div class="line">The URL can point to the GeoServer base URL (e.g. <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/geoserver</span></code>) or the REST API URL (e.g. <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/geoserver/rest</span></code>). Both URLs will work.</div>
 </div>
+<p>If required, you can create and publish Mapbox styles for vector tiles. Mapbox styles and sprite sheets will be processed
+after all layers were successfully published to GeoServer.</p>
 <p>Click <span class="guilabel">Test Connection</span> to verify that the connection can be established.</p>
 <p>You should also specify how layer data will be stored on the server. Three different methods are available:</p>
 <section id="file-based-storage">
 <h4>File-based storage<a class="headerlink" href="#file-based-storage" title="Permalink to this headline">¶</a></h4>
 <div class="line-block">
-<div class="line">The layer data is uploaded and stored as files (e.g. Shapefile, GeoPackage) in the GeoServer target workspace on the server.</div>
-<div class="line">If multiple layer data sources are uploaded, Bridge will try to combine them all in a single GeoPackage, regardless of the original input format.</div>
-<div class="line">If a single layer is uploaded, Bridge will prefer to upload a file in the original input format (i.e. a Shapefile will be uploaded as a Shapefile).</div>
+<div class="line">The layer data is uploaded and stored as files in the GeoServer target workspace on the server.</div>
+<div class="line">Bridge prefers to upload vector data as GeoPackages and raster data as GeoTIFF files.</div>
 </div>
 </section>
 <section id="import-into-postgis-database-direct-connect">
@@ -257,7 +259,8 @@ with a name that already exists.</div>
 <section id="import-into-postgis-database-handled-by-geoserver">
 <h4>Import into PostGIS database (handled by GeoServer)<a class="headerlink" href="#import-into-postgis-database-handled-by-geoserver" title="Permalink to this headline">¶</a></h4>
 <div class="line-block">
-<div class="line">The layer data is uploaded to tables in a PostGIS database by GeoServer.</div>
+<div class="line">The layer data is uploaded to tables in a PostGIS database by GeoServer. This method requires the GeoServer Importer extension, which only handles Shapefile imports for vector data.</div>
+<div class="line">This means that if the data is stored in a GeoPackage originally, attribute names may be renamed due to the 10 character limit of the Shapefile <cite>.dbf</cite> file upon export. Bridge handles this automatically and also makes sure that field names referenced in styles renamed accordingly.</div>
 <div class="line">You must select a suitable PostGIS datastore on the GeoServer instance. Selecting this option will trigger a process that lists all the available datastores in each GeoServer workspace (which might take some time):</div>
 </div>
 <img alt="_images/servers_geoserver2.png" src="_images/servers_geoserver2.png" />
@@ -275,6 +278,17 @@ the datastore that you have selected.</div>
 <div class="line">If you wish to add a new PostGIS-backed datastore, click the <span class="guilabel">Add datastore</span> button.</div>
 <div class="line">This will open a dialog that allows you to specify the connection details. Make sure that GeoServer has full access to the specified PostGIS instance.</div>
 <div class="line">For more options (or if you wish to specify a JNDI connection pool) please create the datastore using the GeoServer admin page instead.</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<div class="line-block">
+<div class="line">Neither the GeoServer REST API nor the Importer extension is authorized to delete underlying PostGIS layer data tables.</div>
+<div class="line">This means that Bridge also won’t be able to clean up these data tables and that each publication will create new tables in the database,
+adding a numeric suffix to the table name and GeoServer feature type to avoid conflicts. If you (re)publish frequently,
+this may lead to a lot of redundant data!</div>
+<div class="line">Therefore, it’s recommended to create a clean-up script on the database side that will remove any “orphaned” tables
+that were created by GeoServer, but are no longer used by any feature type.</div>
+</div>
 </div>
 </section>
 </section>
@@ -299,6 +313,15 @@ files over FTP to the online MapServer instance. Depending on which option is se
 <img alt="_images/servers_mapserver2.png" src="_images/servers_mapserver2.png" />
 </section>
 </section>
+<section id="proxies-certificates">
+<h2>Proxies &amp; certificates<a class="headerlink" href="#proxies-certificates" title="Permalink to this headline">¶</a></h2>
+<p>The GeoNetwork and GeoServer connections mentioned above communicate with the server over HTTP(S) and all their outgoing traffic is handled by the Python <code class="docutils literal notranslate"><span class="pre">requests</span></code> library.
+Currently, GeoCat Bridge does <em>not</em> provide a way to set up a proxy server for these connections, and any QGIS proxy settings that may have been defined are ignored.
+There are plans to add proxy support in future QGIS Bridge releases.</p>
+<p>Any QGIS SSL certificate settings are also ignored, which means that Bridge will <em>not</em> be able to connect to servers that use self-signed certificates, for example.
+However, there is a workaround to this problem. You could set a system environment variable called <code class="docutils literal notranslate"><span class="pre">REQUESTS_CA_BUNDLE</span></code> that points to a <em>.pem</em> certificate bundle.
+This bundle should include the root certificate and any intermediate certificates that are required to verify the authenticity of the server certificate.</p>
+</section>
 </section>
 
 
@@ -315,7 +338,7 @@ files over FTP to the online MapServer instance. Depending on which option is se
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, GeoCat BV. Built from 64fa71f.
+        &#169; Copyright 2022, GeoCat BV. Built from 7180fac.
 
     </p>
   </div>
