@@ -1,0 +1,586 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Supported Symbology &mdash; GeoCat Bridge 4.2.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="StyleViewer Panel" href="styleviewer.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/bridge.svg" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bridge_dialog.html">The Bridge Dialog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_configuration.html">Server Connections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish.html">Publishing Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata_editing.html">Metadata Editing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="styleviewer.html">StyleViewer Panel</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Supported Symbology</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#common-settings">Common settings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drawing-order-symbol-levels">Drawing order (symbol levels)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#size-units">Size units</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#expressions">Expressions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#blending-modes">Blending modes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#vector-layers">Vector Layers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#supported-renderers">Supported renderers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Single symbol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Categorized</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Graduated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Heatmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Rule-based</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#supported-point-symbology">Supported point symbology</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple-marker">Simple marker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#svg-marker">SVG marker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#raster-image-marker">Raster image marker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#font-marker">Font marker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry-generator">Geometry generator</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#supported-line-symbology">Supported line symbology</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple-line">Simple line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#marker-line">Marker line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Geometry generator</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#supported-polygon-symbology">Supported polygon symbology</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple-fill">Simple fill</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#point-pattern-fill">Point pattern fill</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#line-pattern-fill">Line pattern fill</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#outline-simple-line">Outline: Simple line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#outline-marker-line">Outline: Marker line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Geometry generator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#labeling">Labeling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#text-options">Text options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#buffer-options">Buffer options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#background-options">Background options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#placement-options">Placement options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#raster-layers">Raster Layers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Supported renderers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeoCat Bridge</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Supported Symbology</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="supported-symbology">
+<span id="symbology"></span><h1>Supported Symbology<a class="headerlink" href="#supported-symbology" title="Permalink to this headline">¶</a></h1>
+<p>Bridge uses the Python <a class="reference external" href="https://github.com/GeoCat/bridge-style">bridgestyle library</a> to export QGIS symbology into other formats such as SLD (used when uploading to GeoServer), MapServer files, or Mapbox GL.</p>
+<p>Below you can find a list of supported elements that should be correctly converted from QGIS to SLD, along with additional information about the limitations of the conversion between these two formats.</p>
+<section id="common-settings">
+<h2>Common settings<a class="headerlink" href="#common-settings" title="Permalink to this headline">¶</a></h2>
+<p>This section describes general elements that are common to most types of layers and symbologies.</p>
+<section id="drawing-order-symbol-levels">
+<h3>Drawing order (symbol levels)<a class="headerlink" href="#drawing-order-symbol-levels" title="Permalink to this headline">¶</a></h3>
+<p>You can use <a class="reference external" href="https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id95">symbol levels</a> in QGIS to define the order in which to render the symbol layers, which should be correctly converted to z-levels in SLD.</p>
+</section>
+<section id="size-units">
+<h3>Size units<a class="headerlink" href="#size-units" title="Permalink to this headline">¶</a></h3>
+<p>Size values can be used in millimeters, pixels, points, or real world meters. In this last case, expressions cannot be used, only fixed values.</p>
+<p>However, please note that it’s safer to use pixels instead of millimeters (which are the default unit in QGIS), since pixel is the assumed unit for formats like SLD, so no conversion is needed.</p>
+</section>
+<section id="expressions">
+<span id="supportedexpressions"></span><h3>Expressions<a class="headerlink" href="#expressions" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://docs.qgis.org/3.4/en/docs/pyqgis_developer_cookbook/expressions.html">Expressions</a> are supported wherever QGIS allows to use data-defined values. They must be created using QGIS expression language (Python custom functions are not supported). Not all available functions in QGIS can be used, since there’s no equivalent for all of them in GeoServer. The following QGIS functions can be used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">radians</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">floor</span><span class="p">,</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">centroid</span><span class="p">,</span>
+<span class="k">if</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">convex_hull</span><span class="p">,</span> <span class="n">end_point</span><span class="p">,</span> <span class="n">start_point</span><span class="p">,</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">concat</span><span class="p">,</span> <span class="n">substr</span><span class="p">,</span> <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">replace</span><span class="p">,</span> <span class="n">exterior_ring</span><span class="p">,</span>
+<span class="n">intersects</span><span class="p">,</span> <span class="n">overlaps</span><span class="p">,</span> <span class="n">touches</span><span class="p">,</span> <span class="n">within</span><span class="p">,</span> <span class="n">relates</span><span class="p">,</span> <span class="n">crosses</span><span class="p">,</span>
+<span class="n">disjoint</span><span class="p">,</span> <span class="n">geom_from_wkt</span><span class="p">,</span> <span class="n">perimeter</span><span class="p">,</span> <span class="n">union</span><span class="p">,</span> <span class="n">acos</span><span class="p">,</span> <span class="n">asin</span><span class="p">,</span> <span class="n">atan</span><span class="p">,</span>
+<span class="n">atan2</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">ln</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">translate</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">Some function parameters accept expressions, but this is not always supported by Bridge when converting to SLD.</div>
+<div class="line">This applies to the following parameter types:</div>
+</div>
+<ul class="simple">
+<li><p>Colors</p></li>
+<li><p>Parameters selected from drop down lists</p></li>
+<li><p>Offset values</p></li>
+<li><p>Size measures in units different than pixels or mm (i.e. if you are using map units relative to the current map scale)</p></li>
+</ul>
+</section>
+<section id="blending-modes">
+<h3>Blending modes<a class="headerlink" href="#blending-modes" title="Permalink to this headline">¶</a></h3>
+<p>Blending modes are supported at the layer level.</p>
+</section>
+</section>
+<section id="vector-layers">
+<h2>Vector Layers<a class="headerlink" href="#vector-layers" title="Permalink to this headline">¶</a></h2>
+<p>The supported elements for styling vector layers are described below.</p>
+<section id="supported-renderers">
+<h3>Supported renderers<a class="headerlink" href="#supported-renderers" title="Permalink to this headline">¶</a></h3>
+<p>The following renderers are supported for vector layers:</p>
+<section id="id2">
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#single-symbol-renderer">Single symbol</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/singlesymbolrenderer.png" src="_images/singlesymbolrenderer.png" />
+</figure>
+</section>
+<section id="id3">
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#categorized-renderer">Categorized</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/categorizedrenderer.png" src="_images/categorizedrenderer.png" />
+</figure>
+</section>
+<section id="id4">
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#graduated-renderer">Graduated</a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/graduatedrenderer.png" src="_images/graduatedrenderer.png" />
+</figure>
+</section>
+<section id="id5">
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#heatmap-renderer">Heatmap</a><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<p>The following limitations apply:</p>
+<ul class="simple">
+<li><p>Radius must be expressed in pixels</p></li>
+<li><p>Expressions are not supported for the <code class="docutils literal notranslate"><span class="pre">weight</span></code> parameter</p></li>
+</ul>
+</section>
+<section id="id6">
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#rule-based-renderer">Rule-based</a><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/rulebasedrenderer.png" src="_images/rulebasedrenderer.png" />
+</figure>
+<p>Nested rules are supported. The <code class="docutils literal notranslate"><span class="pre">ELSE</span></code> rule is also supported, but it might behave incorrectly in the SLD version if the layer has labeling.
+QGIS considers labeling to be a separate part of the symbology, while SLD considers it as just another symbolizer.</p>
+<p>To find out more about the supported expressions that can be used in rule filters, see the <a class="reference internal" href="#supportedexpressions"><span class="std std-ref">Expressions</span></a> section.</p>
+</section>
+</section>
+<section id="supported-point-symbology">
+<h3>Supported point symbology<a class="headerlink" href="#supported-point-symbology" title="Permalink to this headline">¶</a></h3>
+<p>The following symbol layer types are supported for rendering points:</p>
+<section id="simple-marker">
+<h4>Simple marker<a class="headerlink" href="#simple-marker" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/simplemarker.png" src="_images/simplemarker.png" />
+</figure>
+<p>Below is a list of the parameters that are supported:</p>
+<ul class="simple">
+<li><p>Size</p></li>
+<li><p>Fill Color</p></li>
+<li><p>Stroke Color</p></li>
+<li><p>Stroke style</p></li>
+<li><p>Stroke width</p></li>
+<li><p>Join style</p></li>
+<li><p>Rotation</p></li>
+<li><p>Offset</p></li>
+</ul>
+</section>
+<section id="svg-marker">
+<h4>SVG marker<a class="headerlink" href="#svg-marker" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/svgmarker.png" src="_images/svgmarker.png" />
+</figure>
+<p>Below is a list of the parameters that are supported:</p>
+<ul class="simple">
+<li><p>Size</p></li>
+<li><p>Fill Color</p></li>
+<li><p>Stroke Color</p></li>
+<li><p>Stroke width</p></li>
+<li><p>Rotation</p></li>
+<li><p>Offset</p></li>
+<li><p>SVG image</p></li>
+</ul>
+</section>
+<section id="raster-image-marker">
+<h4>Raster image marker<a class="headerlink" href="#raster-image-marker" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/rastermarker.png" src="_images/rastermarker.png" />
+</figure>
+<p>Below is a list of the parameters that are supported:</p>
+<ul class="simple">
+<li><p>Size</p></li>
+<li><p>Rotation</p></li>
+<li><p>File</p></li>
+</ul>
+</section>
+<section id="font-marker">
+<h4>Font marker<a class="headerlink" href="#font-marker" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/fontmarker.png" src="_images/fontmarker.png" />
+</figure>
+<p>Below is a list of the parameters that are supported:</p>
+<ul class="simple">
+<li><p>Size</p></li>
+<li><p>Fill Color</p></li>
+<li><p>Font</p></li>
+</ul>
+</section>
+<section id="geometry-generator">
+<h4>Geometry generator<a class="headerlink" href="#geometry-generator" title="Permalink to this headline">¶</a></h4>
+</section>
+</section>
+<section id="supported-line-symbology">
+<h3>Supported line symbology<a class="headerlink" href="#supported-line-symbology" title="Permalink to this headline">¶</a></h3>
+<p>The following symbol layer types are supported for rendering lines:</p>
+<section id="simple-line">
+<h4>Simple line<a class="headerlink" href="#simple-line" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/simpleline.png" src="_images/simpleline.png" />
+</figure>
+<p>Below is a list of the parameters that are supported:</p>
+<ul class="simple">
+<li><p>Color</p></li>
+<li><p>Stroke width</p></li>
+<li><p>Stroke style</p></li>
+<li><p>Join style</p></li>
+<li><p>Cap style</p></li>
+<li><p>Offset</p></li>
+</ul>
+</section>
+<section id="marker-line">
+<h4>Marker line<a class="headerlink" href="#marker-line" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/markerline.png" src="_images/markerline.png" />
+</figure>
+<p>Below is a list of the parameters that are supported:</p>
+<ul class="simple">
+<li><p>Marker placement: only <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">interval</span></code> mode is supported</p></li>
+<li><p>Offset along line</p></li>
+</ul>
+<p>As marker, you can use simple markers, SVG markers and raster image markers, with the restrictions mentioned in the corresponding section about supported symbology for point symbols.</p>
+</section>
+<section id="id7">
+<h4>Geometry generator<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+</section>
+</section>
+<section id="supported-polygon-symbology">
+<h3>Supported polygon symbology<a class="headerlink" href="#supported-polygon-symbology" title="Permalink to this headline">¶</a></h3>
+<p>The following symbol layer types are supported for rendering polygons:</p>
+<section id="simple-fill">
+<h4>Simple fill<a class="headerlink" href="#simple-fill" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/simplefill.png" src="_images/simplefill.png" />
+</figure>
+<p>Below is a list of the parameters that are supported:</p>
+<ul class="simple">
+<li><p>Size</p></li>
+<li><p>Fill Color</p></li>
+<li><p>Fill style: only <code class="docutils literal notranslate"><span class="pre">solid,</span> <span class="pre">no</span> <span class="pre">brush,</span> <span class="pre">horizontal,</span> <span class="pre">vertical,</span> <span class="pre">cross</span></code></p></li>
+<li><p>Stroke Color</p></li>
+<li><p>Stroke style</p></li>
+<li><p>Stroke width</p></li>
+<li><p>Join style</p></li>
+<li><p>Rotation</p></li>
+</ul>
+</section>
+<section id="point-pattern-fill">
+<h4>Point pattern fill<a class="headerlink" href="#point-pattern-fill" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/pointpatternfill.png" src="_images/pointpatternfill.png" />
+</figure>
+<p>Below is a list of the parameters that are supported:</p>
+<ul class="simple">
+<li><p>Horizontal distance</p></li>
+<li><p>Vertical distance</p></li>
+</ul>
+<p>As marker, you can use simple markers, SVG markers and raster image markers, with the restrictions mentioned in the corresponding section about supported symbology for point symbols.</p>
+</section>
+<section id="line-pattern-fill">
+<h4>Line pattern fill<a class="headerlink" href="#line-pattern-fill" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/linepatternfill.png" src="_images/linepatternfill.png" />
+</figure>
+<p>Below is a list of the parameters that are supported:</p>
+<ul class="simple">
+<li><p>Rotation: Angle will be rounded to a multiple of 45 degrees</p></li>
+<li><p>Spacing</p></li>
+</ul>
+</section>
+<section id="outline-simple-line">
+<h4>Outline: Simple line<a class="headerlink" href="#outline-simple-line" title="Permalink to this headline">¶</a></h4>
+<p>See the section on supported symbology for simple lines</p>
+</section>
+<section id="outline-marker-line">
+<h4>Outline: Marker line<a class="headerlink" href="#outline-marker-line" title="Permalink to this headline">¶</a></h4>
+<figure class="align-default">
+<img alt="_images/fillmarkeroutline.png" src="_images/fillmarkeroutline.png" />
+</figure>
+<p>See the section on supported symbology for marker lines</p>
+</section>
+<section id="id8">
+<h4>Geometry generator<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+</section>
+</section>
+</section>
+<section id="labeling">
+<h2>Labeling<a class="headerlink" href="#labeling" title="Permalink to this headline">¶</a></h2>
+<p>The following labeling modes are supported for vector layer labels.</p>
+<ul class="simple">
+<li><p>No labels</p></li>
+<li><p><a class="reference external" href="https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id98">Single labels</a></p></li>
+<li><p><a class="reference external" href="https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id111">Rule-based labeling</a></p></li>
+</ul>
+<section id="text-options">
+<h3>Text options<a class="headerlink" href="#text-options" title="Permalink to this headline">¶</a></h3>
+<p>The following options from the <span class="guilabel">Text</span> group of parameters are supported:</p>
+<ul class="simple">
+<li><p>Size</p></li>
+<li><p>Font family</p></li>
+<li><p>Rotation</p></li>
+</ul>
+</section>
+<section id="buffer-options">
+<h3>Buffer options<a class="headerlink" href="#buffer-options" title="Permalink to this headline">¶</a></h3>
+<figure class="align-default">
+<img alt="_images/labelhalo.png" src="_images/labelhalo.png" />
+</figure>
+<p>The following options from the <span class="guilabel">Buffer</span> group of parameters are supported:</p>
+<ul class="simple">
+<li><p>Size</p></li>
+<li><p>Color</p></li>
+<li><p>Opacity</p></li>
+</ul>
+</section>
+<section id="background-options">
+<h3>Background options<a class="headerlink" href="#background-options" title="Permalink to this headline">¶</a></h3>
+<figure class="align-default">
+<img alt="_images/labelbackground.png" src="_images/labelbackground.png" />
+</figure>
+<p>The following options from the <span class="guilabel">Background</span> group of parameters are supported:</p>
+<ul class="simple">
+<li><p>Size X</p></li>
+<li><p>Size Y</p></li>
+<li><p>Size type</p></li>
+<li><p>Shape type</p></li>
+<li><p>Stroke color</p></li>
+<li><p>Fill color</p></li>
+</ul>
+</section>
+<section id="placement-options">
+<h3>Placement options<a class="headerlink" href="#placement-options" title="Permalink to this headline">¶</a></h3>
+<p>The only supported <span class="guilabel">Placement</span> option is <span class="guilabel">Offset from centroid</span>, using the following parameters</p>
+<ul class="simple">
+<li><p>Quadrant</p></li>
+<li><p>Offset</p></li>
+<li><p>Rotation</p></li>
+</ul>
+</section>
+</section>
+<section id="raster-layers">
+<h2>Raster Layers<a class="headerlink" href="#raster-layers" title="Permalink to this headline">¶</a></h2>
+<p>The supported elements for styling raster layers are detailed in this section.</p>
+<section id="id9">
+<h3>Supported renderers<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Single band gray</p></li>
+<li><p>Single band color</p></li>
+<li><p>Single band pseudo color</p></li>
+<li><p>Multi-band color</p></li>
+<li><p>Paletted</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="styleviewer.html" class="btn btn-neutral float-left" title="StyleViewer Panel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2022, GeoCat BV. Built from 7180fac.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
