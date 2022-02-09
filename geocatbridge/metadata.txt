@@ -2,14 +2,17 @@
 name=GeoCat Bridge
 author=GeoCat BV
 description=Easy publication of data and metadata from QGIS.
-about=GeoCat is pleased to offer the Bridge plugin to its customers and the QGIS community.
+about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 
- GeoCat Bridge offers a one-click publishing experience for QGIS Desktop. Create great looking maps and publish them to GeoServer, MapServer and share via GeoNetwork opensource metadata catalog. Your data is uploaded as a GeoPackage or shared PostGIS database. GeoCat Bridge brings our celebrated symbology output to the QGIS Desktop to share your cartography online.
- 
+      GeoCat Bridge offers a one-click publishing experience for QGIS Desktop. Create great looking maps and publish them to GeoServer or MapServer, or share its metadata via the GeoNetwork metadata catalog.
+      Your data is uploaded as a GeoPackage, Shapefile, or imported into a PostGIS database. GeoCat Bridge brings our celebrated symbology output to QGIS Desktop, so you can share your cartography online.
+
+      <i>Note: "Bridge for QGIS" versioning starts at v4.0. There are no official releases prior to v4.x.</i>
+
 experimental=False
 category=Web
-qgisMinimumVersion=3.10
-version=4.1.4
+qgisMinimumVersion=3.16
+version=4.2
 email=support@geocat.net
 icon=icons/geocat.png
 tags=GeoServer, MapServer, GeoNetwork, Mapbox style, Geostyler, ISO19139, SLD, GeoPackage, PostGIS
@@ -18,7 +21,21 @@ tracker=https://my.geocat.net/submitticket.php?step=2&deptid=4
 repository=https://github.com/geocat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
+changelog=Version 4.2, February 2022
+          - Fixed GeoServer layer group publication [#135]
+          - Workaround for regression in pkgutil library [#136]
+          - Fixed SLD encoding issue for GeoServer styles [#139, #141]
+          - Improved window modality behavior for non-Windows users
+          - Auto-rename fields for SHP exports and link to style fields
+          - Fixed publication for multiple layers from the same GeoPackage
+          - Fixed MapBox VT publication process
+          - Improved robustness of StyleViewerWidget
+          - Fixed metadata editor dialog [#985702]
+          - Fixed keyError when defaultStyle is missing [#894721]
+          - Improved GeoServer-managed PostGIS publication process
+          - Bridge should load own bridgestyle lib (not from Python path)
+          - Minor bridgestyle fixes and updates
 
 [bridge]
 shortName=Bridge
-docs=https://geocat.github.io/qgis-bridge-plugin/v4.1
+docs=https://geocat.github.io/qgis-bridge-plugin/v4.2

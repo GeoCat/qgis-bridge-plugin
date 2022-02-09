@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Iterable, FrozenSet
+from collections import namedtuple
 
 from qgis.core import (
     QgsProject,
@@ -127,6 +128,67 @@ class BridgeLayer:
         return self.__dataset_name and self.__source_uri and (self.is_vector or self.is_raster)
 
 
+LayerGroup = namedtuple('LayerGroup', 'name title abstract layers')
+
+
+class LayerGroups(list):
+    def __init__(self, lyrid_filter: Iterable[str] = None, slug_map: dict = None):
+        """
+        Creates a list of LayerGroup objects for the current QGIS project.
+
+        On init, the QGIS TOC will be searched for layer groups. If a list of QGIS layer IDs is provided,
+        only the layers that are in the list will be added to a group object. All other layers will be ignored.
+        If no IDs are specified, all groups and layers will be included.
+
+        :param lyrid_filter:    Iterable of QGIS layer IDs that will participate in the output object.
+        :param slug_map:        Optional lookup dictionary to map the original layer slugs (names) to
+                                the feature type names that were given on the server.
+        """
+        super().__init__()
+        lyrid_filter = frozenset(lyrid_filter or [])
+        root = QgsProject().instance().layerTreeRoot()
+        for element in self._reversed_iter(root):
+            self._group(element, lyrid_filter, slug_map or {})
+
+    @staticmethod
+    def _reversed_iter(element):
+        """ Returns a generator of child elements for the given element in a reversed order.
+        GeoServer requires a reversed layer stacking order compared to QGIS.
+        """
+        children = element.children()
+        children.reverse()
+        for child in children:
+            yield child
+
+    def _group(self, layer_tree: QgsLayerTreeGroup, lyrid_filter: FrozenSet[str], slug_map: dict, parent: list = None):
+        if not isinstance(layer_tree, QgsLayerTreeGroup):
+            return
+        parent = self if parent is None else parent
+
+        # Walk child elements
+        layers = []
+        for child in self._reversed_iter(layer_tree):
+            if isinstance(child, QgsLayerTreeLayer):
+                child_layer = BridgeLayer(child.layer())
+                if not lyrid_filter or (child_layer.id() in lyrid_filter):
+                    layers.append(slug_map.get(child_layer.web_slug, child_layer.web_slug))
+            elif isinstance(child, QgsLayerTreeGroup):
+                self._group(child, lyrid_filter, slug_map, layers)
+
+        if not layers:
+            return  # No layers or subgroups encountered in child elements
+
+        # Append a (sub)group object
+        parent.append(
+            LayerGroup(
+                name=strings.layer_slug(layer_tree),
+                title=layer_tree.customProperty("wmsTitle", layer_tree.name()),
+                abstract=layer_tree.customProperty("wmsAbstract", layer_tree.name()),
+                layers=layers
+            )
+        )
+
+
 def isSupportedLayer(layer):
     """ Returns True if the given layer is supported by Bridge.
 
@@ -139,22 +201,54 @@ def isSupportedLayer(layer):
         layer.type() in (QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer) and layer.dataProvider().name() != "wms"
 
 
-def listBridgeLayers() -> List[BridgeLayer]:
+def listLayerNames(layer_ids: Iterable[str] = None, actual: bool = False) -> List[str]:
+    """
+    Returns a list of layer names for the given QGIS layer IDs.
+    If no list of IDs was specified, all publishable layer names will be returned.
+
+    :param layer_ids:   Optional list of QGIS layer IDs that must be included in the result.
+    :param actual:      If True, the QGIS layer name will be returned (as shown in the TOC).
+                        If False, the web-safe name will be returned (default).
+    :return:            A list of layer names.
+    """
+    return [(lyr.name() if actual else lyr.web_slug) for lyr in listBridgeLayers(layer_ids)]
+
+
+def listGroupNames(layer_ids: Iterable[str] = None, actual: bool = False) -> List[str]:
+    """
+    Returns a list of layer group names for the given QGIS layer IDs, if any have been grouped.
+    If no list of IDs was specified, all layer group names in the TOC will be returned.
+
+    :param layer_ids:   Optional list of QGIS layer IDs whose parent groups must be included.
+    :param actual:      If True, the QGIS group name will be returned (as shown in the TOC).
+                        If False, the web-safe name will be returned.
+    :return:            A list of group names.
+    """
+    return [(g.title if actual else g.name) for g in LayerGroups(layer_ids)]
+
+
+def listBridgeLayers(filter_ids: Iterable[str] = None) -> List[BridgeLayer]:
     """ Returns a flattened list of supported publishable layers in the current QGIS project.
 
     See `isSupportedLayer()` to find out which layers are supported.
+
+    :param filter_ids:  Optional list of QGIS layer IDs for layer that should be included in the output.
+                        If omitted, all publishable layers will be returned.
     """
     def _layersFromTree(layer_tree):
         _layers = []
         for child in layer_tree.children():
             if isinstance(child, QgsLayerTreeLayer):
                 bridge_layer = BridgeLayer(child.layer())
-                if isSupportedLayer(bridge_layer) and bridge_layer.can_publish:
-                    _layers.append(bridge_layer)
+                if not (isSupportedLayer(bridge_layer) and bridge_layer.can_publish) or \
+                        (filter_ids and bridge_layer.id() not in filter_ids):
+                    continue
+                _layers.append(bridge_layer)
             elif isinstance(child, QgsLayerTreeGroup):
                 _layers.extend(_layersFromTree(child))
         return _layers
 
+    filter_ids = frozenset(filter_ids or [])
     root = QgsProject().instance().layerTreeRoot()
     return _layersFromTree(root)
 

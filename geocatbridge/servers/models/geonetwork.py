@@ -45,8 +45,10 @@ class GeonetworkAuthError(Exception):
 
 
 class GeonetworkServer(MetaCatalogServerBase):
+    profile: GeoNetworkProfiles = GeoNetworkProfiles.DEFAULT
+    node: str = "srv"
 
-    def __init__(self, name, authid="", url="", profile=GeoNetworkProfiles.DEFAULT, node="srv"):
+    def __init__(self, name, authid="", url="", **options):
         """
         Creates a new GeoNetwork model instance.
 
@@ -57,22 +59,8 @@ class GeonetworkServer(MetaCatalogServerBase):
         :param node:            GeoNetwork node name (default = srv)
         """
 
-        super().__init__(name, authid, url)
-        try:
-            self.profile = GeoNetworkProfiles[profile]
-        except IndexError:
-            raise ValueError(f"'{profile}' is not a valid GeoNetwork profile")
-        self.node = node
+        super().__init__(name, authid, url, **options)
         self._session = GeonetworkSession(self.meUrl)
-
-    def getSettings(self) -> dict:
-        return {
-            'name':  self.serverName,
-            'authid': self.authId,
-            'url': self.baseUrl,
-            'profile': self.profile,
-            'node': self.node
-        }
 
     @classmethod
     def getWidgetClass(cls) -> type:

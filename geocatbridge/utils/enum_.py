@@ -1,6 +1,6 @@
 class LabeledInt(int):
     """ Subclass of int that allows to assign a name to a number.
-    Can be used to set metadata profile enum constants with labels.
+    Can be used to set enum constants with labels.
     """
     def __new__(cls, index, parent: type, name, value):
         return int.__new__(cls, int(index))  # noqa
@@ -44,10 +44,9 @@ class LabeledInt(int):
 
 
 class LabeledIntEnumType(type):
-    """ Container base class for MetadataProfile type constants.
-    Provides class methods to make the container iterable and to check if a given profile is contained.
+    """ Container base class for LabeledIntEnum type constants.
+    Provides class methods to make the container iterable and to check if a given value is contained.
     """
-
     def _items(cls):
         for i, (attr, val) in enumerate((attr, val) for (attr, val) in
                                         object.__getattribute__(cls, '__dict__').items()
@@ -95,6 +94,7 @@ class LabeledIntEnumType(type):
 
 
 class LabeledIntEnum(metaclass=LabeledIntEnumType):
+    """ This class must be inherited by custom enum classes to make them labeled. """
     pass
 
 

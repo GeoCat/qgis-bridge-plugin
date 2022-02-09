@@ -7,13 +7,13 @@ from geocatbridge.utils.layers import BridgeLayer
 
 
 class ShpFieldLookup(OrderedDict):
-    def __init__(self, *fields, max_chars: int = 10):
+    def __init__(self, fields: Iterable[str], max_chars: int = 10):
         """
         Creates a lookup dictionary that maps original input field name keys
         to 10-character dBase (Shapefile DBF) field name values and replaces invalid chars.
         See https://support.esri.com/en/technical-article/000005588 for field name specifications.
 
-        :param fields:      Sequence of field names to translate.
+        :param fields:      Iterable of field names to translate.
         :param max_chars:   Number of characters to which to truncate the field names.
                             Defaults to 10 characters (standard dBase3 limitation).
         """

@@ -7,23 +7,13 @@ from geocatbridge.utils.meta import getAppName
 
 
 class PostgisServer(DbServerBase):
+    host: str = "localhost"
+    port: int = PostgisWidget.DEFAULT_PORT
+    schema: str = "public"
+    database: str = "db"
 
-    def __init__(self, name, authid="", host="localhost", port=PostgisWidget.DEFAULT_PORT, schema="public", database="db"):  # noqa
-        super().__init__(name, authid)
-        self.host = host
-        self.port = port
-        self.schema = schema
-        self.database = database
-
-    def getSettings(self) -> dict:
-        return {
-            'name': self.serverName,
-            'authid': self.authId,
-            'host': self.host,
-            'port': self.port,
-            'schema': self.schema,
-            'database': self.database
-        }
+    def __init__(self, name, authid="", **options):  # noqa
+        super().__init__(name, authid, **options)
 
     @classmethod
     def getWidgetClass(cls) -> type:

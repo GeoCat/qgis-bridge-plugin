@@ -93,7 +93,7 @@ def serializeServers() -> Union[str, None]:
 
     # Serialize JSON and output string
     try:
-        config_str = json.dumps(server_config)
+        config_str = json.dumps(server_config, indent=4)
     except TypeError as e:
         feedback.logError(f"Failed to serialize server configuration as JSON: {e}")
         return

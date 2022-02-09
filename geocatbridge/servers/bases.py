@@ -2,7 +2,7 @@ import json
 from abc import ABC, abstractmethod
 from importlib import import_module
 from pathlib import Path
-from typing import Union, List, Iterable
+from typing import Union, Iterable, Dict
 from urllib.parse import urlparse
 
 import requests
@@ -17,6 +17,7 @@ from qgis.core import (
 from geocatbridge.utils import files
 from geocatbridge.utils.feedback import FeedbackMixin
 from geocatbridge.utils.layers import BridgeLayer
+from geocatbridge.utils.enum_ import LabeledIntEnum
 from geocatbridge.utils.network import BridgeSession, UPLOAD_TIMEOUT
 
 
@@ -65,13 +66,61 @@ class AbstractServer(ABC):
 
 class ServerBase(AbstractServer, FeedbackMixin, ABC):
 
-    def __init__(self, name, authid=""):
+    def __init__(self, name, authid="", **options):
         super().__init__()
+        self._apply_options(**options)
         self._name = name
         self._authid = authid
         self._username = None
         self._password = None
         self.getCredentials()
+
+    def _apply_options(self, **kwargs):
+        """ Processes class initialization options (kwargs) and adds them as first-class attribute values
+        if the option names and types match the annotations defined at the top the subclass.
+        Called on `__init__()` of the ServerBase.
+        """
+        for keyword, value in kwargs.items():
+            if keyword not in self.__class__.__annotations__:
+                self.logWarning(f"'{keyword}' is an unsupported {self.__class__.__name__} keyword argument")
+                continue
+            keyword_type = self.__class__.__annotations__[keyword]
+            try:
+                if issubclass(keyword_type, LabeledIntEnum):
+                    # lookup the underlying LabeledInt type using the value as index
+                    value_copy = keyword_type[value]
+                else:
+                    # call the type using the value as parameter (re-init)
+                    value_copy = keyword_type(value)
+            except (ValueError, TypeError):
+                self.logError(f"Keyword argument '{keyword}' of {self.__class__.__name__} has invalid value '{value}'")
+                continue
+            setattr(self, keyword, value_copy)
+
+    def _collect_options(self) -> dict:
+        """ Collects all first-class attribute values where the option names and types match
+        the annotations defined at the top of the subclass, and returns it as a dictionary.
+        Called by `getSettings()` on the ServerBase. Overrides in subclasses must call `super().getSettings()`.
+        """
+        options = {}
+        for keyword, keyword_type in self.__class__.__annotations__.items():
+            try:
+                value = getattr(self, keyword)
+            except AttributeError:
+                continue
+            if not (isinstance(value, keyword_type) or
+                    (issubclass(keyword_type, LabeledIntEnum) and value in keyword_type)):
+                continue
+            options[keyword] = value
+        return options
+
+    def getSettings(self) -> dict:
+        settings = {
+            'name': self.serverName,
+            'authid': self.authId,
+        }
+        settings.update(self._collect_options())
+        return settings
 
     def setBasicAuthCredentials(self, username, password):
         self._username = username
@@ -188,8 +237,8 @@ class CombiServerBase(AbstractServer, FeedbackMixin, ABC):
 
 class CatalogServerBase(ServerBase, ABC):
 
-    def __init__(self, name, authid="", url=""):
-        super().__init__(name, authid)
+    def __init__(self, name, authid="", url="", **options):
+        super().__init__(name, authid, **options)
         self._baseurl = urlparse(url).geturl()
 
     def request(self, url, method="get", data=None, **kwargs):
@@ -241,11 +290,17 @@ class CatalogServerBase(ServerBase, ABC):
     def validateBeforePublication(self, *args, **kwargs):
         pass
 
+    def getSettings(self) -> dict:
+        settings = super().getSettings()
+        # Add URL property to base settings
+        settings['url'] = self.baseUrl
+        return settings
+
 
 class MetaCatalogServerBase(CatalogServerBase, ABC):
 
-    def __init__(self, name, authid="", url="", ignore_ssl_errors=False):
-        super().__init__(name, authid, url, ignore_ssl_errors)
+    def __init__(self, name, authid="", url="", **options):
+        super().__init__(name, authid, url, **options)
 
     def openMetadata(self, uuid):
         pass
@@ -266,8 +321,8 @@ class MetaCatalogServerBase(CatalogServerBase, ABC):
 
 class DataCatalogServerBase(CatalogServerBase, ABC):
 
-    def __init__(self, name, authid="", url=""):
-        super().__init__(name, authid, url)
+    def __init__(self, name, authid="", url="", **options):
+        super().__init__(name, authid, url, **options)
 
     def prepareForPublishing(self, only_symbology: bool):
         """ This method is called right before any publication takes place.
@@ -304,7 +359,7 @@ class DataCatalogServerBase(CatalogServerBase, ABC):
         """ Publishes a style (symbology) for the given QGIS layer to the server."""
         raise NotImplementedError
 
-    def closePublishing(self):
+    def closePublishing(self, layer_ids: Iterable[str]):
         """ This method is called after a publish task has finished.
         It may be implemented to do some clean up or perform other tasks.
         """
@@ -320,8 +375,8 @@ class DataCatalogServerBase(CatalogServerBase, ABC):
         """
         pass
 
-    def layerNames(self) -> List[str]:
-        """ Returns a list of all layer names in the current workspace. """
+    def layerNames(self) -> Dict[str, str]:
+        """ Returns a lookup of all QGIS layer names matched to remote layer names in the current workspace. """
         raise NotImplementedError
 
     def layerExists(self, name: str) -> bool:
@@ -364,19 +419,18 @@ class DataCatalogServerBase(CatalogServerBase, ABC):
         """ This method must be implemented if the server supports setting a metadata link URL on a layer. """
         raise NotImplementedError
 
-    def createGroups(self, groups, layers):
+    def createGroups(self, layer_ids: Iterable[str]):
         """ This method may be implemented to create layer groups on the server.
 
-        :param groups:  One or more groups to assign the given layers to.
-        :param layers:  QGIS layer names to put in the given group(s).
+        :param layer_ids:  QGIS layer IDs to include in the group(s).
         """
         pass
 
 
 class DbServerBase(ServerBase, ABC):
 
-    def __init__(self, name, authid=""):
-        super().__init__(name, authid)
+    def __init__(self, name, authid="", **options):
+        super().__init__(name, authid, **options)
 
 
 class ServerWidgetBase:

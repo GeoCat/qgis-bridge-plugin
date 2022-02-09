@@ -2,7 +2,7 @@ import json
 import webbrowser
 from collections import Counter
 from functools import partial
-from typing import Iterable, List
+from typing import List, FrozenSet
 
 import requests
 from qgis.PyQt.QtCore import (
@@ -40,7 +40,9 @@ from geocatbridge.ui.metadatadialog import MetadataDialog
 from geocatbridge.ui.progressdialog import ProgressDialog
 from geocatbridge.utils import files, gui, meta, l10n
 from geocatbridge.utils.feedback import FeedbackMixin
-from geocatbridge.utils.layers import BridgeLayer, listBridgeLayers, layerById
+from geocatbridge.utils.layers import (
+    BridgeLayer, listBridgeLayers, layerById, listLayerNames, listGroupNames
+)
 
 # QGIS setting that stores the online/offline publish settings
 PUBLISH_SETTING = f"{meta.PLUGIN_NAMESPACE}/BridgePublish"
@@ -164,6 +166,9 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         # Set active tab (making sure the tab index is not out of bounds)
         tab_index = min(max(0, settings.get('currentTab', 0)), self.tabOnOffline.count() - 1)
         self.tabOnOffline.setCurrentIndex(tab_index)
+
+        # Update layer item publication state
+        self.updateOnlineLayersPublicationStatus()
 
     def saveConfig(self):
         """ Collects current publish settings and persists them as QGIS Bridge configuration. """
@@ -319,14 +324,15 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             return
         layer_id = self.listLayers.itemWidget(item).id
         menu = QMenu()
-        if self.isDataPublished.get(layer_id):
-            menu.addAction(self.translate("View WMS layer"), partial(self.viewWms, layer_id))
-            menu.addAction(self.translate("Unpublish geodata"), partial(self.unpublishData, layer_id))
-        if self.isMetadataPublished.get(layer_id):
-            menu.addAction(self.translate("View metadata"), partial(self.viewMetadata, layer_id))
-            menu.addAction(self.translate("Unpublish metadata"), partial(self.unpublishMetadata, layer_id))
+        server = manager.getGeodataServer(self.comboGeodataServer.currentText())
         if any(self.isDataPublished.values()):
             menu.addAction(self.translate("View all WMS layers"), self.viewAllWms)
+        if self.isDataPublished.get(layer_id):
+            menu.addAction(self.translate("View this WMS layer"), partial(self.viewWms, layer_id))
+            menu.addAction(self.translate("Unpublish geodata"), partial(self.unpublishData, layer_id))
+        if self.isMetadataPublished.get(layer_id):
+            menu.addAction(self.translate("View metadata record"), partial(self.viewMetadata, layer_id))
+            menu.addAction(self.translate("Unpublish metadata"), partial(self.unpublishMetadata, layer_id))
         menu.exec_(self.listLayers.mapToGlobal(pos))
 
     def populateLayers(self):
@@ -521,16 +527,20 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
     def updateOnlineLayersPublicationStatus(self, data: bool = True, metadata: bool = True):
         """ Validates online tab servers and updates layer status. """
 
-        def _isMetadataOnServer(srv: manager.bases.MetaCatalogServerBase, lyr: BridgeLayer, existing_items: Iterable):
+        def _isMetadataOnServer(srv: manager.bases.MetaCatalogServerBase, lyr: BridgeLayer, existing_items: FrozenSet):
             if not srv:
                 return False
             uuid = uuidForLayer(lyr)
-            return (uuid in existing_items) or srv.metadataExists(uuid)
+            if existing_items:
+                return uuid in existing_items
+            return srv.metadataExists(uuid)
 
-        def _isDataOnServer(srv: manager.bases.DataCatalogServerBase, lyr: BridgeLayer, existing_items: Iterable):
+        def _isDataOnServer(srv: manager.bases.DataCatalogServerBase, lyr: BridgeLayer, existing_items: FrozenSet):
             if not srv:
                 return False
-            return (lyr.web_slug in existing_items) or srv.layerExists(lyr.web_slug)
+            if existing_items:
+                return lyr.web_slug in existing_items
+            return srv.layerExists(lyr.web_slug)
 
         def _refreshStatus(server_, combo):
             errors = set()
@@ -541,7 +551,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                     self.showErrorBar("Error", e)
 
             # Get list of all item names on server to prevent doing a lot of requests   TODO: metadata
-            existing_items = server_.layerNames() if isinstance(server_, manager.bases.DataCatalogServerBase) else []
+            existing_items = frozenset(server_.layerNames().keys()
+                                       if isinstance(server_, manager.bases.DataCatalogServerBase) else [])
 
             # Update layer publication status
             for i in range(self.listLayers.count()):
@@ -551,12 +562,14 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                 if not layer:
                     continue
                 if isinstance(server_, manager.bases.DataCatalogServerBase):
-                    self.isDataPublished[layer.id()] = _isDataOnServer(server_, layer, existing_items)
-                    state = server_ if self.isDataPublished.get(layer.id()) else None
+                    published = _isDataOnServer(server_, layer, existing_items)
+                    self.isDataPublished[layer.id()] = published
+                    state = server_ if published else None
                     widget.setDataPublished(state)
                 elif isinstance(server_, manager.bases.MetaCatalogServerBase):
-                    self.isMetadataPublished[layer.id()] = _isMetadataOnServer(server_, layer, existing_items)
-                    state = server_ if self.isMetadataPublished.get(layer.id()) else None
+                    published = _isMetadataOnServer(server_, layer, existing_items)
+                    self.isMetadataPublished[layer.id()] = published
+                    state = server_ if published else None
                     widget.setMetadataPublished(state)
 
         def _processAll():
@@ -652,6 +665,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             xform = QgsCoordinateTransform(layer.crs(), crs, QgsProject().instance())
             extent = xform.transform(layer.extent())
             bbox.combineExtentWith(extent)
+        # Reverse WMS layer order to correctly stack them visually
+        names.sort(reverse=False)
         self.previewWebService(server, names, bbox, crs.authid())
 
     def previewWebService(self, server, layer_names, bbox, crs_authid):
@@ -744,19 +759,38 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         QgsApplication.taskManager().addTask(task)
         QCoreApplication.processEvents()  # noqa
 
-    def validateBeforePublication(self, to_publish: List[str], style_only: bool):
+    def validateBeforePublication(self, to_publish: List[str], style_only: bool) -> bool:
+        """ Checks if there are no duplicate names among the selected layers (also verifies participating group names),
+        and performs server-specific checks for each selected layer.
+        Shows (bad) results in a dialog and returns False if validation failed.
+
+        :param to_publish:  QGIS layer IDs that must be published.
+        :param style_only:  If True, only styles will be published. Value is passed on to server-specific validation.
+        """
         errors = set()
-        for name, n in ((k, v) for (k, v) in Counter(to_publish).items() if v > 1):
+
+        # Collect all participating (group) layer names
+        layer_names = listLayerNames(to_publish, actual=True)
+        group_names = listGroupNames(to_publish, actual=True)
+
+        # Add errors for duplicate names
+        for name, n in ((k, v) for (k, v) in Counter(layer_names).items() if v > 1):
             errors.add(f"Layer name '{name}' is not unique: found {n} duplicates")
-        for name in to_publish:
+        for name, n in ((k, v) for (k, v) in Counter(group_names).items() if v > 1):
+            errors.add(f"Group name '{name}' is not unique: found {n} duplicates")
+
+        # Quick check for unsupported chars in names (<server>.validateBeforePublication may be more specific)
+        for name in layer_names + group_names:
             for c in "?&=#":
                 if c in name:
-                    errors.add(f"Unsupported character in layer '{name}': '{c}'")
+                    errors.add(f"Unsupported character in group or layer '{name}': '{c}'")
 
+        # Server-specific validation
         geodata_server = manager.getGeodataServer(self.comboGeodataServer.currentText())
         if geodata_server:
             geodata_server.validateBeforePublication(errors, to_publish, style_only)
 
+        # Display errors (if any) and return
         if errors:
             html = f"<p><b>Cannot publish data.</b></p>"
             issues = "".join(f"<li>{e}</li>" for e in errors)
@@ -847,12 +881,14 @@ class LayerItemWidget(QWidget):
             self._metalabel.setToolTip(f"Metadata published to '{server.serverName}'")
         else:
             self._metalabel.setToolTip('')
+        self.update()
 
     def setDataPublished(self, server):
         if self._setIcon(self._datalabel, server):
             self._datalabel.setToolTip(f"Geodata published to '{server.serverName}'")
         else:
             self._datalabel.setToolTip('')
+        self.update()
 
     @property
     def checked(self) -> bool:

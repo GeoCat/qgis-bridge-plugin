@@ -7,8 +7,6 @@ from qgis.core import (
     QgsRectangle,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
-    QgsRasterLayer,
-    QgsVectorLayer,
     QgsWkbTypes
 )
 
@@ -18,36 +16,34 @@ from geocatbridge.publish.style import convertDictToMapfile, layerStyleAsMapfile
 from geocatbridge.servers.bases import DataCatalogServerBase
 from geocatbridge.servers.views.mapserver import MapServerWidget
 from geocatbridge.utils import files
-from geocatbridge.utils.layers import BridgeLayer
+from geocatbridge.utils.layers import BridgeLayer, layerById
 
 
 class MapserverServer(DataCatalogServerBase):
+    useLocalFolder: bool = True
+    folder: str = ""
+    host: str = ""
+    port: int = 80
+    servicesPath: str = ""
+    projFolder: str = "/usr/share/proj"
 
-    def __init__(self, name, url="", useLocalFolder=True, folder="", authid="", host="", port=80,
-                 servicesPath="", projFolder=""):
-        super().__init__(name, authid, url)
-        self.folder = folder
-        self.useLocalFolder = useLocalFolder
-        self.host = host
-        self.port = port
-        self.servicesPath = servicesPath
-        self.projFolder = projFolder or "/usr/share/proj"  # FTP project folder (not local)
-        self._layers = []
+    def __init__(self, name, authid="", url="", **options):
+        """
+        Creates a new MapServer model instance.
+
+        :param name:                    Descriptive server name (given by the user)
+        :param authid:                  QGIS Authentication ID (optional)
+        :param url:                     MapServer FTP URL
+        :param useLocalFolder:          Set to True if publication must take place to a local folder
+        :param folder:                  Local folder path
+        :param host:                    MapServer host name
+        :param port:                    MapServer port (default = 80)
+        :param servicesPath:            Relative path to map services
+        :param projFolder:              Local path on server to projections folder
+        """
+        super().__init__(name, authid, url, **options)
         self._metadataLinks = {}
         self._folder = files.tempFolder()
-
-    def getSettings(self) -> dict:
-        return {
-            'name': self.serverName,
-            'url': self.baseUrl,
-            'useLocalFolder': self.useLocalFolder,
-            'folder': self.folder,
-            'authid': self.authId,
-            'host': self.host,
-            'port': self.port,
-            'servicesPath': self.servicesPath,
-            'projFolder': self.projFolder
-        }
 
     @classmethod
     def getWidgetClass(cls) -> type:
@@ -62,8 +58,7 @@ class MapserverServer(DataCatalogServerBase):
         return True
 
     def publishStyle(self, layer: BridgeLayer):
-        # TODO?
-        self._layers.append(layer)
+        pass  # TODO?
 
     def publishLayer(self, layer: BridgeLayer, fields: List[str] = None, exporter=None):
         if layer.is_vector:
@@ -78,11 +73,10 @@ class MapserverServer(DataCatalogServerBase):
         uploadFolder(folder, self.host, self.port, self.folder, username, password)
 
     def testConnection(self, errors):
-        # MapServer connections are not tested
+        # TODO: MapServer connections are not tested
         return True
 
     def prepareForPublishing(self, only_symbology):
-        self._layers = []
         self._metadataLinks = {}
         self._folder = self.folder if self.useLocalFolder else files.tempFolder()
 
@@ -110,33 +104,34 @@ class MapserverServer(DataCatalogServerBase):
         os.makedirs(path, exist_ok=True)
         return path
 
-    def closePublishing(self):
-        name = self.projectName
-        extent = QgsRectangle()
-        epsg4326 = QgsCoordinateReferenceSystem("EPSG:4326")
-        for layer in self._layers:
-            trans = QgsCoordinateTransform(layer.crs(), epsg4326, QgsProject.instance())
-            layerExtent = trans.transform(layer.extent())
-            extent.combineExtentWith(layerExtent)
-
-        sExtent = " ".join([str(v) for v in [extent.xMinimum(), extent.yMinimum(),
-                                             extent.xMaximum(), extent.yMaximum()]])
+    def closePublishing(self, layer_ids):
 
         def _quote(t):
             return '"%s"' % t
 
-        for layer in self._layers:
+        name = self.projectName
+        extent = QgsRectangle()
+        epsg4326 = QgsCoordinateReferenceSystem("EPSG:4326")
+        layers = [layerById(lyr_id) for lyr_id in layer_ids]
+        for layer in layers:
+            trans = QgsCoordinateTransform(layer.crs(), epsg4326, QgsProject.instance())
+            layer_extent = trans.transform(layer.extent())
+            extent.combineExtentWith(layer_extent)
+
+        extent_str = " ".join([str(v) for v in [extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()]])  # noqa
+
+        for layer in layers:
             add = {}
-            layerFilename = layer.file_slug + ".shp"
-            add["DATA"] = _quote(layerFilename)
-            if isinstance(layer, QgsRasterLayer):
-                layerType = "raster"
-            elif isinstance(layer, QgsVectorLayer):
-                layerType = QgsWkbTypes.geometryDisplayString(layer.geometryType())
+            layer_filename = layer.file_slug + ".shp"
+            add["DATA"] = _quote(layer_filename)
+            if layer.is_raster:
+                layer_type = "raster"
+            elif layer.is_vector:
+                layer_type = QgsWkbTypes.geometryDisplayString(layer.geometryType())
             else:
                 self.logWarning(f"Skipped unsupported layer '{layer.name()}'")
                 continue
-            add["TYPE"] = layerType
+            add["TYPE"] = layer_type
 
             bbox = layer.extent()
             if bbox.isEmpty():
@@ -160,32 +155,50 @@ class MapserverServer(DataCatalogServerBase):
             for w in warnings:
                 self.logWarning(w)
 
-        web = {"IMAGEPATH": '"../data/bridge/webdav/images"',
-               "IMAGEURL": '"http://localhost/images"',
-               "METADATA": {
-                   '"wms_title"': _quote(name),
-                   '"wms_onlineresource"': _quote(f"{self.getWmsUrl()}&layers={','.join(l.web_slug for l in self._layers)}"),  # noqa
-                   '"ows_enable_request"': '"*"',
-                   '"ows_srs"': '"EPSG:4326"',
-                   '"wms_feature_info_mime_type"': '"text/html"'
-               }}
-        mapElement = {"NAME": _quote(name), "STATUS": 'ON', "CONFIG": '"PROJ_LIB" "%s"' % self.projFolder,
-                      "EXTENT": sExtent, "PROJECTION": {'AUTO': ''}, "SYMBOLSET": '"symbols.txt"', "MAXSIZE": 8000,
-                      "SHAPEPATH": '"../data"', "SIZE": "700 700", "UNITS": "METERS", "WEB": web,
-                      "OUTPUTFORMAT": {"DRIVER": '"AGG/PNG"',
-                                       "EXTENSION": '"png"',
-                                       "IMAGEMODE": '"RGB"',
-                                       "MIMETYPE": '"image/png"'}, "SCALEBAR": {"ALIGN": "CENTER",
-                                                                                "OUTLINECOLOR": "0 0 0"},
-                      "LAYERS": [{"INCLUDE": '"%s.txt"' % layer.web_slug} for layer in self._layers],
-                      "SYMBOLS": [{"INCLUDE": '"%s_symbols.txt"' % layer.web_slug} for layer in self._layers]}
-        mapfile = {"MAP": mapElement}
+        mapfile_obj = {
+            "MAP": {
+                "NAME": _quote(name),
+                "STATUS": 'ON',
+                "CONFIG": f'"PROJ_LIB" "{self.projFolder}"',
+                "EXTENT": extent_str,
+                "PROJECTION": {
+                    'AUTO': ''
+                },
+                "SYMBOLSET": '"symbols.txt"',
+                "MAXSIZE": 8000,
+                "SHAPEPATH": '"../data"',
+                "SIZE": "700 700",
+                "UNITS": "METERS",
+                "WEB": {
+                    "IMAGEPATH": '"../data/bridge/webdav/images"',
+                    "IMAGEURL": '"http://localhost/images"',
+                    "METADATA": {
+                        '"wms_title"': _quote(name),
+                        '"wms_onlineresource"': _quote(f"{self.getWmsUrl()}&layers={','.join(l.web_slug for l in layers)}"),  # noqa
+                        '"ows_enable_request"': '"*"',
+                        '"ows_srs"': '"EPSG:4326"',
+                        '"wms_feature_info_mime_type"': '"text/html"'
+                    }
+                },
+                "OUTPUTFORMAT": {
+                    "DRIVER": '"AGG/PNG"',
+                    "EXTENSION": '"png"',
+                    "IMAGEMODE": '"RGB"',
+                    "MIMETYPE": '"image/png"'
+                },
+                "SCALEBAR": {
+                    "ALIGN": "CENTER",
+                    "OUTLINECOLOR": "0 0 0"
+                },
+                "LAYERS": [{"INCLUDE": f'"{layer.web_slug}.txt"'} for layer in layers],
+                "SYMBOLS": [{"INCLUDE": f'"{layer.web_slug}_symbols.txt"'} for layer in layers]
+            }
+        }
 
-        s = convertDictToMapfile(mapfile)
-
-        mapfilePath = os.path.join(self.mapsFolder(), name + ".map")
-        with open(mapfilePath, "w") as f:
-            f.write(s)
+        mapfile_str = convertDictToMapfile(mapfile_obj)
+        mapfile_path = os.path.join(self.mapsFolder(), name + ".map")
+        with open(mapfile_path, "w") as f:
+            f.write(mapfile_str)
 
         src = files.getResourcePath(files.Path("mapserver") / "symbols.txt")
         dst = self.mapsFolder()
@@ -195,7 +208,7 @@ class MapserverServer(DataCatalogServerBase):
             self.uploadFolder(dst)
 
     def layerNames(self):
-        return
+        return {}  # TODO
 
     def layerExists(self, name: str):
         return
@@ -225,5 +238,5 @@ class MapserverServer(DataCatalogServerBase):
     def setLayerMetadataLink(self, name, url):
         self._metadataLinks[name] = url
 
-    def createGroups(self, groups, qgis_layers):
+    def createGroups(self, layer_ids):
         pass

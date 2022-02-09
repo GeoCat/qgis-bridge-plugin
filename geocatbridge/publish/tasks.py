@@ -7,8 +7,6 @@ from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QWidget
 from qgis.core import (
     QgsTask,
-    QgsLayerTreeLayer,
-    QgsLayerTreeGroup,
     QgsNativeMetadataValidator,
     QgsProject,
     QgsLayerMetadata,
@@ -59,41 +57,8 @@ class PublishTask(TaskBase):
         self.exc_type = None
         self.parent = parent
 
-    def _layerGroups(self):
-
-        def _addGroup(layer_tree):
-            layers = []
-            children = layer_tree.children()
-            children.reverse()  # GS and QGIS have opposite ordering
-            for child in children:
-                if isinstance(child, QgsLayerTreeLayer):
-                    child_layer = BridgeLayer(child.layer())
-                    if child_layer.id() in self.layer_ids:
-                        layers.append(child_layer.web_slug)
-                elif isinstance(child, QgsLayerTreeGroup):
-                    subgroup = _addGroup(child)
-                    if subgroup is not None:
-                        layers.append(subgroup)
-            if layers:
-                slug = strings.layer_slug(layer_tree)
-                return {"name": layer_tree.name(),
-                        "title": layer_tree.customProperty("wmsTitle", slug),
-                        "abstract": layer_tree.customProperty("wmsAbstract", slug),
-                        "layers": layers}
-            else:
-                return None
-
-        groups = []
-        root = QgsProject().instance().layerTreeRoot()
-        for element in root.children():
-            if isinstance(element, QgsLayerTreeGroup):
-                group = _addGroup(element)
-                if group is not None:
-                    groups.append(group)
-
-        return groups
-
     def run(self):
+        """ Start the publish task. """
 
         def _publish(lyr: BridgeLayer, pub_fields: Union[list, ShpFieldLookup, None] = None):
             pub_fields = pub_fields.values() if isinstance(pub_fields, ShpFieldLookup) else pub_fields
@@ -107,7 +72,7 @@ class PublishTask(TaskBase):
         try:
             validator = QgsNativeMetadataValidator()
 
-            # FIXME: remove or improve this
+            # TODO: remove or make configurable
             # DONOTALLOW = 0
             ALLOW = 1
             ALLOWONLYDATA = 2
@@ -118,6 +83,7 @@ class PublishTask(TaskBase):
                 self.geodata_server.prepareForPublishing(self.only_symbology)
 
             self.results = {}
+            published_ids = set()
             for i, layer_id in enumerate(self.layer_ids):
                 if self.isCanceled():
                     return False
@@ -159,6 +125,7 @@ class PublishTask(TaskBase):
                             try:
                                 if md_valid or (allow_without_md in (ALLOW, ALLOWONLYDATA)):
                                     _publish(layer, publish_fields)
+                                    published_ids.add(layer_id)
                                 else:
                                     errors.append(f"Could not publish layer '{name}' because of invalid metadata")
                             except:
@@ -206,18 +173,17 @@ class PublishTask(TaskBase):
                 self.results[name] = (set(warnings), set(errors))
 
             # Create layer groups (if any)
-            if self.geodata_server is not None:
+            if published_ids and self.geodata_server is not None:
                 self.stepStarted.emit(None, GROUPS)
                 try:
-                    # FIXME (did this ever work?)
-                    self.geodata_server.createGroups(self._layerGroups(), self.layer_ids)
+                    self.geodata_server.createGroups(published_ids)
                 except Exception as err:
                     # TODO: figure out where to properly put a warning or error message for this
                     feedback.logError(f"Could not create layer groups: {err}")
                 finally:
                     try:
                         # Call closePublishing(): for GeoServer, this will set up vector tiles, if enabled
-                        self.geodata_server.closePublishing()
+                        self.geodata_server.closePublishing(published_ids)
                     except Exception as err:
                         feedback.logError(f"Failed to finalize publish task: {err}")
                     self.stepFinished.emit(None, GROUPS)
@@ -261,6 +227,16 @@ class ExportTask(TaskBase, feedback.FeedbackMixin):
 
     def __init__(self, folder: str, layer_ids: List[str], field_map: dict,
                  export_data: bool, export_metadata: bool, export_symbology: bool):
+        """
+        Task to export layer data and styles to a given offline (local) folder.
+
+        :param folder:              Folder path where the data should be written.
+        :param layer_ids:           List of QGIS layer IDs to export.
+        :param field_map:           Lookup dictionary with all field names to export for each layer.
+        :param export_data:         Set to True if the layer source data should be exported (GeoPackage, GeoTIFF).
+        :param export_metadata:     Set to True if the layer metadata should be exported (zipped MEF).
+        :param export_symbology:    Set to True if the layer styles should be exported (zipped SLDs).
+        """
         TaskBase.__init__(self, layer_ids, field_map)
         self.exception = None
         self.folder = folder
@@ -269,6 +245,7 @@ class ExportTask(TaskBase, feedback.FeedbackMixin):
         self.export_symbology = export_symbology
 
     def run(self):
+        """ Start the export task. """
         try:
             os.makedirs(self.folder, exist_ok=True)
             for i, id_ in enumerate(self.layer_ids):
