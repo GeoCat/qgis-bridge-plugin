@@ -8,15 +8,16 @@ This can be achieved in the *Servers* section of the |short_name| dialog:
 
 .. image:: ./img/servers.png
 
+
 Adding connections
 ##################
 
 Click :guilabel:`New Server` and choose one of the supported server types to create a new server connection:
 
--   GeoServer
--   MapServer
--   PostGIS
--   GeoNetwork
+- GeoServer
+- MapServer
+- PostGIS
+- GeoNetwork
 
 | Fill in the required parameters and click the :guilabel:`Save` button to store the connection details.
 | You can edit the parameters of a server at any given time. Just select the server connection in the left panel, and edit the fields you wish to change in the right panel.
@@ -42,6 +43,7 @@ Configure a GeoNetwork connection to publish your metadata to an online catalog 
 
 .. image:: ./img/servers_geonetwork.png
 
+
 | You can set a (unique) name to identify the connection, the server URL, and the corresponding credentials (user with publish permissions).
 | The default GeoNetwork node is ``srv``, which will be used if you leave the *Node* field empty.
 
@@ -55,6 +57,7 @@ GeoServer
 | When you add a new GeoServer connection, |short_name| will automatically add the corresponding WMS and/or WFS endpoints to QGIS, so you can easily add to the server layers to your project, if needed.
 
 .. image:: ./img/servers_geoserver.png
+
 
 | You can set a (unique) name to identify the connection, the server URL, and the corresponding credentials (user with publish permissions).
 | The URL can point to the GeoServer base URL (e.g. ``http://localhost:8080/geoserver``) or the REST API URL (e.g. ``http://localhost:8080/geoserver/rest``). Both URLs will work.
@@ -90,6 +93,7 @@ Import into PostGIS database (handled by GeoServer)
 
 .. image:: ./img/servers_geoserver2.png
 
+
 .. note::   | The listed datastores will be prefixed by the workspace name to which they belong.
             | This does **not** mean that the layers will be published to that workspace as well.
             | |short_name| always publishes layers to a (new) workspace named after the QGIS project name
@@ -116,6 +120,7 @@ Setting up this connection is required when using the :ref:`PostGISDirectOption`
 
 .. image:: ./img/servers_postgis.png
 
+
 .. note::   JNDI connection pool support is currently unavailable.
 
 
@@ -126,6 +131,7 @@ Configure a MapServer connection to publish your map (layer data and symbology).
 A MapServer endpoint (Mapfile) is created for each QGIS project.
 
 .. image:: ./img/servers_mapserver.png
+
 
 Under *Storage*, configure how |short_name| should save the MapServer data.
 Choose *Local path* to store all files on the local file system. Choose *FTP service* to transmit the
