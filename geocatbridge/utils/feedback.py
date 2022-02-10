@@ -199,7 +199,7 @@ class FeedbackMixin:
 
         :param title:               Header of the message box (set to "" if no header is required).
         :param message:             The message that should be displayed in the message box.
-        :keyword buttons:           Optional override of the standard warning box buttons (use BUTTONS.YES/NO/etc.).
+        :keyword buttons:           Optional override of the standard error box buttons (use BUTTONS.YES/NO/etc.).
         :keyword defaultButton:     Optional override of the default button (use BUTTONS.YES/NO/etc.).
         :keyword propagate:         When set to `True`, the message will also be logged.
                                     When set to a string or Exception, it's value will be logged.
@@ -225,7 +225,7 @@ class FeedbackMixin:
 
         :param title:               Header of the message box (set to "" if no header is required).
         :param message:             The message that should be displayed in the message box.
-        :keyword buttons:           Optional override of the standard warning box buttons (use BUTTONS.YES/NO/etc.).
+        :keyword buttons:           Optional override of the standard question box buttons (use BUTTONS.YES/NO/etc.).
         :keyword defaultButton:     Optional override of the default button (use BUTTONS.YES/NO/etc.).
         """
         return self._show_box(QMessageBox.question, title, message, **kwargs)

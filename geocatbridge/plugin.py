@@ -58,12 +58,6 @@ class GeocatBridge:
                 except Exception as err:
                     # Swallow all exceptions here, to avoid entering an endless loop
                     feedback.logWarning(f"A failure occurred while handling an exception: {err}")
-                # TODO: Once Bridge is more mature, the code below should be uncommented
-                # try:
-                #     # Close/disable the plugin to avoid messing up things
-                #     self.unload()
-                # except Exception as err:
-                #     feedback.logWarning(f"A failure occurred while unloading the Bridge plugin: {err}")
             else:
                 # Handle regular QGIS exception
                 self.qgis_hook(t, value, tb)          
@@ -133,15 +127,19 @@ class GeocatBridge:
         self.action_styleviewer.triggered.disconnect(self.widget_styleviewer.show)
         self.iface.removePluginWebMenu(self.name, self.action_styleviewer)
         self.closeDialog(self.widget_styleviewer)
+        self.action_styleviewer = None
 
         # Remove Publish button and close Publish dialog
         self.action_publish.triggered.disconnect(self.bridgeButtonClicked)
         self.iface.removePluginWebMenu(self.name, self.action_publish)
         self.iface.removeWebToolBarIcon(self.action_publish)
         self.closeDialog(self.main_dialog)
+        self.action_publish = None
 
         # Remove Help button
+        self.action_help.triggered.disconnect(self.openDocUrl)
         self.iface.removePluginWebMenu(self.name, self.action_help)
+        self.action_help = None
 
         # Remove processing provider
         QgsApplication.processingRegistry().removeProvider(self.provider)  # noqa

@@ -41,7 +41,9 @@ class BridgeDialog(BASE, WIDGET):
         if self.showAbout():
             # Show About panel first on fresh install or update
             self.listWidget.setCurrentRow(Panels.ABOUT)
+            self.listItemClicked(self.listWidget.item(Panels.ABOUT))
         else:
+            # Match selected item to default Publish panel
             self.listWidget.setCurrentRow(Panels.PUBLISH)
 
     def addPanels(self):
