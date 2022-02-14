@@ -745,7 +745,7 @@ class GeoserverServer(DataCatalogServerBase):
         # Retrieve all layers in the workspace
         url = f"{self.apiUrl}/workspaces/{self.workspace}/layers.json"
         try:
-            layers = self.request(url).json()["layers"]
+            layers = self.request(url).json()["layers"] or {}
         except Exception as err:
             self.logError(f"Failed to retrieve layers from workspace {self.workspace}: {err}")
             return {}
