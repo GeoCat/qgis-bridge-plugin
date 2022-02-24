@@ -331,7 +331,10 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
 
     def addMenuToButtonNew(self):
         """ Populate "New Server" menu button with available server types (in alphabetical order). """
-        menu = QMenu()
+        if self.buttonNew.menu():
+            # For macOS users, it's important that we only set the menu once
+            return
+        menu = QMenu(self)
         for label, server_type in sorted((s.getLabel(), deepcopy(s)) for s in manager.getServerTypes()):
             menu.addAction(label, partial(self.addNewServer, server_type))
         self.buttonNew.setMenu(menu)
