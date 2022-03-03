@@ -185,7 +185,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                 worker.resultReady.connect(partial(addGeoserverPgDatastores, current_db))
                 worker.run()
             except Exception as e:
-                msg = f'Failed to retrieve datastores for {self.serverName}'
+                msg = f'Failed to retrieve datastores for {getattr(server, "serverName", self.txtGeoserverName.text())}'  # noqa
                 if isinstance(e, HTTPError) and e.response.status_code == 401:
                     msg = f'{msg}: please check credentials'
                 else:

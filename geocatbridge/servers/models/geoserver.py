@@ -1056,6 +1056,9 @@ class GeoserverServer(DataCatalogServerBase):
                 self.showErrorBar("Error", f"Failed to connect to {self.serverName}: bad or missing credentials")
             self.logError(f"Failed to retrieve workspaces from {self.apiUrl}: {e}")
             return []
+        except json.JSONDecodeError:
+            self.logWarning(f"GeoServer instance at {self.apiUrl} did not return a valid JSON response")
+            return []
         if not res:
             self.logWarning(f"GeoServer instance at {self.apiUrl} does not seem to have any workspaces")
             return []
