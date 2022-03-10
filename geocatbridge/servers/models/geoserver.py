@@ -377,20 +377,25 @@ class GeoserverServer(DataCatalogServerBase):
         # Get the created feature type for the current layer
         url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{ds_name}/featuretypes/{ds_name}.json"
         try:
-            ft = self.request(url).json()
+            self.request(url).json()
         except Exception as err:
             return self.logError(f"Feature type {ds_name} was not found: {err}")
 
-        # Edit the feature type
-        ft["featureType"]["name"] = layer.web_slug
-        ft["featureType"]["title"] = layer.name()
+        # Modify the feature type
         ext = layer.extent()
-        ft["featureType"]["nativeBoundingBox"] = {
-            "minx": round(ext.xMinimum(), 5),
-            "maxx": round(ext.xMaximum(), 5),
-            "miny": round(ext.yMinimum(), 5),
-            "maxy": round(ext.yMaximum(), 5),
-            "srs": layer.crs().authid()
+        ft = {
+            "featureType": {
+                "name": layer.web_slug,
+                "title": layer.title() or layer.name(),
+                "abstract": layer.abstract(),
+                "nativeBoundingBox": {
+                    "minx": round(ext.xMinimum(), 5),
+                    "maxx": round(ext.xMaximum(), 5),
+                    "miny": round(ext.yMinimum(), 5),
+                    "maxy": round(ext.yMaximum(), 5),
+                    "crs": layer.crs().authid()
+                }
+            }
         }
         try:
             self.request(url, "put", ft)
@@ -472,7 +477,7 @@ class GeoserverServer(DataCatalogServerBase):
         self.logInfo("Checking if feature type creation was successful...")
         url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{datastore}/featuretypes/{given_name}.json"
         try:
-            ret = self.request(url + "?quietOnNotFound=true")
+            self.request(url + "?quietOnNotFound=true")
         except RequestException as e:
             # Something unexpected happened: failure cannot be retrieved from import task,
             # so the user should check the GeoServer logs to find out what caused it.
@@ -483,9 +488,13 @@ class GeoserverServer(DataCatalogServerBase):
 
         # Modify the feature type descriptions, but leave the name intact to avoid DB schema mismatches
         self.logInfo("Fixing feature type properties...")
-        ft = ret.json()
-        ft["featureType"]["nativeName"] = layer.web_slug    # original name used for the upload
-        ft["featureType"]["title"] = layer.name()           # layer name as displayed in QGIS
+        ft = {
+            "featureType": {
+                "nativeName": layer.web_slug,               # original name used for the upload
+                "title": layer.title() or layer.name(),     # layer name as displayed in QGIS
+                "abstract": layer.abstract()                # layer abstract (if any)
+            }
+        }
         self.request(url, "put", ft)
 
         self.logInfo(f"Successfully created feature type from file '{shp_file}'")
@@ -526,7 +535,9 @@ class GeoserverServer(DataCatalogServerBase):
         self.request(ds_url, data=ds, method="post")
         ft = {
             "featureType": {
-                "name": layer.name(),
+                "name": layer.web_slug,
+                "title": layer.title() or layer.name(),
+                "abstract": layer.abstract(),
                 "srs": layer.crs().authid()
             }
         }
@@ -851,7 +862,7 @@ class GeoserverServer(DataCatalogServerBase):
             "metadataLink": [
                 {
                     "type": "text/html",
-                    "metadataType": "ISO19115:2003",
+                    "metadataType": "ISO19115:2003",  # TODO: metadata type may be different
                     "content": url
                 }
             ]

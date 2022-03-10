@@ -30,6 +30,10 @@ class BridgeLayer:
         for pname, pval in cls.__dict__.items():
             if isinstance(pval, property):
                 setattr(qgis_layer.__class__, pname, pval)
+        # Override title, abstract and keyword methods, so they look in metadata instead
+        qgis_layer.title = qgis_layer.metadata().title
+        qgis_layer.abstract = qgis_layer.metadata().abstract
+        qgis_layer.keywords = qgis_layer.metadata().keywords
         return qgis_layer
 
     def __getattr__(self, attr):
