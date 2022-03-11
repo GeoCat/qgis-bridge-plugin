@@ -388,6 +388,9 @@ class GeoserverServer(DataCatalogServerBase):
                 "name": layer.web_slug,
                 "title": layer.title() or layer.name(),
                 "abstract": layer.abstract(),
+                "keywords": {
+                    "string": layer.keywords()
+                },
                 "nativeBoundingBox": {
                     "minx": round(ext.xMinimum(), 5),
                     "maxx": round(ext.xMaximum(), 5),
@@ -492,7 +495,10 @@ class GeoserverServer(DataCatalogServerBase):
             "featureType": {
                 "nativeName": layer.web_slug,               # original name used for the upload
                 "title": layer.title() or layer.name(),     # layer name as displayed in QGIS
-                "abstract": layer.abstract()                # layer abstract (if any)
+                "abstract": layer.abstract(),               # layer abstract (if any)
+                "keywords": {
+                    "string": layer.keywords()              # metadata keywords
+                },
             }
         }
         self.request(url, "put", ft)
@@ -538,6 +544,9 @@ class GeoserverServer(DataCatalogServerBase):
                 "name": layer.web_slug,
                 "title": layer.title() or layer.name(),
                 "abstract": layer.abstract(),
+                "keywords": {
+                    "string": layer.keywords()
+                },
                 "srs": layer.crs().authid()
             }
         }

@@ -1,4 +1,6 @@
 from pathlib import Path
+from itertools import chain
+from functools import partial
 from typing import Union, Tuple, List, Iterable, FrozenSet
 from collections import namedtuple
 
@@ -33,12 +35,16 @@ class BridgeLayer:
         # Override title, abstract and keyword methods, so they look in metadata instead
         qgis_layer.title = qgis_layer.metadata().title
         qgis_layer.abstract = qgis_layer.metadata().abstract
-        qgis_layer.keywords = qgis_layer.metadata().keywords
+        qgis_layer.keywords = partial(cls.keywords, qgis_layer)
         return qgis_layer
 
     def __getattr__(self, attr):
         # Prevent IDE's from showing errors for missing methods or attributes on the QgsMapLayer
         return getattr(self, attr)
+
+    def keywords(self) -> List[str]:
+        """ Returns a list of all keywords in the metadata. """
+        return sorted([v.strip() for v in chain.from_iterable(self.metadata().keywords().values())])
 
     @staticmethod
     def _parse_source(layer) -> Tuple[str, Union[Path, QgsDataSourceUri, None]]:
