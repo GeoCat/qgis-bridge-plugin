@@ -145,6 +145,36 @@ class GeoserverServer(DataCatalogServerBase):
         self._publishOpenLayersPreview(tmp_dir)
         self.logInfo(f"Finished MapBox VT publish process")
 
+    @staticmethod
+    def featureTypeProps(layer: BridgeLayer, bounding_box: bool = False, **kwargs) -> dict:
+        """ Extracts name, title, abstract and keywords from the given layer and creates
+        a JSON dictionary that can be used for GeoServer featuretype/coverage `PUT` requests.
+
+        :param layer:           The layer for which to collect properties.
+        :param bounding_box:    If True, a `nativeBoundingBox` property will also be added.
+        """
+        props = {
+            "name": layer.web_slug,
+            "title": layer.title() or layer.name(),
+            "abstract": layer.abstract(),
+            "keywords": {
+                "string": layer.keywords()
+            }
+        }
+        if bounding_box:
+            ext = layer.extent()
+            props["nativeBoundingBox"] = {
+                "minx": round(ext.xMinimum(), 5),
+                "maxx": round(ext.xMaximum(), 5),
+                "miny": round(ext.yMinimum(), 5),
+                "maxy": round(ext.yMaximum(), 5),
+                "crs": layer.crs().authid()
+            }
+        props.update(**kwargs)
+        return {
+            "featureType": props
+        }
+
     def _publishOpenLayersPreview(self, folder):
         style_filename = os.path.join(folder, "style.mapbox")
         with open(style_filename) as f:
@@ -243,9 +273,8 @@ class GeoserverServer(DataCatalogServerBase):
                 self._publishVectorLayerFromGeoPackage(layer, fields)
 
         elif layer.is_raster:
-            # Export GeoTIFF
-            filename = exportRaster(layer)
-            self._publishRasterLayer(filename, layer.web_slug)
+            # Publish GeoTIFF
+            self._publishRasterLayer(layer)
 
         self._clearCache()
 
@@ -382,24 +411,7 @@ class GeoserverServer(DataCatalogServerBase):
             return self.logError(f"Feature type {ds_name} was not found: {err}")
 
         # Modify the feature type
-        ext = layer.extent()
-        ft = {
-            "featureType": {
-                "name": layer.web_slug,
-                "title": layer.title() or layer.name(),
-                "abstract": layer.abstract(),
-                "keywords": {
-                    "string": layer.keywords()
-                },
-                "nativeBoundingBox": {
-                    "minx": round(ext.xMinimum(), 5),
-                    "maxx": round(ext.xMaximum(), 5),
-                    "miny": round(ext.yMinimum(), 5),
-                    "maxy": round(ext.yMaximum(), 5),
-                    "crs": layer.crs().authid()
-                }
-            }
-        }
+        ft = self.featureTypeProps(layer, bounding_box=True)
         try:
             self.request(url, "put", ft)
         except Exception as err:
@@ -491,16 +503,7 @@ class GeoserverServer(DataCatalogServerBase):
 
         # Modify the feature type descriptions, but leave the name intact to avoid DB schema mismatches
         self.logInfo("Fixing feature type properties...")
-        ft = {
-            "featureType": {
-                "nativeName": layer.web_slug,               # original name used for the upload
-                "title": layer.title() or layer.name(),     # layer name as displayed in QGIS
-                "abstract": layer.abstract(),               # layer abstract (if any)
-                "keywords": {
-                    "string": layer.keywords()              # metadata keywords
-                },
-            }
-        }
+        ft = self.featureTypeProps(layer, nativeName=layer.web_slug)  # reset original name used for the upload
         self.request(url, "put", ft)
 
         self.logInfo(f"Successfully created feature type from file '{shp_file}'")
@@ -539,28 +542,30 @@ class GeoserverServer(DataCatalogServerBase):
         }
         ds_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores"
         self.request(ds_url, data=ds, method="post")
-        ft = {
-            "featureType": {
-                "name": layer.web_slug,
-                "title": layer.title() or layer.name(),
-                "abstract": layer.abstract(),
-                "keywords": {
-                    "string": layer.keywords()
-                },
-                "srs": layer.crs().authid()
-            }
-        }
+
+        ft = self.featureTypeProps(layer, srs=layer.crs().authid())
         ft_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{layer.web_slug}/featuretypes"
         self.request(ft_url, data=ft, method="post")
+
         self._setLayerStyle(layer.web_slug)
 
-    def _publishRasterLayer(self, filename, layername):
+    def _publishRasterLayer(self, layer: BridgeLayer):
         self._ensureWorkspaceExists()
-        with open(filename, "rb") as f:
-            url = f"{self.apiUrl}/workspaces/{self.workspace}/coveragestores/{layername}/file.geotiff"
-            self.request(url, "put", f.read())
+
+        # Export to GeoTIFF
+        filename = exportRaster(layer)
+
+        # Upload the TIFF
+        try:
+            with open(filename, "rb") as f:
+                url = f"{self.apiUrl}/workspaces/{self.workspace}/coveragestores/" \
+                      f"{layer.web_slug}/file.geotiff?coverageName={layer.web_slug}"
+                self.request(url, "put", f.read())
+        except Exception as e:
+            return self.logError(f"Failed to create coverage from TIFF file '{filename}': {e}")
+
         self.logInfo(f"Successfully created coverage from TIFF file '{filename}'")
-        self._setLayerStyle(layername)
+        self._setLayerStyle(layer.web_slug)
 
     def _getImportResult(self, import_id, task_id):
         """ Get the error message on the import task (if any) and the resulting layer name. """

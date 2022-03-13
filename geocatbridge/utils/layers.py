@@ -155,6 +155,7 @@ class LayerGroups(list):
                                 the feature type names that were given on the server.
         """
         super().__init__()
+        self._all_layers = set()
         lyrid_filter = frozenset(lyrid_filter or [])
         root = QgsProject().instance().layerTreeRoot()
         for element in self._reversed_iter(root):
@@ -181,12 +182,14 @@ class LayerGroups(list):
             if isinstance(child, QgsLayerTreeLayer):
                 child_layer = BridgeLayer(child.layer())
                 if not lyrid_filter or (child_layer.id() in lyrid_filter):
-                    layers.append(slug_map.get(child_layer.web_slug, child_layer.web_slug))
+                    name = slug_map.get(child_layer.web_slug, child_layer.web_slug)
+                    layers.append(name)
+                    self._all_layers.add(name)
             elif isinstance(child, QgsLayerTreeGroup):
                 self._group(child, lyrid_filter, slug_map, layers)
 
-        if not layers:
-            return  # No layers or subgroups encountered in child elements
+        if not layers or (len(layers) == 1 and layers[0] in self._all_layers):
+            return  # Less than 2 layers or no subgroups encountered in child elements
 
         # Append a (sub)group object
         parent.append(

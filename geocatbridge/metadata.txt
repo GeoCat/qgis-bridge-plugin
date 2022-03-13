@@ -25,7 +25,8 @@ deprecated=False
 changelog=Version 4.2.2-3, March 2022
           - Fixed 'New Server' button for macOS users [#146]
           - Fixed error fetching GeoServer workspaces without credentials [#169851]
-          - Properly set GeoServer layer title, abstract and keywords
+          - Properly set GeoServer layer title, abstract, and keywords
+          - Do not create GeoServer layergroup if QGIS group only contains one layer
 
           Version 4.2.0-1, February 2022
           - Fixed GeoServer layer group publication [#135]
