@@ -47,6 +47,9 @@ class GeonetworkAuthError(Exception):
 class GeonetworkServer(MetaCatalogServerBase):
     profile: GeoNetworkProfiles = GeoNetworkProfiles.DEFAULT
     node: str = "srv"
+    group: str = ""
+    assignCat: str = ""
+    transform: str = ""
 
     def __init__(self, name, authid="", url="", **options):
         """
@@ -57,6 +60,9 @@ class GeonetworkServer(MetaCatalogServerBase):
         :param url:             GeoNetwork base URL
         :param profile:         GeoNetwork metadata profile type (optional)
         :param node:            GeoNetwork node name (default = srv)
+        :param group:           GeoNetwork group id (optional)
+        :param assignCat:       Assign to Current Catalogue (optional)
+        :param transform:       Apply named xslt transformation (optional)
         """
 
         super().__init__(name, authid, url, **options)
@@ -141,6 +147,9 @@ class GeonetworkServer(MetaCatalogServerBase):
         with open(metadata, "rb") as f:
             files = {
                 'uuidProcessing': (None, 'OVERWRITE', 'text/plain'),
+                'group': (None, self.group, 'text/plain'),
+                'assignToCatalog': (None, self.assignCat, 'text/plain'),
+                'transformWith': (None, self.transform, 'text/plain'),
                 'file': (path.basename(metadata), f, 'application/octet-stream')
             }
             result = self.sessionRequest(url, "post", files=files, headers=headers)
