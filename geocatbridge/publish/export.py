@@ -45,9 +45,8 @@ def _writeVector(layer: BridgeLayer, fields: List[str],
         options.attributes = attrs
         options.driverName = driver
         if driver == DRIVER_GEOPACKAGE:
-            if isinstance(layer.uri, Path) and layer.uri.suffix == EXT_SHAPEFILE:
-                # If the input layer comes from a Shapefile, explicitly set the GeoPackage layer name
-                options.layerName = layer.dataset_name
+            # Explicitly set the GeoPackage layer name (GeoServer uses this name for the feature types)
+            options.layerName = layer.web_slug
             if target_path.exists():
                 # Add a new layer to existing GeoPackages (instead of overwriting the GeoPackage)
                 options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer

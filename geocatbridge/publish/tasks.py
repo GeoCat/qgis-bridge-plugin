@@ -96,11 +96,13 @@ class PublishTask(TaskBase):
                 name = layer.name()
                 if not strings.validate(name, first_alpha=True):
                     try:
-                        warnings.append(f"Layer name '{name}' may cause issues: "
-                                        f"prefer ASCII, start with a letter, follow with letters, numbers, or .-_")
+                        msg = f"Layer name '{name}' may cause issues"
                     except UnicodeError:
-                        warnings.append("Layer name may cause issues: "
-                                        f"prefer ASCII, start with a letter, follow with letters, numbers, or .-_")
+                        msg = "Layer name may cause issues"
+                    msg += f" and has been published as '{layer.web_slug}': " \
+                           f"preferably use ASCII characters only, start with a letter, " \
+                           f"and follow with letters, numbers, or .-_"
+                    warnings.append(msg)
                 md_valid, _ = validator.validate(layer.metadata())
                 if self.geodata_server is not None:
                     self.geodata_server.resetLogIssues()

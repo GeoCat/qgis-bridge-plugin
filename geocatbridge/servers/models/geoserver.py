@@ -153,14 +153,18 @@ class GeoserverServer(DataCatalogServerBase):
         :param layer:           The layer for which to collect properties.
         :param bounding_box:    If True, a `nativeBoundingBox` property will also be added.
         """
+        keywords = layer.keywords()
+        abstract = layer.abstract().strip()
         props = {
             "name": layer.web_slug,
-            "title": layer.title() or layer.name(),
-            "abstract": layer.abstract(),
-            "keywords": {
-                "string": layer.keywords()
-            }
+            "title": layer.title().strip() or layer.name()
         }
+        if keywords:
+            props["keywords"] = {
+                "string": keywords
+            }
+        if abstract:
+            props["abstract"] = abstract
         if bounding_box:
             ext = layer.extent()
             props["nativeBoundingBox"] = {
