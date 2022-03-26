@@ -1,3 +1,4 @@
+from re import compile
 from pathlib import Path
 from itertools import chain
 from functools import partial
@@ -13,6 +14,8 @@ from qgis.core import (
 )
 
 from geocatbridge.utils import strings
+
+LAYERNAME_REGEX = compile(r'^layername=(.*)$')
 
 
 class BridgeLayer:
@@ -65,7 +68,7 @@ class BridgeLayer:
             src_path = Path(parts[0])
             if not src_path.exists():
                 return '', None
-            ds_name = {k: v for k, v in (p.split('=') for p in parts[1:])}.get('layername', src_path.stem)
+            ds_name = next((m[0] for m in (LAYERNAME_REGEX.match(p) for p in parts[1:]) if m), src_path.stem)
             return ds_name, src_path
         except Exception:  # noqa
             return '', None

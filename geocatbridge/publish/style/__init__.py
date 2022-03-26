@@ -89,7 +89,7 @@ def layerStyleAsSld(layer: _lyr.BridgeLayer) -> Tuple[str, dict, list]:
     root = ETree.Element("StyledLayerDescriptor", attrib=attribs)
     named_layer = ETree.SubElement(root, "NamedLayer")
     layer_name = ETree.SubElement(named_layer, "Name")
-    layer_name.text = layer.web_slug
+    layer_name.text = layer.web_slug if hasattr(layer, 'web_slug') else layer.name()
     user_style = ETree.SubElement(named_layer, "UserStyle")
     props = {
         "Title": layer.title().strip() or layer.name(),
