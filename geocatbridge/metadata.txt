@@ -12,7 +12,7 @@ about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 experimental=False
 category=Web
 qgisMinimumVersion=3.16
-version=4.2.6
+version=4.2.7
 email=support@geocat.net
 icon=icons/geocat.png
 tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
@@ -22,7 +22,10 @@ tracker=https://my.geocat.net/submitticket.php?step=2&deptid=4
 repository=https://github.com/geocat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
-changelog=Version 4.2.2-6, March 2022
+changelog=Version 4.2.7, April 2022
+          - Fixed documentation URL link
+
+          Version 4.2.2-6, March 2022
           - Fixed 'New Server' button for macOS users [#146]
           - Fixed error fetching GeoServer workspaces without credentials [#169851]
           - Set title, abstract, and keywords in GeoServer layers and styles [GEOCAT-BRIDGE-T-2589]
@@ -55,4 +58,4 @@ changelog=Version 4.2.2-6, March 2022
 
 [bridge]
 shortName=Bridge
-docs=https://geocat.github.io/qgis-bridge-plugin/v4.2
+docs=https://geocat.github.io/qgis-bridge-plugin

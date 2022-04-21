@@ -70,8 +70,9 @@ def getVersion() -> str:
 
 
 def getDocsUrl() -> str:
-    """ Returns the GeoCat Bridge documentation URL. """
-    return getProperty("docs", "bridge").rstrip('/')
+    """ Returns the GeoCat Bridge documentation URL for the current (major.minor) release. """
+    semver = '.'.join(str(i) for i in semanticVersion(getVersion()))
+    return f"{getProperty('docs', 'bridge').rstrip('/')}/v{semver}/"
 
 
 _load()

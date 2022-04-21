@@ -67,8 +67,7 @@ class GeocatBridge:
     @staticmethod
     def openDocUrl():
         """ Opens the web-based documentation in a new tab of the default browser. """
-        full_url = f"{meta.getDocsUrl()}/v{meta.getVersion()}/"
-        webbrowser.open_new_tab(full_url)
+        webbrowser.open_new_tab(meta.getDocsUrl())
 
     def initProcessing(self):
         """ Initializes and adds a processing provider. """
