@@ -552,9 +552,9 @@ class GeoserverServer(DataCatalogServerBase):
                                      f"due to an unknown error.\nPlease check the GeoServer logs.")
             raise
 
-        # Modify the feature type descriptions, but leave the name intact to avoid DB schema mismatches
+        # Modify the feature type name and descriptions (but leave the nativeName intact to avoid DB schema mismatches)
         self.logInfo("Fixing feature type properties...")
-        ft = self.featureTypeProps(layer, nativeName=layer.web_slug)  # reset original name used for the upload
+        ft = self.featureTypeProps(layer)
         self.request(url, "put", ft)
 
         self.logInfo(f"Successfully created feature type from file '{shp_file}'")
@@ -563,7 +563,7 @@ class GeoserverServer(DataCatalogServerBase):
         # Fix layer style reference and remove unwanted global style
         self.logInfo("Performing style cleanup...")
         try:
-            self._fixLayerStyle(given_name, layer.web_slug)
+            self._fixLayerStyle(layer.web_slug)
         except RequestException as e:
             self.logWarning(f"Failed to clean up layer styles: {e}")
         else:
@@ -802,10 +802,10 @@ class GeoserverServer(DataCatalogServerBase):
 
         self.logInfo(f"Successfully created GeoServer layergroup '{group.name}'")
 
-    def deleteStyle(self, name) -> bool:
+    def deleteStyle(self, name: str, recurse: bool = True) -> bool:
         if not self.styleExists(name):
             return True
-        url = f"{self.apiUrl}/workspaces/{self.workspace}/styles/{name}?purge=true&recurse=true"
+        url = f"{self.apiUrl}/workspaces/{self.workspace}/styles/{name}?purge=true&recurse={str(recurse).lower()}"
         try:
             self.request(url, method="delete")
         except RequestException as e:
@@ -1116,16 +1116,14 @@ class GeoserverServer(DataCatalogServerBase):
             return {}
         return old_style
 
-    def _fixLayerStyle(self, actual_name, proper_name):
+    def _fixLayerStyle(self, style_name: str):
         """
         Fixes the layer style for feature types that have been imported using the GeoServer Importer extension.
-        The Importer extension also creates an unwanted global style, which is removed by this function.
+        The Importer extension creates an unwanted global defaultStyle, which is removed by this function.
 
-        :param actual_name: Layer name given by GeoServer (may contain numeric suffix).
-        :param proper_name: The desired layer name, which should also be the style name.
+        :param style_name:  Layer style name (as Bridge created it).
         """
-
-        old_style = self._setLayerStyle(actual_name, proper_name)
+        old_style = self._setLayerStyle(style_name)
         if not old_style:
             # Something went wrong or the new style to assign does not exist:
             # The layer style will remain as-is and we will not delete the old style.
