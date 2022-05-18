@@ -78,5 +78,9 @@ def layer_slug(layer, to_web: bool = True) -> str:
     name = layer.name() if hasattr(layer, 'name') else layer
     norm_options = {'first_letter': 'L', 'prepend': True}
     if not to_web:
+        # Override allowed characters for file slugs
         norm_options['allowed_chars'] = FILEPATH_CHARS
+    else:
+        # Web slugs are lowercase
+        name = name.lower()
     return normalize(name, **norm_options)

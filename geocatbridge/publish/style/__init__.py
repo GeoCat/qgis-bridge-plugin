@@ -70,9 +70,13 @@ def convertMapboxGroup(group: _lyr.LayerGroup, layers: _Dict[str, _lyr.BridgeLay
 
 
 # noinspection HttpUrlsUsage
-def layerStyleAsSld(layer: _lyr.BridgeLayer) -> Tuple[str, dict, list]:
+def layerStyleAsSld(layer: _lyr.BridgeLayer, lowercase_props: bool = False) -> Tuple[str, dict, list]:
     """ Function override of bridgestyle.qgis.layerStyleAsSld() to convert a QGIS layer style to an SLD string.
     Circumvents bridgestyle.sld.fromgeostyler.convert(), so we can properly set the layer name, title, and abstract.
+
+    :param layer:           The Bridge layer for which to export an SLD.
+    :param lowercase_props: For some styles, it may be necessary to use lowercase property names for attributes.
+                            If that is the case, set this to True (defaults to False).
     """
     geostyler, icons, sprites, warnings = convertStyle(layer)
 
@@ -107,6 +111,10 @@ def layerStyleAsSld(layer: _lyr.BridgeLayer) -> Tuple[str, dict, list]:
         feature_type_style.append(sld.fromgeostyler.processTransformation(transformation))
     for rule in geostyler.get("rules", []):
         feature_type_style.append(sld.fromgeostyler.processRule(rule))
+    if lowercase_props:
+        # Convert property names to lowercase in order to match the feature type attributes if needed
+        for p in feature_type_style.iter("ogc:PropertyName"):
+            p.text = p.text.lower()
     sld.fromgeostyler._addVendorOption(feature_type_style, "composite", geostyler.get("blendMode"))  # noqa
 
     # Convert ElementTree to XML string (use minidom for proper formatting)
@@ -117,10 +125,16 @@ def layerStyleAsSld(layer: _lyr.BridgeLayer) -> Tuple[str, dict, list]:
     return dom.toprettyxml(indent="  ", encoding="utf-8").decode(), icons, warnings
 
 
-def saveLayerStyleAsZippedSld(layer: _lyr.BridgeLayer, filename) -> List[str]:
-    """ Function override of bridgestyle.qgis.saveLayerStyleAsZippedSld(). """
-    sld_string, icons, warnings = layerStyleAsSld(layer)
-    with zipfile.ZipFile(filename, "w") as z:
+def saveLayerStyleAsZippedSld(layer: _lyr.BridgeLayer, target_file: str, lowercase_props: bool = False) -> List[str]:
+    """ Function override of bridgestyle.qgis.saveLayerStyleAsZippedSld().
+
+    :param layer:           The Bridge layer for which to export an SLD.
+    :param target_file:     Path to the output zip file.
+    :param lowercase_props: For some styles, it may be necessary to use lowercase property names for attributes.
+                            If that is the case, set this to True (defaults to False).
+    """
+    sld_string, icons, warnings = layerStyleAsSld(layer, lowercase_props)
+    with zipfile.ZipFile(target_file, "w") as z:
         for icon in icons.keys():
             if icon:
                 z.write(icon, os.path.basename(icon))

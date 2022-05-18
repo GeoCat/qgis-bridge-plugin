@@ -68,7 +68,7 @@ class BridgeLayer:
             src_path = Path(parts[0])
             if not src_path.exists():
                 return '', None
-            ds_name = next((m[0] for m in (LAYERNAME_REGEX.match(p) for p in parts[1:]) if m), src_path.stem)
+            ds_name = next((m.group(1) for m in (LAYERNAME_REGEX.match(p) for p in parts[1:]) if m and m.groups()), src_path.stem)  # noqa
             return ds_name, src_path
         except Exception:  # noqa
             return '', None

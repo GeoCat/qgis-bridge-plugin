@@ -1,6 +1,6 @@
 import json
 import os
-from typing import List, Iterable, Dict
+from typing import List, Iterable, Dict, Union
 from zipfile import ZipFile
 
 from qgis.PyQt.QtCore import QByteArray, QBuffer, QIODevice, QSettings
@@ -23,7 +23,7 @@ from geocatbridge.servers.models.gs_storage import GeoserverStorage
 from geocatbridge.servers.views.geoserver import GeoServerWidget
 from geocatbridge.utils import strings
 from geocatbridge.utils.files import tempFileInSubFolder, tempSubFolder, Path, getResourcePath
-from geocatbridge.utils.meta import getAppName, semanticVersion
+from geocatbridge.utils.meta import semanticVersion
 from geocatbridge.utils.network import TESTCON_TIMEOUT
 from geocatbridge.utils.layers import (
     BridgeLayer, LayerGroups, LayerGroup, listBridgeLayers, layerById, listLayerNames
@@ -229,7 +229,8 @@ class GeoserverServer(DataCatalogServerBase):
 
     def publishStyle(self, layer: BridgeLayer):
         style_file = tempFileInSubFolder(layer.file_slug + ".zip")
-        warnings = saveLayerStyleAsZippedSld(layer, style_file)
+        # Convert style to SLD: for direct PostGIS feature types, we need to ensure lowercase property names!
+        warnings = saveLayerStyleAsZippedSld(layer, style_file, self.storage == GeoserverStorage.POSTGIS_BRIDGE)
         for w in warnings:
             self.logWarning(w)
         self.logInfo(f"Style for layer '{layer.name()}' exported as ZIP file to '{style_file}'")
@@ -237,50 +238,56 @@ class GeoserverServer(DataCatalogServerBase):
         return style_file
 
     def publishLayer(self, layer: BridgeLayer, fields: List[str] = None):
-        if layer.is_vector:
-            # Export vector layer
-            if layer.featureCount() == 0:
-                self.logWarning(f"Layer '{layer.name()}' contains no features and will not be published")
-                return
+        try:
+            if layer.is_vector:
+                # Export vector layer
+                if layer.featureCount() == 0:
+                    self.logWarning(f"Layer '{layer.name()}' contains no features and will not be published")
+                    return
 
-            if layer.is_postgis_based and self.useOriginalDataSource:
-                # Reference existing PostGIS table (must have direct access)
-                try:
-                    from geocatbridge.servers.models.postgis import PostgisServer
-                except (ImportError, ModuleNotFoundError, NameError):
-                    raise Exception(self.translate(getAppName(), "Cannot find or import PostgisServer class"))
-                else:
-                    db = PostgisServer(
-                        "temp",
-                        layer.uri.authConfigId(),
-                        host=layer.uri.host(),
-                        port=layer.uri.port(),
-                        schema=layer.uri.schema(),
-                        database=layer.uri.database()
-                    )
-                    self._publishVectorLayerFromPostgis(layer, db)
+                if layer.is_postgis_based and self.useOriginalDataSource:
+                    # Reference existing PostGIS table (must have direct access)
+                    try:
+                        from geocatbridge.servers.models.postgis import PostgisServer
+                    except (ImportError, ModuleNotFoundError, NameError):
+                        raise Exception("Cannot find or import PostgisServer class")
+                    else:
+                        db = PostgisServer(
+                            "temp",
+                            layer.uri.authConfigId(),
+                            host=layer.uri.host(),
+                            port=layer.uri.port(),
+                            schema=layer.uri.schema(),
+                            database=layer.uri.database()
+                        )
+                        self._publishVectorLayerFromPostgis(layer, db, fields)
 
-            elif self.storage == GeoserverStorage.POSTGIS_BRIDGE:
-                # Export to PostGIS table (must have direct access)
-                db = manager.getServer(self.postgisdb)
-                if not db:
-                    raise Exception(self.translate(getAppName(), "Cannot find the selected PostGIS database"))
-                db.importLayer(layer, fields)
-                self._publishVectorLayerFromPostgis(layer, db)
+                elif self.storage == GeoserverStorage.POSTGIS_BRIDGE:
+                    # Export to PostGIS table (must have direct access)
+                    db = manager.getServer(self.postgisdb)
+                    if not db:
+                        raise Exception("Bad or missing PostGIS configuration")
+                    try:
+                        db.importLayer(layer)
+                    except Exception as err:
+                        self.logError(err)
+                        return
+                    self._publishVectorLayerFromPostgis(layer, db, fields)
 
-            elif self.storage == GeoserverStorage.POSTGIS_GEOSERVER:
-                # Export layer to Shapefile and publish to PostGIS using GeoServer Importer extension
-                self._publishVectorLayerFromShpToPostgis(layer, fields)
+                elif self.storage == GeoserverStorage.POSTGIS_GEOSERVER:
+                    # Export layer to Shapefile and publish to PostGIS using GeoServer Importer extension
+                    self._publishVectorLayerFromShpToPostgis(layer, fields)
 
-            elif self.storage == GeoserverStorage.FILE_BASED:
-                # Export layer to GeoPackage datastore
-                self._publishVectorLayerFromGeoPackage(layer, fields)
+                elif self.storage == GeoserverStorage.FILE_BASED:
+                    # Export layer to GeoPackage datastore
+                    self._publishVectorLayerFromGeoPackage(layer, fields)
 
-        elif layer.is_raster:
-            # Publish GeoTIFF
-            self._publishRasterLayer(layer)
+            elif layer.is_raster:
+                # Publish GeoTIFF
+                self._publishRasterLayer(layer)
 
-        self._clearCache()
+        finally:
+            self._clearCache()
 
     def _getPostgisDatastores(self, ds_list_url: str = None):
         """
@@ -309,6 +316,47 @@ class GeoserverServer(DataCatalogServerBase):
             if enabled and entries.get("dbtype", "").startswith("postgis"):
                 yield ds_name
 
+    @staticmethod
+    def _paramsDict(params: dict):
+        """ Converts the connectionParameters of a datastore response object into a regular key-value dictionary. """
+        return {e["@key"]: e["$"] for e in params.get("entry", []) if isinstance(e, dict) and "@key" in e and "$" in e}
+
+    def _findPostgisDatastore(self, db: manager.bases.DbServerBase) -> Union[str, None]:
+        """
+        Tries to find the first enabled datastore that matches the given DbServer parameters.
+
+        :param db:  REST URL that returns a list of datastores for a specific workspace.
+        :returns:   An existing datastore name or None (if no store was found).
+        """
+        try:
+            from geocatbridge.servers.models.postgis import PostgisServer
+        except (ImportError, NameError, ModuleNotFoundError):
+            self.logError("Failed to import PostgisServer model")
+            return
+
+        if not isinstance(db, PostgisServer):
+            self.logError("Non-PostGIS databases are not supported")
+            return
+
+        user, _ = db.getCredentials()
+        ds_list_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores.json"
+        res = (self.request(ds_list_url).json() or {}).get("dataStores", {})
+        if not res:
+            # There aren't any datastores for the given workspace (yet)
+            return
+
+        for ds_url in (s.get("href") for s in res.get("dataStore", [])):
+            ds = (self.request(ds_url).json() or {}).get("dataStore", {})
+            params = self._paramsDict(ds.get("connectionParameters", {}))
+            ds_name, enabled = ds.get("name"), ds.get("enabled")
+            if not enabled or params.get("dbtype") != "postgis":
+                # We are looking for enabled pure PostGIS (no JNDI!) datastores only
+                continue
+            if params.get("host") == db.host and params.get("user") == user and int(params.get("port"), 0) == db.port \
+                    and params.get("database") == db.database and params.get("schema") == db.schema:
+                # Everything matches: return the name of this datastore
+                return ds_name
+
     def createPostgisDatastore(self) -> str:
         """
         Creates a new datastore based on the selected one in the Server widget
@@ -316,7 +364,6 @@ class GeoserverServer(DataCatalogServerBase):
 
         :returns:   The existing or created PostGIS datastore name (which equals the workspace name).
         """
-
         # Check if current workspaces has a PostGIS datastore (use first)
         for ds_name in self._getPostgisDatastores():
             return ds_name
@@ -522,35 +569,69 @@ class GeoserverServer(DataCatalogServerBase):
         else:
             self.logInfo(f"Successfully published layer '{layer.name()}'")
 
-    def _publishVectorLayerFromPostgis(self, layer: BridgeLayer, db):
+    def _publishVectorLayerFromPostgis(self, layer: BridgeLayer, db, fields: List[str] = None):
         """ Creates a datastore and feature type for the given PostGIS layer and DB connection on GeoServer. """
-        username, password = db.getCredentials()
+        datastore = self._findPostgisDatastore(db)
 
-        ds = {
-            "dataStore": {
-                "name": layer.web_slug,
-                "type": "PostGIS",
-                "enabled": True,
-                "connectionParameters": {
-                    "entry": [
-                        self._connectionParamEntry("schema", db.schema),
-                        self._connectionParamEntry("port", str(db.port)),
-                        self._connectionParamEntry("database", db.database),
-                        self._connectionParamEntry("passwd", password),
-                        self._connectionParamEntry("user", username),
-                        self._connectionParamEntry("host", db.host),
-                        self._connectionParamEntry("dbtype", "postgis")
-                    ]
+        if not datastore:
+            # Create a PostGIS datastore for the given DB config if no existing match was found
+            datastore = strings.normalize(db.serverName.lower(), first_letter='L', prepend=True)
+            username, password = db.getCredentials()
+            ds = {
+                "dataStore": {
+                    "name": datastore,
+                    "type": "PostGIS",
+                    "enabled": True,
+                    "connectionParameters": {
+                        "entry": [
+                            self._connectionParamEntry("schema", db.schema),
+                            self._connectionParamEntry("port", str(db.port)),
+                            self._connectionParamEntry("database", db.database),
+                            self._connectionParamEntry("passwd", password),
+                            self._connectionParamEntry("user", username),
+                            self._connectionParamEntry("host", db.host),
+                            self._connectionParamEntry("dbtype", "postgis")
+                        ]
+                    }
                 }
             }
-        }
-        ds_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores"
-        self.request(ds_url, data=ds, method="post")
+            ds_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores"
+            self.request(ds_url, data=ds, method="post")
 
-        ft = self.featureTypeProps(layer, srs=layer.crs().authid())
-        ft_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{layer.web_slug}/featuretypes"
-        self.request(ft_url, data=ft, method="post")
+        native_name = layer.dataset_name if layer.is_postgis_based else layer.web_slug
+        ft_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{datastore}/featuretypes/{layer.web_slug}.json?quietOnNotFound=true"  # noqa
+        try:
+            response = self.request(ft_url).json() or {}
+        except HTTPError:
+            self.logInfo(f"Feature type {layer.web_slug} does not exist in datastore {datastore}")
+            response = {}
 
+        # The PostGIS table always contains all fields, but the user may only wish to publish some fields:
+        # Create an 'attributes' list for the feature type that contains the geometry field and selected fields
+        attrs = []
+        fields = fields or []
+        pgshape_attr = db.geometryField(layer)
+        if pgshape_attr:
+            fields.insert(0, pgshape_attr)
+        for f in fields:
+            attrs.append({
+                "name": f.lower() if self.storage == GeoserverStorage.POSTGIS_BRIDGE else f
+            })
+        # GeoServer requires the attributes in a silly structure
+        attrs = {"attribute": attrs}
+
+        if not response:
+            # Create a new feature type
+            ft = self.featureTypeProps(layer, srs=layer.crs().authid(), nativeName=native_name, attributes=attrs)
+            ft_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{datastore}/featuretypes"
+            self.request(ft_url, data=ft, method="post")
+        else:
+            # Feature type does exist, but some properties may no longer match
+            ft = self.featureTypeProps(layer, srs=layer.crs().authid(), nativeName=native_name, attributes=attrs)
+            ft_url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{datastore}/featuretypes/{layer.web_slug}.json"  # noqa
+            self.request(ft_url, data=ft, method="put")
+
+        # Attach style to the new/modified layer
         self._setLayerStyle(layer.web_slug)
 
     def _publishRasterLayer(self, layer: BridgeLayer):
