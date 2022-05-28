@@ -3,6 +3,7 @@ import os
 from typing import List, Iterable, Dict, Union
 from zipfile import ZipFile
 
+import requests
 from qgis.PyQt.QtCore import QByteArray, QBuffer, QIODevice, QSettings
 from qgis.core import (
     QgsProject,
@@ -11,6 +12,7 @@ from qgis.core import (
     QgsProcessingParameterAuthConfig
 )
 from requests.exceptions import HTTPError, RequestException
+from simplejson.errors import JSONDecodeError
 
 from geocatbridge.publish.style import (
     saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder, convertMapboxGroup
@@ -1206,13 +1208,22 @@ class GeoserverServer(DataCatalogServerBase):
         s.setValue(f'qgis/WFS/{self.serverName}/authcfg', self.authId)
 
     def checkMinGeoserverVersion(self, errors):
-        """ Checks that the GeoServer instance we are dealing with is at least 2.13.2 """
+        """ Checks that the GeoServer instance we are dealing with is at least 2.13.2. """
+        response = requests.Response()
+        url = f"{self.apiUrl}/about/version.json"
         try:
-            url = f"{self.apiUrl}/about/version.json"
-            result = self.request(url).json()
-        except RequestException:
-            errors.add("Could not connect to Geoserver."
-                       "Please check the server settings (including password).")
+            response = self.request(url)
+            result = response.json()
+        except RequestException as err:
+            errors.add(f"Could not connect to GeoServer: {err}. "
+                       f"Please check the connection settings (e.g. username, password).")
+            return
+        except JSONDecodeError as err:
+            length = len(getattr(response, 'text', ''))
+            self.logError(f"Failed to parse GeoServer response as JSON: {err}")
+            errors.add(f"Could not determine GeoServer version due to an invalid response. "
+                       f"Please check the connection settings or GeoServer configuration. "
+                       f"The URL {url} did not return a valid JSON response ({length} chars).")
             return
 
         resources = result.get('about', {}).get('resource', {})

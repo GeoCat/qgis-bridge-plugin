@@ -56,17 +56,28 @@ class StyleviewerWidget(BASE, WIDGET):
         mapserver = ""
         warnings = set()
         if isSupportedLayer(layer):
+            # Try SLD conversion
             try:
                 sld, _, sld_warnings = layerStyleAsSld(layer)
             except Exception as e:
                 sld_warnings = [f"Failed to convert to SLD: {e}"]
-            geostyler, _, _, geostyler_warnings = convertStyle(layer)
-            geostyler = json.dumps(geostyler, indent=4)
+            # Try GeoStyler conversion
+            try:
+                geostyler, _, _, geostyler_warnings = convertStyle(layer)
+                geostyler = json.dumps(geostyler, indent=4)
+            except Exception as e:
+                geostyler_warnings = [f"Failed to convert to GeoStyler: {e}"]
+            # Try MapBox GL conversion
             try:
                 mapbox, _, mapbox_warnings = layerStyleAsMapbox(layer)
             except Exception as e:
-                mapbox_warnings = [f"Failed to convert to Mapbox GL: {e}"]
-            mapserver, _, _, mapserver_warnings = layerStyleAsMapfile(layer)
+                mapbox_warnings = [f"Failed to convert to MapBox GL: {e}"]
+            # Try Mapfile conversion
+            try:
+                mapserver, _, _, mapserver_warnings = layerStyleAsMapfile(layer)
+            except Exception as e:
+                mapserver_warnings = [f"Failed to convert to Mapfile: {e}"]
+            # Collect all warnings
             warnings.update(chain(sld_warnings, geostyler_warnings, mapbox_warnings, mapserver_warnings))
         self.txtSld.setText(sld)
         self.txtGeostyler.setText(geostyler)
