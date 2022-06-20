@@ -55,6 +55,7 @@ class GeoserverServer(DataCatalogServerBase):
         self._workspace = None
         self._slug_map = {}     # maps requested layer name (slug) to the resulting server name
         self._apiurl = self.fixRestApiUrl()
+        self._importer = None
 
     @classmethod
     def getWidgetClass(cls) -> type:
@@ -272,11 +273,14 @@ class GeoserverServer(DataCatalogServerBase):
                     try:
                         db.importLayer(layer)
                     except Exception as err:
-                        self.logError(err)
-                        return
+                        return self.logError(err)
                     self._publishVectorLayerFromPostgis(layer, db, fields)
 
                 elif self.storage == GeoserverStorage.POSTGIS_GEOSERVER:
+                    # Check if the Importer extension is in the manifest (and which version)
+                    if not self._importer:
+                        return self.logError("GeoServer Importer extension was not detected")
+
                     # Export layer to Shapefile and publish to PostGIS using GeoServer Importer extension
                     self._publishVectorLayerFromShpToPostgis(layer, fields)
 
@@ -290,6 +294,16 @@ class GeoserverServer(DataCatalogServerBase):
 
         finally:
             self._clearCache()
+
+    def _featureTypeExists(self, datastore: str, ftype_name: str) -> bool:
+        """ Checks if a feature type exists in the given datastore. Also looks at unpublished feature types. """
+        url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{datastore}/featuretypes.json?list=all"
+        try:
+            ftype_names = set(((self.request(url).json() or {}).get("list", {}) or {}).get("string", []) or [])
+        except RequestException as e:
+            self.logError(f"Failed to list all feature types in datastore {self.workspace}:{datastore} - {e}")
+            return False
+        return ftype_name in ftype_names
 
     def _getPostgisDatastores(self, ds_list_url: str = None):
         """
@@ -480,7 +494,17 @@ class GeoserverServer(DataCatalogServerBase):
         Publishes the given vector layer to PostGIS using the GeoServer Importer extension.
         The Importer extension expects a zipped Shapefile as input.
         """
-        # First export layer data to a zipped Shapefile
+        def _invalid_task(status: str):
+            return {
+                "READY": None,  # This is the expected state for new tasks: it should not return an error message
+                "NO_CRS": "layer does not have a CRS",
+                "NO_BOUNDS": "failed to determine layer bounds",
+                "NO_FORMAT": "unspecified layer format",
+                "BAD_FORMAT": "invalid layer format",
+                "ERROR": "an unknown error occurred"
+            }.get(status.strip().upper(), f"Importer task is in an unexpected state ({status})")
+
+        # Export layer data to a zipped Shapefile
         shp_file = exportVector(layer, fields, force_shp=True)
         zip_file = shp_file.with_suffix('.zip')
         with ZipFile(zip_file, 'w') as z:
@@ -516,23 +540,37 @@ class GeoserverServer(DataCatalogServerBase):
         url = f"{self.apiUrl}/imports/{import_id}/tasks"
         try:
             with open(zip_file, "rb") as f:
-                task_id = self.request(url, method="post", files={
+                result = self.request(url, method="post", files={
                     zip_file.name: (zip_file.name, f, 'application/octet-stream')
-                }).json()["task"]["id"]
+                }).json()["task"]
+            task_id = result["id"]
+            task_error = _invalid_task(result["state"])
+            if task_error:
+                raise Exception(task_error)
         except Exception as err:
-            return self.logError(f"Failed to initiate GeoServer Importer task: {err}")
+            return self.logError(f"Failed to create GeoServer Importer task: {err}")
 
-        # Reassign PostGIS datastore as target (was reset to Shapefile by upload)
-        body = {
-            "dataStore": {
-                "name": datastore
+        if self._featureTypeExists(datastore, layer.web_slug):
+            # Modify the task so that it will use a fixed name and replaces existing PostGIS tables
+            # TODO: Make behavior Importer version-dependent once GEOS-10553 has been fixed and merged
+            #       Without the fix, REPLACE may still fail if there's a schema mismatch.
+            #       With the fix, we can also leave REPLACE always on.
+            body = {
+                "task": {
+                    "updateMode": "REPLACE",
+                    "layer": {
+                        "nativeName": layer.web_slug
+                    }
+                }
             }
-        }
-        url = f"{self.apiUrl}/imports/{import_id}/tasks/{task_id}/target.json"
-        self.request(url, "put", body)
+            url = f"{self.apiUrl}/imports/{import_id}/tasks/{task_id}"
+            try:
+                self.request(url, "put", body)
+            except Exception as err:
+                return self.logError(f"Failed to modify GeoServer Importer task settings: {err}")
 
         # Start import execution
-        self.logInfo(f"Starting Importer task for layer '{layer.name()}'...")
+        self.logInfo(f"Starting Importer job for layer '{layer.name()}'...")
         url = f"{self.apiUrl}/imports/{import_id}"
         self.request(url, method="post")
 
@@ -1207,13 +1245,46 @@ class GeoserverServer(DataCatalogServerBase):
         s.setValue(f'qgis/connections-wfs/{self.serverName}/url', f'{self.baseUrl}/wfs')
         s.setValue(f'qgis/WFS/{self.serverName}/authcfg', self.authId)
 
+    def _getManifestInfo(self, key: str, value: str) -> List[dict]:
+        """ Retrieves objects from the GeoServer manifest using a key and value filter. """
+        url = f'{self.apiUrl}/about/manifest.json&key={key}&value={value}'
+        try:
+            about = (self.request(url).json() or {}).get("about")
+            if not about:
+                return []
+            resources = about.get("resource", [])
+            if isinstance(resources, dict):
+                return [resources]
+            return resources
+        except Exception as err:
+            self.logError(f"Failed to read GeoServer manifest: {err}")
+            return []
+
+    def getImporterVersion(self, force: bool = False):
+        """ Retrieve version of the GeoServer Importer extension (if installed). """
+        if self._importer and not force:
+            return
+        resources = self._getManifestInfo("Implementation-Vendor-Id", "org.geoserver.importer")
+        versions = list(set(v for v in
+                            (obj.get('Implementation-Version') for obj in resources if isinstance(obj, dict))
+                            if v))
+
+        # Version list should have exactly 1 item
+        if len(versions) == 1:
+            self._importer = versions[0]
+            self.logInfo(f"GeoServer instance at {self.baseUrl} runs Importer extension version {self._importer}")
+            return
+
+        self._importer = None
+        self.logWarning(f"Missing or misconfigured Importer extension found on GeoServer instance at {self.baseUrl}")
+
     def checkMinGeoserverVersion(self, errors):
         """ Checks that the GeoServer instance we are dealing with is at least 2.13.2. """
         response = requests.Response()
         url = f"{self.apiUrl}/about/version.json"
         try:
             response = self.request(url)
-            result = response.json()
+            result = response.json() or {}
         except rjson.JSONDecodeError as err:
             length = len(getattr(response, 'text', ''))
             self.logError(f"Failed to parse GeoServer response as JSON: {err}")
@@ -1241,8 +1312,10 @@ class GeoserverServer(DataCatalogServerBase):
                     f"Please refer to <a href='{info_url}'>this article</a> for more info."
                 )
         except Exception as e:
-            # Failed to retrieve Version. It could be a RC or dev version: warn but consider OK.
+            # Failed to retrieve Version. It could be an RC or dev version: warn but consider OK.
             self.logWarning(f"Failed to retrieve GeoServer version info: {e}")
+        else:
+            self.logInfo(f"Detected GeoServer version is: {ver}")
 
     def validateBeforePublication(self, errors: set, layer_ids: List[str], only_symbology: bool):
         if not self.refreshWorkspaceName():
@@ -1256,7 +1329,12 @@ class GeoserverServer(DataCatalogServerBase):
                                        defaultButton=self.BUTTONS.NO)
             if ret == self.BUTTONS.NO:
                 errors.add("Cannot overwrite existing workspace.")
+
+        # Make sure GeoServer is reachable and that we're running the correct version
         self.checkMinGeoserverVersion(errors)
+
+        # Read the Importer extension info from the manifest (if not already done)
+        self.getImporterVersion()
 
     @classmethod
     def getAlgorithmInstance(cls):
