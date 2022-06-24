@@ -66,9 +66,9 @@ class BridgeDialog(BASE, WIDGET):
         If the versions do NOT match, it means that the About screen should be shown.
         """
         cur_version = meta.getVersion()
-        old_version = QSettings().value(VERSION_SETTING)
+        old_version = meta.SemanticVersion(QSettings().value(VERSION_SETTING) or '')
         if old_version != cur_version:
-            QSettings().setValue(VERSION_SETTING, cur_version)
+            QSettings().setValue(VERSION_SETTING, str(cur_version))
             return True
         return False
 
