@@ -17,7 +17,7 @@ from geocatbridge.servers.bases import MetaCatalogServerBase
 from geocatbridge.servers.models.gn_profile import GeoNetworkProfiles
 from geocatbridge.servers.views.geonetwork import GeoNetworkWidget
 from geocatbridge.utils.network import BridgeSession
-from geocatbridge.utils.meta import semanticVersion
+from geocatbridge.utils.meta import SemanticVersion
 from geocatbridge.utils import feedback
 from geocatbridge.utils.network import TESTCON_TIMEOUT
 
@@ -80,15 +80,13 @@ class GeonetworkServer(MetaCatalogServerBase):
         msg = f'Could not connect to {self.serverName}'
 
         # First get GeoNetwork version
-        version = self.getVersion() or ''
+        version = SemanticVersion(self.getVersion() or '')
         if version:
-            major, minor = semanticVersion(version)
-            if not (major == 3 and minor >= 4):
-                if major == 4:
-                    errors.add(f'{msg}: {self.getLabel()} version 4 instances are not supported yet')
-                else:
-                    errors.add(f'{msg}: {self.getLabel()} instances prior to version 3.4 are not supported')
-                return False
+            if version >= 4:
+                errors.add(f'{msg}: {self.getLabel()} version 4 instances are not supported yet')
+            elif version < 3.4:
+                errors.add(f'{msg}: {self.getLabel()} instances prior to version 3.4 are not supported')
+            return False
         else:
             errors.add(f'{msg}: please check URL')
             return False
