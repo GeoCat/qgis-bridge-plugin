@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Supported Symbology &mdash; GeoCat Bridge 4.2.8 documentation</title>
+  <title>Supported Symbology &mdash; GeoCat Bridge 4.2.9 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,6 +14,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -128,23 +129,23 @@
            <div itemprop="articleBody">
              
   <section id="supported-symbology">
-<span id="symbology"></span><h1>Supported Symbology<a class="headerlink" href="#supported-symbology" title="Permalink to this headline"></a></h1>
+<span id="symbology"></span><h1>Supported Symbology<a class="headerlink" href="#supported-symbology" title="Permalink to this heading"></a></h1>
 <p>Bridge uses the Python <a class="reference external" href="https://github.com/GeoCat/bridge-style">bridgestyle library</a> to export QGIS symbology into other formats such as SLD (used when uploading to GeoServer), MapServer files, or Mapbox GL.</p>
 <p>Below you can find a list of supported elements that should be correctly converted from QGIS to SLD, along with additional information about the limitations of the conversion between these two formats.</p>
 <section id="common-settings">
-<h2>Common settings<a class="headerlink" href="#common-settings" title="Permalink to this headline"></a></h2>
+<h2>Common settings<a class="headerlink" href="#common-settings" title="Permalink to this heading"></a></h2>
 <p>This section describes general elements that are common to most types of layers and symbologies.</p>
 <section id="drawing-order-symbol-levels">
-<h3>Drawing order (symbol levels)<a class="headerlink" href="#drawing-order-symbol-levels" title="Permalink to this headline"></a></h3>
+<h3>Drawing order (symbol levels)<a class="headerlink" href="#drawing-order-symbol-levels" title="Permalink to this heading"></a></h3>
 <p>You can use <a class="reference external" href="https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id95">symbol levels</a> in QGIS to define the order in which to render the symbol layers, which should be correctly converted to z-levels in SLD.</p>
 </section>
 <section id="size-units">
-<h3>Size units<a class="headerlink" href="#size-units" title="Permalink to this headline"></a></h3>
+<h3>Size units<a class="headerlink" href="#size-units" title="Permalink to this heading"></a></h3>
 <p>Size values can be used in millimeters, pixels, points, or real world meters. In this last case, expressions cannot be used, only fixed values.</p>
 <p>However, please note that it’s safer to use pixels instead of millimeters (which are the default unit in QGIS), since pixel is the assumed unit for formats like SLD, so no conversion is needed.</p>
 </section>
 <section id="expressions">
-<span id="supportedexpressions"></span><h3>Expressions<a class="headerlink" href="#expressions" title="Permalink to this headline"></a></h3>
+<span id="supportedexpressions"></span><h3>Expressions<a class="headerlink" href="#expressions" title="Permalink to this heading"></a></h3>
 <p><a class="reference external" href="https://docs.qgis.org/3.4/en/docs/pyqgis_developer_cookbook/expressions.html">Expressions</a> are supported wherever QGIS allows to use data-defined values. They must be created using QGIS expression language (Python custom functions are not supported). Not all available functions in QGIS can be used, since there’s no equivalent for all of them in GeoServer. The following QGIS functions can be used:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">radians</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">floor</span><span class="p">,</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">centroid</span><span class="p">,</span>
 <span class="k">if</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">convex_hull</span><span class="p">,</span> <span class="n">end_point</span><span class="p">,</span> <span class="n">start_point</span><span class="p">,</span>
@@ -166,36 +167,36 @@
 </ul>
 </section>
 <section id="blending-modes">
-<h3>Blending modes<a class="headerlink" href="#blending-modes" title="Permalink to this headline"></a></h3>
+<h3>Blending modes<a class="headerlink" href="#blending-modes" title="Permalink to this heading"></a></h3>
 <p>Blending modes are supported at the layer level.</p>
 </section>
 </section>
 <section id="vector-layers">
-<h2>Vector Layers<a class="headerlink" href="#vector-layers" title="Permalink to this headline"></a></h2>
+<h2>Vector Layers<a class="headerlink" href="#vector-layers" title="Permalink to this heading"></a></h2>
 <p>The supported elements for styling vector layers are described below.</p>
 <section id="supported-renderers">
-<h3>Supported renderers<a class="headerlink" href="#supported-renderers" title="Permalink to this headline"></a></h3>
+<h3>Supported renderers<a class="headerlink" href="#supported-renderers" title="Permalink to this heading"></a></h3>
 <p>The following renderers are supported for vector layers:</p>
 <section id="id2">
-<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#single-symbol-renderer">Single symbol</a><a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#single-symbol-renderer">Single symbol</a><a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/singlesymbolrenderer.png" src="_images/singlesymbolrenderer.png" />
 </figure>
 </section>
 <section id="id3">
-<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#categorized-renderer">Categorized</a><a class="headerlink" href="#id3" title="Permalink to this headline"></a></h4>
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#categorized-renderer">Categorized</a><a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/categorizedrenderer.png" src="_images/categorizedrenderer.png" />
 </figure>
 </section>
 <section id="id4">
-<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#graduated-renderer">Graduated</a><a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#graduated-renderer">Graduated</a><a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/graduatedrenderer.png" src="_images/graduatedrenderer.png" />
 </figure>
 </section>
 <section id="id5">
-<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#heatmap-renderer">Heatmap</a><a class="headerlink" href="#id5" title="Permalink to this headline"></a></h4>
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#heatmap-renderer">Heatmap</a><a class="headerlink" href="#id5" title="Permalink to this heading"></a></h4>
 <p>The following limitations apply:</p>
 <ul class="simple">
 <li><p>Radius must be expressed in pixels</p></li>
@@ -203,7 +204,7 @@
 </ul>
 </section>
 <section id="id6">
-<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#rule-based-renderer">Rule-based</a><a class="headerlink" href="#id6" title="Permalink to this headline"></a></h4>
+<h4><a class="reference external" href="https://docs.qgis.org/latest/en/docs/user_manual/working_with_vector/vector_properties.html#rule-based-renderer">Rule-based</a><a class="headerlink" href="#id6" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/rulebasedrenderer.png" src="_images/rulebasedrenderer.png" />
 </figure>
@@ -213,10 +214,10 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </section>
 </section>
 <section id="supported-point-symbology">
-<h3>Supported point symbology<a class="headerlink" href="#supported-point-symbology" title="Permalink to this headline"></a></h3>
+<h3>Supported point symbology<a class="headerlink" href="#supported-point-symbology" title="Permalink to this heading"></a></h3>
 <p>The following symbol layer types are supported for rendering points:</p>
 <section id="simple-marker">
-<h4>Simple marker<a class="headerlink" href="#simple-marker" title="Permalink to this headline"></a></h4>
+<h4>Simple marker<a class="headerlink" href="#simple-marker" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/simplemarker.png" src="_images/simplemarker.png" />
 </figure>
@@ -233,7 +234,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="svg-marker">
-<h4>SVG marker<a class="headerlink" href="#svg-marker" title="Permalink to this headline"></a></h4>
+<h4>SVG marker<a class="headerlink" href="#svg-marker" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/svgmarker.png" src="_images/svgmarker.png" />
 </figure>
@@ -249,7 +250,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="raster-image-marker">
-<h4>Raster image marker<a class="headerlink" href="#raster-image-marker" title="Permalink to this headline"></a></h4>
+<h4>Raster image marker<a class="headerlink" href="#raster-image-marker" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/rastermarker.png" src="_images/rastermarker.png" />
 </figure>
@@ -261,7 +262,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="font-marker">
-<h4>Font marker<a class="headerlink" href="#font-marker" title="Permalink to this headline"></a></h4>
+<h4>Font marker<a class="headerlink" href="#font-marker" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/fontmarker.png" src="_images/fontmarker.png" />
 </figure>
@@ -273,14 +274,14 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="geometry-generator">
-<h4>Geometry generator<a class="headerlink" href="#geometry-generator" title="Permalink to this headline"></a></h4>
+<h4>Geometry generator<a class="headerlink" href="#geometry-generator" title="Permalink to this heading"></a></h4>
 </section>
 </section>
 <section id="supported-line-symbology">
-<h3>Supported line symbology<a class="headerlink" href="#supported-line-symbology" title="Permalink to this headline"></a></h3>
+<h3>Supported line symbology<a class="headerlink" href="#supported-line-symbology" title="Permalink to this heading"></a></h3>
 <p>The following symbol layer types are supported for rendering lines:</p>
 <section id="simple-line">
-<h4>Simple line<a class="headerlink" href="#simple-line" title="Permalink to this headline"></a></h4>
+<h4>Simple line<a class="headerlink" href="#simple-line" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/simpleline.png" src="_images/simpleline.png" />
 </figure>
@@ -295,7 +296,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="marker-line">
-<h4>Marker line<a class="headerlink" href="#marker-line" title="Permalink to this headline"></a></h4>
+<h4>Marker line<a class="headerlink" href="#marker-line" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/markerline.png" src="_images/markerline.png" />
 </figure>
@@ -307,14 +308,14 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 <p>As marker, you can use simple markers, SVG markers and raster image markers, with the restrictions mentioned in the corresponding section about supported symbology for point symbols.</p>
 </section>
 <section id="id7">
-<h4>Geometry generator<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h4>
+<h4>Geometry generator<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h4>
 </section>
 </section>
 <section id="supported-polygon-symbology">
-<h3>Supported polygon symbology<a class="headerlink" href="#supported-polygon-symbology" title="Permalink to this headline"></a></h3>
+<h3>Supported polygon symbology<a class="headerlink" href="#supported-polygon-symbology" title="Permalink to this heading"></a></h3>
 <p>The following symbol layer types are supported for rendering polygons:</p>
 <section id="simple-fill">
-<h4>Simple fill<a class="headerlink" href="#simple-fill" title="Permalink to this headline"></a></h4>
+<h4>Simple fill<a class="headerlink" href="#simple-fill" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/simplefill.png" src="_images/simplefill.png" />
 </figure>
@@ -331,7 +332,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="point-pattern-fill">
-<h4>Point pattern fill<a class="headerlink" href="#point-pattern-fill" title="Permalink to this headline"></a></h4>
+<h4>Point pattern fill<a class="headerlink" href="#point-pattern-fill" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/pointpatternfill.png" src="_images/pointpatternfill.png" />
 </figure>
@@ -343,7 +344,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 <p>As marker, you can use simple markers, SVG markers and raster image markers, with the restrictions mentioned in the corresponding section about supported symbology for point symbols.</p>
 </section>
 <section id="line-pattern-fill">
-<h4>Line pattern fill<a class="headerlink" href="#line-pattern-fill" title="Permalink to this headline"></a></h4>
+<h4>Line pattern fill<a class="headerlink" href="#line-pattern-fill" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/linepatternfill.png" src="_images/linepatternfill.png" />
 </figure>
@@ -354,23 +355,23 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="outline-simple-line">
-<h4>Outline: Simple line<a class="headerlink" href="#outline-simple-line" title="Permalink to this headline"></a></h4>
+<h4>Outline: Simple line<a class="headerlink" href="#outline-simple-line" title="Permalink to this heading"></a></h4>
 <p>See the section on supported symbology for simple lines</p>
 </section>
 <section id="outline-marker-line">
-<h4>Outline: Marker line<a class="headerlink" href="#outline-marker-line" title="Permalink to this headline"></a></h4>
+<h4>Outline: Marker line<a class="headerlink" href="#outline-marker-line" title="Permalink to this heading"></a></h4>
 <figure class="align-default">
 <img alt="_images/fillmarkeroutline.png" src="_images/fillmarkeroutline.png" />
 </figure>
 <p>See the section on supported symbology for marker lines</p>
 </section>
 <section id="id8">
-<h4>Geometry generator<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h4>
+<h4>Geometry generator<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h4>
 </section>
 </section>
 </section>
 <section id="labeling">
-<h2>Labeling<a class="headerlink" href="#labeling" title="Permalink to this headline"></a></h2>
+<h2>Labeling<a class="headerlink" href="#labeling" title="Permalink to this heading"></a></h2>
 <p>The following labeling modes are supported for vector layer labels.</p>
 <ul class="simple">
 <li><p>No labels</p></li>
@@ -378,7 +379,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 <li><p><a class="reference external" href="https://docs.qgis.org/3.4/en/docs/user_manual/working_with_vector/vector_properties.html#id111">Rule-based labeling</a></p></li>
 </ul>
 <section id="text-options">
-<h3>Text options<a class="headerlink" href="#text-options" title="Permalink to this headline"></a></h3>
+<h3>Text options<a class="headerlink" href="#text-options" title="Permalink to this heading"></a></h3>
 <p>The following options from the <span class="guilabel">Text</span> group of parameters are supported:</p>
 <ul class="simple">
 <li><p>Size</p></li>
@@ -387,7 +388,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="buffer-options">
-<h3>Buffer options<a class="headerlink" href="#buffer-options" title="Permalink to this headline"></a></h3>
+<h3>Buffer options<a class="headerlink" href="#buffer-options" title="Permalink to this heading"></a></h3>
 <figure class="align-default">
 <img alt="_images/labelhalo.png" src="_images/labelhalo.png" />
 </figure>
@@ -399,7 +400,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="background-options">
-<h3>Background options<a class="headerlink" href="#background-options" title="Permalink to this headline"></a></h3>
+<h3>Background options<a class="headerlink" href="#background-options" title="Permalink to this heading"></a></h3>
 <figure class="align-default">
 <img alt="_images/labelbackground.png" src="_images/labelbackground.png" />
 </figure>
@@ -414,7 +415,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </ul>
 </section>
 <section id="placement-options">
-<h3>Placement options<a class="headerlink" href="#placement-options" title="Permalink to this headline"></a></h3>
+<h3>Placement options<a class="headerlink" href="#placement-options" title="Permalink to this heading"></a></h3>
 <p>The only supported <span class="guilabel">Placement</span> option is <span class="guilabel">Offset from centroid</span>, using the following parameters</p>
 <ul class="simple">
 <li><p>Quadrant</p></li>
@@ -424,10 +425,10 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
 </section>
 </section>
 <section id="raster-layers">
-<h2>Raster Layers<a class="headerlink" href="#raster-layers" title="Permalink to this headline"></a></h2>
+<h2>Raster Layers<a class="headerlink" href="#raster-layers" title="Permalink to this heading"></a></h2>
 <p>The supported elements for styling raster layers are detailed in this section.</p>
 <section id="id9">
-<h3>Supported renderers<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h3>
+<h3>Supported renderers<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Single band gray</p></li>
 <li><p>Single band color</p></li>
@@ -449,7 +450,7 @@ QGIS considers labeling to be a separate part of the symbology, while SLD consid
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, GeoCat BV. Built from cfff362.</p>
+    <p>&#169; Copyright 2022, GeoCat BV. Built from 10622a1.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
