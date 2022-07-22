@@ -11,8 +11,7 @@ from qgis.core import (
     QgsProcessingParameterString,
     QgsProcessingParameterAuthConfig
 )
-from requests.exceptions import HTTPError, RequestException
-from simplejson.errors import JSONDecodeError
+from requests.exceptions import HTTPError, RequestException, ContentDecodingError
 
 from geocatbridge.publish.style import (
     saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder, convertMapboxGroup
@@ -1161,13 +1160,13 @@ class GeoserverServer(DataCatalogServerBase):
         url = f"{self.apiUrl}/workspaces.json"
         try:
             res = self.request(url).json().get("workspaces", {})
+        except ContentDecodingError:
+            self.logWarning(f"GeoServer instance at {self.apiUrl} did not return a valid JSON response")
+            return []
         except RequestException as e:
             if isinstance(e, HTTPError) and e.response.status_code == 401:
                 self.showErrorBar("Error", f"Failed to connect to {self.serverName}: bad or missing credentials")
             self.logError(f"Failed to retrieve workspaces from {self.apiUrl}: {e}")
-            return []
-        except json.JSONDecodeError:
-            self.logWarning(f"GeoServer instance at {self.apiUrl} did not return a valid JSON response")
             return []
         if not res:
             self.logWarning(f"GeoServer instance at {self.apiUrl} does not seem to have any workspaces")
@@ -1214,16 +1213,16 @@ class GeoserverServer(DataCatalogServerBase):
         try:
             response = self.request(url)
             result = response.json()
-        except RequestException as err:
-            errors.add(f"Could not connect to GeoServer: {err}. "
-                       f"Please check the connection settings (e.g. username, password).")
-            return
-        except JSONDecodeError as err:
+        except ContentDecodingError as err:
             length = len(getattr(response, 'text', ''))
             self.logError(f"Failed to parse GeoServer response as JSON: {err}")
             errors.add(f"Could not determine GeoServer version due to an invalid response. "
                        f"Please check the connection settings or GeoServer configuration. "
                        f"The URL {url} did not return a valid JSON response ({length} chars).")
+            return
+        except RequestException as err:
+            errors.add(f"Could not connect to GeoServer: {err}. "
+                       f"Please check the connection settings (e.g. username, password).")
             return
 
         resources = result.get('about', {}).get('resource', {})
