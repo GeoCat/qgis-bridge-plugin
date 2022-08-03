@@ -190,7 +190,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                     msg = f'{msg}: please check credentials'
                 else:
                     msg = f'{msg}: {e}'
-                self.parent.showErrorBar(msg)
+                self.parent.showErrorBar("Error", msg)
 
         else:
             # Database is managed by Bridge: iterate over all user-defined database connections

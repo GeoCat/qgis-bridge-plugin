@@ -11,7 +11,8 @@ from qgis.core import (
     QgsProcessingParameterString,
     QgsProcessingParameterAuthConfig
 )
-from requests.exceptions import HTTPError, RequestException, ContentDecodingError
+from requests.compat import json as rjson
+from requests.exceptions import HTTPError, RequestException
 
 from geocatbridge.publish.style import (
     saveLayerStyleAsZippedSld, layerStyleAsMapboxFolder, convertMapboxGroup
@@ -1160,7 +1161,7 @@ class GeoserverServer(DataCatalogServerBase):
         url = f"{self.apiUrl}/workspaces.json"
         try:
             res = self.request(url).json().get("workspaces", {})
-        except ContentDecodingError:
+        except rjson.JSONDecodeError:
             self.logWarning(f"GeoServer instance at {self.apiUrl} did not return a valid JSON response")
             return []
         except RequestException as e:
@@ -1213,7 +1214,7 @@ class GeoserverServer(DataCatalogServerBase):
         try:
             response = self.request(url)
             result = response.json()
-        except ContentDecodingError as err:
+        except rjson.JSONDecodeError as err:
             length = len(getattr(response, 'text', ''))
             self.logError(f"Failed to parse GeoServer response as JSON: {err}")
             errors.add(f"Could not determine GeoServer version due to an invalid response. "

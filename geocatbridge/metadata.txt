@@ -12,7 +12,7 @@ about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 experimental=False
 category=Web
 qgisMinimumVersion=3.16
-version=4.2.9
+version=4.2.10
 email=support@geocat.net
 icon=icons/geocat.png
 tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
@@ -22,8 +22,10 @@ tracker=https://my.geocat.net/submitticket.php?step=2&deptid=4
 repository=https://github.com/geocat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
-changelog=Version 4.2.9, July 2022
-          - Use requests.exceptions.ContentDecodingError in favor of simplejson.JSONDecodeError
+changelog=Version 4.2.9-10, July 2022
+          - Handle JSONDecodeError from GeoServer regardless of json lib
+          - Fixed missing title argument when showing QGIS error message bar
+          - Updated GeoCat logo and icon
 
           Version 4.2.7-8, April-May 2022
           - Fixed broken URL for documentation link
