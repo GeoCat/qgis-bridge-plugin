@@ -18,8 +18,8 @@ icon=icons/geocat.png
 tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
      GeoNetwork, GeoServer, Mapbox, GeoStyler, ISO19139, SLD, GeoPackage, PostGIS
 homepage=https://www.geocat.net/bridge
-tracker=https://my.geocat.net/submitticket.php?step=2&deptid=4
-repository=https://github.com/geocat/qgis-bridge-plugin
+tracker=https://github.com/GeoCat/qgis-bridge-plugin/issues
+repository=https://github.com/GeoCat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
 changelog=Version 4.2.9-10, July 2022
@@ -67,4 +67,5 @@ changelog=Version 4.2.9-10, July 2022
 
 [bridge]
 shortName=Bridge
+support=https://my.geocat.net/submitticket.php?step=2&deptid=4
 docs=https://geocat.github.io/qgis-bridge-plugin

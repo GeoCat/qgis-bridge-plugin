@@ -6,6 +6,13 @@ from re import compile
 #: GeoCat Bridge plugin namespace
 PLUGIN_NAMESPACE = "geocatbridge"
 
+#: Plugin metadata file path
+PLUGIN_METAPATH = (Path(__file__).parent.parent / "metadata.txt").resolve()
+
+#: Sections in metadata.txt file
+SECTION_DEFAULT = "general"
+SECTION_BRIDGE = "bridge"
+
 #: Semantic version regex
 VERSION_REGEX = compile(r'^(\d+)\.(\d+).*')
 
@@ -14,7 +21,7 @@ _meta_parser = configparser.ConfigParser()
 
 
 def _load():
-    _meta_parser.read(str(Path(__file__).parent.parent / 'metadata.txt'))
+    _meta_parser.read(str(PLUGIN_METAPATH))
 
 
 def semanticVersion(version: str) -> Tuple[int, int]:
@@ -25,7 +32,7 @@ def semanticVersion(version: str) -> Tuple[int, int]:
     return tuple(int(v) for v in m.groups())  # noqa
 
 
-def getProperty(name, section='general'):
+def getProperty(name, section=SECTION_DEFAULT):
     """ Reads the property with the given name from the **local** plugin metadata. """
     key = f'{section}.{name}'
     try:
@@ -44,7 +51,7 @@ def getAppName() -> str:
 def getLongAppName() -> str:
     """ Returns the full name of the QGIS Bridge plugin.
     Depending on the settings, this may return the same as calling getAppName(). """
-    long_name = getProperty("longName", "bridge")
+    long_name = getProperty("longName", SECTION_BRIDGE)
     if long_name:
         return long_name
     return getAppName()
@@ -53,15 +60,20 @@ def getLongAppName() -> str:
 def getShortAppName() -> str:
     """ Returns the short name of the QGIS Bridge plugin.
     Depending on the settings, this may return the same as calling getAppName(). """
-    short_name = getProperty("shortName", "bridge")
+    short_name = getProperty("shortName", SECTION_BRIDGE)
     if short_name:
         return short_name
     return getAppName()
 
 
 def getTrackerUrl() -> str:
-    """ Returns the issue tracker URL for GeoCat Bridge. """
+    """ Returns the issue tracker URL for GeoCat Bridge (i.e. GitHub). """
     return getProperty("tracker")
+
+
+def getSupportUrl() -> str:
+    """ Returns the support ticket URL for GeoCat Bridge. """
+    return getProperty("support", SECTION_BRIDGE)
 
 
 def getVersion() -> str:
@@ -71,8 +83,11 @@ def getVersion() -> str:
 
 def getDocsUrl() -> str:
     """ Returns the GeoCat Bridge documentation URL for the current (major.minor) release. """
+    doc_url = getProperty('docs', SECTION_BRIDGE)
+    if not doc_url:
+        raise ValueError("Bridge documentation URL has not been set")
     semver = '.'.join(str(i) for i in semanticVersion(getVersion()))
-    return f"{getProperty('docs', 'bridge').rstrip('/')}/v{semver}/"
+    return f"{doc_url.rstrip('/')}/v{semver}/"
 
 
 _load()

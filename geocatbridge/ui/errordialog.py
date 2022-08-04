@@ -7,7 +7,7 @@ from requests.models import PreparedRequest
 
 from geocatbridge.utils.files import getIconPath
 from geocatbridge.utils.gui import loadUiType
-from geocatbridge.utils.meta import getTrackerUrl, getAppName
+from geocatbridge.utils.meta import getSupportUrl, getAppName
 
 WIDGET, BASE = loadUiType(__file__)
 
@@ -19,29 +19,29 @@ class ErrorDialog(BASE, WIDGET):
         self.setupUi(self)
 
         self.setWindowTitle(f"{getAppName()} Error Report")
-        self.setWindowIcon(QIcon(getIconPath('geocat')))
+        self.setWindowIcon(QIcon(getIconPath("geocat")))
         pixmap = QPixmap(getIconPath("bridge_logo"))
         self.labelIcon.setPixmap(pixmap)
         self.label.setText(f"The {getAppName()} plugin has caused the following exception:")
 
         self.txtError.setHtml(html_error)
 
-        tracker_url = getTrackerUrl()
-        if not tracker_url:
+        support_url = getSupportUrl()
+        if not support_url:
             self.btnSendReport.setEnabled(False)
         else:
-            self.btnSendReport.clicked.connect(lambda: self.sendReport(md_error, tracker_url))
+            self.btnSendReport.clicked.connect(lambda: self.sendReport(md_error, support_url))
         self.btnClose.clicked.connect(self.close)
 
-    def sendReport(self, error, tracker_url):
+    def sendReport(self, error, support_url):
         """ Copies the given stacktrace in a GeoCat support form. """
         payload = {
-            "subject": "[Crash Report] GeoCat Bridge for QGIS",
+            "subject": f"[Crash Report] {getAppName()} for QGIS",
             "message": error
         }
         req = PreparedRequest()
         try:
-            req.prepare("GET", tracker_url, params=parse.urlencode(payload, quote_via=parse.quote))
+            req.prepare("GET", support_url, params=parse.urlencode(payload, quote_via=parse.quote))
             webbrowser.open_new_tab(req.url)
         except Exception as e:
-            QgsMessageLog().logMessage(f"Failed to send crash report: {e}", 'GeoCat Bridge')
+            QgsMessageLog().logMessage(f"Failed to send crash report: {e}", getAppName())
