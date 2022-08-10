@@ -582,8 +582,7 @@ class GeoserverServer(DataCatalogServerBase):
         }
 
         # GeoServer fix GEOS-10553 makes it possible to always use the REPLACE mode!
-        # TODO: set Importer version that contains fix
-        if self._importer < meta.SemanticVersion('2.22'):
+        if self._importer < meta.SemanticVersion('2.21.1'):
             self.logInfo(f"Importer {self._importer} does not support REPLACE mode")
         else:
             self.logInfo(f"Importer {self._importer} supports REPLACE mode")
