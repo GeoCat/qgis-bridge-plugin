@@ -84,9 +84,10 @@ class GeonetworkServer(MetaCatalogServerBase):
         if version:
             if version >= 4:
                 errors.add(f'{msg}: {self.getLabel()} version 4 instances are not supported yet')
+                return False
             elif version < 3.4:
                 errors.add(f'{msg}: {self.getLabel()} instances prior to version 3.4 are not supported')
-            return False
+                return False
         else:
             errors.add(f'{msg}: please check URL')
             return False
@@ -232,17 +233,17 @@ class GeonetworkAlgorithm(BridgeAlgorithm):
     def shortDescription(self):
         return self.tr('Publishes metadata to a GeoNetwork server instance')
 
-    def processAlgorithm(self, parameters, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback_):
         url = self.parameterAsString(parameters, self.URL, context)
         authid = self.parameterAsString(parameters, self.AUTHID, context)
         layer = BridgeLayer(self.parameterAsLayer(parameters, self.INPUT, context))
 
-        feedback.pushInfo(f'Publishing {layer.name()} metadata to GeoNetwork...')
+        feedback_.pushInfo(f'Publishing {layer.name()} metadata to GeoNetwork...')
         try:
             server = GeonetworkServer(GeonetworkServer.__name__, authid, url)
             server.publishLayerMetadata(layer)
         except Exception as err:
-            feedback.reportError(err, True)
+            feedback_.reportError(err, True)
 
         return {self.OUTPUT: True}
 

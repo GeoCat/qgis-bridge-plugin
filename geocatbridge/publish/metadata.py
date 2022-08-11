@@ -6,7 +6,6 @@ from xml.dom import minidom
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
 
-import lxml.etree as ET
 from qgis.PyQt.QtCore import QSize
 from qgis.PyQt.QtGui import QImage, QColor, QPainter
 from qgis.core import (
@@ -18,6 +17,14 @@ from geocatbridge.utils import meta, feedback
 from geocatbridge.utils.files import tempFileInSubFolder, getResourcePath
 from geocatbridge.utils.layers import BridgeLayer
 
+try:
+    import lxml.etree as lxml
+except ModuleNotFoundError:
+    # Prevent crash when plugin loads (QGIS 3.22+ no longer includes lxml by default)
+    feedback.logWarning("Python package 'lxml' is unavailable: please install if you need to publish metadata")
+    lxml = None
+
+# XSLT transformation files
 QMD_TO_ISO19139_XSLT = getResourcePath("qgis-to-iso19139.xsl")
 ISO19139_TO_QMD_XSLT = getResourcePath("iso19139-to-qgis.xsl")
 ISO19115_TO_ISO19139_XSLT = getResourcePath("iso19115-to-iso19139.xsl")
@@ -25,10 +32,19 @@ WRAPPING_ISO19115_TO_ISO19139_XSLT = getResourcePath("ISO19115-wrapping-MD_Metad
 FGDC_TO_ISO19115 = getResourcePath("ArcCatalogFgdc_to_ISO19115.xsl")
 
 
+class MetadataDependencyError(ModuleNotFoundError):
+    """ Raised when lxml is None (i.e. the library was not imported). """
+    def __init__(self, *args):
+        super().__init__(args)
+
+    def __str__(self):
+        return "'lxml' python package is unavailable"
+
+
 def _transformDom(input_file, xslt_file):
-    in_dom = ET.parse(input_file)
-    xslt = ET.parse(xslt_file)
-    transform = ET.XSLT(xslt)
+    in_dom = lxml.parse(input_file)
+    xslt = lxml.parse(xslt_file)
+    transform = lxml.XSLT(xslt)
     out_dom = transform(in_dom)
     if not out_dom:
         raise Exception("Failed to convert metadata")
@@ -36,7 +52,7 @@ def _transformDom(input_file, xslt_file):
 
 
 def _writeDom(dom, output_file):
-    s = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(dom, pretty_print=True).decode()
+    s = '<?xml version="1.0" encoding="UTF-8"?>\n' + lxml.tostring(dom, pretty_print=True).decode()
     with open(output_file, "w", encoding="utf8") as f:
         f.write(s)
 
@@ -101,18 +117,18 @@ def _transformMetadata(filename, uuid, api_url, wms, wfs, layer_name):
         return f"{{http://www.isotc211.org/2005/gmd}}{n}"
 
     def _addServiceElement(root_element, md_layer, service_url, service_type):
-        trans = ET.SubElement(root_element, _ns("transferOptions"))
-        dtrans = ET.SubElement(trans, _ns("MD_DigitalTransferOptions"))
-        online = ET.SubElement(dtrans, _ns("onLine"))
-        cionline = ET.SubElement(online, _ns("CI_OnlineResource"))
-        linkage = ET.SubElement(cionline, _ns("linkage"))
-        url = ET.SubElement(linkage, _ns("URL"))
+        trans = lxml.SubElement(root_element, _ns("transferOptions"))
+        dtrans = lxml.SubElement(trans, _ns("MD_DigitalTransferOptions"))
+        online = lxml.SubElement(dtrans, _ns("onLine"))
+        cionline = lxml.SubElement(online, _ns("CI_OnlineResource"))
+        linkage = lxml.SubElement(cionline, _ns("linkage"))
+        url = lxml.SubElement(linkage, _ns("URL"))
         url.text = service_url
-        protocol = ET.SubElement(cionline, _ns("protocol"))
-        cs = ET.SubElement(protocol, "{http://www.isotc211.org/2005/gco}CharacterString")
+        protocol = lxml.SubElement(cionline, _ns("protocol"))
+        cs = lxml.SubElement(protocol, "{http://www.isotc211.org/2005/gco}CharacterString")
         cs.text = f"OGC:{service_type.upper()}"
-        name = ET.SubElement(cionline, _ns("name"))
-        csname = ET.SubElement(name, "{http://www.isotc211.org/2005/gco}CharacterString")
+        name = lxml.SubElement(cionline, _ns("name"))
+        csname = lxml.SubElement(name, "{http://www.isotc211.org/2005/gco}CharacterString")
         csname.text = md_layer
 
     iso_filename = tempFileInSubFolder("metadata.xml")
@@ -128,10 +144,10 @@ def _transformMetadata(filename, uuid, api_url, wms, wfs, layer_name):
         for root in out_dom.iter(_ns("MD_Distribution")):
             _addServiceElement(root, layer_name, wfs, "wfs")
     for root in out_dom.iter(_ns("MD_DataIdentification")):
-        overview = ET.SubElement(root, _ns("graphicOverview"))
-        browse_graphic = ET.SubElement(overview, _ns("MD_BrowseGraphic"))
-        file = ET.SubElement(browse_graphic, _ns("fileName"))
-        cs = ET.SubElement(file, "{http://www.isotc211.org/2005/gco}CharacterString")
+        overview = lxml.SubElement(root, _ns("graphicOverview"))
+        browse_graphic = lxml.SubElement(overview, _ns("MD_BrowseGraphic"))
+        file = lxml.SubElement(browse_graphic, _ns("fileName"))
+        cs = lxml.SubElement(file, "{http://www.isotc211.org/2005/gco}CharacterString")
         thumbnail_url = f"{api_url}/records/{uuid}/attachments/thumbnail.png"
         cs.text = thumbnail_url
 
@@ -195,6 +211,8 @@ def uuidForLayer(layer: BridgeLayer) -> str:
 
 
 def loadMetadataFromXml(layer, filename):
+    if lxml is None:
+        raise MetadataDependencyError()
     filename = str(filename)  # make sure that it's not a Path
     root = ElementTree.parse(filename).getroot()
     tags = set()
@@ -236,6 +254,8 @@ def loadMetadataFromXml(layer, filename):
 
 def saveMetadata(layer: BridgeLayer, mef_file: str = None,
                  api_url: str = None, wms_url: str = None, wfs_url: str = None, record_name: str = None):
+    if lxml is None:
+        raise MetadataDependencyError()
     uuid_ = uuidForLayer(layer)
     filename = tempFileInSubFolder(layer.file_slug + ".qmd")
     layer.saveNamedMetadata(filename)

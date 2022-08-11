@@ -33,7 +33,7 @@ from qgis.core import (
 )
 from qgis.utils import iface
 
-from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromXml
+from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromXml, MetadataDependencyError
 from geocatbridge.publish.tasks import PublishTask, ExportTask
 from geocatbridge.servers import manager
 from geocatbridge.ui.metadatadialog import MetadataDialog
@@ -386,12 +386,14 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
 
     def importMetadata(self):
-        if not isinstance(self.currentLayer, BridgeLayer):
+        if self.currentLayer is None:
             return
 
         if not self.currentLayer.is_file_based:
-            self.logInfo("Can only import metadata for file-based layer sources")
-            return
+            return self.showWarningBar(
+                "Error importing metadata",
+                "Can only import metadata for file-based layer sources"
+            )
 
         layer_source = self.currentLayer.uri
         metadata_file = layer_source.with_suffix(".xml")
@@ -412,13 +414,18 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if metadata_file:
             try:
                 loadMetadataFromXml(self.currentLayer, metadata_file)
+            except MetadataDependencyError as err:
+                self.logError(err)
+                return self.showErrorBar(
+                    "Error importing metadata",
+                    f"Missing Bridge dependency: {err}"
+                )
             except Exception as err:
                 self.logError(err)
-                self.showWarningBar(
+                return self.showWarningBar(
                     "Error importing metadata",
                     "Cannot convert metadata file. Does it have an ISO19139 or ESRI-ISO format?"
                 )
-                return
 
             self.populateLayerMetadata()
             self.showSuccessBar("", "Successfully imported metadata")
