@@ -125,6 +125,16 @@ def getTrackerUrl() -> str:
     return getProperty("tracker")
 
 
+def getRepoUrl() -> str:
+    """ Returns the Git repository URL for GeoCat Bridge (i.e. GitHub). """
+    return getProperty("repository")
+
+
+def getHomeUrl() -> str:
+    """ Returns the homepage URL for GeoCat Bridge. """
+    return getProperty("homepage")
+
+
 def getVersion() -> SemanticVersion:
     """ Returns the GeoCat Bridge version string. """
     return SemanticVersion(getProperty("version"))
@@ -141,6 +151,15 @@ def getDocsUrl() -> str:
     if not doc_url:
         raise ValueError("Bridge documentation URL has not been set")
     return f"{doc_url.rstrip('/')}/v{getVersion()}/"
+
+
+def isEnterprise() -> bool:
+    """ Returns True if this is the GeoCat Bridge Enterprise edition. """
+    try:
+        from geocatbridge.utils import license  # noqa
+    except ImportError:
+        return False
+    return True
 
 
 _load()

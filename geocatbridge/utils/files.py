@@ -3,18 +3,24 @@ import shutil
 import uuid
 from pathlib import Path
 
-from qgis.PyQt.QtCore import QDir
+from qgis.PyQt.QtCore import QDir, QUrl
+from jinja2 import Environment, FileSystemLoader
 
 from geocatbridge.utils import meta
-
-#: GeoCat Bridge Python root directory
-BRIDGE_ROOT_DIR = Path(__file__).parent.parent
 
 _DIR_NAME_WIDGETS = "ui"
 _DIR_NAME_TRANSLATIONS = "i18n"
 _DIR_NAME_ICONS = "icons"
 _DIR_NAME_RESOURCES = "resources"
 _DIR_NAME_DOCS = "docs"
+
+_ABOUT_SRCDIR = "geocat"
+_ABOUT_TEMPLATE = "template.html"
+_ABOUT_HTMLPAGE = "index.html"
+
+#: GeoCat Bridge Python root directory
+BRIDGE_ROOT_DIR = Path(__file__).parent.parent
+BRIDGE_ABOUT_DIR = BRIDGE_ROOT_DIR / _DIR_NAME_RESOURCES / _ABOUT_SRCDIR
 
 
 def _fix_ext(name, ext):
@@ -104,3 +110,33 @@ def getDirectory(path) -> str:
     """ Returns the parent directory path to the given file or directory path. """
     fix_path = Path(str(path).split('|')[0])  # Fix for GeoPackage layer paths
     return str(fix_path.resolve().parent)
+
+
+def getAboutUrl(refresh: bool = False) -> QUrl:
+    """
+    Returns the QUrl for the Bridge About page (HTML).
+    If 'refresh' is True or the HTML page does not exist, it is rendered from the template in the same folder.
+    If the template does not exist,
+    """
+    target_path = (BRIDGE_ABOUT_DIR / _ABOUT_HTMLPAGE).resolve()
+
+    # Render the index.html if it does not exist yet or if it should be updated (i.e. when version changed)
+    if refresh or not target_path.is_file():
+        template_path = target_path.with_name(_ABOUT_TEMPLATE)
+        if not template_path.is_file():
+            raise FileNotFoundError(f"HTML template at {template_path} does not exist")
+        env = Environment(loader=FileSystemLoader(template_path.parent))
+        template = env.get_template(_ABOUT_TEMPLATE)
+        html = template.render(
+            app_name=meta.getAppName(),
+            short_name=meta.getShortAppName(),
+            doc_url=meta.getDocsUrl(),
+            repo_url=meta.getRepoUrl(),
+            support_url=meta.getSupportUrl(),
+            homepage=meta.getHomeUrl(),
+            is_enterprise=meta.isEnterprise()
+        )
+        with open(target_path, mode="w+", encoding="utf-8") as fp:
+            fp.write(html)
+
+    return QUrl.fromLocalFile(str(target_path))

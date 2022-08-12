@@ -86,25 +86,26 @@
          margin-left: 0.5em;
       }
    </style>
-   <title>About GeoCat</title>
+   <title>About {{ app_name }}</title>
 </head>
 <body>
 <table class="gc-columns">
    <tr>
       <td class="gc-left-column">
-         <h1>Bridge <span>for QGIS</span></h1>
+         <h1>{{ short_name }} <span>for QGIS</span></h1>
          <p>
-            GeoCat Bridge is a Python plugin for QGIS, that has been designed
+            {{ app_name }} is a Python plugin for QGIS, that has been designed
             to simplify the publishing process of your geographic data and metadata to
             open source web services like GeoServer, GeoNetwork, and MapServer.
          </p>
          <p>
-            Please read our <a href="https://geocat.github.io/qgis-bridge-plugin/">online documentation</a>
+            Please read our <a href="{{ doc_url }}">online documentation</a>
             for more information.
          </p>
+         {% if not is_enterprise %}
          <div class="gc-top-space">
             <div class="gc-logo-ext-container">
-               <a href="https://github.com/GeoCat/qgis-bridge-plugin" title="Source code on GitHub">
+               <a href="{{ repo_url }}" title="Source code on GitHub">
                   <div class="gc-logo-ext-wrapper">
                      <img class="gc-logo-ext" src="img/github_logo.svg" alt="GitHub">
                   </div>
@@ -120,6 +121,7 @@
                </a>
             </div>
          </div>
+         {% endif %}
       </td>
       <td class="gc-right-column">
          <div class="gc-logo-wrapper">
@@ -127,16 +129,25 @@
                <img class="gc-logo" src="img/geocat_logo.svg" alt="GeoCat">
             </a>
          </div>
-         <h2>Bridge <span>Enterprise</span></h2>
+         {% if is_enterprise %}
+         <h2>{{ short_name }} <span>Support</span></h2>
          <p>
-            Consider <a href="https://www.geocat.net/bridge/">upgrading</a> to
-            GeoCat Bridge Enterprise. Get unlimited support and contribute to future developments.
+            GeoCat customers can <a href="{{ support_url }}">submit a support ticket</a> if they have
+            any questions or issues related to {{ app_name }} (login required). Our support team will
+            contact you as soon as possible.
+         </p>
+         {% else %}
+         <h2>{{ short_name }} <span>Enterprise</span></h2>
+         <p>
+            Consider <a href="{{ homepage }}">upgrading</a> to
+            {{ app_name }} Enterprise. Get unlimited support and contribute to future developments.
          </p>
          <h2>GeoCat <span>Live</span></h2>
          <p>
             Try <a href="https://www.geocat.net/live/">all-in-one hosting</a> of GeoNetwork,
-            GeoServer and PostGIS today and get Bridge Enterprise for free.
+            GeoServer and PostGIS today and get {{ app_name }} Enterprise for free.
          </p>
+         {% endif %}
       </td>
    </tr>
 </table>

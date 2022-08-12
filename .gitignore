@@ -112,3 +112,6 @@ venv.bak/
 
 # Custom folders
 _debug/
+
+# Do not check in rendered HTML
+/geocatbridge/resources/geocat/index.html

@@ -4,7 +4,8 @@ from functools import partial
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtWebKitWidgets import QWebPage
 
-from geocatbridge.utils import files, gui, meta
+from geocatbridge.utils import gui, meta
+from geocatbridge.utils.files import getAboutUrl
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
@@ -16,9 +17,7 @@ class GeoCatWidget(WIDGET, BASE):
         self.parent = parent
         self.setupUi(self)
 
-        path = files.getResourcePath(files.Path("geocat") / "index.html")
-        url = QUrl.fromLocalFile(path)
-        self.txtAbout.load(url)
+        self.txtAbout.load(getAboutUrl())
         self.txtAbout.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
         self.txtAbout.linkClicked.connect(partial(self.open_link))
 
