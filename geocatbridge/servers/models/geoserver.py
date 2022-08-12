@@ -1411,6 +1411,6 @@ class GeoserverAlgorithm(BridgeAlgorithm):
             server.publishStyle(layer)
             server.publishLayer(layer)
         except Exception as err:
-            feedback.reportError(err, True)
+            feedback.reportError(str(err), True)
 
         return {self.OUTPUT: True}

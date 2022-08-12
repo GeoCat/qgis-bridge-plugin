@@ -4,8 +4,10 @@ from urllib.parse import urlparse
 from xml.etree import ElementTree as ETree
 
 import requests
+
 from geocatbridge.utils.layers import BridgeLayer
 from qgis.core import (
+    QgsProcessingFeedback,
     QgsProcessingParameterMapLayer,
     QgsProcessingParameterString,
     QgsProcessingParameterAuthConfig
@@ -233,7 +235,7 @@ class GeonetworkAlgorithm(BridgeAlgorithm):
     def shortDescription(self):
         return self.tr('Publishes metadata to a GeoNetwork server instance')
 
-    def processAlgorithm(self, parameters, context, feedback_):
+    def processAlgorithm(self, parameters, context, feedback_: QgsProcessingFeedback):
         url = self.parameterAsString(parameters, self.URL, context)
         authid = self.parameterAsString(parameters, self.AUTHID, context)
         layer = BridgeLayer(self.parameterAsLayer(parameters, self.INPUT, context))
@@ -243,7 +245,7 @@ class GeonetworkAlgorithm(BridgeAlgorithm):
             server = GeonetworkServer(GeonetworkServer.__name__, authid, url)
             server.publishLayerMetadata(layer)
         except Exception as err:
-            feedback_.reportError(err, True)
+            feedback_.reportError(str(err), True)
 
         return {self.OUTPUT: True}
 
