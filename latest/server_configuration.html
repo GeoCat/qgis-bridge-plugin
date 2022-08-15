@@ -129,6 +129,17 @@ with a name that already exists.</div>
 <div class="line">The default GeoNetwork node is <code class="docutils literal notranslate"><span class="pre">srv</span></code>, which will be used if you leave the <em>Node</em> field empty.</div>
 </div>
 <p>Click <span class="guilabel">Test Connection</span> to verify that the connection can be established.</p>
+<div class="admonition note" id="lxml-dependency">
+<p class="admonition-title">Note</p>
+<div class="line-block">
+<div class="line">In order to convert the QGIS layer metadata into a format that GeoNetwork understands,
+Bridge uses the <code class="docutils literal notranslate"><span class="pre">lxml</span></code> Python library. This library used to be installed by default,
+but this no longer applies to QGIS 3.22 (LTR) and up, for example.</div>
+<div class="line">If Bridge cannot find <code class="docutils literal notranslate"><span class="pre">lxml</span></code>, it will issue a warning. Therefore, if you wish to publish metadata,
+please install this missing Python package (e.g. using the OSGeo4W setup or Python’s pip tool).</div>
+<div class="line">Users who <em>only</em> have to publish <em>geodata</em> should <em>never</em> have to install this library.</div>
+</div>
+</div>
 </section>
 <section id="geoserver">
 <h3>GeoServer<a class="headerlink" href="#geoserver" title="Permalink to this heading"></a></h3>
@@ -164,7 +175,7 @@ after all layers were successfully published to GeoServer.</p>
 <h4>Import into PostGIS database (handled by GeoServer)<a class="headerlink" href="#import-into-postgis-database-handled-by-geoserver" title="Permalink to this heading"></a></h4>
 <div class="line-block">
 <div class="line">The layer data is uploaded to tables in a PostGIS database by GeoServer. This method requires the GeoServer Importer extension, which only handles Shapefile imports for vector data.</div>
-<div class="line">This means that if the data is stored in a GeoPackage originally, attribute names may be renamed due to the 10 character limit of the Shapefile <cite>.dbf</cite> file upon export. Bridge handles this automatically and also makes sure that field names referenced in styles renamed accordingly.</div>
+<div class="line">This means that if the data is stored in a GeoPackage originally, attribute names may be renamed due to the 10 character limit of the Shapefile <cite>.dbf</cite> file upon export. Bridge handles this automatically and also makes sure that field names referenced in styles are renamed accordingly.</div>
 <div class="line">You must select a suitable PostGIS datastore on the GeoServer instance. Selecting this option will trigger a process that lists all the available datastores in each GeoServer workspace (which might take some time):</div>
 </div>
 <img alt="_images/servers_geoserver2.png" src="_images/servers_geoserver2.png" />
@@ -189,9 +200,13 @@ the datastore that you have selected.</div>
 <div class="line">Neither the GeoServer REST API nor the Importer extension is authorized to delete underlying PostGIS layer data tables.</div>
 <div class="line">This means that Bridge also won’t be able to clean up these data tables and that each publication will create new tables in the database,
 adding a numeric suffix to the table name and GeoServer feature type to avoid conflicts. If you (re)publish frequently,
-this may lead to a lot of redundant data!</div>
-<div class="line">Therefore, it’s recommended to create a clean-up script on the database side that will remove any “orphaned” tables
+this may lead to a lot of redundant tables!</div>
+<div class="line">Therefore, we recommend creating a clean-up script on the database side that will remove any “orphaned” tables
 that were created by GeoServer, but are no longer used by any feature type.</div>
+<div class="line"><br /></div>
+<div class="line"><strong>Update August 2022</strong></div>
+<div class="line">Starting from Bridge 4.3 and GeoServer 2.21.1, <em>existing PostGIS tables can now actually be overwritten by the Importer extension</em>. This should lead to a much cleaner publication process, as there will be less “orphaned” tables.</div>
+<div class="line">However, please be aware that the Importer extension still cannot delete any PostGIS tables: if a workspace is completely removed, this will not delete the underlying feature type tables.</div>
 </div>
 </div>
 </section>
@@ -239,7 +254,7 @@ This bundle should include the root certificate and any intermediate certificate
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, GeoCat BV. Built from e949d71.</p>
+    <p>&#169; Copyright 2022, GeoCat BV. Built from 6c6e434.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

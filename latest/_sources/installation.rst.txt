@@ -10,6 +10,9 @@ Client-side
 |app_name| requires QGIS |min_qgis_ver| or newer.
 Both the standalone QGIS installation or the OSGeo distribution should work.
 
+QGIS users who use a QGIS version *beyond* 3.16 should verify that the ``lxml`` :ref:`Python dependency <lxml-dependency>` is available.
+However, this only applies if you wish to import or publish metadata using |short_name|.
+
 .. note::   If you access the internet through a proxy server,
             you might experience some issues while publishing data or connecting to a server.
 
@@ -19,8 +22,8 @@ Server-side
 GeoNetwork
 ^^^^^^^^^^
 
-|app_name| currently supports GeoNetwork 3 starting at version 3.4 and higher.
-GeoNetwork 2 support has been deprecated and version 4 is not supported yet.
+|app_name| currently supports GeoNetwork version 3.4 and higher.
+GeoNetwork 2.x support has been deprecated and version 4.x is not supported yet.
 
 GeoServer
 ^^^^^^^^^

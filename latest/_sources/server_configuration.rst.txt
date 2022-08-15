@@ -49,6 +49,15 @@ Configure a GeoNetwork connection to publish your metadata to an online catalog 
 
 Click :guilabel:`Test Connection` to verify that the connection can be established.
 
+.. _lxml-dependency:
+
+.. note::   | In order to convert the QGIS layer metadata into a format that GeoNetwork understands,
+              |short_name| uses the ``lxml`` Python library. This library used to be installed by default,
+              but this no longer applies to QGIS 3.22 (LTR) and up, for example.
+            | If |short_name| cannot find ``lxml``, it will issue a warning. Therefore, if you wish to publish metadata,
+              please install this missing Python package (e.g. using the OSGeo4W setup or Python's pip tool).
+            | Users who *only* have to publish *geodata* should *never* have to install this library.
+
 
 GeoServer
 ---------
@@ -88,7 +97,7 @@ Import into PostGIS database (handled by GeoServer)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 | The layer data is uploaded to tables in a PostGIS database by GeoServer. This method requires the GeoServer Importer extension, which only handles Shapefile imports for vector data.
-| This means that if the data is stored in a GeoPackage originally, attribute names may be renamed due to the 10 character limit of the Shapefile `.dbf` file upon export. Bridge handles this automatically and also makes sure that field names referenced in styles renamed accordingly.
+| This means that if the data is stored in a GeoPackage originally, attribute names may be renamed due to the 10 character limit of the Shapefile `.dbf` file upon export. Bridge handles this automatically and also makes sure that field names referenced in styles are renamed accordingly.
 | You must select a suitable PostGIS datastore on the GeoServer instance. Selecting this option will trigger a process that lists all the available datastores in each GeoServer workspace (which might take some time):
 
 .. image:: ./img/servers_geoserver2.png
@@ -107,9 +116,13 @@ Import into PostGIS database (handled by GeoServer)
 .. warning::    | Neither the GeoServer REST API nor the Importer extension is authorized to delete underlying PostGIS layer data tables.
                 | This means that Bridge also won't be able to clean up these data tables and that each publication will create new tables in the database,
                   adding a numeric suffix to the table name and GeoServer feature type to avoid conflicts. If you (re)publish frequently,
-                  this may lead to a lot of redundant data!
-                | Therefore, it's recommended to create a clean-up script on the database side that will remove any "orphaned" tables
+                  this may lead to a lot of redundant tables!
+                | Therefore, we recommend creating a clean-up script on the database side that will remove any "orphaned" tables
                   that were created by GeoServer, but are no longer used by any feature type.
+                |
+                | **Update August 2022**
+                | Starting from |short_name| 4.3 and GeoServer 2.21.1, *existing PostGIS tables can now actually be overwritten by the Importer extension*. This should lead to a much cleaner publication process, as there will be less "orphaned" tables.
+                | However, please be aware that the Importer extension still cannot delete any PostGIS tables: if a workspace is completely removed, this will not delete the underlying feature type tables.
 
 
 PostGIS
