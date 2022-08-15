@@ -10,6 +10,9 @@ Client-side
 |app_name| requires QGIS |min_qgis_ver| or newer.
 Both the standalone QGIS installation or the OSGeo distribution should work.
 
+QGIS users who use a QGIS version *beyond* 3.16 should verify that the ``lxml`` :ref:`Python dependency <lxml-dependency>` is available.
+However, this only applies if you wish to import or publish metadata using |short_name|.
+
 .. note::   If you access the internet through a proxy server,
             you might experience some issues while publishing data or connecting to a server.
 
@@ -19,8 +22,8 @@ Server-side
 GeoNetwork
 ^^^^^^^^^^
 
-|app_name| currently supports GeoNetwork 3 starting at version 3.4 and higher.
-GeoNetwork 2 support has been deprecated and version 4 is not supported yet.
+|app_name| currently supports GeoNetwork version 3.4 and higher.
+GeoNetwork 2.x support has been deprecated and version 4.x is not supported yet.
 
 GeoServer
 ^^^^^^^^^
@@ -35,6 +38,8 @@ GeoServer
     the REST API instead of direct access), you need to make sure that the
     `Importer extension <https://docs.geoserver.org/latest/en/user/extensions/importer/index.html>`_
     is available on GeoServer.
+    If you do not know if this extension is installed, simply try to publish
+    something and |short_name| will warn you if it isn't.
 
 MapServer
 ^^^^^^^^^
@@ -49,33 +54,32 @@ How to install
 
 To install the |plugin_name|, please follow these steps:
 
-1. Open the :guilabel:`QGIS Plugin Manager`. The Plugin Manager can be opened using the :menuselection:`Plugins --> Manage and Install plugins` menu entry.
+1. Open the :guilabel:`QGIS Plugin Manager` by clicking on the :menuselection:`Plugins --> Manage and Install Plugins...` menu entry.
 
     .. image:: ./img/pluginmanagermenu.png
 
-    You will see the following dialog:
+    You will now see a dialog similar to the one below, listing all your (pre-)installed plugins:
 
     .. image:: ./img/pluginmanager.png
 
-2. Select the :guilabel:`all` section to show all available plugins.
-
-    .. image:: ./img/pluginmanagerall.png
-
-3. In the search box, type `bridge` to filter the list of available plugins.
-
-    .. image:: ./img/pluginmanagerfiltered.png
-
-4. Click on the |gui_name| plugin entry to display the information about the plugin:
+2. Click the :guilabel:`All` section on the sidebar to list all available plugins. Scroll down to find "|gui_name|"
+or use the search box at the top to filter the list (e.g. by typing "|short_name|"). Clicking on the "|gui_name|" plugin entry
+will display detailed information about the plugin:
 
     .. image:: ./img/pluginmanagerbridge.png
 
-5. Click on :guilabel:`Install` to install the plugin.
 
-6. Once the plugin is installed, close the Plugin Manager and you will find a new menu entry under the :menuselection:`Web` menu,
-which contains the menu items for the |short_name| plugin.
+3. Click :guilabel:`Install Plugin` and wait until |short_name| has been downloaded and installed.
+
+4. Close the Plugin Manager when done. You should now have a new menu entry under the :menuselection:`Web` menu,
+which contains a couple of menu items related the |short_name| plugin:
 
     .. image:: ./img/bridgemenuentry.png
 
-7. You'll also notice a new toolbar button, that will open the |short_name| Publish dialog.
+5. You should also see a new toolbar button, that will open the |short_name| Publish dialog.
 
     .. image:: ./img/bridgetoolbarbutton.png
+
+
+In the Plugin Manager settings, note that you can configure QGIS to automatically check for plugin updates.
+Alternatively, you can update plugins manually using the :guilabel:`Upgrade All` button.

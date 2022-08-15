@@ -18,6 +18,7 @@ complete a minimal subset of required metadata elements:
 -   Metadata language
 
 When publishing metadata to GeoNetwork, |short_name| will convert the QGIS metadata (QMD) into the ISO19139 format.
+Note that in order to do that, |short_name| uses the ``lxml`` library, which :ref:`may not be installed <lxml-dependency>`.
 
 | You can edit the |short_name| metadata fields directly, or use the QGIS metadata editor by clicking the :guilabel:`Open QGIS metadata editor` button.
 | Note that you can also click the :guilabel:`...` buttons next to each |short_name| metadata field to open the QGIS metadata editor a specific page:
@@ -70,6 +71,8 @@ If you click :guilabel:`Yes`, a file dialog will open so you can select the meta
 
 .. note::   - Some (non-supported) elements of the original metadata may get lost in the transformation.
             - Changes in the metadata editor will not be saved to the original imported metadata file.
+            - Because of a :ref:`dependency <lxml-dependency>`, |short_name| may not be able to import metadata.
+              If this is the case, a warning will be displayed.
 
 .. warning::    | **If you wish to persist the imported/edited metadata for another time, it is important that you
                   save the QGIS project before your close the application.**

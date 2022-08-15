@@ -30,14 +30,14 @@ Logging and error handling
 | This panel can be opened by clicking the "balloon" button in the lower-right corner of QGIS
   or by checking the :guilabel:`View` > :guilabel:`Panels` > :guilabel:`Log Messages` item from the QGIS menu bar.
 
-| In some (rare) occassions, |short_name| might raise an exception. When this happens, a dialog pops up with a Python strack trace.
+| In some (rare) occasions, |short_name| might raise an exception. When this happens, a dialog pops up with a Python stack trace.
 | If the error re-occurs, please press the :guilabel:`Send Report` button, so that we're aware of the issue and can try fixing it.
 
 Internationalization (i18n)
 ---------------------------
 
 |app_name| is primarily targeted towards an international audience, which means that it has an English user interface.
-| However, some rudimentary translations are available for the following languages:
+| However, some basic translations are available for the following languages:
 
 - Dutch (Nederlands)
 - German (Deutsch)

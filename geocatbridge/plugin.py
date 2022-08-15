@@ -98,7 +98,7 @@ class GeocatBridge:
 
         # Help menu item
         self.action_help = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'),
-                                   "Online Documentation", self._win)
+                                   "Online Documentation...", self._win)
         self.action_help.setObjectName(f"{self.name} Help")
         self.action_help.triggered.connect(self.openDocUrl)
         self.iface.addPluginToWebMenu(self.name, self.action_help)
