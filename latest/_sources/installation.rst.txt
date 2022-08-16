@@ -68,14 +68,15 @@ will display detailed information about the plugin:
 
     .. image:: ./img/pluginmanagerbridge.png
 
-4. Click :guilabel:`Install Plugin` and wait until |short_name| has been downloaded and installed.
 
-5. Close the Plugin Manager when done. You should now have a new menu entry under the :menuselection:`Web` menu,
+3. Click :guilabel:`Install Plugin` and wait until |short_name| has been downloaded and installed.
+
+4. Close the Plugin Manager when done. You should now have a new menu entry under the :menuselection:`Web` menu,
 which contains a couple of menu items related the |short_name| plugin:
 
     .. image:: ./img/bridgemenuentry.png
 
-6. You should also see a new toolbar button, that will open the |short_name| Publish dialog.
+5. You should also see a new toolbar button, that will open the |short_name| Publish dialog.
 
     .. image:: ./img/bridgetoolbarbutton.png
 
