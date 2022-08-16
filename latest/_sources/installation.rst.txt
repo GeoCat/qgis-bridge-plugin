@@ -62,8 +62,8 @@ To install the |plugin_name|, please follow these steps:
 
     .. image:: ./img/pluginmanager.png
 
-2. Click the :guilabel:`All` section on the sidebar to list all available plugins. Scroll down to find `|gui_name|`
-or use the search box at the top to filter the list (e.g. by typing "|short_name|"). Clicking on the `|gui_name|` plugin entry
+2. Click the :guilabel:`All` section on the sidebar to list all available plugins. Scroll down to find "|gui_name|"
+or use the search box at the top to filter the list (e.g. by typing "|short_name|"). Clicking on the "|gui_name|" plugin entry
 will display detailed information about the plugin:
 
     .. image:: ./img/pluginmanagerbridge.png
