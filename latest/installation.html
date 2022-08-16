@@ -123,7 +123,9 @@ need to have access to that database instance.</p></li>
 <li><p>If you wish to let GeoServer import your data into PostGIS (i.e. through
 the REST API instead of direct access), you need to make sure that the
 <a class="reference external" href="https://docs.geoserver.org/latest/en/user/extensions/importer/index.html">Importer extension</a>
-is available on GeoServer.</p></li>
+is available on GeoServer.
+If you do not know if this extension is installed, simply try to publish
+something and Bridge will warn you if it isn’t.</p></li>
 </ul>
 </section>
 <section id="mapserver">
@@ -140,42 +142,37 @@ However, other versions since 5.6 are expected to run fine in most of the cases.
 <h2>How to install<a class="headerlink" href="#how-to-install" title="Permalink to this heading"></a></h2>
 <p>To install the GeoCat Bridge for QGIS, please follow these steps:</p>
 <ol class="arabic">
-<li><p>Open the <span class="guilabel">QGIS Plugin Manager</span>. The Plugin Manager can be opened using the <span class="menuselection">Plugins ‣ Manage and Install plugins</span> menu entry.</p>
+<li><p>Open the <span class="guilabel">QGIS Plugin Manager</span> by clicking on the <span class="menuselection">Plugins ‣ Manage and Install Plugins…</span> menu entry.</p>
 <blockquote>
 <div><img alt="_images/pluginmanagermenu.png" src="_images/pluginmanagermenu.png" />
-<p>You will see the following dialog:</p>
+<p>You will now see a dialog similar to the one below, listing all your (pre-)installed plugins:</p>
 <img alt="_images/pluginmanager.png" src="_images/pluginmanager.png" />
 </div></blockquote>
 </li>
-<li><p>Select the <span class="guilabel">all</span> section to show all available plugins.</p>
-<blockquote>
-<div><img alt="_images/pluginmanagerall.png" src="_images/pluginmanagerall.png" />
-</div></blockquote>
-</li>
-<li><p>In the search box, type <cite>bridge</cite> to filter the list of available plugins.</p>
-<blockquote>
-<div><img alt="_images/pluginmanagerfiltered.png" src="_images/pluginmanagerfiltered.png" />
-</div></blockquote>
-</li>
-<li><p>Click on the <span class="guilabel">GeoCat Bridge</span> plugin entry to display the information about the plugin:</p>
+</ol>
+<p>2. Click the <span class="guilabel">All</span> section on the sidebar to list all available plugins. Scroll down to find <cite>|gui_name|</cite>
+or use the search box at the top to filter the list (e.g. by typing “Bridge”). Clicking on the <cite>|gui_name|</cite> plugin entry
+will display detailed information about the plugin:</p>
 <blockquote>
 <div><img alt="_images/pluginmanagerbridge.png" src="_images/pluginmanagerbridge.png" />
 </div></blockquote>
-</li>
-<li><p>Click on <span class="guilabel">Install</span> to install the plugin.</p></li>
+<ol class="arabic simple" start="4">
+<li><p>Click <span class="guilabel">Install Plugin</span> and wait until Bridge has been downloaded and installed.</p></li>
 </ol>
-<p>6. Once the plugin is installed, close the Plugin Manager and you will find a new menu entry under the <span class="menuselection">Web</span> menu,
-which contains the menu items for the Bridge plugin.</p>
+<p>5. Close the Plugin Manager when done. You should now have a new menu entry under the <span class="menuselection">Web</span> menu,
+which contains a couple of menu items related the Bridge plugin:</p>
 <blockquote>
 <div><img alt="_images/bridgemenuentry.png" src="_images/bridgemenuentry.png" />
 </div></blockquote>
-<ol class="arabic" start="7">
-<li><p>You’ll also notice a new toolbar button, that will open the Bridge Publish dialog.</p>
+<ol class="arabic" start="6">
+<li><p>You should also see a new toolbar button, that will open the Bridge Publish dialog.</p>
 <blockquote>
 <div><img alt="_images/bridgetoolbarbutton.png" src="_images/bridgetoolbarbutton.png" />
 </div></blockquote>
 </li>
 </ol>
+<p>In the Plugin Manager settings, note that you can configure QGIS to automatically check for plugin updates.
+Alternatively, you can update plugins manually using the <span class="guilabel">Upgrade All</span> button.</p>
 </section>
 </section>
 
@@ -190,7 +187,7 @@ which contains the menu items for the Bridge plugin.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, GeoCat BV. Built from 6c6e434.</p>
+    <p>&#169; Copyright 2022, GeoCat BV. Built from 55830cc.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
