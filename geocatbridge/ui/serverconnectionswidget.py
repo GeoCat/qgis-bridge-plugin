@@ -73,6 +73,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self.buttonTest.setVisible(self.stackedWidget.widget(widget_index) not in (None, self.widgetEmpty))
 
     def exportServers(self):
+        """ Exports all configured servers as a JSON file. """
         filename = QFileDialog.getSaveFileName(self, self.translate("Export servers"),
                                                filter=f'{self.translate("Server configuration")} (*.json)',
                                                options=QFileDialog.DontUseNativeDialog)[0]
@@ -96,6 +97,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.showErrorBar("Error", "Failed to write server configuration JSON file. Please check QGIS log.")
 
     def importServers(self):
+        """ Imports a list of server configurations from a user-specified JSON file. """
         filename = QFileDialog.getOpenFileName(self, self.translate("Import servers"),
                                                filter=f'{self.translate("Server configuration")} (*.json)',
                                                options=QFileDialog.DontUseNativeDialog)[0]
@@ -115,16 +117,21 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
                                        "Please check QGIS log.")
             return
 
+        # Serialize all successful configurations again and store them in the QGIS settings
+        manager.saveConfiguredServers()
+
         self.populateServerList()
         self.showSuccessBar("Success", "Successfully imported server configuration from JSON file")
 
     def serverIsDirty(self) -> bool:
+        """ Returns True if the current server (widget) has edits. """
         widget = self.stackedWidget.currentWidget()
         if widget and hasattr(widget, 'isDirty'):
             return widget.isDirty
         return False
 
     def serverSetClean(self):
+        """ Mark the current server as 'clean' (no edits). This does not reset field values to their initial state! """
         widget = self.stackedWidget.currentWidget()
         if widget and hasattr(widget, 'setClean'):
             widget.setClean()
@@ -142,6 +149,7 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         return self.showQuestionBox("Servers", question, **msgbox_kwargs)
 
     def listSelectNoSignals(self, item):
+        """ Sets the currently selected server without sending any Qt signals. """
         self.listServers.blockSignals(True)
         self.listServers.setCurrentItem(item)
         self.listServers.blockSignals(False)
@@ -248,14 +256,15 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         """ Tells the server manager to store the server in the QGIS settings. """
 
         server_widget = self.stackedWidget.currentWidget()
-        if not server_widget:
-            # No current server widget set (should not happen)
+        if server_widget is None or not hasattr(server_widget, 'createServerInstance'):
+            # No current server widget set
             return False
 
         # See if the server can be instantiated from field values
         try:
             server = server_widget.createServerInstance()
         except NotImplementedError:
+            # This is a development notification and should not show up in stable releases
             self.showErrorBar("Error", f"Current server does not implement {ServerWidgetBase.__name__}")
             return False
         if not server:
@@ -484,6 +493,9 @@ class ServerConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         """ Makes sure that the current server is stored in the QGIS Bridge settings.
         Sets the server state to "clean" if it was successfully stored.
         Updates the server name in the list view (if changed).
+
+        Note:   The difference with `persistServer()` is that this method is triggered by a direct user action,
+                i.e. by clicking the Save or Close button, whereas `persistServer()` is called programmatically.
 
         :param silent:  If True (default = False), a message bar will be shown upon success.
                         Otherwise, there will only be a log message.

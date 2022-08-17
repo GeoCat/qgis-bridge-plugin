@@ -5,13 +5,11 @@ description=Easy publication of data and metadata from QGIS.
 about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 
       GeoCat Bridge offers a one-click publishing experience for QGIS Desktop. Create great looking maps and publish them to GeoServer or MapServer, or share its metadata via the GeoNetwork metadata catalog.
-      Your data is uploaded as a GeoPackage, Shapefile, or imported into a PostGIS database. GeoCat Bridge brings our celebrated symbology output to QGIS Desktop, so you can share your cartography online.
+      Your data is uploaded as a GeoPackage, Shapefile, or imported into a PostGIS database. Bridge will automatically convert your QGIS styles into the destination format (SLD, Mapfile, etc.).
 
       <b>Notes</b>
-      <ul>
-        <li>If you wish to publish metadata, please note that some QGIS versions (3.22+) require you to install the 'lxml' python package.</li>
-        <li><i>Bridge for QGIS</i> versioning starts at v4.0. There are no official releases prior to v4.x.</li>
-      </ul>
+      - If you wish to publish metadata, be aware that more recent QGIS versions (3.22+) require you to install the 'lxml' python package.
+      - <i>Bridge for QGIS</i> versioning starts at v4.0. There are no official releases prior to v4.x.
 
 experimental=False
 category=Web
@@ -30,7 +28,9 @@ changelog=Version 4.3, August 2022
           - Enhanced GeoServer Importer support related to GEOS-10553 (see PR #151)
           - Warn when lxml dependency is missing for QGIS 3.22+ users (prevent crash when plugin loads)
           - Updated About dialog with useful links
-          - Updated documentation
+          - Updated documentation and added quickstart tutorial
+          - Bug fix: persist server configurations imported from JSON file
+          - Bug fix: clicking Save without a current server should not throw
 
           Version 4.2.9-10, July 2022
           - Handle JSONDecodeError from GeoServer regardless of json lib
