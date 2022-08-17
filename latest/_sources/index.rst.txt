@@ -24,6 +24,7 @@ Contents
 
     background
     installation
+    quickstart
     bridge_dialog
     server_configuration
     publish

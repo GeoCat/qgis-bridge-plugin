@@ -48,6 +48,7 @@ MapServer
     However, other versions since 5.6 are expected to run fine in most of the cases.
 -   FTP connection or file write access to MapServer project path.
 
+.. _installing-bridge:
 
 How to install
 **************
@@ -62,8 +63,8 @@ To install the |plugin_name|, please follow these steps:
 
     .. image:: ./img/pluginmanager.png
 
-2. Click the :guilabel:`All` section on the sidebar to list all available plugins. Scroll down to find "|gui_name|"
-or use the search box at the top to filter the list (e.g. by typing "|short_name|"). Clicking on the "|gui_name|" plugin entry
+2. Click the :guilabel:`All` section on the sidebar to list all available plugins. Scroll down to find "|app_name|"
+or use the search box at the top to filter the list (e.g. by typing "|short_name|"). Clicking on the "|app_name|" plugin entry
 will display detailed information about the plugin:
 
     .. image:: ./img/pluginmanagerbridge.png
@@ -72,7 +73,7 @@ will display detailed information about the plugin:
 3. Click :guilabel:`Install Plugin` and wait until |short_name| has been downloaded and installed.
 
 4. Close the Plugin Manager when done. You should now have a new menu entry under the :menuselection:`Web` menu,
-which contains a couple of menu items related the |short_name| plugin:
+which contains a couple of menu items related to the |short_name| plugin:
 
     .. image:: ./img/bridgemenuentry.png
 

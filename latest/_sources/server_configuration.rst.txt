@@ -58,6 +58,7 @@ Click :guilabel:`Test Connection` to verify that the connection can be establish
               please install this missing Python package (e.g. using the OSGeo4W setup or Python's pip tool).
             | Users who *only* have to publish *geodata* should *never* have to install this library.
 
+.. _geoserver-setup:
 
 GeoServer
 ---------
