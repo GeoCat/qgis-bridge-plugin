@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Server Connections &mdash; GeoCat Bridge 4.3 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Publishing Data" href="publish.html" />
+    <link rel="prev" title="The Bridge Dialog" href="bridge_dialog.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> GeoCat Bridge
+          </a>
+              <div class="version">
+                4.3
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bridge_dialog.html">The Bridge Dialog</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Server Connections</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#adding-connections">Adding connections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#geonetwork">GeoNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geoserver">GeoServer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#file-based-storage">File-based storage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#import-into-postgis-database-direct-connect">Import into PostGIS database (direct connect)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#import-into-postgis-database-handled-by-geoserver">Import into PostGIS database (handled by GeoServer)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#postgis">PostGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mapserver">MapServer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#proxies-certificates">Proxies &amp; certificates</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="publish.html">Publishing Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata_editing.html">Metadata Editing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="styleviewer.html">StyleViewer Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_symbology.html">Supported Symbology</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeoCat Bridge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Server Connections</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="server-connections">
+<span id="serverconnections"></span><h1>Server Connections<a class="headerlink" href="#server-connections" title="Permalink to this heading"></a></h1>
+<p>Before you can publish data with GeoCat Bridge, you will have to configure one or more server connections.
+This can be achieved in the <em>Servers</em> section of the Bridge dialog:</p>
+<img alt="_images/servers.png" src="_images/servers.png" />
+<section id="adding-connections">
+<h2>Adding connections<a class="headerlink" href="#adding-connections" title="Permalink to this heading"></a></h2>
+<p>Click <span class="guilabel">New Server</span> and choose one of the supported server types to create a new server connection:</p>
+<ul class="simple">
+<li><p>GeoServer</p></li>
+<li><p>MapServer</p></li>
+<li><p>PostGIS</p></li>
+<li><p>GeoNetwork</p></li>
+</ul>
+<div class="line-block">
+<div class="line">Fill in the required parameters and click the <span class="guilabel">Save</span> button to store the connection details.</div>
+<div class="line">You can edit the parameters of a server at any given time. Just select the server connection in the left panel, and edit the fields you wish to change in the right panel.</div>
+</div>
+<p>If you wish to remove a server connection, select it from the left panel and click the <span class="guilabel">Remove</span> button.
+The <span class="guilabel">Duplicate</span> button may come in handy if you wish to try out an alternative configuration based on an existing
+server connection.</p>
+<div class="line-block">
+<div class="line">Bridge will automatically store all server connections in the QGIS settings for later use.</div>
+<div class="line">However, sometimes you might want to backup or share all the configured server connections. The <span class="guilabel">Export</span> button will
+allow you to <em>save</em> a JSON file of the current configuration.</div>
+<div class="line">The <span class="guilabel">Import</span> button will do the opposite and <em>load</em> server connections from a JSON file. Note that the imported connections will be
+<em>added</em> to the list (i.e. no existing connections will be removed). Bridge will append a numeric suffix to server connections
+with a name that already exists.</div>
+</div>
+<p>Below you can find more info about the different types of services and connections supported by Bridge.</p>
+<section id="geonetwork">
+<h3>GeoNetwork<a class="headerlink" href="#geonetwork" title="Permalink to this heading"></a></h3>
+<p>Configure a GeoNetwork connection to publish your metadata to an online catalog (CSW).</p>
+<img alt="_images/servers_geonetwork.png" src="_images/servers_geonetwork.png" />
+<div class="line-block">
+<div class="line">You can set a (unique) name to identify the connection, the server URL, and the corresponding credentials (user with publish permissions).</div>
+<div class="line">The default GeoNetwork node is <code class="docutils literal notranslate"><span class="pre">srv</span></code>, which will be used if you leave the <em>Node</em> field empty.</div>
+</div>
+<p>Click <span class="guilabel">Test Connection</span> to verify that the connection can be established.</p>
+<div class="admonition note" id="lxml-dependency">
+<p class="admonition-title">Note</p>
+<div class="line-block">
+<div class="line">In order to convert the QGIS layer metadata into a format that GeoNetwork understands,
+Bridge uses the <code class="docutils literal notranslate"><span class="pre">lxml</span></code> Python library. This library used to be installed by default,
+but this no longer applies to QGIS 3.22 (LTR) and up, for example.</div>
+<div class="line">If Bridge cannot find <code class="docutils literal notranslate"><span class="pre">lxml</span></code>, it will issue a warning. Therefore, if you wish to publish metadata,
+please install this missing Python package (e.g. using the OSGeo4W setup or Python’s pip tool).</div>
+<div class="line">Users who <em>only</em> have to publish <em>geodata</em> should <em>never</em> have to install this library.</div>
+</div>
+</div>
+</section>
+<section id="geoserver">
+<span id="geoserver-setup"></span><h3>GeoServer<a class="headerlink" href="#geoserver" title="Permalink to this heading"></a></h3>
+<div class="line-block">
+<div class="line">Configure a GeoServer connection to publish your geodata (layers and symbology) as a map service.</div>
+<div class="line">When you add a new GeoServer connection, Bridge will automatically add the corresponding WMS and/or WFS endpoints to QGIS, so you can easily add to the server layers to your project, if needed.</div>
+</div>
+<img alt="_images/servers_geoserver.png" src="_images/servers_geoserver.png" />
+<div class="line-block">
+<div class="line">You can set a (unique) name to identify the connection, the server URL, and the corresponding credentials (user with publish permissions).</div>
+<div class="line">The URL can point to the GeoServer base URL (e.g. <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/geoserver</span></code>) or the REST API URL (e.g. <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/geoserver/rest</span></code>). Both URLs will work.</div>
+</div>
+<p>If required, you can create and publish Mapbox styles for vector tiles. Mapbox styles and sprite sheets will be processed
+after all layers were successfully published to GeoServer.</p>
+<p>Click <span class="guilabel">Test Connection</span> to verify that the connection can be established.</p>
+<p>You should also specify how layer data will be stored on the server. Three different methods are available:</p>
+<section id="file-based-storage">
+<h4>File-based storage<a class="headerlink" href="#file-based-storage" title="Permalink to this heading"></a></h4>
+<div class="line-block">
+<div class="line">The layer data is uploaded and stored as files in the GeoServer target workspace on the server.</div>
+<div class="line">Bridge prefers to upload vector data as GeoPackages and raster data as GeoTIFF files.</div>
+</div>
+</section>
+<section id="import-into-postgis-database-direct-connect">
+<span id="postgisdirectoption"></span><h4>Import into PostGIS database (direct connect)<a class="headerlink" href="#import-into-postgis-database-direct-connect" title="Permalink to this heading"></a></h4>
+<div class="line-block">
+<div class="line">The layer data is uploaded to tables in a PostGIS database directly (i.e. by Bridge, see <a class="reference internal" href="#postgis">PostGIS</a>).</div>
+<div class="line">GeoServer will <em>not</em> handle the database upload, but merely establish a link to the database table in the created layer(s). This will require a direct PostGIS connection, which you can set up in the <em>Servers</em> section of Bridge as well (see below).</div>
+<div class="line">Note that GeoServer should also have read access to that PostGIS connection.</div>
+</div>
+</section>
+<section id="import-into-postgis-database-handled-by-geoserver">
+<h4>Import into PostGIS database (handled by GeoServer)<a class="headerlink" href="#import-into-postgis-database-handled-by-geoserver" title="Permalink to this heading"></a></h4>
+<div class="line-block">
+<div class="line">The layer data is uploaded to tables in a PostGIS database by GeoServer. This method requires the GeoServer Importer extension, which only handles Shapefile imports for vector data.</div>
+<div class="line">This means that if the data is stored in a GeoPackage originally, attribute names may be renamed due to the 10 character limit of the Shapefile <cite>.dbf</cite> file upon export. Bridge handles this automatically and also makes sure that field names referenced in styles are renamed accordingly.</div>
+<div class="line">You must select a suitable PostGIS datastore on the GeoServer instance. Selecting this option will trigger a process that lists all the available datastores in each GeoServer workspace (which might take some time):</div>
+</div>
+<img alt="_images/servers_geoserver2.png" src="_images/servers_geoserver2.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<div class="line-block">
+<div class="line">The listed datastores will be prefixed by the workspace name to which they belong.</div>
+<div class="line">This does <strong>not</strong> mean that the layers will be published to that workspace as well.</div>
+<div class="line">Bridge always publishes layers to a (new) workspace named after the QGIS project name
+(see <a class="reference internal" href="publish.html#howtopublish"><span class="std std-ref">How to publish</span></a>), but it will use the same datastore <em>connection details</em> as
+the datastore that you have selected.</div>
+</div>
+</div>
+<div class="line-block">
+<div class="line">If you wish to add a new PostGIS-backed datastore, click the <span class="guilabel">Add datastore</span> button.</div>
+<div class="line">This will open a dialog that allows you to specify the connection details. Make sure that GeoServer has full access to the specified PostGIS instance.</div>
+<div class="line">For more options (or if you wish to specify a JNDI connection pool) please create the datastore using the GeoServer admin page instead.</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<div class="line-block">
+<div class="line">Neither the GeoServer REST API nor the Importer extension is authorized to delete underlying PostGIS layer data tables.</div>
+<div class="line">This means that Bridge also won’t be able to clean up these data tables and that each publication will create new tables in the database,
+adding a numeric suffix to the table name and GeoServer feature type to avoid conflicts. If you (re)publish frequently,
+this may lead to a lot of redundant tables!</div>
+<div class="line">Therefore, we recommend creating a clean-up script on the database side that will remove any “orphaned” tables
+that were created by GeoServer, but are no longer used by any feature type.</div>
+<div class="line"><br /></div>
+<div class="line"><strong>Update August 2022</strong></div>
+<div class="line">Starting from Bridge 4.3 and GeoServer 2.21.1, <em>existing PostGIS tables can now actually be overwritten by the Importer extension</em>. This should lead to a much cleaner publication process, as there will be less “orphaned” tables.</div>
+<div class="line">However, please be aware that the Importer extension still cannot delete any PostGIS tables: if a workspace is completely removed, this will not delete the underlying feature type tables.</div>
+</div>
+</div>
+</section>
+</section>
+<section id="postgis">
+<h3>PostGIS<a class="headerlink" href="#postgis" title="Permalink to this heading"></a></h3>
+<p>Configure a PostGIS connection if you wish to upload layer data to PostGIS directly.
+Setting up this connection is required when using the <a class="reference internal" href="#postgisdirectoption"><span class="std std-ref">Import into PostGIS database (direct connect)</span></a> in a <a class="reference internal" href="#geoserver">GeoServer</a> connection.</p>
+<img alt="_images/servers_postgis.png" src="_images/servers_postgis.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>JNDI connection pool support is currently unavailable.</p>
+</div>
+</section>
+<section id="mapserver">
+<h3>MapServer<a class="headerlink" href="#mapserver" title="Permalink to this heading"></a></h3>
+<p>Configure a MapServer connection to publish your map (layer data and symbology).
+A MapServer endpoint (Mapfile) is created for each QGIS project.</p>
+<img alt="_images/servers_mapserver.png" src="_images/servers_mapserver.png" />
+<p>Under <em>Storage</em>, configure how Bridge should save the MapServer data.
+Choose <em>Local path</em> to store all files on the local file system. Choose <em>FTP service</em> to transmit the
+files over FTP to the online MapServer instance. Depending on which option is selected, you will see some additional parameters that must be configured:</p>
+<img alt="_images/servers_mapserver2.png" src="_images/servers_mapserver2.png" />
+</section>
+</section>
+<section id="proxies-certificates">
+<h2>Proxies &amp; certificates<a class="headerlink" href="#proxies-certificates" title="Permalink to this heading"></a></h2>
+<p>The GeoNetwork and GeoServer connections mentioned above communicate with the server over HTTP(S) and all their outgoing traffic is handled by the Python <code class="docutils literal notranslate"><span class="pre">requests</span></code> library.
+Currently, GeoCat Bridge does <em>not</em> provide a way to set up a proxy server for these connections, and any QGIS proxy settings that may have been defined are ignored.
+There are plans to add proxy support in future QGIS Bridge releases.</p>
+<p>Any QGIS SSL certificate settings are also ignored, which means that Bridge will <em>not</em> be able to connect to servers that use self-signed certificates, for example.
+However, there is a workaround to this problem. You could set a system environment variable called <code class="docutils literal notranslate"><span class="pre">REQUESTS_CA_BUNDLE</span></code> that points to a <em>.pem</em> certificate bundle.
+This bundle should include the root certificate and any intermediate certificates that are required to verify the authenticity of the server certificate.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bridge_dialog.html" class="btn btn-neutral float-left" title="The Bridge Dialog" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="publish.html" class="btn btn-neutral float-right" title="Publishing Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, GeoCat BV. Built from 8eb23f8.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

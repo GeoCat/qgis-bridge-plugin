@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publishing Data &mdash; GeoCat Bridge 4.3 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Metadata Editing" href="metadata_editing.html" />
+    <link rel="prev" title="Server Connections" href="server_configuration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> GeoCat Bridge
+          </a>
+              <div class="version">
+                4.3
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bridge_dialog.html">The Bridge Dialog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_configuration.html">Server Connections</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Publishing Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#supported-layer-types">Supported layer types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-publish">How to publish</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#view-published-layers-on-server-s">View published layers on server(s)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#removing-geodata-and-metadata">Removing geodata and metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#export-files">Export files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="metadata_editing.html">Metadata Editing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="styleviewer.html">StyleViewer Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_symbology.html">Supported Symbology</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeoCat Bridge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Publishing Data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="publishing-data">
+<h1>Publishing Data<a class="headerlink" href="#publishing-data" title="Permalink to this heading"></a></h1>
+<section id="supported-layer-types">
+<span id="layertypes"></span><h2>Supported layer types<a class="headerlink" href="#supported-layer-types" title="Permalink to this heading"></a></h2>
+<p>GeoCat Bridge supports the following layer types:</p>
+<ul class="simple">
+<li><p>Vector layers from any spatial data source</p></li>
+<li><p>Raster layers from any spatial data source</p></li>
+<li><p>Layer groups</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may experience that even if your layer is of one of the types listed above,
+Bridge still does not seem to support it. This could be the case if:</p>
+<ul class="simple">
+<li><p>The layer data source is non-spatial (e.g. a CSV)</p></li>
+<li><p>The layer does not have a CRS (coordinate reference system) or it is invalid</p></li>
+<li><p>The layer is corrupt for some reason</p></li>
+<li><p>The layer is temporary (i.e. stored in memory)</p></li>
+<li><p>The layer is a web map layer (e.g. WMS)</p></li>
+</ul>
+<p>In most of the cases you should be able to easily fix these issues, for example by exporting
+the layer, assigning a spatial reference etc. etc.</p>
+</div>
+</section>
+<section id="how-to-publish">
+<span id="howtopublish"></span><h2>How to publish<a class="headerlink" href="#how-to-publish" title="Permalink to this heading"></a></h2>
+<p>If you wish to publish data <em>online</em>, you will first need to set up one or more server connections.
+Please see ref:<cite>ServerConnections</cite> for more information on how to add these. Then come back to this page
+to continue the publication process.</p>
+<p>In the Bridge dialog, navigate to the <span class="guilabel">Publish</span> section.</p>
+<img alt="_images/publish_section.png" src="_images/publish_section.png" />
+<p>Here you can choose the supported layers that you wish to publish, by (un)ticking the checkboxes for each layer:</p>
+<img alt="_images/publish_layers_list.png" src="_images/publish_layers_list.png" />
+<p>If you click on one of the layers in the <em>Layers panel</em>, you can see that the <span class="guilabel">Metadata</span> and <span class="guilabel">Attributes</span> tabs on the right side update
+their contents based on the currently selected layer. This will allow you to:</p>
+<ul class="simple">
+<li><p>Edit the layer metadata (see <a class="reference internal" href="metadata_editing.html#metadataediting"><span class="std std-ref">Metadata Editing</span></a>)</p></li>
+</ul>
+<img alt="_images/publish_metadata.png" src="_images/publish_metadata.png" />
+<ul class="simple">
+<li><p>Select the attributes (fields) to publish as part of the map service.
+Attributes can only be selected for vector data.</p></li>
+</ul>
+<img alt="_images/publish_fields.png" src="_images/publish_fields.png" />
+<p>Once you have finished configuring the properties for all map layers that you wish to publish,
+please select the destinations server(s) that you would like to use in the <span class="guilabel">Online</span> tab at the bottom,
+or specify the things you wish to export to a local file on the <span class="guilabel">Offline</span> tab.</p>
+<p>When publishing online, you can publish your layers to a geodata server, their metadata to a metadata server, or both in one go.
+Those servers must be selected from the two available drop-down lists in the <span class="guilabel">Online</span> tab.
+As mentioned before, these servers should be added beforehand in the <span class="guilabel">Servers</span> section of the Bridge dialog,
+as described in <a class="reference internal" href="server_configuration.html#serverconnections"><span class="std std-ref">Server Connections</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are publishing layers to GeoServer, the destination workspace name will be taken from the
+QGIS project name. Therefore, it is important that you save your work <em>before</em> publishing it to GeoServer.
+Bridge will warn you if the current QGIS project has not been saved yet.</p>
+</div>
+<p>When a geodata or metadata server is selected and there are issues connecting to it, the server
+drop-down list will show a red border around it and an error message may be shown at the top of the
+Bridge dialog (e.g. bad credentials). Please go to the <a class="reference internal" href="server_configuration.html#serverconnections"><span class="std std-ref">Server Connections</span></a> section to fix the issue(s).</p>
+<img alt="_images/publish_server_error.png" src="_images/publish_server_error.png" />
+<p>Once you have selected the layers you wish to publish and the destination(s) have been set, click
+on the <span class="guilabel">Publish</span> button to start the publication process. Note that the <span class="guilabel">Publish</span> button
+is context-aware, meaning that when the <span class="guilabel">Online</span> tab is active, the data will be published online only.</p>
+<p>Alternatively, if the <span class="guilabel">Offline</span> tab is active and the <span class="guilabel">Publish</span> button is pressed, the data will only be
+published offline. Please see <a class="reference internal" href="#export-files">Export files</a> and <a class="reference internal" href="#removing-geodata-and-metadata">Removing geodata and metadata</a> as well.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<div class="line-block">
+<div class="line">If you have a lot of data and you wish to continue working with QGIS while layer data is being published,
+you can tick the <span class="guilabel">Background</span> checkbox next to the <span class="guilabel">Publish</span> button.</div>
+<div class="line">After you hit the <span class="guilabel">Publish</span> button, the Bridge dialog will close and you will be able to continue working with QGIS.
+Once the publication process has finished, a result dialog (see below) will be shown.</div>
+</div>
+</div>
+<p>During the publication process, a progress dialog is shown. This may only show up briefly if there is little data to publish:</p>
+<img alt="_images/publish_layers_progress.png" src="_images/publish_layers_progress.png" />
+<p>Once the publication process has finished, a result dialog is displayed:</p>
+<img alt="_images/publish_layers_report.png" src="_images/publish_layers_report.png" />
+<p>If there are any warnings or errors, there will be a little warning sign button in the layer result field.
+Click on this button to open another dialog that will display all the warning or error messages for each layer.</p>
+<div class="line-block">
+<div class="line">Once you have uploaded your geodata and wish to update the symbology of your server layers without uploading all layer data again, check the <span class="guilabel">Symbology only</span> option.
+The styles of the selected (checked) layers will then be updated, but no layer data will be uploaded and/or overwritten.</div>
+<div class="line">For more information about how Bridge handles symbology, please read the <a class="reference internal" href="supported_symbology.html#symbology"><span class="std std-ref">Supported Symbology</span></a> section.</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>It is currently not possible to add layers to an existing workspace.</strong></p>
+<p>Each time you publish layers to an existing GeoServer workspace, all data in that workspace will be removed.
+Bridge will warn you if this is about to happen:</p>
+<img alt="_images/publish_workspace_warning.png" class="align-center" src="_images/publish_workspace_warning.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>If you do not want to clear the entire workspace, you could save your QGIS project under a different
+name and re-publish the layers. This will create a new workspace on the server and keep the old one.</p>
+</div>
+</section>
+<section id="view-published-layers-on-server-s">
+<h2>View published layers on server(s)<a class="headerlink" href="#view-published-layers-on-server-s" title="Permalink to this heading"></a></h2>
+<p>The context menu in the layers list provides quick access to view the
+published data on the server(s):</p>
+<img alt="_images/publish_layers_context_menu.png" src="_images/publish_layers_context_menu.png" />
+<ul class="simple">
+<li><p><span class="guilabel">View metadata</span>: If the metadata is already published to a catalog
+server, this option opens a browser to show the metadata from the
+server.</p></li>
+</ul>
+<img alt="_images/preview_gnmetadata.png" src="_images/preview_gnmetadata.png" />
+<ul class="simple">
+<li><p><span class="guilabel">View WMS layer</span>: Opens up a layer preview page for the selected map
+server with the selected layer.</p></li>
+<li><p><span class="guilabel">View all WMS layers</span>: Opens up a layer preview page for the
+selected map server with all published layers in the map project (i.e. GeoServer workspace).</p></li>
+</ul>
+<img alt="_images/preview_layers.png" src="_images/preview_layers.png" />
+</section>
+<section id="removing-geodata-and-metadata">
+<h2>Removing geodata and metadata<a class="headerlink" href="#removing-geodata-and-metadata" title="Permalink to this heading"></a></h2>
+<div class="line-block">
+<div class="line">In case you wish to undo the publication process, there is an option to remove all layer data from the server(s).</div>
+<div class="line">If the <span class="guilabel">Online</span> tab is active and one or more servers have been selected for publication, a <span class="guilabel">Clear All</span> button becomes available.</div>
+<div class="line">Clicking this button will remove all the geodata from the selected data server (if any) and all metadata from the selected
+metadata server (if any). You will be asked for confirmation before any removal takes place.</div>
+</div>
+<img alt="_images/remove_all.png" src="_images/remove_all.png" />
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<div class="line-block">
+<div class="line">When removing data from GeoServer, Bridge cannot always remove all uploaded data,
+because GeoServer does not allow to remove these files through the REST API.</div>
+<div class="line">For example, if you publish data to GeoServer using a PostGIS datastore,
+the database tables will not be removed when you hit the <span class="guilabel">Clear All</span> button.</div>
+<div class="line">Only the feature type and layer will be removed from GeoServer, but you will have
+to manually remove the underlying table from PostGIS. This also means that republishing
+a certain layer to PostGIS will import its data into a <em>new</em> table.</div>
+</div>
+</div>
+</section>
+<section id="export-files">
+<h2>Export files<a class="headerlink" href="#export-files" title="Permalink to this heading"></a></h2>
+<p>To export your (meta)data and/or style files locally, use the <span class="guilabel">Offline</span> export tab in Bridge.
+The offline export functionality makes it possible to export symbology in the following formats:</p>
+<ul class="simple">
+<li><p>SLD (XML)</p></li>
+<li><p>GeoStyler (JSON)</p></li>
+<li><p>Mapbox GL style (JSON)</p></li>
+</ul>
+<p>Metadata will be exported to the ISO19319 XML format.</p>
+<img alt="_images/offline_export.png" src="_images/offline_export.png" />
+<p>Select a folder and the corresponding files will be created in it for
+all the current selected (checked) layers when you click the <span class="guilabel">Publish</span> button.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="server_configuration.html" class="btn btn-neutral float-left" title="Server Connections" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="metadata_editing.html" class="btn btn-neutral float-right" title="Metadata Editing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, GeoCat BV. Built from 8eb23f8.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
