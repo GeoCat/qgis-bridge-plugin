@@ -11,6 +11,7 @@ from qgis.PyQt.QtWidgets import (
 
 from geocatbridge.servers import bases
 from geocatbridge.utils import gui, files
+from geocatbridge.utils.strings import pluralize
 from geocatbridge.utils.feedback import FeedbackMixin
 
 WIDGET, BASE = gui.loadUiType(__file__)
@@ -25,8 +26,6 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
 
         txt_on = self.translate('on').upper()
         txt_off = self.translate('off').upper()
-        self._txt_warnings = self.translate('warnings')
-        self._txt_errors = self.translate('errors')
 
         self.setWindowIcon(QIcon(files.getIconPath('geocat')))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -65,7 +64,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
             button.clicked.connect(partial(self.openDetails, name))  # noqa
             layout.addWidget(button)  # noqa
             status_lbl = QLabel()
-            status_lbl.setText(f"{len(warnings)} {self._txt_warnings}, {len(errors)} {self._txt_errors}")
+            status_lbl.setText(f"{pluralize(len(warnings), 'warning')}, {pluralize(len(errors), 'error')}")
             if errors:
                 # Also render text in red if there are any errors
                 status_lbl.setStyleSheet("QLabel { color: red; }")
@@ -76,9 +75,9 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
             self.tableWidget.setCellWidget(i, 1, status_widget)
 
     def openDetails(self, name):
-        """ Populates and shows a HTML dialog with errors and warnings. """
+        """ Populates and shows an HTML dialog with errors and warnings. """
         warnings, errors = self.results[name]
-        w = "".join(f"<p>{w}</p>" for w in warnings).replace("\n", "\n<br>")
-        e = "".join(f"<p>{e}</p>" for e in errors).replace("\n", "\n<br>")
-        html = f"<p><b>{self._txt_warnings.title()}:</b></p>\n{w}\n<p><b>{self._txt_errors.title()}:</b></p>\n{e}"
+        w = ("".join(f"<p>{w}</p>" for w in warnings) or "None").replace("\n", "\n<br>")
+        e = ("".join(f"<p>{e}</p>" for e in errors) or "None").replace("\n", "\n<br>")
+        html = f"<p><b>Warnings:</b></p>\n{w}\n<p><b>Errors:</b></p>\n{e}"
         self.showHtmlMessage(f"Issues for layer {name}", html)

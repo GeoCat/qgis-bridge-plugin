@@ -84,3 +84,25 @@ def layer_slug(layer, to_web: bool = True) -> str:
         # Web slugs are lowercase
         name = name.lower()
     return normalize(name, **norm_options)
+
+
+def pluralize(num_items: int, base: str, suffix: str = "s") -> str:
+    """ Basic function that appends an 's' (or another given suffix) to a base word if `num_items` != 1.
+    The resulting word prepended by the number (of items) is returned.
+
+    Examples:
+    >>> pluralize(3, "thing")
+    '3 things'
+
+    >>> pluralize(1, "item")
+    '1 item'
+
+    >>> pluralize(2, "bus", "es")
+    '2 buses'
+
+    :param num_items:   The number of items (e.g. in a list) to prepend to the base word.
+    :param base:        The base word that may have to be pluralized.
+    :param suffix:      The suffix that should be used to pluralize the base word. Defaults to "s".
+                        Note that this may not work for more complex or non-English words.
+    """
+    return f"{num_items} {base}{suffix if num_items != 1 else ''}"
