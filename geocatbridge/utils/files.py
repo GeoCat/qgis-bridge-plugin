@@ -125,7 +125,7 @@ def getAboutUrl(refresh: bool = False) -> QUrl:
         template_path = target_path.with_name(_ABOUT_TEMPLATE)
         if not template_path.is_file():
             raise FileNotFoundError(f"HTML template at {template_path} does not exist")
-        env = Environment(loader=FileSystemLoader(template_path.parent))
+        env = Environment(loader=FileSystemLoader(str(template_path.parent)))
         template = env.get_template(_ABOUT_TEMPLATE)
         html = template.render(
             app_name=meta.getAppName(),

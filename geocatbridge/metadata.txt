@@ -14,7 +14,7 @@ about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 experimental=False
 category=Web
 qgisMinimumVersion=3.16
-version=4.3
+version=4.3.1
 email=support@geocat.net
 icon=icons/geocat.png
 tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
@@ -24,7 +24,11 @@ tracker=https://github.com/GeoCat/qgis-bridge-plugin/issues
 repository=https://github.com/GeoCat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
-changelog=Version 4.3, August 2022
+changelog=Version 4.3.1, November 2022
+          - Fixed About page crash for specific Jinja versions (Path objects not supported)
+          - Updated bridgestyle with some MapBox GL JS fixes
+
+          Version 4.3, August 2022
           - Enhanced GeoServer Importer support related to GEOS-10553 (see PR #151)
           - Warn when lxml dependency is missing for QGIS 3.22+ users (prevent crash when plugin loads)
           - Updated About dialog with useful links
