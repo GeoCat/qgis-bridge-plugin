@@ -184,13 +184,18 @@ class GeonetworkServer(MetaCatalogServerBase):
 
         :returns:   The current GeoNetwork version string or an empty string if not found.
         """
-        url = f"{self.apiUrl}/site/info/build"
+        url = f"{self.apiUrl}/site"
         headers = {"Accept": "application/json"}
         try:
-            result = self.request(url, headers=headers, timeout=TESTCON_TIMEOUT)
-            return result.json().get('version')
+            result = self.request(url, headers=headers, timeout=TESTCON_TIMEOUT).json() or {}
+            version = result.get("system/platform/version")
+            sub_version = result.get("system/platform/subVersion")
+            if sub_version.lower() == "snapshot":
+                self.logWarning(f"{self.getLabel()} node at {self.baseUrl} does not run a stable version. "
+                                f"This may lead to unexpected results.")
+            return version
         except Exception as err:
-            self.logError(f"Failed to retrieve {self.getLabel()} version for '{self.serverName}': {err}")
+            self.logError(f"Failed to retrieve version of {self.getLabel()} node at {self.baseUrl}: {err}")
             return ''
 
     def metadataUrl(self, uuid):
