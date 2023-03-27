@@ -104,7 +104,7 @@ def deserializeServers(config_str: str) -> bool:
     """ Deserializes a JSON server configuration string and creates Bridge server instances.
 
     :param config_str:  A JSON string. Must be deserializable as a list of (str, dict).
-    :returns:           True when successful, False otherwise.
+    :returns:           True if successful, False otherwise.
     """
     global _instances
 
@@ -116,8 +116,12 @@ def deserializeServers(config_str: str) -> bool:
         return False
 
     # It is expected that `stored_servers` is a list
-    if not isinstance(stored_servers, list) or len(stored_servers) == 0:
-        feedback.logError("Server configuration must be a non-empty list")
+    if not isinstance(stored_servers, list):
+        feedback.logError(f"Server configuration corrupt: must be list of items, not {type(stored_servers)}")
+        return False
+
+    if len(stored_servers) == 0:
+        feedback.logWarning(f"No configured servers found in '{SERVERS_SETTING}'")
         return False
 
     # Instantiate servers from models and settings
@@ -164,7 +168,12 @@ def loadConfiguredServers() -> bool:
         return False
 
     # Deserialize JSON and initialize servers
-    return deserializeServers(server_config)
+    if not deserializeServers(server_config):
+        # Settings have become corrupt (usually because user edited QGIS advanced settings):
+        # reset to empty list in this case
+        QSettings().setValue(SERVERS_SETTING, '[]')
+        return False
+    return True
 
 
 def getServer(name: str):

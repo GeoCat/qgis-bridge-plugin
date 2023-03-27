@@ -140,6 +140,12 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         # Parse JSON object from settings string
         try:
             settings = json.loads(config_str)
+            if not isinstance(settings, dict):
+                # Settings have become corrupt (usually because user edited QGIS advanced settings):
+                # reset to empty dict in this case
+                self.logError(f"Publish settings corrupt: must be a dict, not {type(settings)}")
+                QSettings().setValue(PUBLISH_SETTING, '{}')
+                return
         except json.JSONDecodeError as e:
             self.logError(f"Failed to parse publish settings: {e}")
             return
