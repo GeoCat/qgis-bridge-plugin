@@ -22,8 +22,8 @@ Server-side
 GeoNetwork
 ^^^^^^^^^^
 
-|app_name| currently supports GeoNetwork version 3.4 and higher.
-GeoNetwork 2.x support has been deprecated and version 4.x is not supported yet.
+|app_name| currently supports GeoNetwork version 3.4 and up.
+GeoNetwork 2.x support has been deprecated. Version 4.x is supported, but experimental.
 
 GeoServer
 ^^^^^^^^^
