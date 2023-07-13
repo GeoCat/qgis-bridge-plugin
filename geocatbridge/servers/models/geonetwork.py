@@ -37,12 +37,12 @@ def parseMe(response: requests.Response) -> bool:
 
 
 class GeonetworkApiError(Exception):
-    """ Error raised when the API returns a HTTP 200, but the response object contains errors. """
+    """ Error raised when the API returns an HTTP 200, but the response object contains errors. """
     pass
 
 
 class GeonetworkAuthError(Exception):
-    """ Error raised when the sign in process for GeoNetwork failed. """
+    """ Error raised when the sign-in process for GeoNetwork failed. """
     pass
 
 
@@ -83,15 +83,11 @@ class GeonetworkServer(MetaCatalogServerBase):
 
         # First get GeoNetwork version
         version = SemanticVersion(self.getVersion() or '')
-        if version:
-            if version >= 4:
-                errors.add(f'{msg}: {self.getLabel()} version 4 instances are not supported yet')
-                return False
-            elif version < 3.4:
-                errors.add(f'{msg}: {self.getLabel()} instances prior to version 3.4 are not supported')
-                return False
-        else:
+        if not version:
             errors.add(f'{msg}: please check URL')
+            return False
+        elif version < 3.4:
+            errors.add(f'{msg}: {self.getLabel()} instances prior to version 3.4 are not supported')
             return False
 
         # Do an authenticated "me" request
@@ -240,6 +236,7 @@ class GeonetworkAlgorithm(BridgeAlgorithm):
     def shortDescription(self):
         return self.tr('Publishes metadata to a GeoNetwork server instance')
 
+    # noinspection PyMethodOverriding
     def processAlgorithm(self, parameters, context, feedback_: QgsProcessingFeedback):
         url = self.parameterAsString(parameters, self.URL, context)
         authid = self.parameterAsString(parameters, self.AUTHID, context)

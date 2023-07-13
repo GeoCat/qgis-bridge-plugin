@@ -14,7 +14,7 @@ about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 experimental=False
 category=Web
 qgisMinimumVersion=3.16
-version=4.3.2
+version=4.4
 email=support@geocat.net
 icon=icons/geocat.png
 tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
@@ -24,7 +24,11 @@ tracker=https://github.com/GeoCat/qgis-bridge-plugin/issues
 repository=https://github.com/GeoCat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
-changelog=Version 4.3.2, February 2023
+changelog=Version 4.4, July 2023
+          - Allow using GeoNetwork 4.x
+          - Fixed crash when publishing layer groups that only contain 1 or more layer groups
+
+          Version 4.3.2, February 2023
           - Fixed GeoNetwork version retrieval for 3.12.8 and up
           - bridgestyle: support IS NULL rule filters (SLD and MapBox only)
 
