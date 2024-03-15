@@ -37,7 +37,7 @@ class GeocatBridge:
 
         self.name = meta.getAppName()
         self.provider = None
-        self.locale = QSettings().value("locale/userLocale")[0:2]
+        self.locale = QSettings().value("locale/userLocale", QLocale().name())[0:2]
         locale_path = files.getLocalePath(f"bridge_{self.locale}")
 
         self.translator = QTranslator()
