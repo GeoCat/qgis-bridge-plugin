@@ -4,7 +4,7 @@ import traceback
 import webbrowser
 from functools import partial
 
-from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication
+from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication, QLocale
 from qgis.PyQt.QtGui import QIcon, QHideEvent, QShowEvent
 from qgis.PyQt.QtWidgets import QAction, QWidget
 from qgis.core import QgsProject, QgsApplication

@@ -213,8 +213,14 @@ def isSupportedLayer(layer):
     """
     if not layer:
         return False
-    return layer.isValid() and layer.isSpatial() and layer.crs().isValid() and not layer.isTemporary() and \
-        layer.type() in (QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer) and layer.dataProvider().name() != "wms"
+    if layer.isTemporary():
+        uri = layer.source()
+        if not (uri and Path(uri).exists()):
+            # Temporary layers are only supported if the source is an actual path (on disk)
+            return False
+    return (layer.isValid() and layer.isSpatial() and layer.crs().isValid() and
+            layer.type() in (QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer) and
+            layer.dataProvider().name() != "wms")
 
 
 def listLayerNames(layer_ids: Iterable[str] = None, actual: bool = False) -> List[str]:

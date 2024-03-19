@@ -22,20 +22,17 @@ from pathlib import Path
 
 # This is the code that will be injected to enable remote debugging
 _CODE = """
-# Enable PyCharm remote debugger, if debug folder exists
-_debug_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '{0}'))
-if os.path.isdir(_debug_dir):
-    sys.path.append(_debug_dir)
-    import pydevd_pycharm
-    from warnings import simplefilter
-    try:
-        # Suppress ResourceWarning when remote debug server is not running
-        simplefilter('ignore', category=ResourceWarning)
-        pydevd_pycharm.settrace('{1}', True, True, {2})
-    except (ConnectionRefusedError, AttributeError):
-        # PyCharm remote debug server is not running on {1}:{2}
-        # Restore ResourceWarnings
-        simplefilter('default', category=ResourceWarning)    
+# Enables PyCharm remote debugger - DO NOT COMMIT!
+import pydevd_pycharm
+from warnings import simplefilter
+try:
+    # Suppress ResourceWarning when remote debug server is not running
+    simplefilter('ignore', category=ResourceWarning)
+    pydevd_pycharm.settrace('{0}', True, True, {1})
+except (ConnectionRefusedError, AttributeError):
+    # PyCharm remote debug server is not running on {0}:{1}
+    # Restore ResourceWarnings
+    simplefilter('default', category=ResourceWarning)    
 """
 
 # This is the code line before which to inject the debug code
@@ -60,18 +57,15 @@ def get_args() -> list:
     """ Parses the CLI arguments. """
     parser = argparse.ArgumentParser(Path(__file__).name, description=__doc__)
     parser.add_argument('plugin_py', type=str, help='Path to the Bridge plugin.py')
-    parser.add_argument('pydevd_egg', type=str, help='Path to the pycharm-pydevd.egg')
-    parser.add_argument('--debug_dir', type=str, help='Name of the target debug directory', default=_REMOTE_DEBUG_DIR)
     parser.add_argument('--host', type=str, help='Remote debugger host address', default=_HOST)
     parser.add_argument('--port', type=int, help='Remote debugger port', default=_PORT)
     ns = parser.parse_args()
     args = [
-        Path(ns.plugin_py).absolute(),
-        Path(ns.pydevd_egg).absolute()
+        Path(ns.plugin_py).absolute()
     ]
     if any(not x.exists() for x in args):
         raise argparse.ArgumentTypeError('A path was specified that does not exist')
-    return args + [ns.debug_dir, ns.host, ns.port]
+    return args + [ns.host, ns.port]
 
 
 def extract_egg(source: Path, target: Path, work_dir: Path):
@@ -120,10 +114,15 @@ def inject_debug(source: Path, target: Path, code: str):
         raise Exception(f'Code line {_SEARCH} was not found: no debug code can be injected')
 
 
-def main(plugin_py: Path, pydevd_egg: Path, debug_dir: str = _REMOTE_DEBUG_DIR, host: str = _HOST, port: int = _PORT):
+def main(plugin_py: Path, host: str = _HOST, port: int = _PORT):
     """ Main function to start debug setup. """
+    try:
+        import pydevd_pycharm
+    except (ImportError, ModuleNotFoundError):
+        raise Exception('PyCharm remote debugger package not found: '
+                        'run `pip install pydevd-pycharm` in active environment')
+
     cur_dir = get_curdir()
-    dest_debug_dir = plugin_py.parent / debug_dir
     local_py = cur_dir / plugin_py.name
 
     # Check if plugin.py already contains the injected debug code
@@ -137,11 +136,8 @@ def main(plugin_py: Path, pydevd_egg: Path, debug_dir: str = _REMOTE_DEBUG_DIR, 
     shutil.copy2(plugin_py, local_py)
     print(f'Using backup {local_py} for code injection')
 
-    # Extract PyCharm pydevd egg to destination debug directory (overwrite)
-    extract_egg(pydevd_egg, dest_debug_dir, cur_dir)
-
     # Inject debug code
-    code = _CODE.format(debug_dir, host, port)
+    code = _CODE.format(host, port)
     inject_debug(local_py, plugin_py, code)
 
 

@@ -150,7 +150,8 @@ def getDocsUrl() -> str:
     doc_url = getProperty('docs', SECTION_BRIDGE)
     if not doc_url:
         raise ValueError("Bridge documentation URL has not been set")
-    return f"{doc_url.rstrip('/')}/v{getVersion()}/"
+    semver = getVersion()
+    return f"{doc_url.rstrip('/')}/v{semver.major}.{semver.minor}/"
 
 
 def isEnterprise() -> bool:
