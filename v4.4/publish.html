@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Publishing Data &mdash; GeoCat Bridge for QGIS 4.4 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Publishing Data &mdash; GeoCat Bridge for QGIS 4.4.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=a9228490"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -93,8 +95,8 @@
 <span id="layertypes"></span><h2>Supported layer types<a class="headerlink" href="#supported-layer-types" title="Permalink to this heading"></a></h2>
 <p>GeoCat Bridge supports the following layer types:</p>
 <ul class="simple">
-<li><p>Vector layers from any spatial data source</p></li>
-<li><p>Raster layers from any spatial data source</p></li>
+<li><p>Standard vector layers (i.e. a [QgsVectorLayer](<a class="reference external" href="https://api.qgis.org/api/classQgsVectorLayer.html#details">https://api.qgis.org/api/classQgsVectorLayer.html#details</a>) object)</p></li>
+<li><p>Standard raster layers (i.e. a [QgsRasterLayer](<a class="reference external" href="https://api.qgis.org/api/classQgsRasterLayer.html#details">https://api.qgis.org/api/classQgsRasterLayer.html#details</a>) object)</p></li>
 <li><p>Layer groups</p></li>
 </ul>
 <div class="admonition note">
@@ -103,9 +105,10 @@
 Bridge still does not seem to support it. This could be the case if:</p>
 <ul class="simple">
 <li><p>The layer data source is non-spatial (e.g. a CSV)</p></li>
+<li><p>The layer is a third-party plugin layer (i.e. a [QgsPluginLayer](<a class="reference external" href="https://api.qgis.org/api/classQgsPluginLayer.html#details">https://api.qgis.org/api/classQgsPluginLayer.html#details</a>) object)</p></li>
 <li><p>The layer does not have a CRS (coordinate reference system) or it is invalid</p></li>
-<li><p>The layer is corrupt for some reason</p></li>
-<li><p>The layer is temporary (i.e. stored in memory)</p></li>
+<li><p>The layer data source is broken or missing</p></li>
+<li><p>The layer is virtual and stored in memory (i.e. not on disk)</p></li>
 <li><p>The layer is a web map layer (e.g. WMS)</p></li>
 </ul>
 <p>In most of the cases you should be able to easily fix these issues, for example by exporting
@@ -255,7 +258,7 @@ all the current selected (checked) layers when you click the <span class="guilab
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, GeoCat BV. Built from b77dbe3.</p>
+    <p>&#169; Copyright 2024, GeoCat BV. Built from bc2dc1a.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
