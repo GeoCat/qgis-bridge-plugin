@@ -8,17 +8,18 @@ Supported layer types
 
 |app_name| supports the following layer types:
 
--   Vector layers from any spatial data source
--   Raster layers from any spatial data source
+-   Standard vector layers (i.e. a [QgsVectorLayer](https://api.qgis.org/api/classQgsVectorLayer.html#details) object)
+-   Standard raster layers (i.e. a [QgsRasterLayer](https://api.qgis.org/api/classQgsRasterLayer.html#details) object)
 -   Layer groups
 
 .. note::   You may experience that even if your layer is of one of the types listed above,
             |short_name| still does not seem to support it. This could be the case if:
 
             -   The layer data source is non-spatial (e.g. a CSV)
+            -   The layer is a third-party plugin layer (i.e. a [QgsPluginLayer](https://api.qgis.org/api/classQgsPluginLayer.html#details) object)
             -   The layer does not have a CRS (coordinate reference system) or it is invalid
-            -   The layer is corrupt for some reason
-            -   The layer is temporary (i.e. stored in memory)
+            -   The layer data source is broken or missing
+            -   The layer is virtual and stored in memory (i.e. not on disk)
             -   The layer is a web map layer (e.g. WMS)
 
             In most of the cases you should be able to easily fix these issues, for example by exporting
