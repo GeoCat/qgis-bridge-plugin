@@ -37,7 +37,8 @@ Expressions
 		x, y, concat, substr, lower, upper, replace, exterior_ring, 
 		intersects, overlaps, touches, within, relates, crosses, 
 		disjoint, geom_from_wkt, perimeter, union, acos, asin, atan,
-		atan2, sin, cos, tan, ln, title, translate, min, max 
+		atan2, sin, cos, tan, ln, title, translate, min, max,
+		to_int, to_real, to_string
 
 | Some function parameters accept expressions, but this is not always supported by |short_name| when converting to SLD.
 | This applies to the following parameter types:
