@@ -32,7 +32,7 @@ How to publish
 ==============
 
 If you wish to publish data *online*, you will first need to set up one or more server connections.
-Please see ref:`ServerConnections` for more information on how to add these. Then come back to this page
+Please see :ref:`ServerConnections` for more information on how to add these. Then come back to this page
 to continue the publication process.
 
 In the |short_name| dialog, navigate to the :guilabel:`Publish` section.
