@@ -4,6 +4,9 @@ name: Build HTML Docs
 
 on:
   push:
+    paths:
+      # Trigger only when docs/ folder is updated
+      - 'docs/**'
     tags:
       - v[0-9]+.[0-9]+.[0-9]+**
     branches: [ master ]
