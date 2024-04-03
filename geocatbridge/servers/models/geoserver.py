@@ -1073,7 +1073,7 @@ class GeoserverServer(DataCatalogServerBase):
             existing_acl_rules = self.request(url).json()
             for resource, roles in existing_acl_rules.items():
                 # workspace specific rules start with "workspacename." in the resource identifier, e.g. "ws.layer1.w"
-                if resource.startswith(self.workspace):
+                if resource.startswith(f"{self.workspace}."):
                     self.logWarning(f"Found rule for {self.workspace}: {resource} -> {roles}")
                     acl_rules[resource] = roles
 
