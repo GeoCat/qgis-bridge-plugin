@@ -1030,15 +1030,16 @@ class GeoserverServer(DataCatalogServerBase):
     def clearWorkspace(self, recreate=True) -> bool:
         """
         Clears all feature types and coverages (rasters) and their corresponding layers.
-        Leaves styles and datastore definitions in tact.
+        Leaves styles and datastore definitions intact as well as the "isolated" flag.
         """
         if not self.workspaceExists() and recreate:
             # Nothing to delete: workspace does not exist yet (so let's create it)
             self._createWorkspace()
             return False
 
-        # Get database datastores configuration
+        # Get database datastores configuration and isolation flag
         db_stores = []
+        isolated = False
         if recreate:
             url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores.json"
             stores = self.request(url).json()["dataStores"] or {}
@@ -1062,13 +1063,18 @@ class GeoserverServer(DataCatalogServerBase):
                 url = f"{self.apiUrl}/workspaces/{self.workspace}/styles/{style['name']}.json?recurse=true&purge=true"
                 self.request(url, method="delete")
 
+            # Get isolation flag
+            url = f"{self.apiUrl}/workspaces/{self.workspace}.json"
+            workspace = self.request(url).json()
+            isolated = workspace["workspace"]["isolated"]
+
         # Delete workspace recursively
         url = f"{self.apiUrl}/workspaces/{self.workspace}.json?recurse=true"
         self.request(url, method="delete")
 
         if recreate:
             # Recreate the workspace
-            self._createWorkspace()
+            self._createWorkspace(isolated)
 
             # Add all database datastores
             for body in db_stores:
@@ -1203,10 +1209,10 @@ class GeoserverServer(DataCatalogServerBase):
                 # Bad request or style is still in use by other layers: do nothing
                 pass
 
-    def _createWorkspace(self):
+    def _createWorkspace(self, isolated: bool = False):
         """ Creates the workspace. """
         url = f"{self.apiUrl}/workspaces"
-        ws = {"workspace": {"name": self.workspace}}
+        ws = {"workspace": {"name": self.workspace, "isolated": isolated}}
         self.request(url, data=ws, method="post")
 
     def _ensureWorkspaceExists(self):
