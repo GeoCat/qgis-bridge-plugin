@@ -1041,7 +1041,7 @@ class GeoserverServer(DataCatalogServerBase):
     def clearWorkspace(self, recreate=True) -> bool:
         """
         Clears all feature types and coverages (rasters) and their corresponding layers.
-        Leaves styles and datastore definitions intact as well as the "isolated" flag.
+        Leaves styles and datastore definitions intact as well as the "isolated" flag and ACL security rules.
         """
         if not self.workspaceExists() and recreate:
             # Nothing to delete: workspace does not exist yet (so let's create it)
@@ -1051,6 +1051,7 @@ class GeoserverServer(DataCatalogServerBase):
         # Get database datastores configuration and isolation flag
         db_stores = []
         isolated = False
+        acl_rules = {}
         if recreate:
             url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores.json"
             stores = self.request(url).json()["dataStores"] or {}
@@ -1078,6 +1079,14 @@ class GeoserverServer(DataCatalogServerBase):
             url = f"{self.apiUrl}/workspaces/{self.workspace}.json"
             workspace = self.request(url).json()
             isolated = workspace.get("workspace", {}).get("isolated", False)
+            # Get security rules / ACL
+            url = f"{self.apiUrl}/security/acl/layers.json"
+            existing_acl_rules = self.request(url).json()
+            for resource, roles in existing_acl_rules.items():
+                # workspace specific rules start with "workspacename." in the resource identifier, e.g. "ws.layer1.w"
+                if resource.startswith(self.workspace):
+                    self.logWarning(f"Found rule for {self.workspace}: {resource} -> {roles}")
+                    acl_rules[resource] = roles
 
         # Delete workspace recursively
         url = f"{self.apiUrl}/workspaces/{self.workspace}.json?recurse=true"
@@ -1085,7 +1094,7 @@ class GeoserverServer(DataCatalogServerBase):
 
         if recreate:
             # Recreate the workspace
-            self._createWorkspace(isolated)
+            self._createWorkspace(isolated, acl_rules)
 
             # Add all database datastores
             for body in db_stores:
@@ -1220,11 +1229,17 @@ class GeoserverServer(DataCatalogServerBase):
                 # Bad request or style is still in use by other layers: do nothing
                 pass
 
-    def _createWorkspace(self, isolated: bool = False):
+    def _createWorkspace(self, isolated: bool = False, acl_rules: Optional[dict[str, str]] = None):
         """ Creates the workspace. """
         url = f"{self.apiUrl}/workspaces"
         ws = {"workspace": {"name": self.workspace, "isolated": isolated}}
         self.request(url, data=ws, method="post")
+        if acl_rules:
+            self._setWorkspaceACL(acl_rules)
+
+    def _setWorkspaceACL(self, acl_rules: dict[str, str]):
+        url = f"{self.apiUrl}/security/acl/layers.json"
+        self.request(url, data=acl_rules, method="post")
 
     def _ensureWorkspaceExists(self):
         if not self.workspaceExists():
