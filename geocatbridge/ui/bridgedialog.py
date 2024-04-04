@@ -68,8 +68,6 @@ class BridgeDialog(BASE, WIDGET):
         cur_version = meta.getVersion()
         old_version = meta.SemanticVersion(QSettings().value(VERSION_SETTING) or '')
         if old_version != cur_version:
-            # Force-refresh the About HTML page
-            files.getAboutUrl(True)
             QSettings().setValue(VERSION_SETTING, str(cur_version))
             return True
         return False

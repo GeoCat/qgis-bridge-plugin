@@ -16,7 +16,6 @@ _DIR_NAME_DOCS = "docs"
 
 _ABOUT_SRCDIR = "geocat"
 _ABOUT_TEMPLATE = "template.html"
-_ABOUT_HTMLPAGE = "index.html"
 
 #: GeoCat Bridge Python root directory
 BRIDGE_ROOT_DIR = Path(__file__).parent.parent
@@ -112,31 +111,24 @@ def getDirectory(path) -> str:
     return str(fix_path.resolve().parent)
 
 
-def getAboutUrl(refresh: bool = False) -> QUrl:
+def getAboutHtml() -> str:
     """
-    Returns the QUrl for the Bridge About page (HTML).
-    If 'refresh' is True or the HTML page does not exist, it is rendered from the template in the same folder.
-    If the template does not exist,
+    Returns the About HTML page rendered with uptodate information about the plugin version etc.
     """
-    target_path = (BRIDGE_ABOUT_DIR / _ABOUT_HTMLPAGE).resolve()
+    template_path = (BRIDGE_ABOUT_DIR / _ABOUT_TEMPLATE).resolve()
+    if not template_path.is_file():
+        raise FileNotFoundError(f"HTML template at {template_path} does not exist")
+    env = Environment(loader=FileSystemLoader(str(template_path.parent)))
+    template = env.get_template(_ABOUT_TEMPLATE)
+    html = template.render(
+        app_name=meta.getAppName(),
+        short_name=meta.getShortAppName(),
+        doc_url=meta.getDocsUrl(),
+        repo_url=meta.getRepoUrl(),
+        support_url=meta.getSupportUrl(),
+        homepage=meta.getHomeUrl(),
+        is_enterprise=meta.isEnterprise(),
+        about_dir=BRIDGE_ABOUT_DIR.resolve(),
+    )
 
-    # Render the index.html if it does not exist yet or if it should be updated (i.e. when version changed)
-    if refresh or not target_path.is_file():
-        template_path = target_path.with_name(_ABOUT_TEMPLATE)
-        if not template_path.is_file():
-            raise FileNotFoundError(f"HTML template at {template_path} does not exist")
-        env = Environment(loader=FileSystemLoader(str(template_path.parent)))
-        template = env.get_template(_ABOUT_TEMPLATE)
-        html = template.render(
-            app_name=meta.getAppName(),
-            short_name=meta.getShortAppName(),
-            doc_url=meta.getDocsUrl(),
-            repo_url=meta.getRepoUrl(),
-            support_url=meta.getSupportUrl(),
-            homepage=meta.getHomeUrl(),
-            is_enterprise=meta.isEnterprise()
-        )
-        with open(target_path, mode="w+", encoding="utf-8") as fp:
-            fp.write(html)
-
-    return QUrl.fromLocalFile(str(target_path))
+    return html
