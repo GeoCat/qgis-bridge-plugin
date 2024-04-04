@@ -109,6 +109,3 @@ venv.bak/
 .run/
 .idea/
 *debug/
-
-# Do not check in rendered HTML
-/geocatbridge/resources/geocat/index.html
