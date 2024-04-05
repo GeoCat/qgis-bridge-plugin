@@ -1,6 +1,6 @@
 import json
 import os
-from typing import List, Iterable, Dict, Union
+from typing import List, Iterable, Dict, Union, Optional
 from zipfile import ZipFile
 
 import requests
@@ -52,6 +52,7 @@ class GeoserverServer(DataCatalogServerBase):
         """
         super().__init__(name, authid, url, **options)
         self._workspace = None
+        self._fixed_workspace = None  # For overriding workspace name discovery, e.g. when ran in QgsProcessingAlgorithm
         self._slug_map = {}     # maps requested layer name (slug) to the resulting server name
         self._apiurl = self.fixRestApiUrl()
         self._importer = None
@@ -66,29 +67,39 @@ class GeoserverServer(DataCatalogServerBase):
         return 'GeoServer'
 
     @property
-    def workspace(self):
-        if self._workspace is None:
-            self.refreshWorkspaceName()
-        return self._workspace
+    def workspace(self) -> Optional[str]:
+        """
+        Returns a potential workspace name derived from the project name if possible.
 
-    def workspaceFromProject(self):
-        """ Returns the workspace name derived from the QGIS Project path. """
-        path = QgsProject().instance().absoluteFilePath()
-        if path:
-            return Path(path).stem
-        self.logWarning("Workspace name could not be derived from QGIS project path: please save the project")
+        If an override for the workspace name exists (e.g. when GeoserverServer is used as part of the
+        GeoServerAlgorithm), the overridden value is returned instead of a name derived from the current QGIS project.
+        """
 
-    def refreshWorkspaceName(self) -> bool:
-        """ Resets the QGIS Project (file) name. Can be `None` if not found/saved. """
-        self._workspace = None
-        name = self.workspaceFromProject()
-        if name and strings.validate(name, first_alpha=True, allowed_chars=strings.WORKSPACE_CHARS):
-            self._workspace = name
-            return True
-        return False
+        # return override if exist
+        if self._fixed_workspace:
+            return self._fixed_workspace
 
-    def forceWorkspace(self, workspace):
-        self._workspace = workspace
+        workspace = self.workspaceFromProject()
+
+        return workspace
+
+    def workspaceFromProject(self) -> Optional[str]:
+        """ Returns the workspace name derived from the QGIS Project path if valid.
+
+        :return: The workspace name if valid, otherwise None
+        """
+        projectName = Path(QgsProject.instance().absoluteFilePath()).stem
+        if not projectName:
+            self.logWarning("Workspace name could not be derived from QGIS project path: please save the project")
+            return None
+        elif not strings.validate(projectName, first_alpha=True, allowed_chars=strings.WORKSPACE_CHARS):
+            self.logWarning(f"Project name {projectName=!r} cannot be used as workspace name")
+            return None
+        return projectName
+
+    def setFixedWorkspace(self, workspace: str):
+        """ Stores a fixed workspace name override. If set, the current QGIS project's name will be ignored. """
+        self._fixed_workspace = workspace
 
     def fixRestApiUrl(self):
         """ Appends 'rest' to the base URL if it is missing and returns the new URL.
@@ -1358,7 +1369,7 @@ class GeoserverServer(DataCatalogServerBase):
         if errors:
             return
 
-        if not self.refreshWorkspaceName():
+        if not self.workspace:
             errors.add("QGIS project must be saved before publishing layers to GeoServer.\n"
                        "Project name preferably is ASCII only, starts with a letter, and consists of letters, numbers, or .-_")  # noqa
         elif self.willDeleteLayersOnPublication(layer_ids) and not only_symbology:
@@ -1413,7 +1424,7 @@ class GeoserverAlgorithm(BridgeAlgorithm):
         feedback.pushInfo(f'Publishing {layer} and its style to GeoServer...')
         try:
             server = GeoserverServer(GeoserverServer.__name__, authid, url)
-            server.forceWorkspace(workspace)
+            server.setFixedWorkspace(workspace)
             server.publishStyle(layer)
             server.publishLayer(layer)
         except Exception as err:
