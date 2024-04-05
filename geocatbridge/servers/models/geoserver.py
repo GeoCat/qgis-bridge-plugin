@@ -1066,7 +1066,7 @@ class GeoserverServer(DataCatalogServerBase):
             # Get isolation flag
             url = f"{self.apiUrl}/workspaces/{self.workspace}.json"
             workspace = self.request(url).json()
-            isolated = workspace["workspace"]["isolated"]
+            isolated = workspace.get("workspace", {}).get("isolated", False)
 
         # Delete workspace recursively
         url = f"{self.apiUrl}/workspaces/{self.workspace}.json?recurse=true"
