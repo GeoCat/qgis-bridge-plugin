@@ -1043,7 +1043,7 @@ class GeoserverServer(DataCatalogServerBase):
         acl_rules = {}
         if recreate:
             url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores.json"
-            stores = self.request(url).json()["dataStores"] or {}
+            stores = self.request(url).json().get("dataStores", {}) or {}
             for store in stores.get("dataStore", []):
                 url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores/{store['name']}.json"
                 ds = self.request(url).json()
