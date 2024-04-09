@@ -1052,6 +1052,7 @@ class GeoserverServer(DataCatalogServerBase):
         db_stores = []
         isolated = False
         acl_rules = {}
+        service_settings = {}
         if recreate:
             url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores.json"
             stores = self.request(url).json().get("dataStores", {}) or {}
@@ -1088,13 +1089,25 @@ class GeoserverServer(DataCatalogServerBase):
                     self.logWarning(f"Found rule for {self.workspace}: {resource} -> {roles}")
                     acl_rules[resource] = roles
 
+            # Get services
+            for service in ["wms", "wfs", "wmts", "wcs"]:
+                url = f"{self.apiUrl}/services/{service}/workspaces/{self.workspace}/settings.json"
+                try:
+                    service_settings[service] = self.request(url).json()
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        # this simply means that there is no special configuration for this service for this workspace
+                        pass
+                    else:
+                        raise
+
         # Delete workspace recursively
         url = f"{self.apiUrl}/workspaces/{self.workspace}.json?recurse=true"
         self.request(url, method="delete")
 
         if recreate:
             # Recreate the workspace
-            self._createWorkspace(isolated, acl_rules)
+            self._createWorkspace(isolated, acl_rules, service_settings)
 
             # Add all database datastores
             for body in db_stores:
@@ -1229,17 +1242,31 @@ class GeoserverServer(DataCatalogServerBase):
                 # Bad request or style is still in use by other layers: do nothing
                 pass
 
-    def _createWorkspace(self, isolated: bool = False, acl_rules: Optional[dict[str, str]] = None):
+    def _createWorkspace(
+            self,
+            isolated: bool = False,
+            acl_rules: Optional[dict[str, str]] = None,
+            service_settings: Optional[dict[str, dict]] = None,
+    ):
         """ Creates the workspace. """
         url = f"{self.apiUrl}/workspaces"
         ws = {"workspace": {"name": self.workspace, "isolated": isolated}}
         self.request(url, data=ws, method="post")
         if acl_rules:
             self._setWorkspaceACL(acl_rules)
+        if service_settings:
+            self._setWorkspaceServices(service_settings)
 
     def _setWorkspaceACL(self, acl_rules: dict[str, str]):
         url = f"{self.apiUrl}/security/acl/layers.json"
         self.request(url, data=acl_rules, method="post")
+
+    def _setWorkspaceServices(self, service_settings: dict[str, dict]):
+        """ Sets service specific settings for the workspace, e.g. for WMS or WFS. """
+        for service, settings in service_settings.items():
+            self.logInfo(f"Setting {service} settings for workspace {self.workspace!r}")
+            url = f"{self.apiUrl}/services/{service}/workspaces/{self.workspace}/settings.json"
+            self.request(url, data=settings, method="put")
 
     def _ensureWorkspaceExists(self):
         if not self.workspaceExists():
