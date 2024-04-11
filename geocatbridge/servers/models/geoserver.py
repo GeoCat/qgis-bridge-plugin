@@ -1055,6 +1055,7 @@ class GeoserverServer(DataCatalogServerBase):
         service_settings = {}
         workspace_settings = None
         if recreate:
+            # Collect all data stores
             url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores.json"
             stores = self.request(url).json().get("dataStores", {}) or {}
             for store in stores.get("dataStore", []):
@@ -1081,6 +1082,7 @@ class GeoserverServer(DataCatalogServerBase):
             url = f"{self.apiUrl}/workspaces/{self.workspace}.json"
             workspace = self.request(url).json()
             isolated = workspace.get("workspace", {}).get("isolated", False)
+
             # Get security rules / ACL
             url = f"{self.apiUrl}/security/acl/layers.json"
             existing_acl_rules = self.request(url).json()
@@ -1101,6 +1103,7 @@ class GeoserverServer(DataCatalogServerBase):
                         pass
                     else:
                         raise
+
             # Get settings override
             url = f"{self.apiUrl}/workspaces/{self.workspace}/settings.json"
             workspace_settings = self.request(url).json()
