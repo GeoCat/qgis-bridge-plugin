@@ -1053,6 +1053,7 @@ class GeoserverServer(DataCatalogServerBase):
         isolated = False
         acl_rules = {}
         service_settings = {}
+        workspace_settings = None
         if recreate:
             url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores.json"
             stores = self.request(url).json().get("dataStores", {}) or {}
@@ -1100,6 +1101,32 @@ class GeoserverServer(DataCatalogServerBase):
                         pass
                     else:
                         raise
+            # Get settings override
+            url = f"{self.apiUrl}/workspaces/{self.workspace}/settings.json"
+            workspace_settings = self.request(url).json()
+            # GeoServer returns *some* settings even if the workspace does not use any Workspace Specific Settings:
+            # https://osgeo-org.atlassian.net/browse/GEOS-11361
+            # Here we check if we got those exact settings and if so, consider them to mean "no settings".
+            # As of GeoServer 2.24.2:
+            default_workspace_settings = {
+                "settings": {
+                    "contact": {"id": "contact"},
+                    "charset": 'UTF-8',
+                    "numDecimals": 4,
+                    "verbose": False,
+                    "verboseExceptions": False,
+                    "localWorkspaceIncludesPrefix": False,
+                    "showCreatedTimeColumnsInAdminList": False,
+                    "showModifiedTimeColumnsInAdminList": False
+                }
+            }
+            if workspace_settings == default_workspace_settings:
+                self.logWarning(
+                    "Received *default* workspace specific settings which indicates "
+                    "that there were no *actual* settings. "
+                    "Setting the workspace to have *no* workspace specific settings."
+                )
+                workspace_settings = {}
 
         # Delete workspace recursively
         url = f"{self.apiUrl}/workspaces/{self.workspace}.json?recurse=true"
@@ -1107,7 +1134,7 @@ class GeoserverServer(DataCatalogServerBase):
 
         if recreate:
             # Recreate the workspace
-            self._createWorkspace(isolated, acl_rules, service_settings)
+            self._createWorkspace(isolated, acl_rules, service_settings, workspace_settings)
 
             # Add all database datastores
             for body in db_stores:
@@ -1247,6 +1274,7 @@ class GeoserverServer(DataCatalogServerBase):
             isolated: bool = False,
             acl_rules: Optional[dict[str, str]] = None,
             service_settings: Optional[dict[str, dict]] = None,
+            workspace_settings: Optional[dict] = None,
     ):
         """ Creates the workspace. """
         url = f"{self.apiUrl}/workspaces"
@@ -1256,6 +1284,8 @@ class GeoserverServer(DataCatalogServerBase):
             self._setWorkspaceACL(acl_rules)
         if service_settings:
             self._setWorkspaceServices(service_settings)
+        if workspace_settings:
+            self._setWorkspaceSettings(workspace_settings)
 
     def _setWorkspaceACL(self, acl_rules: dict[str, str]):
         url = f"{self.apiUrl}/security/acl/layers.json"
@@ -1267,6 +1297,10 @@ class GeoserverServer(DataCatalogServerBase):
             self.logInfo(f"Setting {service} settings for workspace {self.workspace!r}")
             url = f"{self.apiUrl}/services/{service}/workspaces/{self.workspace}/settings.json"
             self.request(url, data=settings, method="put")
+
+    def _setWorkspaceSettings(self, workspace_settings: dict):
+        url = f"{self.apiUrl}/workspaces/{self.workspace}/settings.json"
+        self.request(url, data=workspace_settings, method="put")
 
     def _ensureWorkspaceExists(self):
         if not self.workspaceExists():
