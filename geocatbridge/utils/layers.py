@@ -215,8 +215,12 @@ def isSupportedLayer(layer):
         return False
     if layer.isTemporary():
         uri = layer.source()
-        if not (uri and Path(uri).exists()):
-            # Temporary layers are only supported if the source is an actual path (on disk)
+        try:
+            if not (uri and Path(uri).exists()):
+                # Temporary layers are only supported if the source is an actual path (on disk)
+                return False
+        except OSError:
+            # If the path is invalid (e.g. too long), the layer is not supported either way [#004035]
             return False
     return (layer.isValid() and layer.isSpatial() and layer.crs().isValid() and
             layer.type() in (QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer) and
