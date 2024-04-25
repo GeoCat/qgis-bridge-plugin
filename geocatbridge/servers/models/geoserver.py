@@ -1050,6 +1050,7 @@ class GeoserverServer(DataCatalogServerBase):
 
         # Get database datastores configuration and isolation flag
         db_stores = []
+        namespace = {}
         isolated = False
         acl_rules = {}
         service_settings = {}
@@ -1077,6 +1078,11 @@ class GeoserverServer(DataCatalogServerBase):
             for style in styles.get("style", []):
                 url = f"{self.apiUrl}/workspaces/{self.workspace}/styles/{style['name']}.json?recurse=true&purge=true"
                 self.request(url, method="delete")
+
+            # Get namespace
+            url = f"{self.apiUrl}/namespaces/{self.workspace}.json"
+            namespace = self.request(url).json()
+            self.logInfo(f"{namespace=!r}")
 
             # Get isolation flag
             url = f"{self.apiUrl}/workspaces/{self.workspace}.json"
@@ -1137,7 +1143,7 @@ class GeoserverServer(DataCatalogServerBase):
 
         if recreate:
             # Recreate the workspace
-            self._createWorkspace(isolated, acl_rules, service_settings, workspace_settings)
+            self._createWorkspace(namespace, isolated, acl_rules, service_settings, workspace_settings)
 
             # Add all database datastores
             for body in db_stores:
@@ -1274,6 +1280,7 @@ class GeoserverServer(DataCatalogServerBase):
 
     def _createWorkspace(
             self,
+            namespace: dict[str, dict],
             isolated: bool = False,
             acl_rules: Optional[dict[str, str]] = None,
             service_settings: Optional[dict[str, dict]] = None,
@@ -1283,12 +1290,20 @@ class GeoserverServer(DataCatalogServerBase):
         url = f"{self.apiUrl}/workspaces"
         ws = {"workspace": {"name": self.workspace, "isolated": isolated}}
         self.request(url, data=ws, method="post")
+
+        self._setWorkspaceNamespace(namespace)
+
         if acl_rules:
             self._setWorkspaceACL(acl_rules)
         if service_settings:
             self._setWorkspaceServices(service_settings)
         if workspace_settings:
             self._setWorkspaceSettings(workspace_settings)
+
+    def _setWorkspaceNamespace(self, namespace: dict[str, dict]):
+        """ Creates the workspace namespace, it is automatically associated to the workspace. """
+        url = f"{self.apiUrl}/namespaces/{self.workspace}.json"
+        self.request(url, data=namespace, method="put")
 
     def _setWorkspaceACL(self, acl_rules: dict[str, str]):
         url = f"{self.apiUrl}/security/acl/layers.json"
