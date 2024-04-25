@@ -1110,32 +1110,18 @@ class GeoserverServer(DataCatalogServerBase):
                     else:
                         raise
 
-            # Get settings override
+            # Get workspace specific settings
             url = f"{self.apiUrl}/workspaces/{self.workspace}/settings.json"
             workspace_settings = self.request(url).json()
             # GeoServer returns *some* settings even if the workspace does not use any Workspace Specific Settings:
             # https://osgeo-org.atlassian.net/browse/GEOS-11361
-            # Here we check if we got those exact settings and if so, consider them to mean "no settings".
-            # As of GeoServer 2.24.2:
-            default_workspace_settings = {
-                "settings": {
-                    "contact": {"id": "contact"},
-                    "charset": 'UTF-8',
-                    "numDecimals": 4,
-                    "verbose": False,
-                    "verboseExceptions": False,
-                    "localWorkspaceIncludesPrefix": False,
-                    "showCreatedTimeColumnsInAdminList": False,
-                    "showModifiedTimeColumnsInAdminList": False
-                }
-            }
-            if workspace_settings == default_workspace_settings:
-                self.logWarning(
-                    "Received *default* workspace specific settings which indicates "
-                    "that there were no *actual* settings. "
-                    "Setting the workspace to have *no* workspace specific settings."
-                )
-                workspace_settings = {}
+            # The presence of an "id" key denotes if there are any *actual* workspace specific settings
+            if workspace_settings.get("settings", {}).get("id"):
+                # We want GeoServer to be able to recreate the "id" if necessary
+                del workspace_settings["settings"]["id"]
+                # Apart from that, we can use the acquired dict to initialise the "new" workspace
+            else:
+                workspace_settings = None
 
         # Delete workspace recursively
         url = f"{self.apiUrl}/workspaces/{self.workspace}.json?recurse=true"
