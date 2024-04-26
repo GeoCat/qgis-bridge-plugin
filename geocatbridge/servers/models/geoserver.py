@@ -1266,7 +1266,7 @@ class GeoserverServer(DataCatalogServerBase):
 
     def _createWorkspace(
             self,
-            namespace: dict[str, dict],
+            namespace: Optional[dict[str, dict]] = None,
             isolated: bool = False,
             acl_rules: Optional[dict[str, str]] = None,
             service_settings: Optional[dict[str, dict]] = None,
@@ -1277,8 +1277,8 @@ class GeoserverServer(DataCatalogServerBase):
         ws = {"workspace": {"name": self.workspace, "isolated": isolated}}
         self.request(url, data=ws, method="post")
 
-        self._setWorkspaceNamespace(namespace)
-
+        if namespace:
+            self._setWorkspaceNamespace(namespace)
         if acl_rules:
             self._setWorkspaceACL(acl_rules)
         if service_settings:
