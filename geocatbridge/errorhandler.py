@@ -10,7 +10,7 @@ def handleError(errors):
     stacktrace = ''.join(errors).strip()
     main_error = errors[-1]
     bridge_label = feedback.translate(f'{meta.getShortAppName()} version')
-    bridge_version = feedback.translate(f'{meta.getLongAppName()} for QGIS v{meta.getVersion()}')
+    bridge_version = feedback.translate(f'{meta.getLongAppName()} v{meta.getVersion()}')
     version_label = feedback.translate('Python version')
     qgis_label = feedback.translate('QGIS version')
     qgis_version = f'{Qgis().version()} ({Qgis().releaseName()} {Qgis.QGIS_DEV_VERSION})'
