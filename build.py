@@ -28,18 +28,27 @@ def make_zip(zip_file):
     file_excludes = {'*.pyc', "*.git*", "*.log"}
     dir_excludes = {"test", "tests", "_debug", "debug", "build", "__pycache__", ".github"}
     src_dir = f"./geocatbridge"
-    lic_txt = Path('./LICENSE.md')
+    gpltxt = Path('./LICENSE')
+    readme = Path('./README.md')
 
     def filter_excludes(file_list):
         for fn in file_list:
             if not any([fnmatch(fn, e) for e in file_excludes]):
                 yield fn
 
-    if lic_txt.is_file():
+    if gpltxt.is_file():
         # Include license file from repo root in package if it exists
-        dstpath = src_dir / lic_txt
+        dstpath = src_dir / gpltxt
         print(f'\t{dstpath}')
-        zip_file.write(lic_txt.resolve(), dstpath)
+        zip_file.write(gpltxt.resolve(), dstpath)
+    else:
+        raise FileNotFoundError(f"Required LICENSE file is missing!")
+
+    if readme.is_file():
+        # Include README file from repo root in package if it exists
+        dstpath = src_dir / readme
+        print(f'\t{dstpath}')
+        zip_file.write(readme.resolve(), dstpath)
 
     for root, dirs, files in os.walk(src_dir):
         if any(p in dir_excludes for p in Path(root).parts):
