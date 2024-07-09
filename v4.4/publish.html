@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Publishing Data &mdash; GeoCat Bridge for QGIS 4.4.1 documentation</title>
+  <title>Publishing Data &mdash; GeoCat Bridge for QGIS 4.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=a9228490"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=9eda0efa"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
@@ -180,14 +180,17 @@ The styles of the selected (checked) layers will then be updated, but no layer d
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><strong>It is currently not possible to add layers to an existing workspace.</strong></p>
-<p>Each time you publish layers to an existing GeoServer workspace, all data in that workspace will be removed.
+<p>Each time you publish layers to a GeoServer workspace that already exists, that workspace will be purged and recreated.
 Bridge will warn you if this is about to happen:</p>
 <img alt="_images/publish_workspace_warning.png" class="align-center" src="_images/publish_workspace_warning.png" />
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<p>If you do not want to clear the entire workspace, you could save your QGIS project under a different
-name and re-publish the layers. This will create a new workspace on the server and keep the old one.</p>
+<p><em>New in version 4.4.2</em>: Even though all datastores and styles in the workspace will be removed, the old workspace settings
+and ACL rules will be preserved. This means that you do not have to manually restore those settings.</p>
+<p>If you do not want to clear the entire workspace and keep the old one, you could rename your QGIS project or save it
+under a different name and re-publish the layers. This will create a new workspace on the server using the default settings,
+and preserve the old one.</p>
 </div>
 </section>
 <section id="view-published-layers-on-server-s">
@@ -258,7 +261,7 @@ all the current selected (checked) layers when you click the <span class="guilab
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, GeoCat BV. Built from c216920.</p>
+    <p>&#169; Copyright 2024, GeoCat BV. Built from 527b970.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
