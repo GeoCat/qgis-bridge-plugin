@@ -16,7 +16,9 @@ import sys
 import argparse
 import os
 import re
+import shlex
 import shutil
+import traceback
 import subprocess
 from pathlib import Path
 from typing import Tuple
@@ -37,14 +39,50 @@ V_LATEST = 'latest'
 
 
 def printif(value):
+    """ Only prints if the value is not None or an empty string. """
     if value in (None, ''):
         return
     print(value)
 
 
+def update_env_path():
+    """ Updates the PATH environment variable on Windows by adding the system PATH.
+    In newer Python environments, the user PATH variable is used instead of the system PATH,
+    which causes some commands to not be found.
+    """
+
+    if (os.name != 'nt'):
+        # Not Windows: nothing to do
+        return
+
+    cmd = 'reg query "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment" /v Path'
+    proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    stdout, _ = proc.communicate()
+    # Extract the PATH value
+    path_line = [line for line in stdout.split('    ')][-1]
+    if path_line and ';' in path_line:
+        paths = f"{os.environ.get('PATH', '')};{path_line.strip()}"
+        os.environ['PATH'] = paths
+
+
 def sh(cmd: str) -> Tuple[int, str]:
-    """ Execute a shell command. """
-    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    """ Execute a shell command. Returns a tuple of (exit code, stdout). """
+    args = shlex.split(cmd)
+    exe = args[0]
+    if not Path(exe).exists():
+        # Try to find the executable in the PATH
+        exe = shutil.which(args[0])
+        if not exe:
+            print(f"Executable '{args[0]}' not found - retrying...")
+            update_env_path()
+        # Retry with updated PATH (on Windows only)
+        exe = shutil.which(args[0])
+        if not exe:
+            print(f"Executable '{args[0]}' not found - giving up", file=sys.stderr, flush=True)
+            return 1, "Failed to execute command 'cmd'"
+        print(f"Found executable '{exe}'")
+        args[0] = exe
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     stdout, _ = proc.communicate()
     return proc.returncode, stdout.decode("utf-8")
 
@@ -184,6 +222,8 @@ def build_tag(src_root: Path, dst_root: Path, version: str, html_theme: str = No
                 return exit_code
     src_dir = src_root / "source"
     bld_dir = dst_root / version_dir
+    print(src_root)
+    print(dst_root)
     if os.path.exists(bld_dir):
         shutil.rmtree(bld_dir)
     os.makedirs(bld_dir)
@@ -192,7 +232,7 @@ def build_tag(src_root: Path, dst_root: Path, version: str, html_theme: str = No
         print(f"HTML theme override '{html_theme}' will be applied")
         override = f'-D html_theme={html_theme}'
     print(f"Building HTML documentation for {NAME} {version if version != V_LATEST else f'({V_LATEST})'}")
-    exit_code, result = sh(f"sphinx-build -a {override} {src_dir} {bld_dir}")
+    exit_code, result = sh(f"sphinx-build -a {override} '{src_dir}' '{bld_dir}'")
     printif(result)
     if exit_code:
         print("Failed to build docs", file=sys.stderr, flush=True)
@@ -244,11 +284,14 @@ def main():
     has_edits = None
     try:
         curdir = Path.cwd().resolve(strict=True)
+        print(f"Current directory: {curdir}")
         sys.path.insert(0, str(curdir))
         docsrc_dir = Path(__file__).parent.resolve(strict=True)
         if docsrc_dir.parent != curdir:
             sys.path.insert(1, str(docsrc_dir.parent))
+        print(f"Documentation source directory: {docsrc_dir}")
         themes_dir = docsrc_dir / THEMES_DIRNAME
+        print(f"Themes directory: {themes_dir}")
 
         # Try import something from geocatbridge (conf.py requires it)
         from geocatbridge.utils import meta
@@ -256,6 +299,8 @@ def main():
         folder = Path(args.output).resolve() if args.output else (docsrc_dir / DEFAULT_DIR).resolve()
         if args.clean:
             clear_target(folder)
+
+        print(f"Output directory: {folder}")
 
         # Temporarily disable detached HEAD warnings
         sh("git config advice.detachedHead false")
@@ -266,7 +311,7 @@ def main():
             current = current_branch()
             working = current or args.branch
             if has_edits:
-                print(f"Current branch{f' {repr(current)}' or ''} has edits: can only build {V_LATEST} version")
+                print(f"Current branch {(f'{repr(current)} ' if current else '')}has edits: can only build {V_LATEST} version")
                 if version == V_STABLE:
                     print(f"Cannot build {V_STABLE} version")
                     sys.exit(1)
@@ -296,7 +341,7 @@ def main():
             os.chdir(curdir)
         else:
             # Just create an empty themes dir so Sphinx won't complain
-            os.makedirs(themes_dir)
+            os.makedirs(themes_dir, exist_ok=True)
 
         # Build HTML docs
         result = build_docs(docsrc_dir, folder, version, html_theme=theme_override, checkout_=checkout_version)
@@ -304,7 +349,8 @@ def main():
     except SystemExit as err:
         result = err.code
     except Exception as err:
-        print(f"Aborted script because of unhandled {type(err).__name__}: {err}", file=sys.stderr, flush=True)
+        print(f"Aborted script because of unhandled {type(err).__name__}: {err}", file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr, flush=True)
         if isinstance(err, (ImportError, ModuleNotFoundError)):
             sep = '\n\t'
             print(f"Python paths:{sep}{f'{sep}'.join(sys.path)}")
@@ -319,7 +365,7 @@ def main():
                 print(f"Failed to check out '{current if current else 'default'}' branch", file=sys.stderr, flush=True)
             else:
                 print(output)
-        print("Done")
+            print("Done")
         sys.exit(result)
 
 

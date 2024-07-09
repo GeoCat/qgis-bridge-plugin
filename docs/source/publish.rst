@@ -104,7 +104,7 @@ Click on this button to open another dialog that will display all the warning or
 
 .. warning::    **It is currently not possible to add layers to an existing workspace.**
 
-                Each time you publish layers to an existing GeoServer workspace, all data in that workspace will be removed.
+                Each time you publish layers to a GeoServer workspace that already exists, that workspace will be purged and recreated.
                 |short_name| will warn you if this is about to happen:
 
                 .. image:: ./img/publish_workspace_warning.png
@@ -112,8 +112,12 @@ Click on this button to open another dialog that will display all the warning or
 
                 |
 
-                If you do not want to clear the entire workspace, you could save your QGIS project under a different
-                name and re-publish the layers. This will create a new workspace on the server and keep the old one.
+                *New in version 4.4.2*: Even though all datastores and styles in the workspace will be removed, the old workspace settings
+                and ACL rules will be preserved. This means that you do not have to manually restore those settings.
+
+                If you do not want to clear the entire workspace and keep the old one, you could rename your QGIS project or save it
+                under a different name and re-publish the layers. This will create a new workspace on the server using the default settings,
+                and preserve the old one.
 
 
 View published layers on server(s)
