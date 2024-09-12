@@ -5,16 +5,16 @@ import webbrowser
 from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QTranslator, QSettings, QCoreApplication, QLocale
-from qgis.PyQt.QtGui import QIcon, QHideEvent, QShowEvent
-from qgis.PyQt.QtWidgets import QAction, QWidget
+from qgis.PyQt.QtGui import QHideEvent, QShowEvent
+from qgis.PyQt.QtWidgets import QAction, QWidget, QDockWidget
 from qgis.core import QgsProject, QgsApplication
 
 from geocatbridge.errorhandler import handleError
 from geocatbridge.process.provider import BridgeProvider
 from geocatbridge.servers import manager
 from geocatbridge.ui.bridgedialog import BridgeDialog
-from geocatbridge.ui.styleviewerwidget import StyleviewerWidget
-from geocatbridge.utils import meta, files, feedback
+from geocatbridge.ui.styleviewerwidget import StyleViewerWidget
+from geocatbridge.utils import meta, files, feedback, gui
 
 
 class GeocatBridge:
@@ -26,7 +26,7 @@ class GeocatBridge:
         self.action_publish = None
         self.action_help = None
         self.action_styleviewer = None
-        self.widget_styleviewer = StyleviewerWidget()
+        self.widget_styleviewer = StyleViewerWidget()
         self.widget_styleviewer.hideEvent = partial(self.styleviewerHidden)
         self.widget_styleviewer.showEvent = partial(self.styleviewerShown)
 
@@ -36,6 +36,7 @@ class GeocatBridge:
         manager.loadConfiguredServers()
 
         self.name = meta.getAppName()
+        self.short_name = meta.getShortAppName()
         self.provider = None
         self.locale = QSettings().value("locale/userLocale", QLocale().name())[0:2]
         locale_path = files.getLocalePath(f"bridge_{self.locale}")
@@ -78,8 +79,9 @@ class GeocatBridge:
         self.initProcessing()
 
         # Publish / main dialog menu item + toolbar button
-        self.action_publish = QAction(QIcon(files.getIconPath("publish_button")),
-                                      QCoreApplication.translate(self.name, "Publish"), self._win)
+        self.action_publish = QAction(gui.getSvgIcon("geocat_icon"),
+                                      QCoreApplication.translate(self.name, f"{self.short_name} Publisher"),
+                                      self._win)
         self.action_publish.setObjectName("startPublish")
         self.action_publish.triggered.connect(self.bridgeButtonClicked)
         self.iface.addPluginToWebMenu(self.name, self.action_publish)
@@ -90,15 +92,16 @@ class GeocatBridge:
         self.widget_styleviewer.hide()
 
         # StyleViewer menu item
-        self.action_styleviewer = QAction(QIcon(files.getIconPath("symbology")),
-                                          QCoreApplication.translate(self.name, "StyleViewer"), self._win)
+        self.action_styleviewer = QAction(gui.getSvgIcon("styleviewer"),
+                                          QCoreApplication.translate(self.name, "StyleViewer"),
+                                          self._win)
         self.action_styleviewer.setObjectName("StyleViewer")
         self.action_styleviewer.triggered.connect(self.widget_styleviewer.show)
         self.iface.addPluginToWebMenu(self.name, self.action_styleviewer)
 
         # Help menu item
         self.action_help = QAction(QgsApplication.getThemeIcon('/mActionHelpContents.svg'),
-                                   "Online Documentation...", self._win)
+                                   f"{self.short_name} Documentation...", self._win)
         self.action_help.setObjectName(f"{self.name} Help")
         self.action_help.triggered.connect(self.openDocUrl)
         self.iface.addPluginToWebMenu(self.name, self.action_help)
@@ -122,10 +125,10 @@ class GeocatBridge:
             return
         self._layerSignals.clear()
 
-        # Remove StyleViewer button and close StyleViewer
+        # Remove StyleViewer button and destroy StyleViewer
         self.action_styleviewer.triggered.disconnect(self.widget_styleviewer.show)
         self.iface.removePluginWebMenu(self.name, self.action_styleviewer)
-        self.closeDialog(self.widget_styleviewer)  # noqa
+        self.removeStyleViewer()
         self.action_styleviewer = None
 
         # Remove Publish button and close Publish dialog
@@ -185,11 +188,21 @@ class GeocatBridge:
 
     @staticmethod
     def closeDialog(dialog: QWidget):
-        """ Closes (hides) and destroys the given dialog. """
-        if dialog is None:
-            return None
+        """ Closes (hides) and destroys the given dialog. Do not use for dock widgets! """
+        if dialog is None or dialog is QDockWidget:
+            return
         dialog.hide()
         dialog.destroy()
+
+    def removeStyleViewer(self):
+        """ Removes the StyleViewer widget from the QGIS interface and releases its resources. """
+        if self.iface is None or self.widget_styleviewer is None:
+            return
+        self.widget_styleviewer.hide()
+        self.iface.removeDockWidget(self.widget_styleviewer)
+        self.widget_styleviewer.deleteLater()
+        del self.widget_styleviewer
+        self.widget_styleviewer = None
 
 
 class LayerStyleEventManager:
