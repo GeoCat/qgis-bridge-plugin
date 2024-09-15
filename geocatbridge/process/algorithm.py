@@ -1,8 +1,7 @@
-from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingAlgorithm
 
 from geocatbridge.utils import meta
-from geocatbridge.utils.files import getIconPath
+from geocatbridge.utils.gui import getSvgIcon
 from geocatbridge.utils.feedback import translate
 
 
@@ -26,7 +25,7 @@ class BridgeAlgorithm(QgsProcessingAlgorithm):
         return type(self)()
 
     def icon(self):
-        return QIcon(getIconPath("geocat"))
+        return getSvgIcon("geocat_icon")
 
     def group(self):
         return self.tr("Publish tools")

@@ -1,13 +1,13 @@
 from functools import partial
 
 from qgis.PyQt.QtCore import QSettings, Qt
-from qgis.PyQt.QtGui import QIcon, QKeyEvent
+from qgis.PyQt.QtGui import QKeyEvent
 from qgis.PyQt.QtWidgets import QListWidgetItem
 
 from geocatbridge.ui.geocatwidget import GeoCatWidget
 from geocatbridge.ui.publishwidget import PublishWidget
-from geocatbridge.ui.serverconnectionswidget import ServerConnectionsWidget
-from geocatbridge.utils import files, gui, meta
+from geocatbridge.ui.connectionswidget import ConnectionsWidget
+from geocatbridge.utils import gui, meta
 from geocatbridge.utils.enum_ import LabeledIntEnum
 
 VERSION_SETTING = f"{meta.PLUGIN_NAMESPACE}/currentVersion"
@@ -17,7 +17,7 @@ WIDGET, BASE = gui.loadUiType(__file__)
 
 class Panels(LabeledIntEnum):
     PUBLISH = PublishWidget
-    SERVERS = ServerConnectionsWidget
+    CONNECTIONS = ConnectionsWidget
     ABOUT = GeoCatWidget
 
 
@@ -29,7 +29,7 @@ class BridgeDialog(BASE, WIDGET):
         self.setupUi(self)
 
         self.setWindowTitle(meta.getLongAppName())
-        self.setWindowIcon(QIcon(files.getIconPath('geocat')))
+        self.setWindowIcon(gui.getSvgIcon('geocat_icon'))
 
         self.panel_widgets, self.keymap = self.addPanels()
         self.panel_widgets[Panels.PUBLISH].restoreConfig()  # noqa
@@ -55,7 +55,7 @@ class BridgeDialog(BASE, WIDGET):
             panels.append(widget)
             self.stackedWidget.addWidget(widget)
             name = panel.name.lower().title()
-            list_item = QListWidgetItem(QIcon(files.getIconPath(name.lower())), name)
+            list_item = QListWidgetItem(gui.getSvgIcon(name.lower()), name)
             self.listWidget.insertItem(panel, list_item)
             keymap[name.lower()[0]] = i
         return panels, keymap
@@ -120,16 +120,16 @@ class BridgeDialog(BASE, WIDGET):
         if panel_widget == current_panel:
             # User clicked the same list item again: do nothing
             return
-        if isinstance(current_panel, Panels.SERVERS.value) and not current_panel.canClose():
+        if isinstance(current_panel, Panels.CONNECTIONS.value) and not current_panel.canClose():
             # User wants to edit/save Server settings: reselect Servers list item
-            self.listSelectNoSignals(Panels.SERVERS)  # noqa
+            self.listSelectNoSignals(Panels.CONNECTIONS)  # noqa
             return
 
         # Match panel to selected list item and populate/update if needed
         self.stackedWidget.setCurrentWidget(panel_widget)
         if isinstance(panel_widget, Panels.PUBLISH.value):
             panel_widget.updateServers()
-        elif isinstance(panel_widget, Panels.SERVERS.value):
+        elif isinstance(panel_widget, Panels.CONNECTIONS.value):
             panel_widget.populateServerList()
 
     def closeEvent(self, evt):
@@ -137,7 +137,7 @@ class BridgeDialog(BASE, WIDGET):
         self.panel_widgets[Panels.PUBLISH].storeMetadata()  # noqa
         self.panel_widgets[Panels.PUBLISH].saveConfig()  # noqa
         current_panel = self.stackedWidget.currentWidget()
-        if isinstance(current_panel, Panels.SERVERS.value) and not current_panel.canClose():
+        if isinstance(current_panel, Panels.CONNECTIONS.value) and not current_panel.canClose():
             # Abort dialog close if the user decided that a server still needs editing
             evt.ignore()
         else:
@@ -147,7 +147,7 @@ class BridgeDialog(BASE, WIDGET):
         """ Releases all resources used by the BridgeDialog. """
         for i in range(len(self.panel_widgets)):
             panel = self.panel_widgets.pop()
-            if i in (Panels.PUBLISH, Panels.SERVERS):
+            if i in (Panels.PUBLISH, Panels.CONNECTIONS):
                 panel.destroy()
             del panel
         self.listWidget.destroy()

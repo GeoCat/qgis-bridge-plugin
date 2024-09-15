@@ -31,29 +31,43 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <property name="topMargin">
+      <number>5</number>
+     </property>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>4</number>
+       </property>
        <item>
         <layout class="QHBoxLayout" name="layoutSelectLayers">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
          <item>
-          <widget class="QLabel" name="labelSelect">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>22</height>
-            </size>
+          <widget class="QToolButton" name="btnSelectAll">
+           <property name="styleSheet">
+            <string notr="true">QToolButton {
+	border: none;
+}</string>
            </property>
            <property name="text">
-            <string>Select: &lt;a href=&quot;all&quot;&gt;All&lt;/a&gt; | &lt;a href=&quot;none&quot;&gt;None&lt;/a&gt;</string>
+            <string>...</string>
            </property>
-           <property name="textInteractionFlags">
-            <set>Qt::TextBrowserInteraction</set>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnSelectNone">
+           <property name="styleSheet">
+            <string notr="true">QToolButton {
+	border: none;
+}</string>
+           </property>
+           <property name="text">
+            <string>...</string>
            </property>
           </widget>
          </item>
@@ -63,12 +77,12 @@
             <enum>Qt::Horizontal</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::MinimumExpanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
              <width>250</width>
-             <height>20</height>
+             <height>21</height>
             </size>
            </property>
           </spacer>
@@ -78,7 +92,7 @@
        <item>
         <widget class="QListWidget" name="listLayers">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -92,6 +106,12 @@
          <property name="contextMenuPolicy">
           <enum>Qt::CustomContextMenu</enum>
          </property>
+         <property name="styleSheet">
+          <string notr="true">QListWidget::item:selected{background: #70c4f0;}</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Panel</enum>
+         </property>
          <property name="dragDropMode">
           <enum>QAbstractItemView::NoDragDrop</enum>
          </property>
@@ -103,7 +123,7 @@
        <item>
         <widget class="QLabel" name="txtNoLayers">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -118,7 +138,7 @@
           <font>
            <family>Segoe UI</family>
            <pointsize>13</pointsize>
-           <weight>43</weight>
+           <weight>44</weight>
            <italic>false</italic>
            <bold>false</bold>
           </font>
@@ -129,7 +149,7 @@ background-color: rgb(255, 255, 255);
 font: 350 13pt &quot;Segoe UI&quot;;</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Panel</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Sunken</enum>
@@ -161,16 +181,52 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="styleSheet">
+        <string notr="true">QTabWidget::pane {
+  border: 1px solid palette(midlight);
+  top:-1px; 
+  background: rgb(245, 245, 245);
+} 
+
+QTabBar::tab {
+  background: palette(midlight); 
+  border: 1px solid lightgray; 
+  padding: 4px 6px 4px 6px;
+} 
+
+QTabBar::tab:selected { 
+  background: palette(window); 
+  margin-bottom: -1px; 
+}</string>
+       </property>
+       <property name="tabPosition">
+        <enum>QTabWidget::North</enum>
+       </property>
+       <property name="tabShape">
+        <enum>QTabWidget::Rounded</enum>
+       </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
+       <property name="elideMode">
+        <enum>Qt::ElideNone</enum>
+       </property>
        <widget class="QWidget" name="tabMetadata">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <attribute name="title">
          <string>Metadata</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <property name="spacing">
+            <number>4</number>
+           </property>
            <item>
             <widget class="QToolButton" name="btnPreview">
              <property name="toolTip">
@@ -178,13 +234,6 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
              </property>
              <property name="text">
               <string/>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>../icons/preview.png</normaloff>../icons/preview.png</iconset>
-             </property>
-             <property name="autoRaise">
-              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -196,29 +245,15 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
              <property name="text">
               <string/>
              </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>../icons/validation.png</normaloff>../icons/validation.png</iconset>
-             </property>
-             <property name="autoRaise">
-              <bool>true</bool>
-             </property>
             </widget>
            </item>
            <item>
             <widget class="QToolButton" name="btnImport">
              <property name="toolTip">
-              <string>Load ISO metadata from file</string>
+              <string>Import ISO metadata</string>
              </property>
              <property name="text">
               <string/>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>../icons/save.png</normaloff>../icons/save.png</iconset>
-             </property>
-             <property name="autoRaise">
-              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -237,8 +272,15 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
            </item>
            <item>
             <widget class="QPushButton" name="btnOpenQgisMetadataEditor">
+             <property name="styleSheet">
+              <string notr="true">padding: 3px 8px 3px 8px;</string>
+             </property>
              <property name="text">
-              <string>Open QGIS metadata editor</string>
+              <string>  Metadata Editor</string>
+             </property>
+             <property name="icon">
+              <iconset theme="qgis_icon.svg">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>
@@ -246,10 +288,22 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
          </item>
          <item>
           <widget class="QTabWidget" name="tabWidgetMetadata">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="currentIndex">
             <number>0</number>
            </property>
            <widget class="QWidget" name="tabMetadataGeneral">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <attribute name="title">
              <string>General</string>
             </attribute>
@@ -375,7 +429,11 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
                 </widget>
                </item>
                <item row="1" column="2" colspan="2">
-                <widget class="QTextEdit" name="txtAbstract"/>
+                <widget class="QTextEdit" name="txtAbstract">
+                 <property name="frameShape">
+                  <enum>QFrame::Panel</enum>
+                 </property>
+                </widget>
                </item>
                <item row="9" column="0">
                 <widget class="QLabel" name="label_9">
@@ -436,6 +494,12 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
             </layout>
            </widget>
            <widget class="QWidget" name="tabInspire">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <attribute name="title">
              <string>INSPIRE</string>
             </attribute>
@@ -487,6 +551,12 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
             </layout>
            </widget>
            <widget class="QWidget" name="tabTemporal">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <attribute name="title">
              <string>Temporal</string>
             </attribute>
@@ -579,12 +649,30 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
         </layout>
        </widget>
        <widget class="QWidget" name="tabData">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <attribute name="title">
          <string>Attributes</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
           <widget class="QTableWidget" name="tableFields">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Panel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+           </property>
            <property name="sizeAdjustPolicy">
             <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
            </property>
@@ -628,6 +716,24 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="styleSheet">
+        <string notr="true">QTabWidget::pane {
+  border: 1px solid palette(midlight);
+  top:-1px; 
+  background: rgb(245, 245, 245);
+} 
+
+QTabBar::tab {
+  background: palette(midlight); 
+  border: 1px solid lightgray; 
+  padding: 4px 6px 4px 6px;
+} 
+
+QTabBar::tab:selected { 
+  background: palette(window); 
+  margin-bottom: -1px; 
+}</string>
+       </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
@@ -642,6 +748,9 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
          <string>Online</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_6">
+         <property name="horizontalSpacing">
+          <number>6</number>
+         </property>
          <item row="1" column="3">
           <widget class="QComboBox" name="comboGeodataServer">
            <property name="sizePolicy">
@@ -665,14 +774,17 @@ font: 350 13pt &quot;Segoe UI&quot;;</string>
          <item row="3" column="0">
           <widget class="QLabel" name="label_20">
            <property name="text">
-            <string>Metadata server</string>
+            <string>Catalog service  </string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_19">
+           <property name="cursor">
+            <cursorShape>ArrowCursor</cursorShape>
+           </property>
            <property name="text">
-            <string>Data server</string>
+            <string>Map service</string>
            </property>
           </widget>
          </item>

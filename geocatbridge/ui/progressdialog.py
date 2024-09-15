@@ -1,19 +1,19 @@
 from qgis.PyQt.QtCore import Qt, QCoreApplication
-from qgis.PyQt.QtGui import QBrush, QIcon, QColor
+from qgis.PyQt.QtGui import QBrush, QColor
 from qgis.PyQt.QtWidgets import QTreeWidgetItem
 
-from geocatbridge.utils import files, gui
+from geocatbridge.utils import gui
 from geocatbridge.utils import layers as lyr_utils
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
 SYMBOLOGY, DATA, METADATA, GROUPS = range(4)
 
-DATA_ICON = QIcon(files.getIconPath("layer"))
-METADATA_ICON = QIcon(files.getIconPath("metadata"))
-SYMBOLOGY_ICON = QIcon(files.getIconPath("symbology"))
-GROUPS_ICON = QIcon(files.getIconPath("group"))
-CHECK_ICON = QIcon(files.getIconPath("checkmark"))
+DATA_ICON = gui.getSvgIcon("layer")
+METADATA_ICON = gui.getSvgIcon("metadata")
+SYMBOLOGY_ICON = gui.getSvgIcon("symbology")
+GROUPS_ICON = gui.getSvgIcon("group")
+CHECK_ICON = gui.getSvgIcon("checkmark")
 
 
 class ProgressDialog(BASE, WIDGET):
@@ -22,7 +22,7 @@ class ProgressDialog(BASE, WIDGET):
         super(ProgressDialog, self).__init__(parent)
         self.setupUi(self)
 
-        self.setWindowIcon(QIcon(files.getIconPath('geocat')))
+        self.setWindowIcon(gui.getSvgIcon('geocat_icon'))
 
         self.layer_ids = layer_ids
         self.populateTree()

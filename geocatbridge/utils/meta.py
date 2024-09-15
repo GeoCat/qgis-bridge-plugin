@@ -2,6 +2,8 @@ import configparser
 from pathlib import Path
 from re import compile
 
+from qgis.core import Qgis
+
 #: GeoCat Bridge plugin namespace
 PLUGIN_NAMESPACE = "geocatbridge"
 
@@ -97,6 +99,11 @@ def getProperty(name, section=SECTION_DEFAULT):
     return value
 
 
+def getAuthor() -> str:
+    """ Returns the author of the QGIS Bridge plugin. """
+    return getProperty("author")
+
+
 def getAppName() -> str:
     """ Returns the name of the QGIS Bridge plugin. """
     return getProperty("name")
@@ -109,6 +116,22 @@ def getLongAppName() -> str:
     if long_name:
         return long_name
     return getAppName()
+
+
+def getLongAppNameWithMinVersion() -> str:
+    """ Returns the full name of the QGIS Bridge plugin with the minimum required QGIS version. """
+    return f"{getAppName()} {getVersion()} for QGIS {getQqisMinimumVersion()}+"
+
+
+def getLongAppNameWithCurrentVersion() -> str:
+    """ Returns the full name of the QGIS Bridge plugin with the current QGIS version. """
+    return f"{getAppName()} {getVersion()} on QGIS {getCurrentQgisVersion()}"
+
+
+def getCurrentQgisVersion() -> str:
+    """ Returns the current QGIS version string. """
+    working_title = f"{Qgis().releaseName()} {Qgis.QGIS_DEV_VERSION}"
+    return f"{Qgis().version()} ({working_title.strip()})"
 
 
 def getShortAppName() -> str:
@@ -140,9 +163,19 @@ def getVersion() -> SemanticVersion:
     return SemanticVersion(getProperty("version"))
 
 
+def getQqisMinimumVersion() -> str:
+    """ Returns the minimum required QGIS version (string!) for the plugin. """
+    return getProperty("qgisMinimumVersion")
+
+
 def getSupportUrl() -> str:
     """ Returns the support ticket URL for GeoCat Bridge. """
     return getProperty("support", SECTION_BRIDGE)
+
+
+def getChatUrl() -> str:
+    """ Returns the Gitter chat URL for GeoCat Bridge. """
+    return getProperty("chat", SECTION_BRIDGE)
 
 
 def getDocsUrl() -> str:

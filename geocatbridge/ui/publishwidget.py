@@ -10,10 +10,7 @@ from qgis.PyQt.QtCore import (
     QCoreApplication,
     QSettings
 )
-from qgis.PyQt.QtGui import (
-    QIcon,
-    QPixmap
-)
+from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtWidgets import (
     QLabel,
     QMenu,
@@ -47,12 +44,13 @@ from geocatbridge.utils.layers import (
 # QGIS setting that stores the online/offline publish settings
 PUBLISH_SETTING = f"{meta.PLUGIN_NAMESPACE}/BridgePublish"
 
-PUBLISHED_ICON = QIcon(files.getIconPath("published"))
-ERROR_ICON = f'<img src="{files.getIconPath("error-red")}">'
-REMOVE_ICON = QIcon(files.getIconPath("remove"))
-VALIDATE_ICON = QIcon(files.getIconPath("validation"))
-PREVIEW_ICON = QIcon(files.getIconPath("preview"))
-IMPORT_ICON = QIcon(files.getIconPath("save"))
+# Icons
+SELECT_ICON = gui.getSvgIcon("select")
+DESELECT_ICON = gui.getSvgIcon("deselect")
+PUBLISHED_ICON = gui.getSvgIcon("published")
+VALIDATE_ICON = gui.getSvgIcon("validate")
+PREVIEW_ICON = gui.getSvgIcon("preview")
+IMPORT_ICON = gui.getSvgIcon("import")
 
 IDENTIFICATION, CATEGORIES, KEYWORDS, ACCESS, EXTENT, CONTACT = range(6)
 
@@ -94,12 +92,19 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.listLayers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.listLayers.customContextMenuRequested.connect(self.showContextMenu)
         self.listLayers.currentRowChanged.connect(self.currentRowChanged)
+        self.listLayers.itemClicked.connect(self.rowClicked)
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
         self.txtExportFolder.textChanged.connect(self.exportFolderChanged)
+        self.btnSelectAll.setToolTip(self.tr("Select all layers"))
+        self.btnSelectAll.setIcon(SELECT_ICON)
+        self.btnSelectAll.clicked.connect(partial(self.toggleLayers, True))
+        self.btnSelectNone.setToolTip(self.tr("Deselect all layers"))
+        self.btnSelectNone.setIcon(DESELECT_ICON)
+        self.btnSelectNone.clicked.connect(partial(self.toggleLayers, False))
         self.btnPublish.clicked.connect(self.publish)
+        self.btnOpenQgisMetadataEditor.setIcon(QgsApplication.getThemeIcon("../../icons/qgis_icon.svg"))  # noqa
         self.btnOpenQgisMetadataEditor.clicked.connect(self.openMetadataEditor)
-        self.labelSelect.linkActivated.connect(self.selectLabelClicked)
         self.btnRemoveAll.clicked.connect(self.unpublishAll)
         self.btnValidate.setIcon(VALIDATE_ICON)
         self.btnPreview.clicked.connect(self.previewMetadata)
@@ -118,15 +123,18 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.tabOnOffline.currentChanged.connect(partial(self.tabOnOfflineChanged))
 
         if self.listLayers.count():
+            # Select the first layer item by default
             self.listLayers.setCurrentRow(0)
+            self.btnSelectAll.setEnabled(True)
+            self.btnSelectNone.setEnabled(True)
         else:
             self.txtNoLayers.setVisible(True)
             self.listLayers.setVisible(False)
-            self.labelSelect.setVisible(False)
             self.btnRemoveAll.setVisible(False)
+            self.btnSelectAll.setEnabled(False)
+            self.btnSelectNone.setEnabled(False)
 
         self.metadataServerChanged()
-        self.selectLabelClicked("all")
 
     def restoreConfig(self):
         """ Sets online and offline publish settings from QGIS Bridge configuration. """
@@ -236,11 +244,15 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.tabWidgetMetadata.addTab(self.tabInspire, profile)
             self.tabWidgetMetadata.addTab(self.tabTemporal, self.translate("Temporal"))
 
-    def selectLabelClicked(self, url):
-        """ Selects all layers if 'all' is clicked and deselects all layers if 'none' is clicked. """
+    def toggleLayers(self, state: bool):
+        """ Toggles the checkbox state of all layer items. """
         for i in range(self.listLayers.count()):
             item = self.listLayers.item(i)
-            self.listLayers.itemWidget(item).setCheckbox(url != 'none')
+            self.listLayers.itemWidget(item).setCheckbox(state)
+
+    def rowClicked(self, item: QListWidgetItem):
+        """ Called whenever the user clicks on a layer item. """
+        self.listLayers.itemWidget(item).toggleCheckbox()
 
     def currentRowChanged(self, current_row: int):
         """ Called whenever the user selects another layer item. """
@@ -842,15 +854,15 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
 
 class LayerItemWidget(QWidget):
-    def __init__(self, layer: BridgeLayer, parent=None):
-        super(LayerItemWidget, self).__init__(parent)  # noqa
+    def __init__(self, layer: BridgeLayer):
+        super(LayerItemWidget, self).__init__()  # noqa
         self._name = layer.name()
         self._id = layer.id()
         self._checkbox = QCheckBox(self._name, self)
         if layer.is_vector:
-            self._checkbox.setIcon(QgsApplication.getThemeIcon('/mIconLineLayer.svg'))
+            self._checkbox.setIcon(QgsApplication.getThemeIcon('mIconVector.svg'))
         elif layer.is_raster:
-            self._checkbox.setIcon(QgsApplication.getThemeIcon('/mIconRaster.svg'))
+            self._checkbox.setIcon(QgsApplication.getThemeIcon('mIconRaster.svg'))
         self._metalabel = QLabel()
         self._metalabel.setFixedWidth(20)
         self._datalabel = QLabel()
@@ -883,7 +895,7 @@ class LayerItemWidget(QWidget):
                 label.pixmap().swap(QPixmap())
             return False
         server_widget = server.__class__.getWidgetClass()
-        pixmap = server_widget.getPngIcon() if server_widget else QPixmap()  # noqa
+        pixmap = server_widget.getIcon() if server_widget else QPixmap()  # noqa
         if not pixmap.isNull():
             pixmap = pixmap.scaled(label.width(), label.height(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
         label.setPixmap(pixmap)
@@ -910,3 +922,6 @@ class LayerItemWidget(QWidget):
 
     def setCheckbox(self, state: bool):
         self._checkbox.setCheckState(Qt.Checked if state else Qt.Unchecked)
+
+    def toggleCheckbox(self):
+        self._checkbox.toggle()

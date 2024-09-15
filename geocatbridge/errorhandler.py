@@ -10,10 +10,10 @@ def handleError(errors):
     stacktrace = ''.join(errors).strip()
     main_error = errors[-1]
     bridge_label = feedback.translate(f'{meta.getShortAppName()} version')
-    bridge_version = feedback.translate(f'{meta.getLongAppName()} v{meta.getVersion()}')
+    bridge_version = feedback.translate(f'{meta.getLongAppNameWithMinVersion()}')
     version_label = feedback.translate('Python version')
     qgis_label = feedback.translate('QGIS version')
-    qgis_version = f'{Qgis().version()} ({Qgis().releaseName()} {Qgis.QGIS_DEV_VERSION})'
+    qgis_version = meta.getCurrentQgisVersion()
     pypath_label = feedback.translate('Python path')
     md_pypaths = '\n'.join('- {}'.format(path) for path in sys.path)
 

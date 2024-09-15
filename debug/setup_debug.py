@@ -6,6 +6,9 @@ It will inject remote debug code before the `GeocatBridge` class definition.
 This only needs to be run once when you start debugging for the first time
 or when you have modified the plugin.py module.
 
+NOTE: please make sure that you have installed the `pydevd-pycharm` package
+in your virtual environment, as it cannot run without it.
+
 This script allows you to change the host and port for the remote debugger.
 Make sure that these settings reflect the ones in your Debug Configuration.
 

@@ -14,7 +14,7 @@ about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 experimental=False
 category=Web
 qgisMinimumVersion=3.16
-version=4.4.2
+version=4.5.0
 email=support@geocat.net
 icon=icons/geocat.png
 tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
@@ -24,7 +24,13 @@ tracker=https://github.com/GeoCat/qgis-bridge-plugin/issues
 repository=https://github.com/GeoCat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
-changelog=Version 4.4.2, July 2024
+changelog=Version 4.5.0, September 2024
+          - Replaced PNG icons with SVG icons
+          - Properly release resources when plugin reloads [#187]
+          - Replaced QtWebKit related code with regular Qt UI elements [#152, #185]
+          - bridgestyle: fix SLD XSD reference [#184]
+
+          Version 4.4.2, July 2024
           - Fix crash when temporary layer path/URI is too long
           - Improve workspace handling (preserve ACLs, settings, etc. - thanks @ Johannes Kröger)
           - Build About page dynamically (thanks @ Johannes Kröger)
@@ -103,3 +109,4 @@ shortName=Bridge
 longName=GeoCat Bridge for QGIS
 support=https://my.geocat.net/submitticket.php?step=2&deptid=4
 docs=https://geocat.github.io/qgis-bridge-plugin
+chat=https://gitter.im/GeoCat/Bridge

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>768</height>
+    <width>900</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -28,15 +28,21 @@
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <widget class="QListWidget" name="listWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
-       <width>100</width>
+       <width>120</width>
        <height>200</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>153</width>
+       <width>150</width>
        <height>16777215</height>
       </size>
      </property>
@@ -54,20 +60,21 @@
       <enum>Qt::NoContextMenu</enum>
      </property>
      <property name="styleSheet">
-      <string notr="true">
-              QListWidget{
-                background-color: rgb(69, 69, 69, 220);
-                outline: 0;
-              }
-              QListWidget::item {
-                padding: 4px;
-                border: 0px;
-                color: white;
-              }
-              QListWidget::item::selected {
-                color: black;
-                background-color:palette(Window);
-              }
+      <string notr="true">QListWidget{
+	background-color: rgb(69, 69, 69, 220);
+   outline: 0;
+}
+
+QListWidget::item {
+	padding: 4px;
+   	border: 0px;
+   	color: white;
+}
+
+QListWidget::item::selected {
+	color: black;
+   background-color:palette(Window);
+}
             </string>
      </property>
      <property name="frameShape">
