@@ -1,6 +1,6 @@
 FORMS = ui/publishreportdialog.ui \
         ui/publishwidget.ui \
-        ui/serverconnectionswidget.ui \
+        ui/connectionswidget.ui \
         ui/errordialog.ui
 
 SOURCES = plugin.py \
@@ -18,7 +18,7 @@ SOURCES = plugin.py \
           ui/publishwidget.py \
           ui/progressdialog.py \
           ui/publishreportdialog.py \
-          ui/serverconnectionswidget.py \
+          ui/connectionswidget.py \
           utils/l10n.py
 
 TRANSLATIONS = i18n/bridge_de.ts \

@@ -1,8 +1,9 @@
 from typing import Iterable
+from pathlib import Path
 
 from qgis.PyQt import QtCore
 from qgis.PyQt import uic
-from qgis.PyQt.QtGui import QCursor
+from qgis.PyQt.QtGui import QCursor, QIcon, QPixmap
 from qgis.PyQt.QtWidgets import QApplication
 
 from geocatbridge.utils import files
@@ -29,6 +30,38 @@ def execute(func, *args, **kwargs):
     finally:
         QApplication.restoreOverrideCursor()
         QtCore.QCoreApplication.processEvents()  # noqa
+
+
+def getSvgIcon(name: str) -> QIcon:
+    """ Returns a QIcon object for a given SVG image. File should exist in the ./images folder.
+
+    :param name:    The SVG icon name (without extension).
+    :returns:       A QIcon object.
+    """
+    return QIcon(files.getIconPath(name))
+
+
+def getPixmap(file_path: Path, width: int, height: int) -> QPixmap:
+    """ Returns a QPixmap object for a given image path. File should exist (no checks performed).
+    Uses QIcon to open the image and then scales it to the given width and height by calling its pixmap() method.
+
+    :param file_path:   Full path to the image file.
+    :param width:       The desired width of the pixmap (pixels).
+    :param height:      The desired height of the pixmap (pixels).
+    :returns:           A QPixmap object.
+    """
+    return QIcon(str(file_path)).pixmap(QtCore.QSize(width, height))
+
+
+def getSvgPixmap(name: str, width: int, height: int) -> QPixmap:
+    """ Returns a QPixmap object for a given SVG image. File should exist in the ./images folder.
+
+    :param name:    The SVG image name (without extension).
+    :param width:   The desired width of the pixmap (pixels).
+    :param height:  The desired height of the pixmap (pixels).
+    :returns:       A QPixmap object.
+    """
+    return getSvgIcon(name).pixmap(QtCore.QSize(width, height))
 
 
 class ItemProcessor(QtCore.QThread):

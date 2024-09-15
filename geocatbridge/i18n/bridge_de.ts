@@ -342,7 +342,7 @@
         <translation>Letzte Überarbeitung</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="128"/>
+        <location filename="../ui/connectionswidget.ui" line="128"/>
         <source>Data</source>
         <translation type="obsolete">Daten</translation>
     </message>
@@ -362,102 +362,102 @@
         <translation type="obsolete">Nur Symbologie</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="73"/>
+        <location filename="../ui/connectionswidget.ui" line="73"/>
         <source>GeoNetwork credentials</source>
         <translation type="obsolete">GeoNetwork-Anmeldeinformationen</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="80"/>
+        <location filename="../ui/connectionswidget.ui" line="80"/>
         <source>Instance identifier</source>
         <translation type="obsolete">Instanzkennung</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="87"/>
+        <location filename="../ui/connectionswidget.ui" line="87"/>
         <source>GeoServer credentials</source>
         <translation type="obsolete">GeoServer-Anmeldeinformationen</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="424"/>
+        <location filename="../ui/connectionswidget.ui" line="424"/>
         <source>Connect</source>
         <translation type="obsolete">Verbinden</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="121"/>
+        <location filename="../ui/connectionswidget.ui" line="121"/>
         <source>Datastore</source>
         <translation type="obsolete">Datenspeicher</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="381"/>
+        <location filename="../ui/connectionswidget.ui" line="381"/>
         <source>Credentials</source>
         <translation type="obsolete">Anmeldeinformationen</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="164"/>
+        <location filename="../ui/connectionswidget.ui" line="164"/>
         <source>Upload data</source>
         <translation type="obsolete">Daten hochladen</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="171"/>
+        <location filename="../ui/connectionswidget.ui" line="171"/>
         <source>Store in PostGIS</source>
         <translation type="obsolete">In PostGIS speichern</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="269"/>
+        <location filename="../ui/connectionswidget.ui" line="269"/>
         <source>URL</source>
         <translation type="obsolete">URL</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="204"/>
+        <location filename="../ui/connectionswidget.ui" line="204"/>
         <source>Workspace</source>
         <translation type="obsolete">Workspace</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="289"/>
+        <location filename="../ui/connectionswidget.ui" line="289"/>
         <source>Metadata profile</source>
         <translation type="obsolete">Metadatenprofil</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="302"/>
+        <location filename="../ui/connectionswidget.ui" line="302"/>
         <source>Default</source>
         <translation type="obsolete">Standard</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="312"/>
+        <location filename="../ui/connectionswidget.ui" line="312"/>
         <source>Dutch Geography</source>
         <translation type="obsolete">Dutch Geography</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="361"/>
+        <location filename="../ui/connectionswidget.ui" line="361"/>
         <source>Database</source>
         <translation type="obsolete">Datenbank</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="374"/>
+        <location filename="../ui/connectionswidget.ui" line="374"/>
         <source>Schema</source>
         <translation type="obsolete">Schema</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="407"/>
+        <location filename="../ui/connectionswidget.ui" line="407"/>
         <source>Port</source>
         <translation type="obsolete">Port</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="414"/>
+        <location filename="../ui/connectionswidget.ui" line="414"/>
         <source>Server address</source>
         <translation type="obsolete">Serveradresse</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="465"/>
+        <location filename="../ui/connectionswidget.ui" line="465"/>
         <source>New Server</source>
         <translation type="obsolete">Neuer Server</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="472"/>
+        <location filename="../ui/connectionswidget.ui" line="472"/>
         <source>Remove server</source>
         <translation type="obsolete">Server entfernen</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="492"/>
+        <location filename="../ui/connectionswidget.ui" line="492"/>
         <source>Save</source>
         <translation type="obsolete">Speichern</translation>
     </message>
@@ -583,67 +583,67 @@
 <context>
     <name>GeoCatBridgeUI</name>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="14"/>
+        <location filename="../ui/connectionswidget.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished">Formular</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="75"/>
+        <location filename="../ui/connectionswidget.ui" line="75"/>
         <source>Please add a server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="206"/>
+        <location filename="../ui/connectionswidget.ui" line="206"/>
         <source>  Test Connection </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="264"/>
+        <location filename="../ui/connectionswidget.ui" line="264"/>
         <source>New Server</source>
         <translation type="unfinished">Neuer Server</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="267"/>
+        <location filename="../ui/connectionswidget.ui" line="267"/>
         <source>Ctrl+N</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="283"/>
+        <location filename="../ui/connectionswidget.ui" line="283"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="299"/>
+        <location filename="../ui/connectionswidget.ui" line="299"/>
         <source>Duplicate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="325"/>
+        <location filename="../ui/connectionswidget.ui" line="325"/>
         <source>Import servers (*.json)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="328"/>
+        <location filename="../ui/connectionswidget.ui" line="328"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="338"/>
+        <location filename="../ui/connectionswidget.ui" line="338"/>
         <source>Export servers (*.json)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="344"/>
+        <location filename="../ui/connectionswidget.ui" line="344"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="367"/>
+        <location filename="../ui/connectionswidget.ui" line="367"/>
         <source>Save</source>
         <translation type="unfinished">Speichern</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.ui" line="370"/>
+        <location filename="../ui/connectionswidget.ui" line="370"/>
         <source>Ctrl+S</source>
         <translation type="unfinished"></translation>
     </message>
@@ -842,44 +842,44 @@
     </message>
 </context>
 <context>
-    <name>ServerConnectionsWidget</name>
+    <name>ConnectionsWidget</name>
     <message>
-        <location filename="../ui/serverconnectionswidget.py" line="336"/>
+        <location filename="../ui/connectionswidget.py" line="336"/>
         <source>Servers</source>
         <translation type="obsolete">Servers</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.py" line="68"/>
+        <location filename="../ui/connectionswidget.py" line="68"/>
         <source>Do you want to save changes to the current server?</source>
         <translation type="obsolete">Möchten Sie die Änderungen auf dem aktuellen Server speichern?</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.py" line="332"/>
+        <location filename="../ui/connectionswidget.py" line="332"/>
         <source>Error</source>
         <translation type="obsolete">Fehler</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.py" line="332"/>
+        <location filename="../ui/connectionswidget.py" line="332"/>
         <source>Wrong values in current item</source>
         <translation type="obsolete">Falsche Werte im aktuellen Artikel</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.py" line="90"/>
+        <location filename="../ui/connectionswidget.py" line="90"/>
         <source>Success</source>
         <translation type="obsolete">Erfolgreich</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.py" line="90"/>
+        <location filename="../ui/connectionswidget.py" line="90"/>
         <source>Connection succesfully established with server</source>
         <translation type="obsolete">Verbindung zum Server erfolgreich hergestellt</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.py" line="92"/>
+        <location filename="../ui/connectionswidget.py" line="92"/>
         <source>Could not connect with server</source>
         <translation type="obsolete">Verbindung zum Server konnte nicht hergestellt werden</translation>
     </message>
     <message>
-        <location filename="../ui/serverconnectionswidget.py" line="336"/>
+        <location filename="../ui/connectionswidget.py" line="336"/>
         <source>Do you want to close without saving the current changes?</source>
         <translation type="obsolete">Möchten Sie schließen, ohne die aktuellen Änderungen zu speichern?</translation>
     </message>

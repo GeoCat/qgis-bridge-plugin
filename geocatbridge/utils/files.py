@@ -3,14 +3,13 @@ import shutil
 import uuid
 from pathlib import Path
 
-from qgis.PyQt.QtCore import QDir, QUrl
-from jinja2 import Environment, FileSystemLoader
+from qgis.PyQt.QtCore import QDir
 
 from geocatbridge.utils import meta
 
 _DIR_NAME_WIDGETS = "ui"
 _DIR_NAME_TRANSLATIONS = "i18n"
-_DIR_NAME_ICONS = "icons"
+_DIR_NAME_IMAGES = "images"
 _DIR_NAME_RESOURCES = "resources"
 _DIR_NAME_DOCS = "docs"
 
@@ -19,7 +18,6 @@ _ABOUT_TEMPLATE = "template.html"
 
 #: GeoCat Bridge Python root directory
 BRIDGE_ROOT_DIR = Path(__file__).parent.parent
-BRIDGE_ABOUT_DIR = BRIDGE_ROOT_DIR / _DIR_NAME_RESOURCES / _ABOUT_SRCDIR
 
 
 def _fix_ext(name, ext):
@@ -70,15 +68,19 @@ def getResourcePath(name, ext=".xsl") -> str:
     return str(BRIDGE_ROOT_DIR / _DIR_NAME_RESOURCES / _fix_ext(name, ext))
 
 
-def getIconPath(name, ext=".png") -> str:
+def getIconPath(name, ext=".svg") -> str:
     """
     Constructs the full icon path for a given base name.
     If `name` does not have an extension, the given `ext` will be appended.
     :param name:    The icon or image file name or relative `Path`.
     :param ext:     The default image extension (if not specified in the name).
     :returns:       An icon file path string.
+    :raises FileNotFoundError: If the icon file does not exist.
     """
-    return str(BRIDGE_ROOT_DIR / _DIR_NAME_ICONS / _fix_ext(name, ext))
+    path = BRIDGE_ROOT_DIR / _DIR_NAME_IMAGES / _fix_ext(name, ext)
+    if not path.is_file():
+        raise FileNotFoundError(f"Image file at {path} does not exist")
+    return str(path)
 
 
 def getViewPath(controller, ext=".ui") -> str:
@@ -89,7 +91,7 @@ def getViewPath(controller, ext=".ui") -> str:
 
     :param controller:  The Python view controller file path.
     :param ext:         The default UI extension (if not specified in the name).
-    :returns:           An Qt UI file path string.
+    :returns:           A Qt UI file path string.
     """
     return str(Path(controller).with_suffix(ext))
 
@@ -100,7 +102,7 @@ def getLocalePath(name, ext=".qm") -> str:
     If `name` does not have an extension, the given `ext` will be appended.
     :param name:    The locale/translation file name or relative `Path`.
     :param ext:     The default locale extension (if not specified in the name).
-    :returns:       An Qt locale/translation file path string.
+    :returns:       A Qt locale/translation file path string.
     """
     return str(BRIDGE_ROOT_DIR / _DIR_NAME_TRANSLATIONS / _fix_ext(name, ext))
 
@@ -109,26 +111,3 @@ def getDirectory(path) -> str:
     """ Returns the parent directory path to the given file or directory path. """
     fix_path = Path(str(path).split('|')[0])  # Fix for GeoPackage layer paths
     return str(fix_path.resolve().parent)
-
-
-def getAboutHtml() -> str:
-    """
-    Returns the About HTML page rendered with uptodate information about the plugin version etc.
-    """
-    template_path = (BRIDGE_ABOUT_DIR / _ABOUT_TEMPLATE).resolve()
-    if not template_path.is_file():
-        raise FileNotFoundError(f"HTML template at {template_path} does not exist")
-    env = Environment(loader=FileSystemLoader(str(template_path.parent)))
-    template = env.get_template(_ABOUT_TEMPLATE)
-    html = template.render(
-        app_name=meta.getAppName(),
-        short_name=meta.getShortAppName(),
-        doc_url=meta.getDocsUrl(),
-        repo_url=meta.getRepoUrl(),
-        support_url=meta.getSupportUrl(),
-        homepage=meta.getHomeUrl(),
-        is_enterprise=meta.isEnterprise(),
-        about_dir=BRIDGE_ABOUT_DIR.resolve(),
-    )
-
-    return html

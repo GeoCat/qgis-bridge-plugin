@@ -15,10 +15,10 @@ from geocatbridge.utils import gui
 WIDGET, BASE = gui.loadUiType(__file__)
 
 
-class StyleviewerWidget(BASE, WIDGET):
+class StyleViewerWidget(BASE, WIDGET):
 
     def __init__(self, ):
-        super(StyleviewerWidget, self).__init__(iface.mainWindow())
+        super(StyleViewerWidget, self).__init__(iface.mainWindow())
         self.setupUi(self)
 
         self.txtSld = EditorWidget(QsciLexerXML())

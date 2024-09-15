@@ -1,11 +1,10 @@
 from processing.core.ProcessingConfig import ProcessingConfig, Setting
-from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingProvider
 
 from geocatbridge.process.algorithm import BridgeAlgorithm
 from geocatbridge.servers.manager import getServerTypes
 from geocatbridge.utils import meta, feedback
-from geocatbridge.utils.files import getIconPath
+from geocatbridge.utils.gui import getSvgIcon
 
 
 class BridgeProvider(QgsProcessingProvider):
@@ -23,7 +22,7 @@ class BridgeProvider(QgsProcessingProvider):
         return meta.getAppName()
 
     def icon(self):
-        return QIcon(getIconPath("geocat"))
+        return getSvgIcon("geocat_icon")
 
     def load(self):
         try:

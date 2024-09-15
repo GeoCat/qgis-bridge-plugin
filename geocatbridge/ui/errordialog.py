@@ -1,12 +1,10 @@
 import webbrowser
 from urllib import parse
 
-from qgis.PyQt.QtGui import QPixmap, QIcon
 from qgis.core import QgsMessageLog
 from requests.models import PreparedRequest
 
-from geocatbridge.utils.files import getIconPath
-from geocatbridge.utils.gui import loadUiType
+from geocatbridge.utils.gui import loadUiType, getSvgIcon
 from geocatbridge.utils.meta import getSupportUrl, getAppName
 
 WIDGET, BASE = loadUiType(__file__)
@@ -19,9 +17,8 @@ class ErrorDialog(BASE, WIDGET):
         self.setupUi(self)
 
         self.setWindowTitle(f"{getAppName()} Error Report")
-        self.setWindowIcon(QIcon(getIconPath("geocat")))
-        pixmap = QPixmap(getIconPath("bridge_logo"))
-        self.labelIcon.setPixmap(pixmap)
+        self.setWindowIcon(getSvgIcon('geocat_icon'))
+        self.btnGeoCat.setIcon(getSvgIcon('geocat_logo'))
         self.label.setText(f"The {getAppName()} plugin has caused the following exception:")
 
         self.txtError.setHtml(html_error)

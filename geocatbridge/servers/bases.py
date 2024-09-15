@@ -7,14 +7,14 @@ from urllib.parse import urlparse
 
 import requests
 from requests.auth import HTTPBasicAuth
-from qgis.PyQt.QtGui import QPixmap
+from qgis.PyQt.QtGui import QPixmap, QIcon
 from qgis.core import (
     QgsAuthMethodConfig,
     QgsApplication,
     QgsProcessingAlgorithm
 )
 
-from geocatbridge.utils import files
+from geocatbridge.utils import gui
 from geocatbridge.utils.feedback import FeedbackMixin
 from geocatbridge.utils.layers import BridgeLayer
 from geocatbridge.utils.enum_ import LabeledIntEnum
@@ -445,7 +445,7 @@ class ServerWidgetBase:
 
     @property
     def parent(self):
-        """ Returns the parent object (usually a ServerConnectionsWidget instance). """
+        """ Returns the parent object (usually a ConnectionsWidget instance). """
         return self._parent
 
     @property
@@ -512,9 +512,9 @@ class ServerWidgetBase:
         raise NotImplementedError(f"{self.__class__.__name__} must implement loadFromInstance()")
 
     @classmethod
-    def getPngIcon(cls) -> QPixmap:
+    def getIcon(cls) -> QPixmap:
         """ Returns the Qt icon for the server list widget.
-        Icons should be PNG files with the same path and name as the server widget controller.
+        Icons should be SVG files with the same path and name as the server widget controller.
         If a matching icon is not found, a default icon is returned.
 
         :return:    A QPixmap object.
@@ -523,8 +523,8 @@ class ServerWidgetBase:
         if module_name:
             # Retrieve the icon path from the module path
             module = import_module(module_name)
-            icon = Path(module.__file__).with_suffix('.png')
+            icon = Path(module.__file__).with_suffix('.svg')
             if icon.exists():
-                return QPixmap(str(icon))
-        # Return the default unknown.png if no matching icon was found
-        return QPixmap(files.getIconPath('unknown'))
+                return gui.getPixmap(icon, 24, 24)
+        # Return the default unknown.svg if no matching icon was found
+        return gui.getSvgPixmap('unknown', 24, 24)

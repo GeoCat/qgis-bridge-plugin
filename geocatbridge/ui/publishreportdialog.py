@@ -1,7 +1,6 @@
 from functools import partial
 
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
@@ -10,7 +9,7 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from geocatbridge.servers import bases
-from geocatbridge.utils import gui, files
+from geocatbridge.utils import gui
 from geocatbridge.utils.strings import pluralize
 from geocatbridge.utils.feedback import FeedbackMixin
 
@@ -27,7 +26,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         txt_on = self.translate('on').upper()
         txt_off = self.translate('off').upper()
 
-        self.setWindowIcon(QIcon(files.getIconPath('geocat')))
+        self.setWindowIcon(gui.getSvgIcon('geocat_icon'))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         if isinstance(geodata_server, bases.DataCatalogServerBase):
             url = geodata_server.baseUrl
@@ -60,7 +59,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
             status_widget = QWidget()  # noqa
             layout = QHBoxLayout(status_widget)
             button = QToolButton()
-            button.setIcon(QIcon(files.getIconPath("attention")))
+            button.setIcon(gui.getSvgIcon("attention"))
             button.clicked.connect(partial(self.openDetails, name))  # noqa
             layout.addWidget(button)  # noqa
             status_lbl = QLabel()
