@@ -12,7 +12,7 @@ WIDGET, BASE = loadUiType(__file__)
 
 class ErrorDialog(BASE, WIDGET):
 
-    def __init__(self, html_error, md_error):
+    def __init__(self, md_error: str):
         super(ErrorDialog, self).__init__()
         self.setupUi(self)
 
@@ -21,7 +21,7 @@ class ErrorDialog(BASE, WIDGET):
         self.btnGeoCat.setIcon(getSvgIcon('geocat_logo'))
         self.label.setText(f"The {getAppName()} plugin has caused the following exception:")
 
-        self.txtError.setHtml(html_error)
+        self.txtError.setMarkdown(md_error)
 
         support_url = getSupportUrl()
         if not support_url:
