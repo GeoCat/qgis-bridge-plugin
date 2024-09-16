@@ -56,7 +56,7 @@
      <item>
       <widget class="QDialogButtonBox" name="btnClose">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -234,6 +234,10 @@ QToolButton:hover {
          <property name="styleSheet">
           <string notr="true">QToolButton {
 	border: none;
+}
+
+QToolButton:hover {
+	color: #0d97ce;
 }</string>
          </property>
          <property name="text">
@@ -252,6 +256,10 @@ QToolButton:hover {
          <property name="styleSheet">
           <string notr="true">QToolButton {
 	border: none;
+}
+
+QToolButton:hover {
+	color: #0d97ce;
 }</string>
          </property>
          <property name="text">
