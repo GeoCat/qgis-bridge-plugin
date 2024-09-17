@@ -25,7 +25,7 @@ class BridgeAlgorithm(QgsProcessingAlgorithm):
         return type(self)()
 
     def icon(self):
-        return getSvgIcon("geocat_icon")
+        return getSvgIcon("bridge_icon")
 
     def group(self):
         return self.tr("Publish tools")

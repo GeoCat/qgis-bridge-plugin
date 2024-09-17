@@ -29,7 +29,7 @@ class BridgeDialog(BASE, WIDGET):
         self.setupUi(self)
 
         self.setWindowTitle(meta.getLongAppName())
-        self.setWindowIcon(gui.getSvgIcon('geocat_icon'))
+        self.setWindowIcon(gui.getSvgIcon('bridge_icon'))
 
         self.panel_widgets, self.keymap = self.addPanels()
         self.panel_widgets[Panels.PUBLISH].restoreConfig()  # noqa

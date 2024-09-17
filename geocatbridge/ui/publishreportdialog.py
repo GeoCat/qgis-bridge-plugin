@@ -26,7 +26,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         txt_on = self.translate('on').upper()
         txt_off = self.translate('off').upper()
 
-        self.setWindowIcon(gui.getSvgIcon('geocat_icon'))
+        self.setWindowIcon(gui.getSvgIcon('bridge_icon'))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         if isinstance(geodata_server, bases.DataCatalogServerBase):
             url = geodata_server.baseUrl

@@ -22,7 +22,7 @@ class BridgeProvider(QgsProcessingProvider):
         return meta.getAppName()
 
     def icon(self):
-        return getSvgIcon("geocat_icon")
+        return getSvgIcon("bridge_icon")
 
     def load(self):
         try:

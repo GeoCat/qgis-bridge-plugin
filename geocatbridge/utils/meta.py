@@ -130,8 +130,11 @@ def getLongAppNameWithCurrentVersion() -> str:
 
 def getCurrentQgisVersion() -> str:
     """ Returns the current QGIS version string. """
-    working_title = f"{Qgis().releaseName()} {Qgis.QGIS_DEV_VERSION}"
-    return f"{Qgis().version()} ({working_title.strip()})"
+    version = Qgis().version()
+    revision = Qgis().QGIS_DEV_VERSION
+    if revision:
+        version += f" (rev {revision})"
+    return version
 
 
 def getShortAppName() -> str:
