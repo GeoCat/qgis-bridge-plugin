@@ -5,7 +5,7 @@ from qgis.core import QgsMessageLog
 from requests.models import PreparedRequest
 
 from geocatbridge.utils.gui import loadUiType, getSvgIcon
-from geocatbridge.utils.meta import getSupportUrl, getAppName
+from geocatbridge.utils import meta
 
 WIDGET, BASE = loadUiType(__file__)
 
@@ -16,14 +16,13 @@ class ErrorDialog(BASE, WIDGET):
         super(ErrorDialog, self).__init__()
         self.setupUi(self)
 
-        self.setWindowTitle(f"{getAppName()} Error Report")
-        self.setWindowIcon(getSvgIcon('geocat_icon'))
-        self.btnGeoCat.setIcon(getSvgIcon('geocat_logo'))
-        self.label.setText(f"The {getAppName()} plugin has caused the following exception:")
+        self.setWindowTitle(meta.getLongAppName())
+        self.setWindowIcon(getSvgIcon('bridge_icon'))
+        self.label.setText(f"The {meta.getAppName()} plugin has caused the following exception:")
 
         self.txtError.setMarkdown(md_error)
 
-        support_url = getSupportUrl()
+        support_url = meta.getSupportUrl()
         if not support_url:
             self.btnSendReport.setEnabled(False)
         else:
@@ -32,8 +31,10 @@ class ErrorDialog(BASE, WIDGET):
 
     def sendReport(self, error, support_url):
         """ Copies the given stacktrace in a GeoCat support form. """
+
+        error = f"[please add context here]  \n\n{error}"
         payload = {
-            "subject": f"[Crash Report] {getAppName()} for QGIS",
+            "subject": f"[Crash Report] {meta.getLongAppName()}",
             "message": error
         }
         req = PreparedRequest()
@@ -41,4 +42,4 @@ class ErrorDialog(BASE, WIDGET):
             req.prepare("GET", support_url, params=parse.urlencode(payload, quote_via=parse.quote))
             webbrowser.open_new_tab(req.url)
         except Exception as e:
-            QgsMessageLog().logMessage(f"Failed to send crash report: {e}", getAppName())
+            QgsMessageLog().logMessage(f"Failed to send crash report: {e}", meta.getAppName())

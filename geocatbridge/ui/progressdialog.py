@@ -22,7 +22,7 @@ class ProgressDialog(BASE, WIDGET):
         super(ProgressDialog, self).__init__(parent)
         self.setupUi(self)
 
-        self.setWindowIcon(gui.getSvgIcon('geocat_icon'))
+        self.setWindowIcon(gui.getSvgIcon('bridge_icon'))
 
         self.layer_ids = layer_ids
         self.populateTree()

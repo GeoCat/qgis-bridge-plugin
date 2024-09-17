@@ -79,7 +79,7 @@ class GeocatBridge:
         self.initProcessing()
 
         # Publish / main dialog menu item + toolbar button
-        self.action_publish = QAction(gui.getSvgIcon("geocat_icon"),
+        self.action_publish = QAction(gui.getSvgIcon("bridge_icon"),
                                       QCoreApplication.translate(self.name, f"{self.short_name} Publisher"),
                                       self._win)
         self.action_publish.setObjectName("startPublish")
@@ -95,7 +95,7 @@ class GeocatBridge:
         self.action_styleviewer = QAction(gui.getSvgIcon("styleviewer"),
                                           QCoreApplication.translate(self.name, "StyleViewer"),
                                           self._win)
-        self.action_styleviewer.setObjectName("StyleViewer")
+        self.action_styleviewer.setObjectName("Style Viewer")
         self.action_styleviewer.triggered.connect(self.widget_styleviewer.show)
         self.iface.addPluginToWebMenu(self.name, self.action_styleviewer)
 
