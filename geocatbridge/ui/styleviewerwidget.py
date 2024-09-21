@@ -3,7 +3,7 @@ from itertools import chain
 
 from qgis.PyQt.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
 from qgis.PyQt.QtGui import QFont, QColor, QFontMetrics
-from qgis.PyQt.QtWidgets import QVBoxLayout
+from qgis.PyQt.QtWidgets import QVBoxLayout, QDockWidget, QFrame
 from qgis.utils import iface
 
 from geocatbridge.publish.style import (
@@ -17,7 +17,7 @@ WIDGET, BASE = gui.loadUiType(__file__)
 
 class StyleViewerWidget(BASE, WIDGET):
 
-    def __init__(self, ):
+    def __init__(self):
         super(StyleViewerWidget, self).__init__(iface.mainWindow())
         self.setupUi(self)
 
@@ -42,6 +42,11 @@ class StyleViewerWidget(BASE, WIDGET):
         self.widgetMapserver.setLayout(layout)        
 
         self.updateForCurrentLayer()
+
+    def setTitle(self, title: str):
+        if not isinstance(self, QDockWidget):
+            return
+        self.setWindowTitle(title)
 
     def updateLayer(self, layer):
         active_layer = iface.activeLayer()
@@ -92,16 +97,20 @@ class EditorWidget(QsciScintilla):
     def __init__(self, lexer=None):
         super(EditorWidget, self).__init__()
 
+        if isinstance(self, QFrame):
+            self.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+
         font = QFont()
-        font.setFamily('Courier')
+        font.setFamily('Cascadia Mono, Roboto Mono, monospace')
         font.setFixedPitch(True)
         font.setPointSize(10)
+
         self.setFont(font)
         self.setMarginsFont(font)
-        
-        fontmetrics = QFontMetrics(font)
+
+        font_metrics = QFontMetrics(font)
         self.setMarginsFont(font)
-        self.setMarginWidth(0, fontmetrics.width("00000") + 6)
+        self.setMarginWidth(0, font_metrics.width("00000") + 6)
         self.setMarginLineNumbers(0, True)
         self.setMarginsBackgroundColor(QColor("#cccccc"))
 
@@ -110,9 +119,10 @@ class EditorWidget(QsciScintilla):
         self.setCaretLineVisible(True)
         self.setCaretLineBackgroundColor(QColor("#ffe4e4"))
 
+        self.setFolding(QsciScintilla.CircledTreeFoldStyle)
+
         if lexer is not None:
-            lexer.setDefaultFont(font)        
+            lexer.setDefaultFont(font)
             self.setLexer(lexer)
 
         self.setReadOnly(True)
-        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier'.encode())

@@ -25,10 +25,11 @@ repository=https://github.com/GeoCat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
 changelog=Version 4.5.0, September 2024
-          - Replaced PNG icons with SVG icons
           - Properly release resources when plugin reloads [#187]
           - Replaced QtWebKit related code with regular Qt UI elements [#152, #185]
-          - bridgestyle: fix SLD XSD reference [#184]
+          - Replaced PNG icons with SVG icons
+          - Tweaked UI and renamed dialogs and actions for clarity
+          - bridgestyle -> 0.1.2: fix single-band raster styling, SLD XSD reference, and label concatenation
 
           Version 4.4.2, July 2024
           - Fix crash when temporary layer path/URI is too long
