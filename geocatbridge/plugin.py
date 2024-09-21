@@ -79,23 +79,22 @@ class GeocatBridge:
         self.initProcessing()
 
         # Publish / main dialog menu item + toolbar button
-        self.action_publish = QAction(gui.getSvgIcon("bridge_icon"),
-                                      QCoreApplication.translate(self.name, f"{self.short_name} Publisher"),
-                                      self._win)
-        self.action_publish.setObjectName("startPublish")
+        publisher_name = QCoreApplication.translate(self.name, f"{self.short_name} Publisher")
+        self.action_publish = QAction(gui.getSvgIcon("bridge_icon"), publisher_name, self._win)
+        self.action_publish.setObjectName(publisher_name)
         self.action_publish.triggered.connect(self.bridgeButtonClicked)
         self.iface.addPluginToWebMenu(self.name, self.action_publish)
         self.iface.addWebToolBarIcon(self.action_publish)
 
         # Register dockable StyleViewer widget (also registers to View > Panels) but keep hidden
+        styleviewer_name = QCoreApplication.translate(self.name, f"{self.short_name} Style Viewer")
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.widget_styleviewer)
+        self.widget_styleviewer.setTitle(styleviewer_name)
         self.widget_styleviewer.hide()
 
         # StyleViewer menu item
-        self.action_styleviewer = QAction(gui.getSvgIcon("styleviewer"),
-                                          QCoreApplication.translate(self.name, "StyleViewer"),
-                                          self._win)
-        self.action_styleviewer.setObjectName("Style Viewer")
+        self.action_styleviewer = QAction(gui.getSvgIcon("styleviewer"), styleviewer_name, self._win)
+        self.action_styleviewer.setObjectName(styleviewer_name)
         self.action_styleviewer.triggered.connect(self.widget_styleviewer.show)
         self.iface.addPluginToWebMenu(self.name, self.action_styleviewer)
 
