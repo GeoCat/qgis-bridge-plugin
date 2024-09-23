@@ -2,8 +2,6 @@ import configparser
 from pathlib import Path
 from re import compile
 
-from qgis.core import Qgis
-
 #: GeoCat Bridge plugin namespace
 PLUGIN_NAMESPACE = "geocatbridge"
 
@@ -130,6 +128,12 @@ def getLongAppNameWithCurrentVersion() -> str:
 
 def getCurrentQgisVersion() -> str:
     """ Returns the current QGIS version string. """
+    try:
+        # Lazy import to prevent crashes when running outside QGIS environment
+        from qgis.core import Qgis
+    except (ImportError, ModuleNotFoundError):
+        return "QGIS version unknown"
+
     version = Qgis().version()
     revision = Qgis().QGIS_DEV_VERSION
     if revision:
