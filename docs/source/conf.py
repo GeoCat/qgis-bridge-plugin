@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 company = 'GeoCat'
-author = meta.getProperty('author')
+author = meta.getAuthor()
 project = meta.getLongAppName()
 app_name = meta.getAppName()
 short_name = meta.getShortAppName()
@@ -247,8 +247,8 @@ rst_epilog = f"""
 .. |plugin_name| replace:: {app_name} for QGIS
 .. |gui_name| replace:: :guilabel:`{app_name}`
 .. |publisher| replace:: {company}
-.. |app_url| replace:: `{app_name} <{meta.getProperty('homepage')}>`__
-.. |min_qgis_ver| replace:: {meta.getProperty('qgisMinimumVersion')}
+.. |app_url| replace:: `{app_name} <{meta.getHomeUrl()}>`__
+.. |min_qgis_ver| replace:: {meta.getQqisMinimumVersion()}
 .. |path_to_settings| replace:: :menuselection:`[path_to_settings]`
 """
 
