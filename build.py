@@ -7,12 +7,14 @@ import argparse
 from pathlib import Path
 from fnmatch import fnmatch
 
+from geocatbridge.utils.meta import getVersion
+
 OUTPUT_DIRNAME = 'build'
 
 
 def package():
     ap = argparse.ArgumentParser(description='Package GeoCat Bridge plugin')
-    ap.add_argument('--filename', help='ZIP file name', default='GeoCat_Bridge')
+    ap.add_argument('--filename', help='ZIP file name', default=f'GeoCat_Bridge_v{getVersion()}')
     ns = ap.parse_args()
 
     file_name = f'{ns.filename}.zip'

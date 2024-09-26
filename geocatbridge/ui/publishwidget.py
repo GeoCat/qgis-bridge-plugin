@@ -17,6 +17,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
     QHBoxLayout,
     QCheckBox,
+    QListWidget,
     QListWidgetItem,
     QTableWidgetItem,
     QFileDialog
@@ -92,7 +93,6 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.listLayers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.listLayers.customContextMenuRequested.connect(self.showContextMenu)
         self.listLayers.currentRowChanged.connect(self.currentRowChanged)
-        self.listLayers.itemClicked.connect(self.rowClicked)
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
         self.txtExportFolder.textChanged.connect(self.exportFolderChanged)
@@ -250,10 +250,6 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             item = self.listLayers.item(i)
             self.listLayers.itemWidget(item).setCheckbox(state)
 
-    def rowClicked(self, item: QListWidgetItem):
-        """ Called whenever the user clicks on a layer item. """
-        self.listLayers.itemWidget(item).toggleCheckbox()
-
     def currentRowChanged(self, current_row: int):
         """ Called whenever the user selects another layer item. """
         if self.currentRow == current_row:
@@ -361,7 +357,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.updateOnlineLayersPublicationStatus()
 
     def addLayerListItem(self, layer):
-        widget = LayerItemWidget(layer)
+        widget = LayerItemWidget(layer, self.listLayers)
         item = QListWidgetItem(self.listLayers)
         item.setSizeHint(widget.sizeHint())
         self.listLayers.addItem(item)
@@ -854,11 +850,14 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
 
 class LayerItemWidget(QWidget):
-    def __init__(self, layer: BridgeLayer):
+    def __init__(self, layer: BridgeLayer, list_widget: QListWidget = None):
         super(LayerItemWidget, self).__init__()  # noqa
+        self._list_widget = list_widget
+        self._position = list_widget.count() if list_widget else 0
         self._name = layer.name()
         self._id = layer.id()
         self._checkbox = QCheckBox(self._name, self)
+        self._checkbox.clicked.connect(self._checkbox_clicked)
         if layer.is_vector:
             self._checkbox.setIcon(QgsApplication.getThemeIcon('mIconVector.svg'))
         elif layer.is_raster:
@@ -915,6 +914,11 @@ class LayerItemWidget(QWidget):
             self._datalabel.setToolTip('')
         self.update()
 
+    def _checkbox_clicked(self, _):
+        """ Make sure that the list widget item is selected when the checkbox is clicked (toggled). """
+        if isinstance(self._list_widget, QListWidget):
+            self._list_widget.item(self._position).setSelected(True)
+
     @property
     def checked(self) -> bool:
         """ Returns True if the list widget item checkbox is in a checked state. """
@@ -922,6 +926,3 @@ class LayerItemWidget(QWidget):
 
     def setCheckbox(self, state: bool):
         self._checkbox.setCheckState(Qt.Checked if state else Qt.Unchecked)
-
-    def toggleCheckbox(self):
-        self._checkbox.toggle()
