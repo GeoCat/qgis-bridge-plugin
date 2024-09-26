@@ -24,18 +24,18 @@ Find and click the |short_name| button in the QGIS Web Toolbar:
 The |short_name| dialog should now appear. First-time users may see the :guilabel:`About` panel, while others will
 probably see the :guilabel:`Publish` panel instead.
 
-Step 2: go to servers panel
----------------------------
+Step 2: go to Connections panel
+-------------------------------
 
-Click on :guilabel:`Servers` in the left sidebar. If no servers have been configured so far, this should show the
+Click on :guilabel:`Connections` in the left sidebar. If no servers have been configured so far, this should show the
 following panel:
 
     .. image:: ./img/quickstart_servers.png
 
-Step 3: add new server
-----------------------
+Step 3: add new connection
+--------------------------
 
-Click the :guilabel:`New Server` button on the lower left corner of the :guilabel:`Servers` panel and select :guilabel:`GeoServer`:
+Click the :guilabel:`Add...` button on the lower left corner of the :guilabel:`Connections` panel and select :guilabel:`GeoServer`:
 
     .. image:: ./img/quickstart_newserver.png
 
@@ -106,7 +106,7 @@ Step 9: save configuration
 --------------------------
 
 Save your GeoServer configuration by clicking the :guilabel:`Save` button in the lower right corner of the
-:guilabel:`Servers` panel.
+:guilabel:`Connections` panel.
 
 You are now ready to publish some layers!
 

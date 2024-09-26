@@ -4,7 +4,7 @@ Server Connections
 ==================
 
 Before you can publish data with |app_name|, you will have to configure one or more server connections.
-This can be achieved in the *Servers* section of the |short_name| dialog:
+This can be achieved in the :guilabel:`Connections` section of the |short_name| dialog:
 
 .. image:: ./img/servers.png
 
@@ -12,7 +12,7 @@ This can be achieved in the *Servers* section of the |short_name| dialog:
 Adding connections
 ##################
 
-Click :guilabel:`New Server` and choose one of the supported server types to create a new server connection:
+Click :guilabel:`Add...` and choose one of the supported server types to create a new server connection:
 
 - GeoServer
 - MapServer

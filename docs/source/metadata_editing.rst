@@ -31,7 +31,9 @@ Preview metadata
 
 To see a preview of the metadata of the selected layer, click the |previewmetadata| button.
 
-.. |previewmetadata| image:: ./img/preview_metadata_button.png
+.. |previewmetadata| image:: ../../geocatbridge/images/preview.svg
+                     :height: 16 px
+                     :width: 16 px
 
 This will open a new dialog and render the metadata as a simple HTML webpage:
 
@@ -44,7 +46,9 @@ Metadata validation
 |short_name| can use built-in QGIS validation tools and display the result of the metadata validation.
 Click the |validatemetadata| button to validate your metadata.
 
-.. |validatemetadata| image:: ./img/validation.png 
+.. |validatemetadata| image:: ../../geocatbridge/images/validate.svg
+                      :height: 16 px
+                      :width: 16 px
 
 After validation a dialog with the results is displayed:
 
@@ -58,7 +62,9 @@ If your layer has metadata in ISO19139 or ESRI-ISO (ISO19115 or FGDC) format, an
 | QGIS only has native support for its own `qmd` format. However, |short_name| is able to import the metadata.
 | Select the layer in the |short_name| dialog and click the |loadmetadata| button.
 
-.. |loadmetadata| image:: ./img/loadmetadata.png 
+.. |loadmetadata| image:: ../../geocatbridge/images/import.svg
+                  :height: 16 px
+                  :width: 16 px
 
 | |short_name| will look in the folder where the layer file is stored and try to find a metadata file named either `[layer_filename].[extension].xml` or `[layer_filename].xml`.
 | For example, for a layer data source named `countries.shp`, it will search for both `countries.shp.xml` and `countries.xml`.
