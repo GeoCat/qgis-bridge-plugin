@@ -2,18 +2,13 @@ from functools import partial
 from itertools import chain
 from requests import HTTPError
 
-from qgis.PyQt import QtCore
-from qgis.PyQt.QtWidgets import (
-    QHBoxLayout,
-    QProgressDialog
-)
+from qgis.PyQt.QtWidgets import QHBoxLayout
 from qgis.gui import QgsAuthConfigSelect
 
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.servers.models.gs_storage import GeoserverStorage
 from geocatbridge.servers.views.geoserver_ds import GeoserverDatastoreDialog
 from geocatbridge.utils import gui
-from geocatbridge.utils.meta import getAppName
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
@@ -30,7 +25,11 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
 
         self.populateStorageCombo()
         self.comboStorageType.currentIndexChanged.connect(self.datastoreChanged)
+        self.btnRefreshDatabases.setToolTip(self.tr("Refresh datastores"))
+        self.btnRefreshDatabases.setIcon(gui.getSvgIcon("refresh"))
         self.btnRefreshDatabases.clicked.connect(partial(self.updateDbServersCombo, True))
+        self.btnAddDatastore.setIcon(gui.getSvgIcon("add"))
+        self.btnAddDatastore.setToolTip(self.tr("Add new PostGIS datastore"))
         self.btnAddDatastore.clicked.connect(self.addPostgisDatastore)
         self.txtGeoserverName.textChanged.connect(self.setDirty)
         self.txtGeoserverUrl.textChanged.connect(self.setDirty)
@@ -112,23 +111,58 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         """ Called each time the database combobox selection changed. """
         if storage is None:
             storage = GeoserverStorage[self.comboStorageType.currentIndex()]
+
+        self.setGeoserverDatastoreText(storage)
         if storage == GeoserverStorage.POSTGIS_BRIDGE:
             self.updateDbServersCombo(False, init_value)
-            self.comboGeoserverDatabase.setVisible(True)
-            self.labelGeoserverDatastore.setText('Database')
-            self.labelGeoserverDatastore.setVisible(True)
-            self.datastoreControls.setVisible(False)
         elif storage == GeoserverStorage.POSTGIS_GEOSERVER:
-            self.comboGeoserverDatabase.setVisible(True)
-            self.labelGeoserverDatastore.setText('Datastore')
-            self.labelGeoserverDatastore.setVisible(True)
-            self.datastoreControls.setVisible(True)
             self.updateDbServersCombo(True, init_value)
-        elif storage == GeoserverStorage.FILE_BASED:
-            self.comboGeoserverDatabase.setVisible(False)
-            self.labelGeoserverDatastore.setVisible(False)
-            self.datastoreControls.setVisible(False)
+
         self.setDirty()
+
+    def setGeoserverDatastoreText(self, storage_type: GeoserverStorage):
+        self.toggleDatastoreControls(False)
+        self.labelGeoserverDatastore.setText('Database')
+        self.labelGeoserverDatastore.setWhatsThis(None)
+        self.labelGeoserverDatastore.setEnabled(False)
+        self.comboGeoserverDatabase.setEnabled(False)
+
+        if storage_type == GeoserverStorage.POSTGIS_BRIDGE:
+            whats_this = """
+                         <html>
+                            <head/>
+                            <body>
+                                <p>Select the PostGIS connection to use when publishing vector layers to GeoServer.</p>
+                                <p>Bridge will use this connection to import the layer data into PostGIS, 
+                                and GeoServer will use it to read the layer data.</p>
+                            </body>
+                         </html>
+                         """
+            self.comboGeoserverDatabase.setEnabled(True)
+            self.labelGeoserverDatastore.setEnabled(True)
+            self.labelGeoserverDatastore.setWhatsThis(whats_this)
+        elif storage_type == GeoserverStorage.POSTGIS_GEOSERVER:
+            whats_this = """
+                         <html>
+                            <head/>
+                            <body>
+                                <p>Select an existing PostGIS datastore to use as a template 
+                                when publishing vector layers.</p>
+                                <p>Bridge will export the layer data to GeoServer and create a new datastore based 
+                                on the one that you selected. 
+                                Then, Bridge will instruct GeoServer to import the data into the PostGIS datastore.</p>
+                            </body>
+                         </html>
+                         """
+            self.toggleDatastoreControls(True)
+            self.comboGeoserverDatabase.setEnabled(True)
+            self.labelGeoserverDatastore.setEnabled(True)
+            self.labelGeoserverDatastore.setText('Template')
+            self.labelGeoserverDatastore.setWhatsThis(whats_this)
+
+    def toggleDatastoreControls(self, enabled: bool):
+        self.btnRefreshDatabases.setEnabled(enabled)
+        self.btnAddDatastore.setEnabled(enabled)
 
     def updateDbServersCombo(self, managed_by_geoserver: bool, init_value=None):
         """ (Re)populate the combobox with database-driven datastores.

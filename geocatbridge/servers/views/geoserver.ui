@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -29,7 +29,7 @@
    <item alignment="Qt::AlignTop">
     <widget class="QFrame" name="frame">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -83,7 +83,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Datastore</string>
+           <string>Database</string>
           </property>
          </widget>
         </item>
@@ -120,7 +120,7 @@
           <item>
            <widget class="QComboBox" name="comboGeoserverDatabase">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -134,68 +134,35 @@
            </widget>
           </item>
           <item>
-           <widget class="QWidget" name="datastoreControls" native="true">
-            <property name="cursor">
-             <cursorShape>ArrowCursor</cursorShape>
+           <widget class="QToolButton" name="btnRefreshDatabases">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QToolButton" name="btnRefreshDatabases">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>70</width>
-                 <height>22</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::StrongFocus</enum>
-               </property>
-               <property name="text">
-                <string>Refresh</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QToolButton" name="btnAddDatastore">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>105</width>
-                 <height>22</height>
-                </size>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::StrongFocus</enum>
-               </property>
-               <property name="text">
-                <string>Add datastore</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
+            <property name="text">
+             <string>Refresh</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="btnAddDatastore">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
+            <property name="text">
+             <string>Add datastore</string>
+            </property>
            </widget>
           </item>
          </layout>
@@ -223,8 +190,11 @@
             <height>0</height>
            </size>
           </property>
+          <property name="whatsThis">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If GeoServer has access to the same PostGIS database as your QGIS project, you may wish to check this option. &lt;/p&gt;&lt;p&gt;When Bridge publishes a PostGIS layer, it will only create a reference to it on GeoServer, instead of uploading the layer source data.&lt;/p&gt;&lt;p&gt;This option has no effect if the layer source does not reference a PostGIS table.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>Connect GeoServer to original data source if possible (do not upload)</string>
+           <string>Reference existing PostGIS tables (if possible)</string>
           </property>
          </widget>
         </item>

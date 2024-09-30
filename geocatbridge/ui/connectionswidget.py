@@ -15,7 +15,7 @@ from qgis.PyQt.QtWidgets import (
 
 from geocatbridge.servers import manager
 from geocatbridge.servers.bases import ServerWidgetBase
-from geocatbridge.utils import gui
+from geocatbridge.utils import gui, meta
 from geocatbridge.utils.feedback import FeedbackMixin
 
 WIDGET, BASE = gui.loadUiType(__file__)
@@ -88,7 +88,9 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
 
         config_str = manager.serializeServers()
         if not config_str:
-            self.showErrorBar("Error", "Failed to export server configuration. Please check QGIS log.")
+            self.showErrorBar("Error",
+                              f"Failed to export server configuration. "
+                              f"Please check {meta.getAppName()} log.")
             return
 
         if not filename.endswith("json"):
@@ -99,7 +101,9 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.showSuccessBar("Success", "Successfully exported server configuration to JSON file")
         except Exception as err:
             self.logError(err)
-            self.showErrorBar("Error", "Failed to write server configuration JSON file. Please check QGIS log.")
+            self.showErrorBar("Error",
+                              f"Failed to write server configuration JSON file. "
+                              f"Please check {meta.getAppName()} log.")
 
     def importServers(self):
         """ Imports a list of server configurations from a user-specified JSON file. """
@@ -115,11 +119,14 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
                 config_str = f.read()
         except Exception as err:
             self.logError(err)
-            self.showErrorBar("Error", "Unable to read server configuration JSON file. Please check QGIS log.")
+            self.showErrorBar("Error",
+                              f"Unable to read server configuration JSON file. "
+                              f"Please check {meta.getAppName()} log.")
 
         if not manager.deserializeServers(config_str):
-            self.showErrorBar("Error", "Failed to import server configuration from JSON file. "
-                                       "Please check QGIS log.")
+            self.showErrorBar("Error",
+                              f"Failed to import server configuration from JSON file. "
+                              f"Please check {meta.getAppName()} log.")
             return
 
         # Serialize all successful configurations again and store them in the QGIS settings
@@ -247,7 +254,9 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         server = server_widget.createServerInstance()
         if server is None:
             # Server is usually None when createServerInstance() call failed.
-            self.showErrorBar("Error", "Wrong value(s) in current server settings. Please check QGIS log.")
+            self.showErrorBar("Error",
+                              f"Wrong value(s) in current server settings. "
+                              f"Please check {meta.getAppName()} log.")
         else:
             errors = set()
             # Run the actual connection test method on the server instance.
@@ -273,7 +282,9 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.showErrorBar("Error", f"Current server does not implement {ServerWidgetBase.__name__}")
             return False
         if not server:
-            self.showErrorBar("Error", "Bad or missing values in current server settings. Please check QGIS log.")
+            self.showErrorBar("Error",
+                              f"Bad or missing values in current server settings. "
+                              f"Please check {meta.getAppName()} log.")
             return False
 
         try:
@@ -331,7 +342,9 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             target_instance = server_type(**settings)
         except Exception as err:
             self.logError(err)
-            self.showErrorBar("Error", f"Failed to duplicate server {source_name}. Please check QGIS log.")
+            self.showErrorBar("Error",
+                              f"Failed to duplicate server {source_name}. "
+                              f"Please check {meta.getAppName()} log.")
             return
 
         # Populate server widget with duplicated instance values and set dirty
@@ -341,7 +354,9 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.toggleServerList()
         else:
             manager.removeServer(target_name, True)
-            self.showErrorBar("Error", f"Failed to duplicate server {source_name}. Please check QGIS log.")
+            self.showErrorBar("Error",
+                              f"Failed to duplicate server {source_name}. "
+                              f"Please check {meta.getAppName()} log.")
 
     def addMenuToButtonNew(self):
         """ Populate "Add" menu button with available server types (in alphabetical order). """
@@ -436,7 +451,9 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             self.addServerListItem(cls, assigned_name, True)
             self.toggleServerList()
         else:
-            self.showErrorBar("Error", f"Failed to add {cls.getLabel()} server. Please check QGIS log.")
+            self.showErrorBar("Error",
+                              f"Failed to add {cls.getLabel()} server. "
+                              f"Please check {meta.getAppName()} log.")
 
     def showServerWidget(self, server=None, force_dirty: bool = False) -> Union[str, None]:
         """ Sets the current server configuration widget for the given server instance or class.

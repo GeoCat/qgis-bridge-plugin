@@ -59,6 +59,7 @@ WIDGET, BASE = gui.loadUiType(__file__)
 
 
 class PublishWidget(FeedbackMixin, BASE, WIDGET):
+    listLayers: QListWidget
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -357,7 +358,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.updateOnlineLayersPublicationStatus()
 
     def addLayerListItem(self, layer):
-        widget = LayerItemWidget(layer, self.listLayers)
+        widget = LayerItemWidget(layer, self)
         item = QListWidgetItem(self.listLayers)
         item.setSizeHint(widget.sizeHint())
         self.listLayers.addItem(item)
@@ -749,11 +750,13 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if task.exception is not None:
             if getattr(task, 'exc_type', None) == requests.exceptions.ConnectionError:
                 self.showErrorBox(f"Error while {action}ing",
-                                  "Connection error: server unavailable.\nPlease check QGIS log for details.",
+                                  f"Connection error: server unavailable.\n"
+                                  f"Please check {meta.getAppName()} log for details.",
                                   propagate=task.exception)
             else:
                 self.showErrorBar(f"Error while {action}ing",
-                                  "Please check QGIS log for details.", propagate=task.exception)
+                                  f"Please check {meta.getAppName()} log for details.",
+                                  propagate=task.exception)
         elif isinstance(task, ExportTask):
             self.showSuccessBar(f"{action.capitalize()} completed", "No issues encountered.")
 
@@ -769,7 +772,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
         def _aborted():
             self.showErrorBar(f"{meta.getAppName()} background {action} failed",
-                              "Please check QGIS log for details.", main=True, propagate=task.exception)
+                              f"Please check {meta.getAppName()} log for details.",
+                              main=True, propagate=task.exception)
 
         def _finished():
             self.showSuccessBar(f"{meta.getAppName()} background {action} completed",
@@ -850,10 +854,10 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
 
 class LayerItemWidget(QWidget):
-    def __init__(self, layer: BridgeLayer, list_widget: QListWidget = None):
+    def __init__(self, layer: BridgeLayer, publish_widget: PublishWidget = None):
         super(LayerItemWidget, self).__init__()  # noqa
-        self._list_widget = list_widget
-        self._position = list_widget.count() if list_widget else 0
+        self._publish_widget = publish_widget
+        self._position = publish_widget.listLayers.count() if publish_widget else 0  # assumes widget is added
         self._name = layer.name()
         self._id = layer.id()
         self._checkbox = QCheckBox(self._name, self)
@@ -916,8 +920,10 @@ class LayerItemWidget(QWidget):
 
     def _checkbox_clicked(self, _):
         """ Make sure that the list widget item is selected when the checkbox is clicked (toggled). """
-        if isinstance(self._list_widget, QListWidget):
-            self._list_widget.item(self._position).setSelected(True)
+        if not isinstance(self._publish_widget, PublishWidget):
+            return
+        self._publish_widget.listLayers.item(self._position).setSelected(True)
+        self._publish_widget.currentRowChanged(self._position)
 
     @property
     def checked(self) -> bool:
