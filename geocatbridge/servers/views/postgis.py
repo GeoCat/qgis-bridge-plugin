@@ -1,5 +1,4 @@
 from qgis.PyQt.QtWidgets import QHBoxLayout
-from qgis.gui import QgsAuthConfigSelect
 
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.utils import gui
@@ -15,7 +14,7 @@ class PostgisWidget(ServerWidgetBase, BASE, WIDGET):
         super().__init__(parent, server_type)
         self.setupUi(self)
 
-        self.postgisAuth = QgsAuthConfigSelect()
+        self.postgisAuth = gui.getBasicAuthSelectWidget(self)
         self.postgisAuth.selectedConfigIdChanged.connect(self.setDirty)
         self.addAuthWidget()
 

@@ -1,5 +1,4 @@
 from qgis.PyQt.QtWidgets import QHBoxLayout
-from qgis.gui import QgsAuthConfigSelect
 
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.utils import gui
@@ -13,7 +12,7 @@ class MapServerWidget(ServerWidgetBase, BASE, WIDGET):
         super().__init__(parent, server_type)
         self.setupUi(self)
 
-        self.mapserverAuth = QgsAuthConfigSelect()
+        self.mapserverAuth = gui.getBasicAuthSelectWidget(self)
         self.mapserverAuth.selectedConfigIdChanged.connect(self.setDirty)
         self.addAuthWidget()
 

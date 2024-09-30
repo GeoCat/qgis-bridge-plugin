@@ -3,7 +3,6 @@ from itertools import chain
 from requests import HTTPError
 
 from qgis.PyQt.QtWidgets import QHBoxLayout
-from qgis.gui import QgsAuthConfigSelect
 
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.servers.models.gs_storage import GeoserverStorage
@@ -19,7 +18,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
         super().__init__(parent, server_type)
         self.setupUi(self)
 
-        self.geoserverAuth = QgsAuthConfigSelect()
+        self.geoserverAuth = gui.getBasicAuthSelectWidget(self)
         self.geoserverAuth.selectedConfigIdChanged.connect(self.setDirty)
         self.addAuthWidget()
 

@@ -1,5 +1,4 @@
 from qgis.PyQt.QtWidgets import QHBoxLayout
-from qgis.gui import QgsAuthConfigSelect
 
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.servers.models.gn_profile import GeoNetworkProfiles
@@ -14,7 +13,7 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         super().__init__(parent, server_type)
         self.setupUi(self)
 
-        self.geonetworkAuth = QgsAuthConfigSelect()
+        self.geonetworkAuth = gui.getBasicAuthSelectWidget(self)
         self.geonetworkAuth.selectedConfigIdChanged.connect(self.setDirty)
         self.addAuthWidget()
 

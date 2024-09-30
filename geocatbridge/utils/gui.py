@@ -4,7 +4,8 @@ from pathlib import Path
 from qgis.PyQt import QtCore
 from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QCursor, QIcon, QPixmap
-from qgis.PyQt.QtWidgets import QApplication
+from qgis.PyQt.QtWidgets import QApplication, QWidget
+from qgis.gui import QgsAuthConfigSelect
 
 from geocatbridge.utils import files
 from geocatbridge.utils.feedback import logError
@@ -62,6 +63,14 @@ def getSvgPixmap(name: str, width: int, height: int) -> QPixmap:
     :returns:       A QPixmap object.
     """
     return getSvgIcon(name).pixmap(QtCore.QSize(width, height))
+
+
+def getBasicAuthSelectWidget(parent: QWidget) -> QgsAuthConfigSelect:
+    """ Returns a QgsAuthConfigSelect widget for selecting a basic authentication configuration only. """
+    # Use "proxy", "gdal", "ogr", or "oracle" data provider argument to filter for Basic Auth only.
+    # It doesn't matter which provider is set, as long as it's not used for other auth methods.
+    # See https://tinyurl.com/4nw7x87f for details.
+    return QgsAuthConfigSelect(parent, "proxy")
 
 
 class ItemProcessor(QtCore.QThread):
