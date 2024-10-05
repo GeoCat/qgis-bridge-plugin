@@ -1,9 +1,10 @@
+import time
 from functools import partial
 from itertools import chain
 from requests import HTTPError
 from typing import Optional
 
-from qgis.PyQt.QtWidgets import QHBoxLayout
+from qgis.PyQt.QtWidgets import QHBoxLayout, QProgressDialog
 
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.servers.models.gs_storage import GeoserverStorage
@@ -177,7 +178,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                                         this value can be set immediately as the only available and selected item.
                                         Doing so prevents a full refresh of GeoServer datastores.
         """
-        def addGeoserverPgDatastores(current_db_: str, worker_result):
+        def _addGeoserverPgDatastores(current_db_: str, worker_result):
             if worker_result:
                 # Worker result might be a list of lists, so we should flatten it
                 datastores = list(chain.from_iterable(worker_result))
@@ -221,10 +222,11 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                 pg_dialog = self.parent.getProgressDialog("Retrieving PostGIS datastores...",
                                                           len(workspaces), self.dsThread.requestInterruption)
                 self.dsWorker.progress.connect(pg_dialog.setValue)
-                self.dsWorker.results.connect(partial(addGeoserverPgDatastores, current_db))
+                self.dsWorker.finished.connect(pg_dialog.close)
+                self.dsWorker.results.connect(partial(_addGeoserverPgDatastores, current_db))
                 self.dsWorker.start()
             except Exception as e:
-                msg = f'Failed to retrieve datastores for {getattr(server, "serverName", self.txtGeoserverName.text())}'  # noqa
+                msg = f'Failed to retrieve datastores for {getattr(server, "serverName", self.txtGeoserverName.text())}'
                 if isinstance(e, HTTPError) and e.response.status_code == 401:
                     msg = f'{msg}: please check credentials'
                 else:

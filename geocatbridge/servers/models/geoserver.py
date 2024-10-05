@@ -972,13 +972,6 @@ class GeoserverServer(DataCatalogServerBase):
         url = f"{self.apiUrl}/workspaces.json"
         return self._exists(url, "workspace", self.workspace)
 
-    def willDeleteLayersOnPublication(self, to_publish: List[str]):
-        """ Checks if any of the layer names of the given QGIS layer IDs already exist on the server workspace. """
-        if self.workspaceExists():
-            # If the set of selected QGIS layers is NOT disjoint with the layers on the server, layers will be deleted!
-            return not frozenset(listLayerNames(to_publish)).isdisjoint(self.layerNames().keys())
-        return False
-
     def datastoreExists(self, name):
         url = f"{self.apiUrl}/workspaces/{self.workspace}/datastores.json"
         return self._exists(url, "dataStore", name)

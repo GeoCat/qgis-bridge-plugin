@@ -81,16 +81,13 @@ class BackgroundWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     results = QtCore.pyqtSignal(list)
 
-    def __init__(self):
-        super().__init__()
-
     def _run(self, func: Callable, items: Iterable):
         results_ = []
         try:
             if isgenerator(items):
                 # Flatten generators into a tuple
                 items = tuple(items)
-            for step, item in enumerate(items):
+            for step, item in enumerate(items, 1):
                 self.progress.emit(step)
                 try:
                     results_.append(func(item))
@@ -100,6 +97,8 @@ class BackgroundWorker(QtCore.QObject):
                     results_.append(e)
                 if self.thread().isInterruptionRequested():
                     break
+            # Tiny delay so user can see the progress bar at 100%
+            self.thread().msleep(100)
         finally:
             self.results.emit(results_)
             self.finished.emit()

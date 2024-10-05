@@ -629,6 +629,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                 for err in errors:
                     self.showErrorBar("Error", err)
                 return False
+            combo.setStyleSheet('')  # reset default style
             return True
 
         def _testServers() -> tuple[manager.bases.DataCatalogServerBase, manager.bases.MetaCatalogServerBase]:

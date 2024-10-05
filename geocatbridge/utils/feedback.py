@@ -185,8 +185,14 @@ class FeedbackMixin:
         :param callback:        Callback function to be executed when the user presses "Cancel".
         :return:                A QProgressDialog instance.
         """
-        pg_dialog = QProgressDialog(label, self.translate("Cancel"), 0, max_length,
-                                    self if isinstance(self, QWidget) else None)
+        if not isinstance(self, QWidget):
+            raise ValueError("A QWidget parent instance is required to show a progress dialog.")
+        pg_dialog = QProgressDialog(self, QtCore.Qt.WindowType.Popup)
+        pg_dialog.setLabelText(label)
+        pg_dialog.setAutoReset(False)
+        pg_dialog.setAutoClose(False)
+        pg_dialog.setCancelButtonText(self.tr("Cancel"))
+        pg_dialog.setRange(0, max_length)
         pg_dialog.canceled.connect(callback, type=QtCore.Qt.DirectConnection)  # noqa
         pg_dialog.setWindowModality(QtCore.Qt.WindowModal)
         pg_dialog.setWindowTitle(getAppName())
