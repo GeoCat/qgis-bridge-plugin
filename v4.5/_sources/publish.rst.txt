@@ -62,7 +62,7 @@ or specify the things you wish to export to a local file on the :guilabel:`Offli
 
 When publishing online, you can publish your layers to a geodata server, their metadata to a metadata server, or both in one go.
 Those servers must be selected from the two available drop-down lists in the :guilabel:`Online` tab.
-As mentioned before, these servers should be added beforehand in the :guilabel:`Servers` section of the |short_name| dialog,
+As mentioned before, these servers should be added beforehand in the :guilabel:`Connections` section of the |short_name| dialog,
 as described in :ref:`ServerConnections`.
 
 .. note::   If you are publishing layers to GeoServer, the destination workspace name will be taken from the

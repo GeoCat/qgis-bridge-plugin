@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -35,6 +36,7 @@
           
           <a href="index.html">
             
+              <img src="_static/bridge_logo.svg" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 4.5
@@ -58,7 +60,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#geoserver">GeoServer</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#file-based-storage">File-based storage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#import-into-postgis-database-direct-connect">Import into PostGIS database (direct connect)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#import-into-postgis-database-handled-by-geoserver">Import into PostGIS database (handled by GeoServer)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#import-into-postgis-database-managed-by-geoserver">Import into PostGIS database (managed by GeoServer)</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#postgis">PostGIS</a></li>
@@ -70,7 +72,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="publish.html">Publishing Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metadata_editing.html">Metadata Editing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="styleviewer.html">StyleViewer Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="styleviewer.html">Style Viewer Panel</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_symbology.html">Supported Symbology</a></li>
 </ul>
 
@@ -100,11 +102,11 @@
   <section id="server-connections">
 <span id="serverconnections"></span><h1>Server Connections<a class="headerlink" href="#server-connections" title="Permalink to this heading"></a></h1>
 <p>Before you can publish data with GeoCat Bridge, you will have to configure one or more server connections.
-This can be achieved in the <em>Servers</em> section of the Bridge dialog:</p>
-<img alt="_images/servers.png" src="_images/servers.png" />
+This can be achieved in the <span class="guilabel">Connections</span> section of the Bridge dialog:</p>
+<img alt="_images/quickstart_servers.png" src="_images/quickstart_servers.png" />
 <section id="adding-connections">
 <h2>Adding connections<a class="headerlink" href="#adding-connections" title="Permalink to this heading"></a></h2>
-<p>Click <span class="guilabel">New Server</span> and choose one of the supported server types to create a new server connection:</p>
+<p>Click <a class="reference internal" href="_images/add.svg"><img alt="addbutton" height="16px" src="_images/add.svg" width="16px" /></a> <strong>Add…</strong> and choose one of the supported server types to create a new server connection:</p>
 <ul class="simple">
 <li><p>GeoServer</p></li>
 <li><p>MapServer</p></li>
@@ -115,14 +117,14 @@ This can be achieved in the <em>Servers</em> section of the Bridge dialog:</p>
 <div class="line">Fill in the required parameters and click the <span class="guilabel">Save</span> button to store the connection details.</div>
 <div class="line">You can edit the parameters of a server at any given time. Just select the server connection in the left panel, and edit the fields you wish to change in the right panel.</div>
 </div>
-<p>If you wish to remove a server connection, select it from the left panel and click the <span class="guilabel">Remove</span> button.
-The <span class="guilabel">Duplicate</span> button may come in handy if you wish to try out an alternative configuration based on an existing
+<p>If you wish to remove a server connection, select it from the left panel and click the <a class="reference internal" href="_images/remove.svg"><img alt="removebutton" height="16px" src="_images/remove.svg" width="16px" /></a> <strong>Remove</strong> button.
+The <a class="reference internal" href="_images/duplicate.svg"><img alt="duplicatebutton" height="16px" src="_images/duplicate.svg" width="16px" /></a> <strong>Duplicate</strong> button may come in handy if you wish to try out an alternative configuration based on an existing
 server connection.</p>
 <div class="line-block">
 <div class="line">Bridge will automatically store all server connections in the QGIS settings for later use.</div>
-<div class="line">However, sometimes you might want to backup or share all the configured server connections. The <span class="guilabel">Export</span> button will
+<div class="line">However, sometimes you might want to backup or share all the configured server connections. The <a class="reference internal" href="_images/export.svg"><img alt="exportbutton" height="16px" src="_images/export.svg" width="16px" /></a> <strong>Export</strong> button will
 allow you to <em>save</em> a JSON file of the current configuration.</div>
-<div class="line">The <span class="guilabel">Import</span> button will do the opposite and <em>load</em> server connections from a JSON file. Note that the imported connections will be
+<div class="line">The <a class="reference internal" href="_images/import.svg"><img alt="importbutton" height="16px" src="_images/import.svg" width="16px" /></a> <strong>Import</strong> button will do the opposite and <em>load</em> server connections from a JSON file. Note that the imported connections will be
 <em>added</em> to the list (i.e. no existing connections will be removed). Bridge will append a numeric suffix to server connections
 with a name that already exists.</div>
 </div>
@@ -162,46 +164,76 @@ please install this missing Python package (e.g. using the OSGeo4W setup or Pyth
 <p>If required, you can create and publish Mapbox styles for vector tiles. Mapbox styles and sprite sheets will be processed
 after all layers were successfully published to GeoServer.</p>
 <p>Click <span class="guilabel">Test Connection</span> to verify that the connection can be established.</p>
-<p>You should also specify how layer data will be stored on the server. Three different methods are available:</p>
+<p>You also need to specify how the layer data should be stored. Three different storage methods are available:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#file-based-storage">File-based storage</a></p></li>
+<li><p><a class="reference internal" href="#import-into-postgis-database-direct-connect">Import into PostGIS database (direct connect)</a> (vector layers only)</p></li>
+<li><p><a class="reference internal" href="#import-into-postgis-database-managed-by-geoserver">Import into PostGIS database (managed by GeoServer)</a> (vector layers only)</p></li>
+</ol>
 <section id="file-based-storage">
 <h4>File-based storage<a class="headerlink" href="#file-based-storage" title="Permalink to this heading"></a></h4>
 <div class="line-block">
-<div class="line">The layer data is uploaded and stored as files in the GeoServer target workspace on the server.</div>
+<div class="line">The layer data is uploaded and stored as files in the GeoServer target workspace datastore.</div>
 <div class="line">Bridge prefers to upload vector data as GeoPackages and raster data as GeoTIFF files.</div>
 </div>
+<p>This method is the most straight-forward and should always work, as there are no dependencies.
+However, depending on the size of the data, this method may be slower and could potentially fail due to network timeouts
+or server-side file upload size limitations.</p>
 </section>
 <section id="import-into-postgis-database-direct-connect">
 <span id="postgisdirectoption"></span><h4>Import into PostGIS database (direct connect)<a class="headerlink" href="#import-into-postgis-database-direct-connect" title="Permalink to this heading"></a></h4>
 <div class="line-block">
-<div class="line">The layer data is uploaded to tables in a PostGIS database directly (i.e. by Bridge, see <a class="reference internal" href="#postgis">PostGIS</a>).</div>
-<div class="line">GeoServer will <em>not</em> handle the database upload, but merely establish a link to the database table in the created layer(s). This will require a direct PostGIS connection, which you can set up in the <em>Servers</em> section of Bridge as well (see below).</div>
-<div class="line">Note that GeoServer should also have read access to that PostGIS connection.</div>
+<div class="line">The layer data is imported by Bridge into a PostGIS database directly.</div>
+<div class="line">GeoServer will merely establish a link to the imported database table for the created layer(s). This will require a direct <a class="reference internal" href="#postgis">PostGIS</a> connection, which you can set up in the <em>Connections</em> section of Bridge as well (see below).</div>
+<div class="line">Note that GeoServer should also have read access to that same PostGIS connection.</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<div class="line-block">
+<div class="line">This method is only available for vector layers.</div>
+<div class="line">For raster layers, Bridge will resort to <a class="reference internal" href="#file-based-storage">file-based storage</a> instead.</div>
+</div>
 </div>
 </section>
-<section id="import-into-postgis-database-handled-by-geoserver">
-<h4>Import into PostGIS database (handled by GeoServer)<a class="headerlink" href="#import-into-postgis-database-handled-by-geoserver" title="Permalink to this heading"></a></h4>
+<section id="import-into-postgis-database-managed-by-geoserver">
+<h4>Import into PostGIS database (managed by GeoServer)<a class="headerlink" href="#import-into-postgis-database-managed-by-geoserver" title="Permalink to this heading"></a></h4>
+<p>The layer data is packaged and uploaded to GeoServer, and a job is scheduled on the server to import the data into a PostGIS database.</p>
+<p>This is a good approach if you do not have direct access to the PostGIS database from your machine, but GeoServer does.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <div class="line-block">
-<div class="line">The layer data is uploaded to tables in a PostGIS database by GeoServer. This method requires the GeoServer Importer extension, which only handles Shapefile imports for vector data.</div>
-<div class="line">This means that if the data is stored in a GeoPackage originally, attribute names may be renamed due to the 10 character limit of the Shapefile <cite>.dbf</cite> file upon export. Bridge handles this automatically and also makes sure that field names referenced in styles are renamed accordingly.</div>
-<div class="line">You must select a suitable PostGIS datastore on the GeoServer instance. Selecting this option will trigger a process that lists all the available datastores in each GeoServer workspace (which might take some time):</div>
+<div class="line">This method is only available for vector layers.</div>
+<div class="line">For raster layers, Bridge will resort to <a class="reference internal" href="#file-based-storage">file-based storage</a> instead.</div>
 </div>
+</div>
+<p>Please note that some limitations apply:</p>
+<ol class="arabic simple">
+<li><p>This method requires the GeoServer <a class="reference external" href="https://docs.geoserver.org/stable/en/user/extensions/importer/installing.html">Importer extension</a> to be installed and enabled.</p></li>
+<li><p>Because Importer can only import vector data from Shapefiles, attribute names may be shortened on export to 10 characters (<cite>.dbf</cite> limitation). Those names will also be applied to the PostGIS table attributes. However, Bridge will try to make sure that attribute names referenced in styles are renamed accordingly, so the styles won’t break.</p></li>
+<li><p>Created PostGIS tables must be deleted manually. Please read <a class="reference internal" href="#importerwarning"><span class="std std-ref">this warning</span></a> for more information.</p></li>
+</ol>
+<section id="datastore-selection">
+<h5>Datastore selection<a class="headerlink" href="#datastore-selection" title="Permalink to this heading"></a></h5>
+<p>In the <em>Import into PostGIS database (managed by GeoServer)</em> mode, you must either:</p>
+<ul class="simple">
+<li><p>select an existing PostGIS datastore connection on GeoServer that can act as a template;</p></li>
+<li><p>or define a new PostGIS connection to use on the GeoServer side.</p></li>
+</ul>
+<p>Bridge will automatically try to list all available PostGIS datastores on GeoServer.
+You can select any datastore as the template that Bridge should use to create a new datastore with the same connection details as the selected one.</p>
 <img alt="_images/servers_geoserver2.png" src="_images/servers_geoserver2.png" />
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <div class="line-block">
 <div class="line">The listed datastores will be prefixed by the workspace name to which they belong.</div>
-<div class="line">This does <strong>not</strong> mean that the layers will be published to that workspace as well.</div>
-<div class="line">Bridge always publishes layers to a (new) workspace named after the QGIS project name
-(see <a class="reference internal" href="publish.html#howtopublish"><span class="std std-ref">How to publish</span></a>), but it will use the same datastore <em>connection details</em> as
-the datastore that you have selected.</div>
+<div class="line">This does <strong>not</strong> mean that the layers will be published to that workspace.</div>
 </div>
 </div>
-<div class="line-block">
-<div class="line">If you wish to add a new PostGIS-backed datastore, click the <span class="guilabel">Add datastore</span> button.</div>
-<div class="line">This will open a dialog that allows you to specify the connection details. Make sure that GeoServer has full access to the specified PostGIS instance.</div>
-<div class="line">For more options (or if you wish to specify a JNDI connection pool) please create the datastore using the GeoServer admin page instead.</div>
-</div>
-<div class="admonition warning">
+<p>Alternatively, you can click the <a class="reference internal" href="_images/add.svg"><img alt="addbutton" height="16px" src="_images/add.svg" width="16px" /></a> button to create a new datastore yourself, if you know the connection details.
+Note that this is the connection that <strong>GeoServer</strong> should use, and that the connection might not work locally on your machine.</p>
+<p>For more fine-grained control, or if you wish to specify a JNDI connection pool instead, please create the datastore in the GeoServer Web UI instead.
+Bridge should then pick up the new datastore automatically, so you can select that as a template.</p>
+<div class="admonition warning" id="importerwarning">
 <p class="admonition-title">Warning</p>
 <div class="line-block">
 <div class="line">Neither the GeoServer REST API nor the Importer extension is authorized to delete underlying PostGIS layer data tables.</div>
@@ -216,6 +248,7 @@ that were created by GeoServer, but are no longer used by any feature type.</div
 <div class="line">However, please be aware that the Importer extension still cannot delete any PostGIS tables: if a workspace is completely removed, this will not delete the underlying feature type tables.</div>
 </div>
 </div>
+</section>
 </section>
 </section>
 <section id="postgis">
@@ -261,7 +294,7 @@ This bundle should include the root certificate and any intermediate certificate
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, GeoCat BV. Built from e9ae3af.</p>
+    <p>&#169; Copyright 2024, GeoCat BV. Built from 47333bd.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
