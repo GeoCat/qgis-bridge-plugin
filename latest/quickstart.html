@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -35,6 +36,7 @@
           
           <a href="index.html">
             
+              <img src="_static/bridge_logo.svg" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 4.5
@@ -53,8 +55,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart Tutorial</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-a-geoserver-connection">Setting up a GeoServer connection</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#step-1-show-short-name-dialog">Step 1: show Bridge dialog</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#step-2-go-to-servers-panel">Step 2: go to servers panel</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#step-3-add-new-server">Step 3: add new server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-go-to-connections-panel">Step 2: go to Connections panel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-add-new-connection">Step 3: add new connection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-4-set-name-and-address">Step 4: set name and address</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-5-confirm-storage-type">Step 5: confirm storage type</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-6-add-new-credentials">Step 6: add new credentials</a></li>
@@ -78,7 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="server_configuration.html">Server Connections</a></li>
 <li class="toctree-l1"><a class="reference internal" href="publish.html">Publishing Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metadata_editing.html">Metadata Editing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="styleviewer.html">StyleViewer Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="styleviewer.html">Style Viewer Panel</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_symbology.html">Supported Symbology</a></li>
 </ul>
 
@@ -107,6 +109,8 @@
              
   <section id="quickstart-tutorial">
 <h1>Quickstart Tutorial<a class="headerlink" href="#quickstart-tutorial" title="Permalink to this heading"></a></h1>
+<blockquote>
+<div></div></blockquote>
 <p>Once GeoCat Bridge has been <a class="reference internal" href="installation.html#installing-bridge"><span class="std std-ref">installed</span></a>, the first thing you might want to do is publish some layers!</p>
 <p>This quickstart tutorial will walk you through the process of publishing a QGIS map layers to GeoServer.</p>
 <section id="setting-up-a-geoserver-connection">
@@ -123,17 +127,17 @@ This typically <em>only needs to be done once</em>, as Bridge will store all ser
 <p>The Bridge dialog should now appear. First-time users may see the <span class="guilabel">About</span> panel, while others will
 probably see the <span class="guilabel">Publish</span> panel instead.</p>
 </section>
-<section id="step-2-go-to-servers-panel">
-<h3>Step 2: go to servers panel<a class="headerlink" href="#step-2-go-to-servers-panel" title="Permalink to this heading"></a></h3>
-<p>Click on <span class="guilabel">Servers</span> in the left sidebar. If no servers have been configured so far, this should show the
+<section id="step-2-go-to-connections-panel">
+<h3>Step 2: go to Connections panel<a class="headerlink" href="#step-2-go-to-connections-panel" title="Permalink to this heading"></a></h3>
+<p>Click on <span class="guilabel">Connections</span> in the left sidebar. If no servers have been configured so far, this should show the
 following panel:</p>
 <blockquote>
 <div><img alt="_images/quickstart_servers.png" src="_images/quickstart_servers.png" />
 </div></blockquote>
 </section>
-<section id="step-3-add-new-server">
-<h3>Step 3: add new server<a class="headerlink" href="#step-3-add-new-server" title="Permalink to this heading"></a></h3>
-<p>Click the <span class="guilabel">New Server</span> button on the lower left corner of the <span class="guilabel">Servers</span> panel and select <span class="guilabel">GeoServer</span>:</p>
+<section id="step-3-add-new-connection">
+<h3>Step 3: add new connection<a class="headerlink" href="#step-3-add-new-connection" title="Permalink to this heading"></a></h3>
+<p>Click the <a class="reference internal" href="_images/add.svg"><img alt="addbutton" height="16px" src="_images/add.svg" width="16px" /></a> <strong>Add…</strong> button on the lower left corner of the <span class="guilabel">Connections</span> panel and select <span class="guilabel">GeoServer</span>:</p>
 <blockquote>
 <div><img alt="_images/quickstart_newserver.png" src="_images/quickstart_newserver.png" />
 </div></blockquote>
@@ -165,7 +169,7 @@ so we do not need to change anything here.</p>
 <section id="step-6-add-new-credentials">
 <h3>Step 6: add new credentials<a class="headerlink" href="#step-6-add-new-credentials" title="Permalink to this heading"></a></h3>
 <p>In order to actually establish a connection, we need to authenticate ourselves with GeoServer.
-To do that, add new <span class="guilabel">Credentials</span> by clicking the <span class="guilabel">+</span> button:</p>
+To do that, add new <span class="guilabel">Credentials</span> by clicking the <a class="reference internal" href="_images/add.svg"><img alt="addbutton" height="16px" src="_images/add.svg" width="16px" /></a> button:</p>
 <blockquote>
 <div><img alt="_images/quickstart_addauth.png" src="_images/quickstart_addauth.png" />
 </div></blockquote>
@@ -173,7 +177,7 @@ To do that, add new <span class="guilabel">Credentials</span> by clicking the <s
 </section>
 <section id="step-7-authentication-details">
 <h3>Step 7: authentication details<a class="headerlink" href="#step-7-authentication-details" title="Permalink to this heading"></a></h3>
-<p>After you clicked the <span class="guilabel">+</span> button in the previous step, the <em>Authentication</em> dialog will pop up.</p>
+<p>After you clicked the <a class="reference internal" href="_images/add.svg"><img alt="addbutton" height="16px" src="_images/add.svg" width="16px" /></a> button in the previous step, the <em>Authentication</em> dialog will pop up.</p>
 <p>For the authentication mechanism, we will use <em>Basic authentication</em>. This is the default and works
 well with GeoServer. It also is the only mechanism that Bridge currently supports.</p>
 <p>Now specify any <span class="guilabel">Name</span> (to identify your credential settings) and set the <span class="guilabel">Username</span>
@@ -195,7 +199,7 @@ If the connection was <em>not</em> successful, you should see a red error messag
 <section id="step-9-save-configuration">
 <h3>Step 9: save configuration<a class="headerlink" href="#step-9-save-configuration" title="Permalink to this heading"></a></h3>
 <p>Save your GeoServer configuration by clicking the <span class="guilabel">Save</span> button in the lower right corner of the
-<span class="guilabel">Servers</span> panel.</p>
+<span class="guilabel">Connections</span> panel.</p>
 <p>You are now ready to publish some layers!</p>
 </section>
 </section>
@@ -227,7 +231,7 @@ automatically create GeoServer group layers for all published layers that have b
 <blockquote>
 <div><img alt="_images/quickstart_setdataserver.png" src="_images/quickstart_setdataserver.png" />
 </div></blockquote>
-<p>The <span class="guilabel">Data server</span> list should display all the names of the configurations that you created in the <span class="guilabel">Servers</span> panel.
+<p>The <span class="guilabel">Data server</span> list should display all the names of the configurations that you created in the <span class="guilabel">Connections</span> panel.
 If you just got started, then there will likely only be 1 item in this list.</p>
 </section>
 <section id="step-3-select-layers">
@@ -240,7 +244,10 @@ but can be published to a catalogue service like GeoNetwork if needed. Also note
 the layer name as shown in the QGIS Table of Contents is used.</p>
 <blockquote>
 <div><img alt="_images/quickstart_titleabstract.png" src="_images/quickstart_titleabstract.png" />
-<div class="admonition tip">
+</div></blockquote>
+<p> </p>
+<blockquote>
+<div><div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>If you have vector layers  with lots of attributes, but you only need to publish a couple of these
 fields, you can select the applicable layer and click on the <span class="guilabel">Attributes</span> tab.
@@ -255,8 +262,11 @@ space on the GeoServer side and reduce the time it will take Bridge to transfer 
 <p>Click the <span class="guilabel">Publish</span> button in the lower right corner of the Bridge dialog to start the publication process.
 During this process, a progress dialog should appear:</p>
 <blockquote>
-<div><img alt="_images/quickstart_publishprogress.png" src="_images/quickstart_publishprogress.png" />
-<div class="admonition note">
+<div><img alt="_images/publish_layers_progress.png" src="_images/publish_layers_progress.png" />
+</div></blockquote>
+<p> </p>
+<blockquote>
+<div><div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For you (the user) it may seem that Bridge does not treat <em>raster</em> layers differently from <em>vector</em> layers.
 Under the hood however, Bridge will <strong>always</strong> publish <em>raster</em> data to a file-based GeoServer datastore
@@ -269,10 +279,10 @@ GeoPackage) if possible, and can also be imported into a PostGIS datastore.</p>
 <h3>Step 5: review results<a class="headerlink" href="#step-5-review-results" title="Permalink to this heading"></a></h3>
 <p>Once the publish process has completed, a result dialog should appear:</p>
 <blockquote>
-<div><img alt="_images/quickstart_publishresult.png" src="_images/quickstart_publishresult.png" />
+<div><img alt="_images/publish_layers_report.png" src="_images/publish_layers_report.png" />
 </div></blockquote>
 <p>If there are any errors or warnings, these are shown in the <span class="guilabel">Status</span> column of the published layer list.
-Click on the tiny <span class="guilabel">!</span> buttons to get more details about the issue(s).
+Click on the tiny <a class="reference internal" href="_images/attention.svg"><img alt="attnbutton" height="16px" src="_images/attention.svg" width="16px" /></a> buttons to get more details about the issue(s).
 If there are no issues, it should say <em>OK</em> next to each layer.</p>
 <p>Close the result dialog once you finished reviewing.</p>
 <blockquote>
@@ -294,7 +304,7 @@ server configuration was used.</p>
 icon and choose either <span class="guilabel">View all WMS layers</span> to preview all layers (i.e. the entire map) in your
 GeoServer workspace, or choose <span class="guilabel">View this WMS layer</span> to only preview the selected layer:</p>
 <blockquote>
-<div><img alt="_images/quickstart_wmspreview.png" src="_images/quickstart_wmspreview.png" />
+<div><img alt="_images/publish_layers_context_menu.png" src="_images/publish_layers_context_menu.png" />
 </div></blockquote>
 <p>The OpenLayers preview for all layers could for example look like this:</p>
 <blockquote>
@@ -321,7 +331,7 @@ Label fonts may also differ from what you see in QGIS if the font is not availab
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, GeoCat BV. Built from 1177892.</p>
+    <p>&#169; Copyright 2024, GeoCat BV. Built from 466f6bc.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

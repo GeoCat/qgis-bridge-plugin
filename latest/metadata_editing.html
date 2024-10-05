@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -21,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="StyleViewer Panel" href="styleviewer.html" />
+    <link rel="next" title="Style Viewer Panel" href="styleviewer.html" />
     <link rel="prev" title="Publishing Data" href="publish.html" /> 
 </head>
 
@@ -35,6 +36,7 @@
           
           <a href="index.html">
             
+              <img src="_static/bridge_logo.svg" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 4.5
@@ -60,7 +62,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#load-metadata">Load metadata</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="styleviewer.html">StyleViewer Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="styleviewer.html">Style Viewer Panel</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_symbology.html">Supported Symbology</a></li>
 </ul>
 
@@ -112,14 +114,14 @@ Note that in order to do that, Bridge uses the <code class="docutils literal not
 <img alt="_images/publish_metadata.png" src="_images/publish_metadata.png" />
 <section id="preview-metadata">
 <h2>Preview metadata<a class="headerlink" href="#preview-metadata" title="Permalink to this heading"></a></h2>
-<p>To see a preview of the metadata of the selected layer, click the <img alt="previewmetadata" src="_images/preview_metadata_button.png" /> button.</p>
+<p>To see a preview of the metadata of the selected layer, click the <a class="reference internal" href="_images/preview.svg"><img alt="previewmetadata" height="16px" src="_images/preview.svg" width="16px" /></a> button.</p>
 <p>This will open a new dialog and render the metadata as a simple HTML webpage:</p>
 <img alt="_images/metadata_preview.png" src="_images/metadata_preview.png" />
 </section>
 <section id="metadata-validation">
 <h2>Metadata validation<a class="headerlink" href="#metadata-validation" title="Permalink to this heading"></a></h2>
 <p>Bridge can use built-in QGIS validation tools and display the result of the metadata validation.
-Click the <img alt="validatemetadata" src="_images/validation.png" /> button to validate your metadata.</p>
+Click the <a class="reference internal" href="_images/validate.svg"><img alt="validatemetadata" height="16px" src="_images/validate.svg" width="16px" /></a> button to validate your metadata.</p>
 <p>After validation a dialog with the results is displayed:</p>
 <img alt="_images/metadata_validation.png" src="_images/metadata_validation.png" />
 </section>
@@ -128,7 +130,7 @@ Click the <img alt="validatemetadata" src="_images/validation.png" /> button to 
 <p>If your layer has metadata in ISO19139 or ESRI-ISO (ISO19115 or FGDC) format, and that metadata is available in an auxiliary file stored alongside the data file, QGIS will <em>not</em> automatically read it.</p>
 <div class="line-block">
 <div class="line">QGIS only has native support for its own <cite>qmd</cite> format. However, Bridge is able to import the metadata.</div>
-<div class="line">Select the layer in the Bridge dialog and click the <img alt="loadmetadata" src="_images/loadmetadata.png" /> button.</div>
+<div class="line">Select the layer in the Bridge dialog and click the <a class="reference internal" href="_images/import.svg"><img alt="loadmetadata" height="16px" src="_images/import.svg" width="16px" /></a> button.</div>
 </div>
 <div class="line-block">
 <div class="line">Bridge will look in the folder where the layer file is stored and try to find a metadata file named either <cite>[layer_filename].[extension].xml</cite> or <cite>[layer_filename].xml</cite>.</div>
@@ -164,13 +166,13 @@ the metadata for each layer will be memorized.</div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="publish.html" class="btn btn-neutral float-left" title="Publishing Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="styleviewer.html" class="btn btn-neutral float-right" title="StyleViewer Panel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="styleviewer.html" class="btn btn-neutral float-right" title="Style Viewer Panel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, GeoCat BV. Built from 1177892.</p>
+    <p>&#169; Copyright 2024, GeoCat BV. Built from 466f6bc.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

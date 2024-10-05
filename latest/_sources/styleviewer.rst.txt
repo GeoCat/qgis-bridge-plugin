@@ -1,31 +1,31 @@
 .. _StyleViewer:
 
-StyleViewer Panel
-=================
+Style Viewer Panel
+==================
 
-|app_name| offers a way to preview a layer style (symbology) in several different formats using the *StyleViewer*.
+|app_name| offers a way to preview a layer style (symbology) in several different formats using the *Style Viewer*.
 
-You can open the *StyleViewer* panel by clicking :guilabel:`StyleViewer` from the |app_name| menu:
+You can open the *Style Viewer* panel by clicking :guilabel:`Bridge Style Viewer` from the |app_name| menu:
 
 .. image:: ./img/styleviewer_menu.png
 
-Alternatively, you can open the panel using :guilabel:`View` > :guilabel:`Panels` > :guilabel:`StyleViewer` in the QGIS menu bar.
+Alternatively, you can open the panel using :guilabel:`View` > :guilabel:`Panels` > :guilabel:`Bridge Style Viewer` in the QGIS menu bar.
 
 A dockable panel will now be displayed (initially on the right side of the screen) that looks similar to this:
 
 .. image:: ./img/styleviewer.png
 
-If you wish to close the *StyleViewer*, click the close button (:guilabel:`x`) in the upper-right corner of the panel
-or uncheck the :guilabel:`View` > :guilabel:`Panels` > :guilabel:`StyleViewer` item in the QGIS menu bar.
+If you wish to close the *Style Viewer*, click the close button (:guilabel:`x`) in the upper-right corner of the panel
+or uncheck the :guilabel:`View` > :guilabel:`Panels` > :guilabel:`Bridge Style Viewer` item in the QGIS menu bar.
 
-Currently, *StyleViewer* supports the following style formats:
+Currently, *Style Viewer* supports the following style formats:
 
 - SLD (XML): used by GeoServer
 - MapServer style (plain text): also known as Mapfile
 - Mapbox style (JSON): used for vector tiles
 - GeoStyler (JSON)
 
-The *StyleViewer* is context-aware, meaning that it will show style previews for the currently selected layer in the QGIS *Layers* panel:
+The *Style Viewer* is context-aware, meaning that it will show style previews for the currently selected layer in the QGIS *Layers* panel:
 
 For more information about how |short_name| handles symbology and which style elements are supported, please read the :ref:`Symbology` section.
 

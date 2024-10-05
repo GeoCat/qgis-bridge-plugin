@@ -1,6 +1,8 @@
 Quickstart Tutorial
 ###################
 
+    .. |nbsp| unicode:: 0xA0
+
 Once |app_name| has been :ref:`installed <installing-bridge>`, the first thing you might want to do is publish some layers!
 
 This quickstart tutorial will walk you through the process of publishing a QGIS map layers to GeoServer.
@@ -24,18 +26,22 @@ Find and click the |short_name| button in the QGIS Web Toolbar:
 The |short_name| dialog should now appear. First-time users may see the :guilabel:`About` panel, while others will
 probably see the :guilabel:`Publish` panel instead.
 
-Step 2: go to servers panel
----------------------------
+Step 2: go to Connections panel
+-------------------------------
 
-Click on :guilabel:`Servers` in the left sidebar. If no servers have been configured so far, this should show the
+Click on :guilabel:`Connections` in the left sidebar. If no servers have been configured so far, this should show the
 following panel:
 
     .. image:: ./img/quickstart_servers.png
 
-Step 3: add new server
-----------------------
+Step 3: add new connection
+--------------------------
 
-Click the :guilabel:`New Server` button on the lower left corner of the :guilabel:`Servers` panel and select :guilabel:`GeoServer`:
+.. |addbutton| image:: ../../geocatbridge/images/add.svg
+               :height: 16 px
+               :width: 16 px
+
+Click the |addbutton| **Add...** button on the lower left corner of the :guilabel:`Connections` panel and select :guilabel:`GeoServer`:
 
     .. image:: ./img/quickstart_newserver.png
 
@@ -71,7 +77,7 @@ Step 6: add new credentials
 ---------------------------
 
 In order to actually establish a connection, we need to authenticate ourselves with GeoServer.
-To do that, add new :guilabel:`Credentials` by clicking the :guilabel:`+` button:
+To do that, add new :guilabel:`Credentials` by clicking the |addbutton| button:
 
     .. image:: ./img/quickstart_addauth.png
 
@@ -80,7 +86,7 @@ If you have already set GeoServer credentials before, you may select the right o
 Step 7: authentication details
 ------------------------------
 
-After you clicked the :guilabel:`+` button in the previous step, the *Authentication* dialog will pop up.
+After you clicked the |addbutton| button in the previous step, the *Authentication* dialog will pop up.
 
 For the authentication mechanism, we will use *Basic authentication*. This is the default and works
 well with GeoServer. It also is the only mechanism that |short_name| currently supports.
@@ -106,7 +112,7 @@ Step 9: save configuration
 --------------------------
 
 Save your GeoServer configuration by clicking the :guilabel:`Save` button in the lower right corner of the
-:guilabel:`Servers` panel.
+:guilabel:`Connections` panel.
 
 You are now ready to publish some layers!
 
@@ -144,7 +150,7 @@ In the :guilabel:`Online` tab at the bottom of the :guilabel:`Publish` panel, se
 
     .. image:: ./img/quickstart_setdataserver.png
 
-The :guilabel:`Data server` list should display all the names of the configurations that you created in the :guilabel:`Servers` panel.
+The :guilabel:`Data server` list should display all the names of the configurations that you created in the :guilabel:`Connections` panel.
 If you just got started, then there will likely only be 1 item in this list.
 
 Step 3: select layers
@@ -160,6 +166,8 @@ the layer name as shown in the QGIS Table of Contents is used.
 
     .. image:: ./img/quickstart_titleabstract.png
 
+|nbsp|
+
     .. tip::    If you have vector layers  with lots of attributes, but you only need to publish a couple of these
                 fields, you can select the applicable layer and click on the :guilabel:`Attributes` tab.
                 Here you can uncheck all attributes that do *not* need to be published, which will save some storage
@@ -173,7 +181,9 @@ For this tutorial, we will simply go ahead and publish **all layers**. As noted 
 Click the :guilabel:`Publish` button in the lower right corner of the |short_name| dialog to start the publication process.
 During this process, a progress dialog should appear:
 
-    .. image:: ./img/quickstart_publishprogress.png
+    .. image:: ./img/publish_layers_progress.png
+
+|nbsp|
 
     .. note::   For you (the user) it may seem that |short_name| does not treat *raster* layers differently from *vector* layers.
                 Under the hood however, |short_name| will **always** publish *raster* data to a file-based GeoServer datastore
@@ -185,10 +195,14 @@ Step 5: review results
 
 Once the publish process has completed, a result dialog should appear:
 
-    .. image::  ./img/quickstart_publishresult.png
+    .. image::  ./img/publish_layers_report.png
+
+.. |attnbutton| image:: ../../geocatbridge/images/attention.svg
+                :height: 16 px
+                :width: 16 px
 
 If there are any errors or warnings, these are shown in the :guilabel:`Status` column of the published layer list.
-Click on the tiny :guilabel:`!` buttons to get more details about the issue(s).
+Click on the tiny |attnbutton| buttons to get more details about the issue(s).
 If there are no issues, it should say *OK* next to each layer.
 
 Close the result dialog once you finished reviewing.
@@ -209,7 +223,7 @@ If you wish to view a browser-based preview of the GeoServer WMS, you can right-
 icon and choose either :guilabel:`View all WMS layers` to preview all layers (i.e. the entire map) in your
 GeoServer workspace, or choose :guilabel:`View this WMS layer` to only preview the selected layer:
 
-    .. image::  ./img/quickstart_wmspreview.png
+    .. image::  ./img/publish_layers_context_menu.png
 
 The OpenLayers preview for all layers could for example look like this:
 
