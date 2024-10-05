@@ -28,7 +28,8 @@ changelog=Version 4.5.0, September 2024
           - Properly release resources when plugin reloads [#187]
           - Replaced QtWebKit related code with regular Qt UI elements [#152, #185]
           - Replaced PNG icons with SVG icons
-          - Tweaked UI and renamed dialogs and actions for clarity
+          - Updated UI styling and renamed dialogs and actions for clarity
+          - Improved UI responsiveness when updating layer publication status
           - bridgestyle -> 0.1.2: fix single-band raster styling, SLD XSD reference, and label concatenation
 
           Version 4.4.2, July 2024
