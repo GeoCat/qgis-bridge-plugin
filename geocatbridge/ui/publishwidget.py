@@ -2,21 +2,26 @@ import json
 import webbrowser
 from collections import Counter
 from functools import partial
-from typing import List, FrozenSet
+from typing import FrozenSet, Optional
 
 import requests
 from qgis.PyQt.QtCore import (
     Qt,
     QCoreApplication,
-    QSettings
+    QSettings,
+    QPoint
 )
-from qgis.PyQt.QtGui import QPixmap
+from qgis.PyQt.QtGui import (
+    QPixmap,
+    QShowEvent
+)
 from qgis.PyQt.QtWidgets import (
     QLabel,
     QMenu,
     QWidget,
     QHBoxLayout,
     QCheckBox,
+    QComboBox,
     QListWidget,
     QListWidgetItem,
     QTableWidgetItem,
@@ -60,6 +65,9 @@ WIDGET, BASE = gui.loadUiType(__file__)
 
 class PublishWidget(FeedbackMixin, BASE, WIDGET):
     listLayers: QListWidget
+    publishableLayers: list[BridgeLayer]
+    statusWorker: Optional[gui.BackgroundWorker]
+    statusThread: Optional[gui.QtCore.QThread]
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -67,9 +75,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.currentLayer = None
         self.parent = parent
 
-        # Retrieve publishable layers once:
-        # this should be safe because the Bridge dialog is modal
-        self.publishableLayers = listBridgeLayers()
+        self.statusWorker = None
+        self.statusThread = None
 
         # Keep track of publishable fields for each layer
         self.fieldsToPublish = {}
@@ -77,6 +84,9 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         # Keep track if metadata or geodata for a layer has been published
         self.isMetadataPublished = {}
         self.isDataPublished = {}
+
+        # Initialize the list of publishable layers
+        self.publishableLayers = []
 
         # Default "not set" values for comboboxes
         self.COMBO_NOTSET_LANG = self.translate("Not specified")
@@ -88,44 +98,54 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
     def _setupUi(self):
         self.setupUi(self)
-        self.txtNoLayers.setVisible(False)
-        self.populateComboBoxes(languages=True)
-        self.populateLayers()
-        self.listLayers.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.listLayers.customContextMenuRequested.connect(self.showContextMenu)
-        self.listLayers.currentRowChanged.connect(self.currentRowChanged)
-        self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
-        self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
-        self.txtExportFolder.textChanged.connect(self.exportFolderChanged)
-        self.btnSelectAll.setToolTip(self.tr("Select all layers"))
-        self.btnSelectAll.setIcon(SELECT_ICON)
-        self.btnSelectAll.clicked.connect(partial(self.toggleLayers, True))
-        self.btnSelectNone.setToolTip(self.tr("Deselect all layers"))
-        self.btnSelectNone.setIcon(DESELECT_ICON)
-        self.btnSelectNone.clicked.connect(partial(self.toggleLayers, False))
-        self.btnPublish.clicked.connect(self.publish)
-        self.btnOpenQgisMetadataEditor.setIcon(QgsApplication.getThemeIcon("../../icons/qgis_icon.svg"))  # noqa
-        self.btnOpenQgisMetadataEditor.clicked.connect(self.openMetadataEditor)
-        self.btnRemoveAll.clicked.connect(self.unpublishAll)
-        self.btnValidate.setIcon(VALIDATE_ICON)
-        self.btnPreview.clicked.connect(self.previewMetadata)
-        self.btnPreview.setIcon(PREVIEW_ICON)
-        self.btnImport.setIcon(IMPORT_ICON)
-        self.btnImport.clicked.connect(self.importMetadata)
-        self.btnValidate.clicked.connect(self.validateMetadata)
-        self.btnUseConstraints.clicked.connect(partial(self.openMetadataEditor, ACCESS))
+        self.populateComboBoxes(True)
+
+        # Set up signals and slots
         self.btnAccessConstraints.clicked.connect(partial(self.openMetadataEditor, ACCESS))
+        self.btnClose.clicked.connect(self.parent.close)
+        self.btnDataContact.clicked.connect(partial(self.openMetadataEditor, CONTACT))
+        self.btnExportFolder.clicked.connect(self.selectExportFolder)
+        self.btnImport.clicked.connect(self.importMetadata)
+        self.btnImport.setIcon(IMPORT_ICON)
         self.btnIsoTopic.clicked.connect(partial(self.openMetadataEditor, CATEGORIES))
         self.btnKeywords.clicked.connect(partial(self.openMetadataEditor, KEYWORDS))
-        self.btnDataContact.clicked.connect(partial(self.openMetadataEditor, CONTACT))
         self.btnMetadataContact.clicked.connect(partial(self.openMetadataEditor, CONTACT))
-        self.btnExportFolder.clicked.connect(self.selectExportFolder)
-        self.btnClose.clicked.connect(self.parent.close)
+        self.btnOpenQgisMetadataEditor.clicked.connect(self.openMetadataEditor)
+        self.btnOpenQgisMetadataEditor.setIcon(QgsApplication.getThemeIcon("../../icons/qgis_icon.svg"))  # noqa
+        self.btnPreview.clicked.connect(self.previewMetadata)
+        self.btnPreview.setIcon(PREVIEW_ICON)
+        self.btnPublish.clicked.connect(self.publish)
+        self.btnRemoveAll.clicked.connect(self.unpublishAll)
+        self.btnSelectAll.clicked.connect(partial(self.toggleLayers, True))
+        self.btnSelectAll.setIcon(SELECT_ICON)
+        self.btnSelectAll.setToolTip(self.tr("Select all layers"))
+        self.btnSelectNone.clicked.connect(partial(self.toggleLayers, False))
+        self.btnSelectNone.setIcon(DESELECT_ICON)
+        self.btnSelectNone.setToolTip(self.tr("Deselect all layers"))
+        self.btnUseConstraints.clicked.connect(partial(self.openMetadataEditor, ACCESS))
+        self.btnValidate.clicked.connect(self.validateMetadata)
+        self.btnValidate.setIcon(VALIDATE_ICON)
+        self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
+        self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
+        self.listLayers.currentRowChanged.connect(self.currentRowChanged)
+        self.listLayers.customContextMenuRequested.connect(self.showContextMenu)
+        self.listLayers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tabOnOffline.currentChanged.connect(partial(self.tabOnOfflineChanged))
+        self.txtExportFolder.textChanged.connect(self.exportFolderChanged)
+
+        self.toggleLayerElements()
+        self.toggleUpdateProgress(False)
+
+    def toggleLayerElements(self):
+        """ Toggles the visibility of UI elements based on the layer widget content. """
 
         if self.listLayers.count():
-            # Select the first layer item by default
-            self.listLayers.setCurrentRow(0)
+            if self.listLayers.currentRow() < 0:
+                # Select the first layer item by default (if nothing is selected yet)
+                self.listLayers.setCurrentRow(0)
+            self.txtNoLayers.setVisible(False)
+            self.listLayers.setVisible(True)
+            self.btnRemoveAll.setVisible(True)
             self.btnSelectAll.setEnabled(True)
             self.btnSelectNone.setEnabled(True)
         else:
@@ -135,7 +155,12 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.btnSelectAll.setEnabled(False)
             self.btnSelectNone.setEnabled(False)
 
-        self.metadataServerChanged()
+    def toggleUpdateProgress(self, show: bool, max_value: int = 0):
+        """ Toggles the visibility of the layer status update progress bar (and resets it). """
+        self.progressBar.value = 0
+        if max_value:
+            self.progressBar.setMaximum(max_value)
+        self.progressBar.setVisible(show)
 
     def restoreConfig(self):
         """ Sets online and offline publish settings from QGIS Bridge configuration. """
@@ -182,9 +207,6 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         tab_index = min(max(0, settings.get('currentTab', 0)), self.tabOnOffline.count() - 1)
         self.tabOnOffline.setCurrentIndex(tab_index)
 
-        # Update layer item publication state
-        self.updateOnlineLayersPublicationStatus()
-
     def saveConfig(self):
         """ Collects current publish settings and persists them as QGIS Bridge configuration. """
 
@@ -218,7 +240,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         """ Refreshes the layer publication status. """
         if tab_index < 0:
             return
-        self.updateOnlineLayersPublicationStatus()
+        self.updateOnlineLayerStatus()
 
     def selectExportFolder(self):
         folder = QFileDialog.getExistingDirectory(self, self.translate("Export to folder"))  # noqa
@@ -226,13 +248,14 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.txtExportFolder.setText(folder)
 
     def geodataServerChanged(self):
-        self.updateOnlineLayersPublicationStatus(True, False)
+        self.updateOnlineLayerStatus(True, False)
 
-    def metadataServerChanged(self):
-        self.updateOnlineLayersPublicationStatus(False, True)
+    def metadataServerChanged(self, update_status: bool = True):
+        if update_status:
+            self.updateOnlineLayerStatus(False, True)
         md_combo = self.comboMetadataServer.currentText()
         profile = 0
-        if md_combo != self.COMBO_NOTSET_META:
+        if md_combo and md_combo != self.COMBO_NOTSET_META:
             profile = manager.getMetadataProfile(self.comboMetadataServer.currentText())
         num_tabs = self.tabWidgetMetadata.count()
         if profile == 0:  # Default profile should be equal to 0
@@ -248,8 +271,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
     def toggleLayers(self, state: bool):
         """ Toggles the checkbox state of all layer items. """
         for i in range(self.listLayers.count()):
-            item = self.listLayers.item(i)
-            self.listLayers.itemWidget(item).setCheckbox(state)
+            widget = self.getPublishWidget(i)
+            widget.setCheckbox(state)
 
     def currentRowChanged(self, current_row: int):
         """ Called whenever the user selects another layer item. """
@@ -332,12 +355,15 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             pub_fields[name.text()] = check.checkState() == Qt.Checked
         self.fieldsToPublish[self.currentLayer.id()] = pub_fields
 
-    def showContextMenu(self, pos):
+    def showContextMenu(self, pos: QPoint):
         """ Provides a context menu for published layers. """
         item = self.listLayers.itemAt(pos)
         if item is None:
             return
-        layer_id = self.listLayers.itemWidget(item).id
+        widget = self.listLayers.itemWidget(item)
+        if not isinstance(widget, LayerItemWidget):
+            return
+        layer_id = widget.id
         menu = QMenu()
         server = manager.getGeodataServer(self.comboGeodataServer.currentText())
         if any(self.isDataPublished.values()):
@@ -350,14 +376,13 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             menu.addAction(self.translate("Unpublish metadata"), partial(self.unpublishMetadata, layer_id))
         menu.exec_(self.listLayers.mapToGlobal(pos))
 
-    def populateLayers(self):
+    def populateLayerWidget(self):
         for i, layer in enumerate(self.publishableLayers):
             fields = [f.name() for f in layer.fields()] if (hasattr(layer, 'fields') and layer.is_vector) else []
             self.fieldsToPublish[layer.id()] = {f: True for f in fields}
-            self.addLayerListItem(layer)
-        self.updateOnlineLayersPublicationStatus()
+            self._addLayerListItem(layer)
 
-    def addLayerListItem(self, layer):
+    def _addLayerListItem(self, layer):
         widget = LayerItemWidget(layer, self)
         item = QListWidgetItem(self.listLayers)
         item.setSizeHint(widget.sizeHint())
@@ -366,14 +391,17 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         return item
 
     def populateComboBoxes(self, languages=False):
+        """ Populates the server combo boxes with available servers.
+        If `languages` is True, the language combo box is also populated.
+        """
         if languages:
             self.comboLanguage.clear()
             self.comboLanguage.addItem(self.COMBO_NOTSET_LANG)
             self.comboLanguage.addItems(l10n.label2code.keys())
-        self.populateComboMetadataServer()
-        self.populateComboGeodataServer()
+        self._populateComboMetadataServer()
+        self._populateComboGeodataServer()
 
-    def populateComboGeodataServer(self):
+    def _populateComboGeodataServer(self):
         servers_ = manager.getGeodataServerNames()
         current = self.comboGeodataServer.currentText()
         self.comboGeodataServer.clear()
@@ -382,7 +410,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if current in servers_:
             self.comboGeodataServer.setCurrentText(current)
 
-    def populateComboMetadataServer(self):
+    def _populateComboMetadataServer(self):
         servers_ = manager.getMetadataServerNames()
         current = self.comboMetadataServer.currentText()
         self.comboMetadataServer.clear()
@@ -391,12 +419,31 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if current in servers_:
             self.comboMetadataServer.setCurrentText(current)
 
-    def updateServers(self):
-        # TODO: do not call updateOnlineLayersPublicationStatus if not really needed
+    def updateAll(self):
+        """ Updates the publishable layers list and server combo boxes. """
+
+        update_status = False
+
+        # Get BridgeLayer objects and populate list widget
+        if not self.publishableLayers:
+            # It's safe to only do this once, as the Bridge dialog is modal
+            self.publishableLayers = listBridgeLayers()
+            self.populateLayerWidget()
+            update_status = True
+
         self.comboGeodataServer.currentIndexChanged.disconnect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.disconnect(self.metadataServerChanged)
+
         self.populateComboBoxes()
-        self.updateOnlineLayersPublicationStatus()
+        self.toggleLayerElements()
+
+        if update_status:
+            # This is a potentially expensive operation (runs on background thread)
+            self.updateOnlineLayerStatus()
+
+        # Fire metadata server changed event once to update metadata tab(s)
+        self.metadataServerChanged(False)
+
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
 
@@ -496,11 +543,19 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.updateLayerIsMetadataPublished(layer_id, None)
             return True
 
+    def getPublishWidget(self, index: int) -> 'LayerItemWidget':
+        """ Returns the LayerItemWidget at the given index. Raises an IndexError if the item does not exist. """
+        item = self.listLayers.item(index)
+        widget = self.listLayers.itemWidget(item)
+        if isinstance(widget, LayerItemWidget):
+            return widget
+        # This should not happen
+        raise IndexError(f"Item at index {index} does not exist or is not a LayerItemWidget")
+
     def updateLayerIsMetadataPublished(self, layer_id: str, server):
         self.isMetadataPublished[layer_id] = server is not None
         for i in range(self.listLayers.count()):
-            item = self.listLayers.item(i)
-            widget = self.listLayers.itemWidget(item)
+            widget = self.getPublishWidget(i)
             if widget.id != layer_id:
                 continue
             widget.setMetadataPublished(server)
@@ -508,8 +563,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
     def updateLayerIsDataPublished(self, layer_id: str, server):
         self.isDataPublished[layer_id] = server is not None
         for i in range(self.listLayers.count()):
-            item = self.listLayers.item(i)
-            widget = self.listLayers.itemWidget(item)
+            widget = self.getPublishWidget(i)
             if widget.id != layer_id:
                 continue
             widget.setDataPublished(server)
@@ -546,65 +600,106 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.txtExportFolder.setStyleSheet("QLineEdit { border: 2px solid red; }")
         return dir_set and checked_items and self.listLayers.count()
 
-    def updateOnlineLayersPublicationStatus(self, data: bool = True, metadata: bool = True):
+    def updateOnlineLayerStatus(self, data: bool = True, metadata: bool = True):
         """ Validates online tab servers and updates layer status. """
 
-        def _isMetadataOnServer(srv: manager.bases.MetaCatalogServerBase, lyr: BridgeLayer, existing_items: FrozenSet):
+        # === HELPER FUNCTIONS ===
+        def _isMetadataOnServer(srv: manager.bases.MetaCatalogServerBase, lyr: BridgeLayer) -> bool:
+            """ Checks if metadata is already published on the server (e.g. GeoNetwork). """
             if not srv:
                 return False
             uuid = uuidForLayer(lyr)
-            if existing_items:
-                return uuid in existing_items
             return srv.metadataExists(uuid)
 
-        def _isDataOnServer(srv: manager.bases.DataCatalogServerBase, lyr: BridgeLayer, existing_items: FrozenSet):
+        def _isDataOnServer(srv: manager.bases.DataCatalogServerBase, lyr: BridgeLayer,
+                            existing_items: frozenset) -> bool:
+            """ Checks if a layer is already published on the server (e.g. GeoServer). """
             if not srv:
                 return False
-            if existing_items:
-                return lyr.web_slug in existing_items
-            return srv.layerExists(lyr.web_slug)
+            if existing_items is None:
+                # Workspace does not exist, so no layers will exist either
+                return False
+            return lyr.web_slug in existing_items
 
-        def _refreshStatus(server_, combo):
+        def _testServer(srv: manager.bases.ServerBase, combo: QComboBox) -> bool:
+            """ Tests a single server connection and displays and error message if it fails. """
             errors = set()
-            combo.setStyleSheet("QComboBox { }")
-            if server_ and not server_.testConnection(errors) and errors:
+            if srv and not srv.testConnection(errors) and errors:
                 combo.setStyleSheet("QComboBox { border: 2px solid red; }")
-                for e in errors:
-                    self.showErrorBar("Error", e)
+                for err in errors:
+                    self.showErrorBar("Error", err)
+                return False
+            return True
 
-            # Get list of all item names on server to prevent doing a lot of requests   TODO: metadata
-            existing_items = frozenset(server_.layerNames().keys()
-                                       if isinstance(server_, manager.bases.DataCatalogServerBase) else [])
+        def _testServers() -> tuple[manager.bases.DataCatalogServerBase, manager.bases.MetaCatalogServerBase]:
+            """ Gets the selected server connections (if any) and tests them. """
+            data_srv = manager.getGeodataServer(self.comboGeodataServer.currentText()) if data else None
+            meta_srv = manager.getMetadataServer(self.comboMetadataServer.currentText()) if metadata else None
+            if not _testServer(data_srv, self.comboGeodataServer):
+                data_srv = None
+            if not _testServer(meta_srv, self.comboMetadataServer):
+                meta_srv = None
+            return data_srv, meta_srv
 
-            # Update layer publication status
+        def _iterateLayers():
+            """ Returns a generator of all publishable layers and their corresponding widgets. """
             for i in range(self.listLayers.count()):
-                item = self.listLayers.item(i)
-                widget = self.listLayers.itemWidget(item)
+                widget = self.getPublishWidget(i)
                 layer = layerById(widget.id)
                 if not layer:
                     continue
-                if isinstance(server_, manager.bases.DataCatalogServerBase):
-                    published = _isDataOnServer(server_, layer, existing_items)
-                    self.isDataPublished[layer.id()] = published
-                    state = server_ if published else None
-                    widget.setDataPublished(state)
-                elif isinstance(server_, manager.bases.MetaCatalogServerBase):
-                    published = _isMetadataOnServer(server_, layer, existing_items)
-                    self.isMetadataPublished[layer.id()] = published
-                    state = server_ if published else None
-                    widget.setMetadataPublished(state)
+                yield layer, widget
 
-        def _processAll():
-            _refreshStatus(data_server, self.comboGeodataServer)
-            _refreshStatus(metadata_server, self.comboMetadataServer)
+        def _refreshStatus(map_srv: Optional[manager.bases.DataCatalogServerBase],
+                           cat_srv: Optional[manager.bases.MetaCatalogServerBase],
+                           existing_map_layers: Optional[frozenset],
+                           layer_item_pair: tuple[BridgeLayer, 'LayerItemWidget']):
+            """ Refreshes the publication status of a single layer item for both servers. """
 
-        if self.tabOnOffline.currentWidget() != self.tabOnline:
-            # Current tab is not the online publish tab
+            layer, widget = layer_item_pair
+
+            # Update layer publication status
+            if isinstance(map_srv, manager.bases.DataCatalogServerBase):
+                published = _isDataOnServer(map_srv, layer, existing_map_layers)
+                self.isDataPublished[layer.id()] = published
+                state = map_srv if published else None
+                widget.setDataPublished(state)
+            if isinstance(cat_srv, manager.bases.MetaCatalogServerBase):
+                published = _isMetadataOnServer(cat_srv, layer)
+                self.isMetadataPublished[layer.id()] = published
+                state = cat_srv if published else None
+                widget.setMetadataPublished(state)
+
+        # === FUNCTION BODY ===
+        if self.tabOnOffline.currentWidget() != self.tabOnline or not self.publishableLayers:
+            # Current tab is not the online publish tab, or there aren't any layers to publish
             return
 
-        data_server = manager.getGeodataServer(self.comboGeodataServer.currentText()) if data else None
-        metadata_server = manager.getMetadataServer(self.comboMetadataServer.currentText()) if metadata else None
-        gui.execute(_processAll)
+        # Test connection to servers (blocking)
+        data_server, meta_server = gui.execute(_testServers)
+
+        if data_server is None and meta_server is None:
+            # No servers selected or both tests failed
+            return
+
+        # Get list of all layer names on server to prevent doing a lot of requests   TODO: metadata?
+        existing_layers = None
+        if data_server and hasattr(data_server, 'workspaceExists'):
+            if data_server.workspaceExists():
+                existing_layers = frozenset(data_server.layerNames().keys())
+
+        try:
+            # Refresh layer upload status on background thread (non-blocking)
+            items = tuple(_iterateLayers())
+            self.toggleUpdateProgress(True, len(items))
+            status_func = partial(_refreshStatus, data_server, meta_server, existing_layers)
+            self.statusWorker, self.statusThread = gui.BackgroundWorker.setup(status_func, items)
+            self.statusWorker.progress.connect(self.progressBar.setValue)
+            self.statusWorker.finished.connect(partial(self.toggleUpdateProgress, False))
+            self.statusWorker.start()
+        except Exception as e:
+            self.logError(f"Failed to update layer status: {e}")
+            self.toggleUpdateProgress(False)
 
     def unpublishAll(self):
         """ Removes all geodata from the current server workspace and clears all metadata (published layers only). """
@@ -661,7 +756,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.showSuccessBar("Success", f"{r_msg}{suffix}")
 
         # Update layer item widgets
-        self.updateOnlineLayersPublicationStatus(data_deleted, meta_server is not None)
+        self.updateOnlineLayerStatus(data_deleted, meta_server is not None)
 
     def viewWms(self, layer_id: str):
         layer = layerById(layer_id)
@@ -763,9 +858,9 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if isinstance(task, PublishTask):
             # Show report dialog for publish tasks and update publication status
             task.finished(ret)
-            self.updateOnlineLayersPublicationStatus(task.geodata_server is not None, task.metadata_server is not None)
+            self.updateOnlineLayerStatus(task.geodata_server is not None, task.metadata_server is not None)
 
-    def publishOnBackground(self, to_publish: List[str]):
+    def publishOnBackground(self, to_publish: list[str]):
         self.parent.close()
         task = self.getPublishTask(iface.mainWindow(), to_publish)
         action = 'publish' if hasattr(task, 'exc_type') else 'export'
@@ -784,7 +879,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         QgsApplication.taskManager().addTask(task)
         QCoreApplication.processEvents()  # noqa
 
-    def validateBeforePublication(self, to_publish: List[str], style_only: bool) -> bool:
+    def validateBeforePublication(self, to_publish: list[str], style_only: bool) -> bool:
         """ Checks if there are no duplicate names among the selected layers (also verifies participating group names),
         and performs server-specific checks for each selected layer.
         Shows (bad) results in a dialog and returns False if validation failed.
@@ -825,17 +920,16 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             return False
         return True
 
-    def getCheckedLayers(self) -> List[str]:
+    def getCheckedLayers(self) -> list[str]:
         """ Returns a list of the layer IDs that were selected by the user for publication. """
         to_publish = []
         for i in range(self.listLayers.count()):
-            item = self.listLayers.item(i)
-            widget = self.listLayers.itemWidget(item)
+            widget = self.getPublishWidget(i)
             if widget.checked:
                 to_publish.append(widget.id)
         return to_publish
 
-    def getPublishTask(self, parent: QWidget, to_publish: List[str]):
+    def getPublishTask(self, parent: QWidget, to_publish: list[str]):
         """ Get ExportTask or PublishTask for the given layers. """
 
         # Since currentRowChanged has not been called yet,
@@ -851,6 +945,10 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
         return ExportTask(self.txtExportFolder.text(), to_publish, self.fieldsToPublish,
                           self.chkExportGeodata.isChecked(), self.chkExportMetadata.isChecked(), style_only)
+
+    def showEvent(self, _: QShowEvent):
+        """ Triggered when the widget is shown."""
+        self.updateAll()
 
 
 class LayerItemWidget(QWidget):

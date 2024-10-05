@@ -22,6 +22,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTreeWidget" name="treeWidget">
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
      <attribute name="headerVisible">
       <bool>false</bool>
      </attribute>

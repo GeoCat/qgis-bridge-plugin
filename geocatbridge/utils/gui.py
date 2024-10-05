@@ -1,4 +1,6 @@
-from typing import Iterable
+from functools import partial
+from typing import Iterable, Any, Callable
+from inspect import isgenerator
 from pathlib import Path
 
 from qgis.PyQt import QtCore
@@ -23,14 +25,14 @@ def loadUiType(controller) -> tuple:
     return uic.loadUiType(ui_file)
 
 
-def execute(func, *args, **kwargs):
-    """ Blocks GUI thread (and sets a wait cursor) while `func` is being executed. """
+def execute(func, *args, **kwargs) -> Any:
+    """ Sets a wait cursor while `func` is being executed. Runs on GUI thread if called from a UI view model. """
     QApplication.setOverrideCursor(QCursor(QtCore.Qt.WaitCursor))
     try:
         return func(*args, **kwargs)
     finally:
         QApplication.restoreOverrideCursor()
-        QtCore.QCoreApplication.processEvents()  # noqa
+        QtCore.QCoreApplication.processEvents()
 
 
 def getSvgIcon(name: str) -> QIcon:
@@ -73,42 +75,71 @@ def getBasicAuthSelectWidget(parent: QWidget) -> QgsAuthConfigSelect:
     return QgsAuthConfigSelect(parent, "proxy")
 
 
-class ItemProcessor(QtCore.QThread):
-    """ This class can be used to process a list of items using a given function.
-
-    The processing is done on a separate (non-blocking) thread and emits signals,
-    which can be connected to a progress indicator for example.
-    The processor can be aborted by calling requestInterruption().
-
-    :param items:       Iterable of items to process.
-    :param processor:   The processor function to call on each item. This function must accept one argument.
-    :returns:           The resultReady signal slot receives a list of results for each processed item.
-    """
+class BackgroundWorker(QtCore.QObject):
+    """ This class can be used to process multiple items using a function on a separate thread."""
     progress = QtCore.pyqtSignal(int)
-    resultReady = QtCore.pyqtSignal(list)
+    finished = QtCore.pyqtSignal()
+    results = QtCore.pyqtSignal(list)
 
-    def __init__(self, items: Iterable, processor):
+    def __init__(self):
         super().__init__()
-        self._items = items
-        self._func = processor
 
-    def run(self):
-        results = []
-        total_steps = 0
-        QApplication.processEvents()
-        for step, item in enumerate(self._items):
-            total_steps += 1
-            self.progress.emit(step)  # noqa
-            try:
-                results.append(self._func(item))
-            except Exception as e:
-                # Log a QGIS error message (should be thread-safe)
-                logError(e)
-            if self.isInterruptionRequested():
-                break
-        if not self.isInterruptionRequested():
-            # Emit 100% progress and wait briefly so that user sees it
-            self.progress.emit(total_steps)  # noqa
-            self.msleep(500)
-        self.resultReady.emit(results)  # noqa
-        self.finished.emit()  # noqa
+    def _run(self, func: Callable, items: Iterable):
+        results_ = []
+        try:
+            if isgenerator(items):
+                # Flatten generators into a tuple
+                items = tuple(items)
+            for step, item in enumerate(items):
+                self.progress.emit(step)
+                try:
+                    results_.append(func(item))
+                except Exception as e:
+                    # Log a QGIS error message (should be thread-safe)
+                    logError(e)
+                    results_.append(e)
+                if self.thread().isInterruptionRequested():
+                    break
+        finally:
+            self.results.emit(results_)
+            self.finished.emit()
+
+    def start(self):
+        """ Shortcut method to start the thread, which will also start the worker (if setup() was called first). """
+        thread = self.thread()
+        if not thread:
+            name = self.__class__.__name__
+            raise RuntimeError(f"{name} is not assigned to a thread. Call setup() first.")
+        if not thread.isRunning():
+            thread.start()
+
+    @staticmethod
+    def setup(fn: Callable, items: Iterable) -> tuple['BackgroundWorker', QtCore.QThread]:
+        """ Convenience method to schedule a function on a separate thread using a `BackgroundWorker` object.
+
+        This method instantiates the thread and worker and connects the signals and slots required to run the function
+        on the background thread and clean up afterward.
+        Call the `start()` method on the worker or the thread (makes no difference).
+        You may want to connect additional signals and slots to the worker before starting the thread.
+
+        :param fn:      The function to run on a separate thread.
+                        The function should at least accept 1 item argument that needs to be processed.
+                        If the function has multiple arguments, use `functools.partial` to bind them,
+                        and make sure that the last (!) argument is the item that needs processing.
+                        If
+        :param items:   An iterable of items to process.
+        :returns:       A tuple of (BackgroundWorker, QThread) objects for reference.
+        """
+
+        # Set up the background thread assign the worker to it
+        thread = QtCore.QThread()
+        worker = BackgroundWorker()
+        worker.moveToThread(thread)
+
+        # Connect signals and slots
+        thread.started.connect(partial(worker._run, fn, items))
+        worker.finished.connect(thread.quit)
+        worker.finished.connect(worker.deleteLater)
+        thread.finished.connect(thread.deleteLater)
+
+        return worker, thread

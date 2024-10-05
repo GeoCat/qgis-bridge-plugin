@@ -3,7 +3,7 @@ from functools import partial
 from typing import Union
 
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QKeyEvent
+from qgis.PyQt.QtGui import QKeyEvent, QShowEvent
 from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -32,7 +32,6 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self.addMenuToButtonNew()
         self.buttonRemove.setIcon(gui.getSvgIcon("remove"))
         self.buttonRemove.clicked.connect(self.removeButtonClicked)
-        self.populateServerList()
         self.showServerWidget()
         self.buttonSave.clicked.connect(self.saveServer)
         self.buttonImport.setIcon(gui.getSvgIcon("import"))
@@ -549,6 +548,10 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         for i in range(len(self.listServers) - 1, -1, -1):
             item_widget = self.listServers.item(i)
             self.removeServer(item_widget)
+
+    def showEvent(self, _: QShowEvent):
+        """ Triggered when the widget is shown."""
+        self.populateServerList()
 
 
 class ServerItemWidget(QWidget):

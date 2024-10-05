@@ -1,6 +1,7 @@
 from functools import partial
 from itertools import chain
 from requests import HTTPError
+from typing import Optional
 
 from qgis.PyQt.QtWidgets import QHBoxLayout
 
@@ -13,9 +14,14 @@ WIDGET, BASE = gui.loadUiType(__file__)
 
 
 class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
+    dsThread: Optional[gui.QtCore.QThread]
+    dsWorker: Optional[gui.BackgroundWorker]
 
     def __init__(self, parent, server_type):
         super().__init__(parent, server_type)
+
+        self.dsThread = None
+        self.dsWorker = None
         self.setupUi(self)
 
         self.geoserverAuth = gui.getBasicAuthSelectWidget(self)
@@ -146,7 +152,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                             <head/>
                             <body>
                                 <p>Select an existing PostGIS datastore to use as a template 
-                                when publishing vector layers.</p>
+                                when publishing vector layers, or add a new one.</p>
                                 <p>Bridge will export the layer data to GeoServer and create a new datastore based 
                                 on the one that you selected. 
                                 Then, Bridge will instruct GeoServer to import the data into the PostGIS datastore.</p>
@@ -156,7 +162,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
             self.toggleDatastoreControls(True)
             self.comboGeoserverDatabase.setEnabled(True)
             self.labelGeoserverDatastore.setEnabled(True)
-            self.labelGeoserverDatastore.setText('Template')
+            self.labelGeoserverDatastore.setText('Datastore')
             self.labelGeoserverDatastore.setWhatsThis(whats_this)
 
     def toggleDatastoreControls(self, enabled: bool):
@@ -211,12 +217,12 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
                     return
                 # Retrieve datastores for each workspace:
                 # This is a potentially long-running operation and uses a separate QThread
-                worker = gui.ItemProcessor(workspaces, server.getPostgisDatastores)
+                self.dsWorker, self.dsThread = gui.BackgroundWorker.setup(server.getPostgisDatastores, workspaces)
                 pg_dialog = self.parent.getProgressDialog("Retrieving PostGIS datastores...",
-                                                          len(workspaces), worker.requestInterruption)
-                worker.progress.connect(pg_dialog.setValue)
-                worker.resultReady.connect(partial(addGeoserverPgDatastores, current_db))
-                worker.run()
+                                                          len(workspaces), self.dsThread.requestInterruption)
+                self.dsWorker.progress.connect(pg_dialog.setValue)
+                self.dsWorker.results.connect(partial(addGeoserverPgDatastores, current_db))
+                self.dsWorker.start()
             except Exception as e:
                 msg = f'Failed to retrieve datastores for {getattr(server, "serverName", self.txtGeoserverName.text())}'  # noqa
                 if isinstance(e, HTTPError) and e.response.status_code == 401:

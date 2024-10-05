@@ -2,7 +2,7 @@ from re import compile
 from pathlib import Path
 from itertools import chain
 from functools import partial
-from typing import Union, Tuple, List, Iterable, FrozenSet
+from typing import Union, Tuple, Iterable, FrozenSet
 from collections import namedtuple
 
 from qgis.core import (
@@ -18,8 +18,9 @@ from geocatbridge.utils import strings
 LAYERNAME_REGEX = compile(r'^layername=(.*)$')
 
 
-class BridgeLayer:
-    def __new__(cls, qgis_layer):
+class BridgeLayer(QgsMapLayer):
+
+    def __new__(cls, qgis_layer: QgsMapLayer) -> 'BridgeLayer':
         """ Wrapper for a QGIS layer (QgsMapLayer, QgsVectorLayer, QgsRasterLayer etc.) that
         sets some protected attributes and adds some properties to the layer that are often required by Bridge,
         and immediately returns the modified layer instance.
@@ -39,13 +40,13 @@ class BridgeLayer:
         qgis_layer.title = qgis_layer.metadata().title
         qgis_layer.abstract = qgis_layer.metadata().abstract
         qgis_layer.keywords = partial(cls.keywords, qgis_layer)
-        return qgis_layer
+        return qgis_layer  # noqa
 
     def __getattr__(self, attr):
         # Prevent IDE's from showing errors for missing methods or attributes on the QgsMapLayer
         return getattr(self, attr)
 
-    def keywords(self) -> List[str]:
+    def keywords(self) -> list[str]:
         """ Returns a list of all keywords in the metadata. """
         return sorted([v.strip() for v in chain.from_iterable(self.metadata().keywords().values())])
 
@@ -58,7 +59,7 @@ class BridgeLayer:
         if layer.dataProvider().name() == "postgres":
             try:
                 db_source = QgsDataSourceUri(source)
-                return db_source.table, db_source
+                return db_source.table, db_source  # noqa
             except Exception:  # noqa
                 return '', None
 
@@ -223,11 +224,11 @@ def isSupportedLayer(layer):
             # If the path is invalid (e.g. too long), the layer is not supported either way [#004035]
             return False
     return (layer.isValid() and layer.isSpatial() and layer.crs().isValid() and
-            layer.type() in (QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer) and
+            layer.type() in (QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer) and  # noqa
             layer.dataProvider().name() != "wms")
 
 
-def listLayerNames(layer_ids: Iterable[str] = None, actual: bool = False) -> List[str]:
+def listLayerNames(layer_ids: Iterable[str] = None, actual: bool = False) -> list[str]:
     """
     Returns a list of layer names for the given QGIS layer IDs.
     If no list of IDs was specified, all publishable layer names will be returned.
@@ -240,7 +241,7 @@ def listLayerNames(layer_ids: Iterable[str] = None, actual: bool = False) -> Lis
     return [(lyr.name() if actual else lyr.web_slug) for lyr in listBridgeLayers(layer_ids)]
 
 
-def listGroupNames(layer_ids: Iterable[str] = None, actual: bool = False) -> List[str]:
+def listGroupNames(layer_ids: Iterable[str] = None, actual: bool = False) -> list[str]:
     """
     Returns a list of layer group names for the given QGIS layer IDs, if any have been grouped.
     If no list of IDs was specified, all layer group names in the TOC will be returned.
@@ -253,7 +254,7 @@ def listGroupNames(layer_ids: Iterable[str] = None, actual: bool = False) -> Lis
     return [(g.title if actual else g.name) for g in LayerGroups(layer_ids)]
 
 
-def listBridgeLayers(filter_ids: Iterable[str] = None) -> List[BridgeLayer]:
+def listBridgeLayers(filter_ids: Iterable[str] = None) -> list[BridgeLayer]:
     """ Returns a flattened list of supported publishable layers in the current QGIS project.
 
     See `isSupportedLayer()` to find out which layers are supported.

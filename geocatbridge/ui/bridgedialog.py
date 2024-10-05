@@ -127,10 +127,6 @@ class BridgeDialog(BASE, WIDGET):
 
         # Match panel to selected list item and populate/update if needed
         self.stackedWidget.setCurrentWidget(panel_widget)
-        if isinstance(panel_widget, Panels.PUBLISH.value):
-            panel_widget.updateServers()
-        elif isinstance(panel_widget, Panels.CONNECTIONS.value):
-            panel_widget.populateServerList()
 
     def closeEvent(self, evt):
         """ Triggered whenever the user closes the dialog. """

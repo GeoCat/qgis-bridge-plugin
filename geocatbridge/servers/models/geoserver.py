@@ -11,7 +11,7 @@ from qgis.core import (
     QgsProcessingParameterString,
     QgsProcessingParameterAuthConfig
 )
-from requests.compat import json as rjson
+from requests.compat import json as rjson  # noqa
 from requests.exceptions import HTTPError, RequestException
 
 from geocatbridge.publish.style import (
@@ -75,7 +75,7 @@ class GeoserverServer(DataCatalogServerBase):
         GeoServerAlgorithm), the overridden value is returned instead of a name derived from the current QGIS project.
         """
 
-        # return override if exist
+        # return override if exists
         if self._fixed_workspace:
             return self._fixed_workspace
 
@@ -1452,14 +1452,16 @@ class GeoserverServer(DataCatalogServerBase):
         if not self.workspace:
             errors.add("QGIS project must be saved before publishing layers to GeoServer.\n"
                        "Project name preferably is ASCII only, starts with a letter, and consists of letters, numbers, or .-_")  # noqa
-        elif self.willDeleteLayersOnPublication(layer_ids) and not only_symbology:
-            ret = self.showQuestionBox("Workspace", f"A workspace named '{self.workspace}' "
-                                                    f"already exists and contains layers that "
-                                                    f"will be deleted.\nDo you wish to proceed?",
+        elif not only_symbology and self.workspaceExists():
+            message = f"A workspace named '{self.workspace}' already exists.\n" + \
+                      f"If you continue the workspace will be cleared and recreated.\n" + \
+                      f"Do you wish to proceed?"
+            ret = self.showQuestionBox("Workspace", message,
                                        buttons=self.BUTTONS.YES | self.BUTTONS.NO,
                                        defaultButton=self.BUTTONS.NO)
             if ret == self.BUTTONS.NO:
-                errors.add("Cannot overwrite existing workspace.")
+                errors.add("User cancelled overwrite of existing GeoServer workspace.\n"
+                           "Please assign a different QGIS project name or clear the workspace manually.")
 
         # Read the Importer extension info from the manifest (if not already done)
         self.setImporterVersion()
