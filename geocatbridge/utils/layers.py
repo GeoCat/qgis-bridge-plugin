@@ -2,7 +2,7 @@ from re import compile
 from pathlib import Path
 from itertools import chain
 from functools import partial
-from typing import Union, Tuple, Iterable, FrozenSet
+from typing import Union, Tuple, Iterable, FrozenSet, Callable
 from collections import namedtuple
 
 from qgis.core import (
@@ -19,6 +19,8 @@ LAYERNAME_REGEX = compile(r'^layername=(.*)$')
 
 
 class BridgeLayer(QgsMapLayer):
+    title: Callable[[], str]
+    abstract: Callable[[], str]
 
     def __new__(cls, qgis_layer: QgsMapLayer) -> 'BridgeLayer':
         """ Wrapper for a QGIS layer (QgsMapLayer, QgsVectorLayer, QgsRasterLayer etc.) that

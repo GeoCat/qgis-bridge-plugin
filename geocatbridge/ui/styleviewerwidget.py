@@ -1,4 +1,5 @@
 import json
+from traceback import format_exc
 from itertools import chain
 
 from qgis.PyQt.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
@@ -10,12 +11,13 @@ from geocatbridge.publish.style import (
     layerStyleAsSld, layerStyleAsMapbox, layerStyleAsMapfile, convertStyle
 )
 from geocatbridge.utils.layers import isSupportedLayer
+from geocatbridge.utils.feedback import FeedbackMixin
 from geocatbridge.utils import gui
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
 
-class StyleViewerWidget(BASE, WIDGET):
+class StyleViewerWidget(FeedbackMixin, BASE, WIDGET):
 
     def __init__(self):
         super(StyleViewerWidget, self).__init__(iface.mainWindow())
@@ -65,22 +67,26 @@ class StyleViewerWidget(BASE, WIDGET):
             try:
                 sld, _, sld_warnings = layerStyleAsSld(layer)
             except Exception as e:
+                self.logError(format_exc())
                 sld_warnings = [f"Failed to convert to SLD: {e}"]
             # Try GeoStyler conversion
             try:
                 geostyler, _, _, geostyler_warnings = convertStyle(layer)
                 geostyler = json.dumps(geostyler, indent=4)
             except Exception as e:
+                self.logError(format_exc())
                 geostyler_warnings = [f"Failed to convert to GeoStyler: {e}"]
             # Try MapBox GL conversion
             try:
                 mapbox, _, mapbox_warnings = layerStyleAsMapbox(layer)
             except Exception as e:
+                self.logError(format_exc())
                 mapbox_warnings = [f"Failed to convert to MapBox GL: {e}"]
             # Try Mapfile conversion
             try:
                 mapserver, _, _, mapserver_warnings = layerStyleAsMapfile(layer)
             except Exception as e:
+                self.logError(format_exc())
                 mapserver_warnings = [f"Failed to convert to Mapfile: {e}"]
             # Collect all warnings
             warnings.update(chain(sld_warnings, geostyler_warnings, mapbox_warnings, mapserver_warnings))
