@@ -14,7 +14,7 @@ about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 experimental=False
 category=Web
 qgisMinimumVersion=3.16
-version=4.5.0
+version=4.5.1
 email=support@geocat.net
 icon=icons/geocat.png
 tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
@@ -24,7 +24,11 @@ tracker=https://github.com/GeoCat/qgis-bridge-plugin/issues
 repository=https://github.com/GeoCat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
-changelog=Version 4.5.0, September 2024
+changelog=Version 4.5.1, October 2024
+          - Fix bridgestyle (ExpressionConverter) causing some feature styles to fail [#189]
+          - Remove Python warnings
+
+          Version 4.5.0, September 2024
           - Properly release resources when plugin reloads [#187]
           - Replaced QtWebKit related code with regular Qt UI elements [#152, #185]
           - Replaced PNG icons with SVG icons

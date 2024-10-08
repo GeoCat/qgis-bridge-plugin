@@ -1,5 +1,5 @@
 import json as _json
-from warnings import catch_warnings
+from warnings import catch_warnings, simplefilter
 from typing import Dict as _Dict, List, Tuple
 from xml.dom import minidom
 from xml.etree import ElementTree as ETree
@@ -96,7 +96,8 @@ def layerStyleAsSld(layer: _lyr.BridgeLayer, lowercase_props: bool = False) -> T
     layer_name = ETree.SubElement(named_layer, "Name")
     layer_name.text = layer.web_slug if hasattr(layer, 'web_slug') else layer.name()
     user_style = ETree.SubElement(named_layer, "UserStyle")
-    with catch_warnings(action="ignore", category=DeprecationWarning):
+    with catch_warnings():
+        simplefilter("ignore", DeprecationWarning)
         # As title() and abstract() actually point to metadata().title() and metadata().abstract(),
         # (see BridgeLayer.__init__), we can suppress the deprecation warning here...
         props = {
