@@ -3,6 +3,7 @@ from qgis.PyQt.QtWidgets import QHBoxLayout
 from geocatbridge.servers.bases import ServerWidgetBase
 from geocatbridge.servers.models.gn_profile import GeoNetworkProfiles
 from geocatbridge.utils import gui
+from PyQt5.QtWidgets import *
 
 WIDGET, BASE = gui.loadUiType(__file__)
 
@@ -20,6 +21,9 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         self.txtGeonetworkName.textChanged.connect(self.setDirty)
         self.txtGeonetworkNode.textChanged.connect(self.setDirty)
         self.txtGeonetworkUrl.textChanged.connect(self.setDirty)
+        self.txtGeonetworkGroup.textChanged.connect(self.setDirty)
+        self.txtGeonetworkAssignToCat.textChanged.connect(self.setDirty)
+        self.txtGeonetworkTransformWith.textChanged.connect(self.setDirty)
 
         self.populateProfileCombo()
         self.comboMetadataProfile.currentIndexChanged.connect(self.setDirty)
@@ -37,13 +41,15 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
                 raise RuntimeError(f'missing {self.serverType.getLabel()} name')
             if not url:
                 raise RuntimeError(f'missing {self.serverType.getLabel()} URL')
-
             return self.serverType(
                 name=name,
                 authid=self.geonetworkAuth.configId() or None,
                 url=url,
                 # profile=self.comboMetadataProfile.currentIndex(),
-                node=self.txtGeonetworkNode.text().strip() or 'srv'
+                node=self.txtGeonetworkNode.text().strip() or 'srv',
+                group=self.txtGeonetworkGroup.text().strip(),
+                assignCat=self.txtGeonetworkAssignToCat.text().strip(),
+                transform=self.txtGeonetworkTransformWith.text().strip()
             )
         except Exception as e:
             self.parent.logError(f"Failed to create {self.serverType.getLabel()} instance: {e}")
@@ -54,6 +60,9 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         self.txtGeonetworkName.setText(name)
         self.txtGeonetworkUrl.clear()
         self.txtGeonetworkNode.clear()
+        self.txtGeonetworkGroup.clear()
+        self.txtGeonetworkAssignToCat.clear()
+        self.txtGeonetworkTransformWith.clear()
         self.geonetworkAuth.setConfigId(None)
 
         # Reset profile combobox
@@ -65,6 +74,10 @@ class GeoNetworkWidget(ServerWidgetBase, BASE, WIDGET):
         """ Populates the form fields with the values from the given server instance. """
         self.txtGeonetworkName.setText(server.serverName)
         self.txtGeonetworkUrl.setText(server.baseUrl)
+        self.txtGeonetworkNode.setText(server.node)
+        self.txtGeonetworkGroup.setText(server.group)
+        self.txtGeonetworkAssignToCat.setText(server.assignCat)
+        self.txtGeonetworkTransformWith.setText(server.transform)
         self.geonetworkAuth.setConfigId(server.authId)
 
         # Reset profile combobox
