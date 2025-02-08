@@ -55,6 +55,11 @@ class BridgeLayer(QgsMapLayer):
     @staticmethod
     def _parse_source(layer) -> Tuple[str, Union[Path, QgsDataSourceUri, None]]:
         """ Analyzes the layer source and returns either a Path or a QgsDataSourceUri instance (or None). """
+        if layer is None:
+            # There have been reports of 'None' layers being passed in [#264159, #008297]
+            # TODO: research why/when this happens
+            return '', None
+
         source = layer.source()
 
         # Source may be a PostgreSQL database

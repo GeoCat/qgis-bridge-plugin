@@ -77,7 +77,7 @@ class ServerBase(AbstractServer, FeedbackMixin, ABC):
 
     def _apply_options(self, **kwargs):
         """ Processes class initialization options (kwargs) and adds them as first-class attribute values
-        if the option names and types match the annotations defined at the top the subclass.
+        if the option names and types match the annotations defined at the top of the subclass.
         Called on `__init__()` of the ServerBase.
         """
         for keyword, value in kwargs.items():
@@ -271,7 +271,7 @@ class CatalogServerBase(ServerBase, ABC):
             with BridgeSession() as session:
                 req_method = getattr(session, method.casefold())
 
-        if (method.casefold() == 'put' and files_) or (isinstance(data, bytes) or hasattr(data, 'read')) or \
+        if (method.casefold() in ('put', 'post') and files_) or (isinstance(data, bytes) or hasattr(data, 'read')) or \
                 headers.get('Content-Type', '').endswith(('zip', 'octet-stream')):
             # If it looks like we're going to transfer something (potentially) large, increase the timeout
             kwargs['timeout'] = max(kwargs.get('timeout', 0), UPLOAD_TIMEOUT)

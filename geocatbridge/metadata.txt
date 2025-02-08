@@ -1,6 +1,6 @@
 [general]
 name=GeoCat Bridge
-author=GeoCat BV
+author=GeoCat bv
 description=Easy publication of data and metadata from QGIS.
 about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 
@@ -14,7 +14,7 @@ about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
 experimental=False
 category=Web
 qgisMinimumVersion=3.16
-version=4.5.1
+version=4.5.2
 email=support@geocat.net
 icon=icons/geocat.png
 tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
@@ -24,7 +24,11 @@ tracker=https://github.com/GeoCat/qgis-bridge-plugin/issues
 repository=https://github.com/GeoCat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
-changelog=Version 4.5.1, October 2024
+changelog=Version 4.5.2, February 2025
+          - Prevent crash when trying to retrieve the source of disposed layers
+          - Make sure that the upload timeout (600s) is applied for multipart POST requests as well
+
+          Version 4.5.1, October 2024
           - Fix bridgestyle (ExpressionConverter) causing some feature styles to fail [#189]
           - Remove Python warnings
 
