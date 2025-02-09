@@ -8,12 +8,12 @@ about=GeoCat is pleased to offer its Bridge plugin to the QGIS community.
       Your data is uploaded as a GeoPackage, Shapefile, or imported into a PostGIS database. Bridge will automatically convert your QGIS styles into the destination format (SLD, Mapfile, etc.).
 
       <b>Notes</b>
-      - If you wish to publish metadata, be aware that more recent QGIS versions (3.22+) require you to install the 'lxml' python package.
+      - If you wish to publish metadata, QGIS 3.22+ requires you to install the 'lxml' python package.
       - <i>Bridge for QGIS</i> versioning starts at v4.0. There are no official releases prior to v4.x.
 
 experimental=False
 category=Web
-qgisMinimumVersion=3.16
+qgisMinimumVersion=3.22
 version=4.5.2
 email=support@geocat.net
 icon=icons/geocat.png

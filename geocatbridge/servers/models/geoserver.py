@@ -353,7 +353,7 @@ class GeoserverServer(DataCatalogServerBase):
             ds_name, enabled, params = ds.get("name"), ds.get("enabled"), ds.get("connectionParameters", {})
             # Only yield dataStore if it is enabled and the "dbtype" parameter equals "postgis"
             # Using the "type" property does not work in all cases (e.g. for JNDI connection pools or NG)
-            entries = {e["@key"]: e["$"] for e in params.get("entry", [])}
+            entries = {k: e.get("$", "") for e in params.get("entry", []) if (k := e.get("@key"))}
             if enabled and entries.get("dbtype", "").startswith("postgis"):
                 yield ds_name
 
