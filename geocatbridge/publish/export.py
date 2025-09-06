@@ -49,7 +49,7 @@ def _writeVector(layer: BridgeLayer, fields: List[str],
             options.layerName = layer.web_slug
             if target_path.exists():
                 # Add a new layer to existing GeoPackages (instead of overwriting the GeoPackage)
-                options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
+                options.actionOnExistingFile = QgsVectorFileWriter.ActionOnExistingFile.CreateOrOverwriteLayer
     # Make sure that we are using the latest (non-deprecated) write method
     if hasattr(QgsVectorFileWriter, 'writeAsVectorFormatV3'):
         # Use writeAsVectorFormatV3 for QGIS versions >= 3.20 to avoid DeprecationWarnings
@@ -102,7 +102,7 @@ def exportVector(layer: BridgeLayer, fields: List[str],
     result = _writeVector(layer, fields, output)
 
     # Check if first item in result tuple is an error code
-    if result[0] == QgsVectorFileWriter.NoError:
+    if result[0] == QgsVectorFileWriter.WriterError.NoError:
         logger.logInfo(f"Layer {layer.name()} exported to {output}")
     else:
         # Dump the result tuple as-is when there are errors (the tuple size depends on the QGIS version)
@@ -141,7 +141,7 @@ def exportRaster(layer: BridgeLayer, target_path: str = None, **kwargs) -> Path:
         result = writer.writeRaster(layer.pipe(), layer.width(), layer.height(), layer.extent(), layer.crs())
 
     # Return type is WriterError (int)
-    if result == QgsRasterFileWriter.NoError:
+    if result == QgsRasterFileWriter.WriterError.NoError:
         logger.logInfo(f"Layer {layer.name()} exported to {output}")
     else:
         # Dump the result tuple as-is when there are errors (the tuple size depends on the QGIS version)
@@ -230,7 +230,7 @@ class GeoPackager:
             lyr = layerById(lyr_id)
             fields = fieldsForLayer(lyr, self._field_map)
             result = _writeVector(lyr, fields, gpk_out)
-            if result[0] == QgsVectorFileWriter.NoError:
+            if result[0] == QgsVectorFileWriter.WriterError.NoError:
                 self._id_gpk_out[lyr.id()] = gpk_out
 
         return ExportResult(gpkg_path=self._id_gpk_out.get(cur_id))

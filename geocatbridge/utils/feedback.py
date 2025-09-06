@@ -26,17 +26,17 @@ def translate(message, *args, **kwargs):
 
 def logInfo(message):
     """ Logs a basic information message. """
-    _log(translate(message), Qgis.Info)
+    _log(translate(message), Qgis.MessageLevel.Info)
 
 
 def logWarning(message):
     """ Logs a basic warning message. """
-    _log(translate(message), Qgis.Warning)
+    _log(translate(message), Qgis.MessageLevel.Warning)
 
 
 def logError(message):
     """ Logs a basic error message. """
-    _log(translate(message), Qgis.Critical)
+    _log(translate(message), Qgis.MessageLevel.Critical)
 
 
 def inject(f, kwarg_name: str = 'feedback'):
@@ -59,10 +59,10 @@ def inject(f, kwarg_name: str = 'feedback'):
 
 
 class Buttons:
-    OK = QMessageBox.Ok
-    NO = QMessageBox.No
-    YES = QMessageBox.Yes
-    CANCEL = QMessageBox.Cancel
+    OK = QMessageBox.StandardButton.Ok
+    NO = QMessageBox.StandardButton.No
+    YES = QMessageBox.StandardButton.Yes
+    CANCEL = QMessageBox.StandardButton.Cancel
 
 
 class FeedbackMixin:
@@ -81,7 +81,7 @@ class FeedbackMixin:
         """ Updates the _widget_bar property if the widget layout has been initialized. """
         if hasattr(self, 'layout') and self.layout():
             self._widget_bar = QgsMessageBar(self if isinstance(self, QWidget) else None)
-            self._widget_bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+            self._widget_bar.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
             self.layout().insertWidget(0, self._widget_bar)
 
     def _log(self, message, level):
@@ -89,14 +89,14 @@ class FeedbackMixin:
             message = str(message)
         text = self.translate(message)
         _log(text, level)
-        if level == Qgis.Warning:
+        if level == Qgis.MessageLevel.Warning:
             self._warnings.append(text)
-        elif level == Qgis.Critical:
+        elif level == Qgis.MessageLevel.Critical:
             self._errors.append(text)
 
     def _propagate(self, message, level, **kwargs):
         value = kwargs.get("propagate")
-        if not value or level not in (Qgis.Critical, Qgis.Warning):
+        if not value or level not in (Qgis.MessageLevel.Critical, Qgis.MessageLevel.Warning):
             return
         self._log(message if value is True else value, level)
 
@@ -117,15 +117,15 @@ class FeedbackMixin:
 
     def logInfo(self, message):
         """ Logs an information message. """
-        self._log(message, Qgis.Info)
+        self._log(message, Qgis.MessageLevel.Info)
 
     def logWarning(self, message):
         """ Logs a warning message. """
-        self._log(message, Qgis.Warning)
+        self._log(message, Qgis.MessageLevel.Warning)
 
     def logError(self, message):
         """ Logs an error message. """
-        self._log(message, Qgis.Critical)
+        self._log(message, Qgis.MessageLevel.Critical)
 
     def getLogIssues(self):
         """ Returns a tuple of all logged (warnings, errors). """
@@ -146,7 +146,7 @@ class FeedbackMixin:
                             of the main application window. By default, the bar will be displayed
                             at the top of the current widget, unless there is none.
         """
-        self._show_bar(title, message, Qgis.Success, **kwargs)
+        self._show_bar(title, message, Qgis.MessageLevel.Success, **kwargs)
 
     def showWarningBar(self, title, message, **kwargs):
         """
@@ -160,7 +160,7 @@ class FeedbackMixin:
         :keyword propagate: When set to `True`, the message will also be logged.
                             When set to a string or Exception, it's value will be logged.
         """
-        self._show_bar(title, message, Qgis.Warning, **kwargs)
+        self._show_bar(title, message, Qgis.MessageLevel.Warning, **kwargs)
 
     def showErrorBar(self, title, message, **kwargs):
         """
@@ -174,7 +174,7 @@ class FeedbackMixin:
         :keyword propagate: When set to `True`, the message will also be logged.
                             When set to a string or Exception, it's value will be logged.
         """
-        self._show_bar(title, message, Qgis.Critical, **kwargs)
+        self._show_bar(title, message, Qgis.MessageLevel.Critical, **kwargs)
 
     def getProgressDialog(self, label, max_length, callback=None) -> QProgressDialog:
         """
@@ -244,5 +244,5 @@ class FeedbackMixin:
         """
         dlg = QgsMessageOutput.createMessageOutput()  # noqa
         dlg.setTitle(self.translate(title))
-        dlg.setMessage(html, QgsMessageOutput.MessageHtml)
+        dlg.setMessage(html, QgsMessageOutput.MessageType.MessageHtml)
         dlg.showMessage()

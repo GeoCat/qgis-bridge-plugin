@@ -71,7 +71,7 @@ class ProgressDialog(BASE, WIDGET):
     @staticmethod
     def setMetadata(item, category):
         if item and category == METADATA:
-            item.setForeground(1, QBrush(Qt.blue))
+            item.setForeground(1, QBrush(Qt.GlobalColor.blue))
             item.setIcon(1, CHECK_ICON)
 
     def setFinished(self, layer_id, category):
@@ -80,14 +80,14 @@ class ProgressDialog(BASE, WIDGET):
         green.setNamedColor("#00851F")
         subitem.setForeground(1, QBrush(green))
         subitem.setText(1, "Finished")
-        subitem.setBackground(0, QBrush(Qt.white))
-        subitem.setBackground(1, QBrush(Qt.white))
+        subitem.setBackground(0, QBrush(Qt.GlobalColor.white))
+        subitem.setBackground(1, QBrush(Qt.GlobalColor.white))
         self.setMetadata(item, category)
         QCoreApplication.processEvents()
 
     def setSkipped(self, layer_id, category):
         item, subitem = self.getItem(layer_id, category, True)
-        subitem.setForeground(1, QBrush(Qt.gray))
+        subitem.setForeground(1, QBrush(Qt.GlobalColor.gray))
         subitem.setText(1, "Skipped")
         self.setMetadata(item, category)
         QCoreApplication.processEvents()

@@ -108,12 +108,12 @@ class BridgeLayer(QgsMapLayer):
     @property
     def is_vector(self) -> bool:
         """ Returns True if it's a vector layer. """
-        return self.type() == QgsMapLayer.VectorLayer  # noqa
+        return self.type() == QgsMapLayer.LayerType.VectorLayer  # noqa
 
     @property
     def is_raster(self) -> bool:
         """ Returns True if it's a raster layer. """
-        return self.type() == QgsMapLayer.RasterLayer  # noqa
+        return self.type() == QgsMapLayer.LayerType.RasterLayer  # noqa
 
     @property
     def is_postgis_based(self) -> bool:
@@ -231,7 +231,7 @@ def isSupportedLayer(layer):
             # If the path is invalid (e.g. too long), the layer is not supported either way [#004035]
             return False
     return (layer.isValid() and layer.isSpatial() and layer.crs().isValid() and
-            layer.type() in (QgsMapLayer.VectorLayer, QgsMapLayer.RasterLayer) and  # noqa
+            layer.type() in (QgsMapLayer.LayerType.VectorLayer, QgsMapLayer.LayerType.RasterLayer) and  # noqa
             layer.dataProvider().name() != "wms")
 
 

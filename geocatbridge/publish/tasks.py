@@ -35,7 +35,7 @@ class TaskBase(QgsTask):
     stepSkipped = pyqtSignal(str, int)
 
     def __init__(self, layer_ids: List[str], field_map: dict):
-        super().__init__(f'{getAppName()} publish/export task', QgsTask.CanCancel)
+        super().__init__(f'{getAppName()} publish/export task', QgsTask.Flag.CanCancel)
         self.layer_ids = layer_ids
         self.field_map = field_map
 
@@ -222,7 +222,7 @@ class PublishTask(TaskBase):
             dialog = PublishReportDialog(self.results, self.only_symbology,
                                          self.geodata_server, self.metadata_server,
                                          self.parent)
-            dialog.exec_()
+            dialog.exec()
 
 
 class ExportTask(TaskBase, feedback.FeedbackMixin):

@@ -104,7 +104,7 @@ class EditorWidget(QsciScintilla):
         super(EditorWidget, self).__init__()
 
         if isinstance(self, QFrame):
-            self.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+            self.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
 
         font = QFont()
         font.setFamily('Cascadia Mono, Roboto Mono, monospace')
@@ -116,16 +116,17 @@ class EditorWidget(QsciScintilla):
 
         font_metrics = QFontMetrics(font)
         self.setMarginsFont(font)
+        # TODO:  WARNING: QFontMetrics.width() has been removed in Qt6. Use QFontMetrics.horizontalAdvance() if plugin can safely require Qt >= 5.11, or QFontMetrics.boundingRect().width() otherwise.
         self.setMarginWidth(0, font_metrics.width("00000") + 6)
         self.setMarginLineNumbers(0, True)
         self.setMarginsBackgroundColor(QColor("#cccccc"))
 
-        self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
+        self.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
 
         self.setCaretLineVisible(True)
         self.setCaretLineBackgroundColor(QColor("#ffe4e4"))
 
-        self.setFolding(QsciScintilla.CircledTreeFoldStyle)
+        self.setFolding(QsciScintilla.FoldStyle.CircledTreeFoldStyle)
 
         if lexer is not None:
             lexer.setDefaultFont(font)

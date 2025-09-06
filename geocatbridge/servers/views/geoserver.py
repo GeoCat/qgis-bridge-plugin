@@ -246,7 +246,7 @@ class GeoServerWidget(ServerWidgetBase, BASE, WIDGET):
             self.parent.showErrorBar("Error", "Wrong values in server definition")
             return
         dlg = GeoserverDatastoreDialog(self)
-        dlg.exec_()
+        dlg.exec()
         name = dlg.name
         if name is None:
             return

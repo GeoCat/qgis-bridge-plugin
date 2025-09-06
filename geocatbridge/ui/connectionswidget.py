@@ -80,7 +80,7 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         """ Exports all configured servers as a JSON file. """
         filename = QFileDialog.getSaveFileName(self, self.translate("Export servers"),
                                                filter=f'{self.translate("Server configuration")} (*.json)',
-                                               options=QFileDialog.DontUseNativeDialog)[0]
+                                               options=QFileDialog.Option.DontUseNativeDialog)[0]
         if not filename:
             self.logWarning("No export filename specified")
             return
@@ -108,7 +108,7 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         """ Imports a list of server configurations from a user-specified JSON file. """
         filename = QFileDialog.getOpenFileName(self, self.translate("Import servers"),
                                                filter=f'{self.translate("Server configuration")} (*.json)',
-                                               options=QFileDialog.DontUseNativeDialog)[0]
+                                               options=QFileDialog.Option.DontUseNativeDialog)[0]
         if not filename:
             self.logWarning("No export filename specified")
             return
@@ -184,10 +184,10 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         """
         list_index = -1
         row_index = self.listServers.currentRow()
-        if event.key() == Qt.Key_Up and row_index > 0:
+        if event.key() == Qt.Key.Key_Up and row_index > 0:
             # User pressed the Up key and there is a list item above the current one
             list_index = row_index - 1
-        elif event.key() == Qt.Key_Down and row_index < self.listServers.count() - 1:
+        elif event.key() == Qt.Key.Key_Down and row_index < self.listServers.count() - 1:
             # User pressed the Down key and there is a list item below the current one
             list_index = row_index + 1
 
