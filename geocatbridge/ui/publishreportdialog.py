@@ -27,7 +27,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         txt_off = self.translate('off').upper()
 
         self.setWindowIcon(gui.getSvgIcon('bridge_icon'))
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         if isinstance(geodata_server, bases.DataCatalogServerBase):
             url = geodata_server.baseUrl
             self.labelUrlMapServer.setText(f'<a href="{url}">{url}</a>')
@@ -68,7 +68,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
                 # Also render text in red if there are any errors
                 status_lbl.setStyleSheet("QLabel { color: red; }")
             layout.addWidget(status_lbl)  # noqa
-            layout.setAlignment(Qt.AlignLeft)
+            layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             layout.setContentsMargins(0, 0, 0, 0)
             status_widget.setLayout(layout)
             self.tableWidget.setCellWidget(i, 1, status_widget)

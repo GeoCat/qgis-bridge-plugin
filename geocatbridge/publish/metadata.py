@@ -92,12 +92,12 @@ def _loadMetadataFromFgdcXml(layer, filename):
 
 def _saveLayerThumbnail(layer):
     filename = tempFileInSubFolder("thumbnail.png")
-    img = QImage(QSize(800, 800), QImage.Format_A2BGR30_Premultiplied)
+    img = QImage(QSize(800, 800), QImage.Format.Format_A2BGR30_Premultiplied)
     color = QColor(255, 255, 255, 255)
     img.fill(color.rgba())
     p = QPainter()
     p.begin(img)
-    p.setRenderHint(QPainter.Antialiasing)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
     ms = QgsMapSettings()
     ms.setBackgroundColor(color)
     ms.setLayers([layer])

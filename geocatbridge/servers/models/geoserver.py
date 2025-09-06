@@ -751,7 +751,7 @@ class GeoserverServer(DataCatalogServerBase):
             """ Reads bytes from PNG sprite sheets. """
             ba = QByteArray()
             buff = QBuffer(ba)
-            buff.open(QIODevice.WriteOnly)
+            buff.open(QIODevice.OpenModeFlag.WriteOnly)
             img.save(buff, "png")
             return ba.data()
 

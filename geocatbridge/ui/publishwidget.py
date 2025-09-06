@@ -129,7 +129,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
         self.listLayers.currentRowChanged.connect(self.currentRowChanged)
         self.listLayers.customContextMenuRequested.connect(self.showContextMenu)
-        self.listLayers.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.listLayers.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tabOnOffline.currentChanged.connect(partial(self.tabOnOfflineChanged))
         self.txtExportFolder.textChanged.connect(self.exportFolderChanged)
 
@@ -193,13 +193,13 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if metadata_server and metadata_server in manager.getMetadataServerNames():
             self.comboMetadataServer.setCurrentText(metadata_server)
         style_only = online_settings.get('symbologyOnly', False)
-        self.chkOnlySymbology.setCheckState(Qt.Checked if style_only else Qt.Unchecked)
+        self.chkOnlySymbology.setCheckState(Qt.CheckState.Checked if style_only else Qt.CheckState.Unchecked)
 
         # Set offline settings
         offline_settings = settings.get('offline', {})
-        self.chkExportGeodata.setCheckState(Qt.Checked if offline_settings.get('exportGeodata') else Qt.Unchecked)
-        self.chkExportMetadata.setCheckState(Qt.Checked if offline_settings.get('exportMetadata') else Qt.Unchecked)
-        self.chkExportSymbology.setCheckState(Qt.Checked if offline_settings.get('exportSymbology') else Qt.Unchecked)
+        self.chkExportGeodata.setCheckState(Qt.CheckState.Checked if offline_settings.get('exportGeodata') else Qt.CheckState.Unchecked)
+        self.chkExportMetadata.setCheckState(Qt.CheckState.Checked if offline_settings.get('exportMetadata') else Qt.CheckState.Unchecked)
+        self.chkExportSymbology.setCheckState(Qt.CheckState.Checked if offline_settings.get('exportSymbology') else Qt.CheckState.Unchecked)
         folder = offline_settings.get('exportFolder') or ''
         self.txtExportFolder.setText(folder)
 
@@ -323,12 +323,12 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             self.tableFields.setRowCount(len(fields))
             for i, field in enumerate(fields):
                 item = QTableWidgetItem()
-                item.setFlags(item.flags() ^ Qt.ItemIsEditable)  # noqa
-                check = Qt.Checked if self.fieldsToPublish[self.currentLayer.id()][field] else Qt.Unchecked
+                item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)  # noqa
+                check = Qt.CheckState.Checked if self.fieldsToPublish[self.currentLayer.id()][field] else Qt.CheckState.Unchecked
                 item.setCheckState(check)
                 self.tableFields.setItem(i, 0, item)
                 item = QTableWidgetItem(field)
-                item.setFlags(item.flags() ^ Qt.ItemIsEditable)  # noqa
+                item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)  # noqa
                 self.tableFields.setItem(i, 1, item)
         else:
             self.tabLayerInfo.setTabEnabled(1, False)
@@ -352,7 +352,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         for i in range(fields.count()):
             check = self.tableFields.item(i, 0)
             name = self.tableFields.item(i, 1)
-            pub_fields[name.text()] = check.checkState() == Qt.Checked
+            pub_fields[name.text()] = check.checkState() == Qt.CheckState.Checked
         self.fieldsToPublish[self.currentLayer.id()] = pub_fields
 
     def showContextMenu(self, pos: QPoint):
@@ -374,7 +374,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         if self.isMetadataPublished.get(layer_id):
             menu.addAction(self.translate("View metadata record"), partial(self.viewMetadata, layer_id))
             menu.addAction(self.translate("Unpublish metadata"), partial(self.unpublishMetadata, layer_id))
-        menu.exec_(self.listLayers.mapToGlobal(pos))
+        menu.exec(self.listLayers.mapToGlobal(pos))
 
     def populateLayerWidget(self):
         for i, layer in enumerate(self.publishableLayers):
@@ -512,7 +512,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             return
         self.storeMetadata()
         w = MetadataDialog(self.currentLayer, tab, self)
-        if w.exec_():
+        if w.exec():
             self.populateLayerMetadata()
 
     def unpublishData(self, layer_id: str) -> bool:
@@ -999,7 +999,7 @@ class LayerItemWidget(QWidget):
         server_widget = server.__class__.getWidgetClass()
         pixmap = server_widget.getIcon() if server_widget else QPixmap()  # noqa
         if not pixmap.isNull():
-            pixmap = pixmap.scaled(label.width(), label.height(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            pixmap = pixmap.scaled(label.width(), label.height(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         label.setPixmap(pixmap)
         return not pixmap.isNull()
 
@@ -1030,4 +1030,4 @@ class LayerItemWidget(QWidget):
         return self._checkbox.isChecked()
 
     def setCheckbox(self, state: bool):
-        self._checkbox.setCheckState(Qt.Checked if state else Qt.Unchecked)
+        self._checkbox.setCheckState(Qt.CheckState.Checked if state else Qt.CheckState.Unchecked)

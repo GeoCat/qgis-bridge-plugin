@@ -20,7 +20,7 @@ class MetadataDialog(FeedbackMixin, QDialog):
         layout.addWidget(self.metadataWidget)  # noqa
         self.metadataWidget.layout().itemAt(0).widget().setCurrentIndex(tab)  # noqa
 
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         layout.addWidget(self.buttonBox)  # noqa
         self.setLayout(layout)
 

@@ -147,12 +147,12 @@ def save_wms_image(filename, url, layer, extent):
     
 def save_layer_image(filename, layer, extent):
     h = int(extent.height() / extent.width() * WIDTH)
-    img = QImage(QSize(WIDTH, h), QImage.Format_A2BGR30_Premultiplied)
+    img = QImage(QSize(WIDTH, h), QImage.Format.Format_A2BGR30_Premultiplied)
     color = QColor(255,255,255,255)
     img.fill(color.rgba())
     p = QPainter()
     p.begin(img)
-    p.setRenderHint(QPainter.Antialiasing)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
     ms = QgsMapSettings()
     ms.setBackgroundColor(color)        
     ms.setLayers([layer])

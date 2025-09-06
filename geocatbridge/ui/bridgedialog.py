@@ -88,10 +88,10 @@ class BridgeDialog(BASE, WIDGET):
         if list_index < 0:
             # User did not press the first letter of a panel name: check if arrow keys were pressed
             row_index = self.listWidget.currentRow()
-            if key == Qt.Key_Up and row_index > 0:
+            if key == Qt.Key.Key_Up and row_index > 0:
                 # User pressed the Up key and there is a list item above the current one
                 list_index = row_index - 1
-            elif key == Qt.Key_Down and row_index < len(self.panel_widgets) - 1:
+            elif key == Qt.Key.Key_Down and row_index < len(self.panel_widgets) - 1:
                 # User pressed the Down key and there is a list item below the current one
                 list_index = row_index + 1
 
