@@ -109,3 +109,9 @@ venv.bak/
 .run/
 .idea/
 *debug/
+
+# Backup, zip files, submodule libs
+.bkp
+.zip
+submodules/
+/libs/*/
