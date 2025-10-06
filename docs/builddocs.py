@@ -16,12 +16,12 @@ import sys
 import argparse
 import os
 import re
-import shlex
 import shutil
 import traceback
-import subprocess
 from pathlib import Path
 from typing import Tuple
+
+from scripts.shared import execute_subprocess
 
 NAME = "GeoCat Bridge"
 DEFAULT_DIR = "../build/docs"
@@ -43,48 +43,6 @@ def printif(value):
     if value in (None, ''):
         return
     print(value)
-
-
-def update_env_path():
-    """ Updates the PATH environment variable on Windows by adding the system PATH.
-    In newer Python environments, the user PATH variable is used instead of the system PATH,
-    which causes some commands to not be found.
-    """
-
-    if (os.name != 'nt'):
-        # Not Windows: nothing to do
-        return
-
-    cmd = 'reg query "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment" /v Path'
-    proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    stdout, _ = proc.communicate()
-    # Extract the PATH value
-    path_line = [line for line in stdout.split('    ')][-1]
-    if path_line and ';' in path_line:
-        paths = f"{os.environ.get('PATH', '')};{path_line.strip()}"
-        os.environ['PATH'] = paths
-
-
-def sh(cmd: str) -> Tuple[int, str]:
-    """ Execute a shell command. Returns a tuple of (exit code, stdout). """
-    args = shlex.split(cmd)
-    exe = args[0]
-    if not Path(exe).exists():
-        # Try to find the executable in the PATH
-        exe = shutil.which(args[0])
-        if not exe:
-            print(f"Executable '{args[0]}' not found - retrying...")
-            update_env_path()
-        # Retry with updated PATH (on Windows only)
-        exe = shutil.which(args[0])
-        if not exe:
-            print(f"Executable '{args[0]}' not found - giving up", file=sys.stderr, flush=True)
-            return 1, "Failed to execute command 'cmd'"
-        print(f"Found executable '{exe}'")
-        args[0] = exe
-    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
-    stdout, _ = proc.communicate()
-    return proc.returncode, stdout.decode("utf-8")
 
 
 def clear_target(folder: Path):
@@ -125,7 +83,7 @@ def build_docs(src_dir: Path, dst_dir: Path, version: str, html_theme: str = Non
 def current_branch():
     """ Gets the current branch name. Returns None if the current branch could not be determined. """
     # Note: "git branch --show-current" does not work on older Git versions
-    exit_code, sym_ref = sh("git symbolic-ref HEAD")
+    exit_code, sym_ref = execute_subprocess("git symbolic-ref HEAD")
     if exit_code:
         # If command failed, force an error below
         sym_ref = None
@@ -138,7 +96,7 @@ def current_branch():
 
 def is_dirty() -> bool:
     """ Returns True if the current branch is dirty (i.e. has uncommitted edits). """
-    exit_code, result = sh("git diff --stat")
+    exit_code, result = execute_subprocess("git diff --stat")
     if exit_code:
         # Presume dirty if git command failed
         print('Failed to check if working branch is clean: assuming dirty')
@@ -150,7 +108,7 @@ def is_dirty() -> bool:
     lines = list(ln.strip() for ln in result.splitlines())
     if len(lines) == 2:
         # Only one difference found: check if it is a submodule (which can be ignored)
-        exit_code, sub_result = sh("git submodule")
+        exit_code, sub_result = execute_subprocess("git submodule")
         if exit_code:
             # Presume dirty if git command failed
             return True
@@ -164,19 +122,19 @@ def checkout(branch: str = None) -> Tuple[int, str]:
     """ Checks out the given branch name or master/main if omitted. """
     if not branch:
         branch = ''
-    return sh(f"git checkout {branch} --recurse-submodules")
+    return execute_subprocess(f"git checkout {branch} --recurse-submodules")
 
 
 def get_tags(retry: bool = True):
     """ Returns a dictionary of {(major, minor, build, suffix): tag-string} for all valid Git tags. """
     print(f"Listing available git tags with '{VERSION_PREFIX}' prefix...")
     result = {}
-    exit_code, tags = sh("git tag -l")
+    exit_code, tags = execute_subprocess("git tag -l")
     if exit_code or not tags.strip():
         print("Failed to retrieve tags")
         if not tags.strip() and retry:
             print("Fetching tags from remote and retrying...")
-            exit_code, _ = sh("git fetch --tags")
+            exit_code, _ = execute_subprocess("git fetch --tags")
             if not exit_code:
                 return get_tags(False)
             else:
@@ -232,7 +190,7 @@ def build_tag(src_root: Path, dst_root: Path, version: str, html_theme: str = No
         print(f"HTML theme override '{html_theme}' will be applied")
         override = f'-D html_theme={html_theme}'
     print(f"Building HTML documentation for {NAME} {version if version != V_LATEST else f'({V_LATEST})'}")
-    exit_code, result = sh(f"sphinx-build -a {override} '{src_dir}' '{bld_dir}'")
+    exit_code, result = execute_subprocess(f"sphinx-build -a {override} '{src_dir}' '{bld_dir}'")
     printif(result)
     if exit_code:
         print("Failed to build docs", file=sys.stderr, flush=True)
@@ -303,7 +261,7 @@ def main():
         print(f"Output directory: {folder}")
 
         # Temporarily disable detached HEAD warnings
-        sh("git config advice.detachedHead false")
+        execute_subprocess("git config advice.detachedHead false")
 
         # Checkout tag/latest if not triggered by a GitHub Action
         if not gh_ref:
@@ -332,7 +290,7 @@ def main():
             clear_target(themes_dir)
             os.chdir(docsrc_dir)
             print(f"Cloning from {THEMES_REPO} into '{THEMES_DIRNAME}' folder...")
-            exit_code, _ = sh(f'git clone -q {THEMES_REPO} --single-branch {THEMES_DIRNAME}')
+            exit_code, _ = execute_subprocess(f'git clone -q {THEMES_REPO} --single-branch {THEMES_DIRNAME}')
             if exit_code:
                 print(f"Failed to clone {THEMES_REPO} into {docsrc_dir / THEMES_DIRNAME}", file=sys.stderr, flush=True)
                 sys.exit(exit_code)

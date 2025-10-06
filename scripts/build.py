@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import subprocess
 import zipfile
 import argparse
 from pathlib import Path
@@ -28,7 +27,7 @@ def package():
 def make_zip(zip_file):
     print("Creating ZIP for GeoCat Bridge plugin...")
     file_excludes = {'*.pyc', "*.git*", "*.log"}
-    dir_excludes = {"test", "tests", "_debug", "scripts", "build", "__pycache__", ".github"}
+    dir_excludes = {"test", "tests", "_debug", "__pycache__"}  # folder names inside ./geocatbridge
     src_dir = f"./geocatbridge"
     gpltxt = Path('./LICENSE')
     readme = Path('./README.md')
@@ -62,14 +61,6 @@ def make_zip(zip_file):
             zip_file.write(os.path.join(root, f), dstpath)
 
     print(f'Successfully created ZIP file {zip_file.filename}')
-
-
-def sh(commands):
-    if isinstance(commands, str):
-        commands = commands.split(" ")
-    out = subprocess.Popen(commands, stdout=subprocess.PIPE)
-    stdout, stderr = out.communicate()
-    return stdout.decode("utf-8")
 
 
 if __name__ == "__main__":

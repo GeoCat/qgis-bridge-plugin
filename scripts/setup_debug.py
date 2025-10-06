@@ -17,11 +17,12 @@ committing your changes to the Git repository.
 """
 
 import argparse
-import inspect
 import os
 import stat
 import shutil
 from pathlib import Path
+
+from shared import get_workdir
 
 # This is the code that will be injected to enable remote debugging
 _CODE = """
@@ -49,11 +50,6 @@ _PORT = 6666
 
 # Default folder name
 _REMOTE_DEBUG_DIR = '_debug'
-
-
-def get_curdir() -> Path:
-    """ Gets the current directory of this script file. """
-    return Path(inspect.getfile(inspect.currentframe())).absolute().parent
 
 
 def get_args() -> list:
@@ -125,7 +121,7 @@ def main(plugin_py: Path, host: str = _HOST, port: int = _PORT):
         raise Exception('PyCharm remote debugger package not found: '
                         'run `pip install pydevd-pycharm` in active environment')
 
-    cur_dir = get_curdir()
+    cur_dir = get_workdir()
     local_py = cur_dir / plugin_py.with_suffix('.py.bkp')
 
     # Check if plugin.py already contains the injected debug code
