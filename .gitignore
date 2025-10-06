@@ -114,4 +114,4 @@ venv.bak/
 .bkp
 .zip
 /libs/*/
-submodules/
+dependencies/
