@@ -126,7 +126,7 @@ def main(plugin_py: Path, host: str = _HOST, port: int = _PORT):
                         'run `pip install pydevd-pycharm` in active environment')
 
     cur_dir = get_curdir()
-    local_py = cur_dir / plugin_py.name
+    local_py = cur_dir / plugin_py.with_suffix('.py.bkp')
 
     # Check if plugin.py already contains the injected debug code
     with open(plugin_py) as f:

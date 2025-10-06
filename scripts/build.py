@@ -28,7 +28,7 @@ def package():
 def make_zip(zip_file):
     print("Creating ZIP for GeoCat Bridge plugin...")
     file_excludes = {'*.pyc', "*.git*", "*.log"}
-    dir_excludes = {"test", "tests", "_debug", "debug", "build", "__pycache__", ".github"}
+    dir_excludes = {"test", "tests", "_debug", "scripts", "build", "__pycache__", ".github"}
     src_dir = f"./geocatbridge"
     gpltxt = Path('./LICENSE')
     readme = Path('./README.md')

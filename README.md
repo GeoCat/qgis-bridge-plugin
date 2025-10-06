@@ -60,7 +60,7 @@ To make this work, you could:
 
 - Set up a symbolic link (directory junction) in the QGIS python plugin directory called `geocatbridge` that points to the `geocatbridge` folder in the cloned repository.
 - Using pip, install the `pydevd-pycharm` package in the QGIS Python environment.
-- Run the [`setup_debug.py`](/debug/setup_debug.py) script, which will inject some code in the [`plugin.py`](/geocatbridge/plugin.py) file that connects to the remote debugger.
+- Run the [`setup_debug.py`](/scripts/setup_debug.py) script, which will inject some code in the [`plugin.py`](/geocatbridge/plugin.py) file that connects to the remote debugger.
 - In PyCharm's _Run/Debug Configurations_, create a new _Python Debug Server_ configuration with the correct host and port settings.
 - Start the remote debugger configuration in PyCharm and then start QGIS. The plugin will connect to the debugger and automatically set a breakpoint at the `__init__` step of the `plugin.py`.
 - When you are done coding, don't forget to roll back the changes made to `plugin.py` by the `setup_debug.py` script.
