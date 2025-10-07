@@ -1,0 +1,12 @@
+{
+  "target_dir": "geocatbridge/libs",
+  "dependencies": [
+    {
+      "name": "bridgestyle",
+      "url": "https://github.com/GeoCat/bridge-style.git",
+      "version": "0.1.4",
+      "main_branch": "master",
+      "source_dir": "src/bridgestyle"
+    }
+  ]
+}

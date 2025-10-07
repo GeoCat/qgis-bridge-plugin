@@ -53,3 +53,8 @@ def execute_subprocess(cmd: str) -> Tuple[int, str]:
 def get_workdir() -> Path:
     """ Gets the current working directory (i.e. from where the script is being called). """
     return Path(inspect.getfile(inspect.currentframe())).absolute().parent
+
+
+def get_rootdir():
+    """ Returns the root directory of the project (i.e. the parent of the /scripts folder)."""
+    return Path(__file__).resolve().parent.parent
