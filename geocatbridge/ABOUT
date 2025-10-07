@@ -1,0 +1,25 @@
+=========================== GEOCAT BRIDGE FOR QGIS ============================
+
+"GeoCat Bridge for QGIS" is the light-weight open-source version of the
+proprietary "GeoCat Bridge for ArcGIS" plugin.
+
+It allows QGIS users to share geospatial (meta)data to cloud-based
+platforms like GeoServer, GeoNetwork, and MapServer.
+
+LICENSE
+This software is released under a GPL v3 license.
+For details, please refer to the LICENSE file.
+
+DOCUMENTATION
+Online documentation can be found at:
+https://geocat.github.io/qgis-bridge-plugin/latest
+
+SUPPORT
+This software is created and maintained by GeoCat bv.
+Community users can use this software for free, but are not entitled
+to receive free support. You may contact GeoCat bv for support options.
+
+ISSUES
+If you experience any issues with the software, please report them using the
+issue tracker on the GeoCat Bridge GitHub repository:
+https://github.com/GeoCat/qgis-bridge-plugin/issues

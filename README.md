@@ -41,7 +41,7 @@ Alternatively, you can open a new [issue](https://github.com/GeoCat/qgis-bridge-
 
 ## Packaging
 
-To package the plugin for QGIS, run the  [`build.py`](/build.py) script. It creates a ZIP archive called `GeoCat_Bridge.zip` in the `build` folder of the cloned repository, that only includes the relevant plugin code for deployment and leaves out debug or test code.
+To package the plugin for QGIS, run the  [`build.py`](/scripts/build.py) script. It creates a ZIP archive called `GeoCat_Bridge.zip` in the `build` folder of the cloned repository, that only includes the relevant plugin code for deployment and leaves out debug or test code.
 
 ## Contributing
 
@@ -59,11 +59,30 @@ If you are using PyCharm like us, you can use its remote debugger while running 
 To make this work, you could:
 
 - Set up a symbolic link (directory junction) in the QGIS python plugin directory called `geocatbridge` that points to the `geocatbridge` folder in the cloned repository.
-- Using pip, install the `pydevd-pycharm` package in the QGIS Python environment.
+- Using `pip`, install the `pydevd-pycharm` package in the QGIS Python environment.
 - Run the [`setup_debug.py`](/scripts/setup_debug.py) script, which will inject some code in the [`plugin.py`](/geocatbridge/plugin.py) file that connects to the remote debugger.
 - In PyCharm's _Run/Debug Configurations_, create a new _Python Debug Server_ configuration with the correct host and port settings.
 - Start the remote debugger configuration in PyCharm and then start QGIS. The plugin will connect to the debugger and automatically set a breakpoint at the `__init__` step of the `plugin.py`.
 - When you are done coding, don't forget to roll back the changes made to `plugin.py` by the `setup_debug.py` script.
+
+#### Dependencies
+
+GeoCat Bridge keeps all Python dependencies for which a specific version is required in the `/geocatbridge/libs/` folder.
+
+These Python libraries must exist in order for the plugin to work. Currently, the only hard dependency is the [`bridgestyle`](https://github.com/GeoCat/bridge-style) library.
+
+The [`update_libs.py`](/dependencies/update_libs.py) script has been created to make sure that a specific version of a library is checked out (cloned first if needed) into the `/dependencies` folder and copied (on success) to the `/geocatbridge/libs` destination folder.
+The contents of the existing lib folder(s) is cleared prior to copying over the new ones.
+
+The script requires a [JSON configuration file](/dependencies/config.json) that specifies the Git URLs, source directories, tag names, etc. for the required Python libraries.
+
+If you wish to update (or activate) the libraries, run the following command:
+
+```cmd
+python dependencies/update_libs.py
+```
+
+Note that both the `/libs/` and `/dependencies` directories are ignored by Git (`.gitignore`) for the **top level** project.
 
 #### Developing new server types
 

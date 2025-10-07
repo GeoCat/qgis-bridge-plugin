@@ -108,9 +108,9 @@ def inject_debug(source: Path, target: Path, code: str):
                 line_found = True
             out_file.write(f'{line}')
     if line_found:
-        print('Done! Don\'t forget to rollback changes before committing!')
+        print('✅ Done! Don\'t forget to rollback changes before committing!')
     else:
-        raise Exception(f'Code line {_SEARCH} was not found: no debug code can be injected')
+        raise Exception(f'❌ Code line {_SEARCH} was not found: no debug code can be injected')
 
 
 def main(plugin_py: Path, host: str = _HOST, port: int = _PORT):
