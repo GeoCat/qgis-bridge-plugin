@@ -106,20 +106,21 @@ def dependency_to_lib(target_dir: str, name: str, source_dir: str, **kwargs):
 
 def main():
     """Setup all project dependencies."""
-    print(f"Searching and reading {CONFIG_FILE}...")
+    config_path = get_parent_dir() / CONFIG_FILE
+    print(f"Searching and reading {config_path}...")
     try:
-        config = json.load(open(CONFIG_FILE))
+        config = json.load(open(config_path))
     except FileNotFoundError:
-        print(f"❌ {CONFIG_FILE} not found")
+        print(f"❌ {config_path} not found")
         sys.exit(1)
 
     target_dir = config.get('target_dir')
     dependencies = config.get('dependencies')
     if not target_dir:
-        print(f"❌ target_dir not found in {CONFIG_FILE}")
+        print(f"❌ target_dir not found in {config_path}")
         sys.exit(1)
     if not dependencies:
-        print(f"⚠️ No dependencies found in {CONFIG_FILE}: nothing to do")
+        print(f"⚠️ No dependencies found in {config_path}: nothing to do")
         sys.exit(0)
 
     print("Setting up project dependencies...")
