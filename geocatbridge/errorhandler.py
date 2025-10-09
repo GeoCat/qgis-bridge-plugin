@@ -21,7 +21,7 @@ def handleError(errors):
     if py_revision:
         py_version += f' (rev {py_revision})'
 
-    md_text = f"#### {trace_label}\n" \
+    md_text = f"### {trace_label}\n" \
               f"```  \n  \n" \
               f"{stacktrace}\n" \
               f"```\n" \
@@ -29,7 +29,7 @@ def handleError(errors):
               f"**{qgis_label}:** {meta.getCurrentQgisVersion()}  \n" \
               f"**{os_label}:** {os_version}  \n" \
               f"**{py_label}:** {py_version}  \n" \
-              f"#### {pypath_label}:\n" \
+              f"### {pypath_label}:\n" \
               f"{md_pypaths}  \n"
 
     dlg = ErrorDialog(md_text)

@@ -4,7 +4,7 @@
     {
       "name": "bridgestyle",
       "url": "https://github.com/GeoCat/bridge-style.git",
-      "version": "0.1.4",
+      "version": "68bdb9be98f650f5cb31bf9abecc220b065695ac",
       "main_branch": "master",
       "source_dir": "src/bridgestyle"
     }

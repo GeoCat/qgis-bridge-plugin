@@ -15,11 +15,21 @@ Online documentation can be found at:
 https://geocat.github.io/qgis-bridge-plugin/latest
 
 SUPPORT
-This software is created and maintained by GeoCat bv.
+This software is maintained by GeoCat bv.
 Community users can use this software for free, but are not entitled
 to receive free support. You may contact GeoCat bv for support options.
+
+CONTRIBUTING
+If you are interested in contributing to the development of this software,
+please visit the GeoCat Bridge GitHub repository:
+https://github.com/GeoCat/qgis-bridge-plugin
 
 ISSUES
 If you experience any issues with the software, please report them using the
 issue tracker on the GeoCat Bridge GitHub repository:
 https://github.com/GeoCat/qgis-bridge-plugin/issues
+
+Issues related to style conversions (SLD, MapLibre, etc.) can be submitted at:
+https://github.com/GeoCat/bridge-style/issues
+
+GeoCat customers may directly contact the GeoCat bv helpdesk.
