@@ -175,11 +175,6 @@ def getQqisMinimumVersion() -> str:
     return getProperty("qgisMinimumVersion")
 
 
-def getSupportUrl() -> str:
-    """ Returns the support ticket URL for GeoCat Bridge. """
-    return getProperty("support", SECTION_BRIDGE)
-
-
 def getChatUrl() -> str:
     """ Returns the Gitter chat URL for GeoCat Bridge. """
     return getProperty("chat", SECTION_BRIDGE)

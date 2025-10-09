@@ -1,11 +1,11 @@
 import webbrowser
 from urllib import parse
 
-from qgis.core import QgsMessageLog
+from qgis.core import QgsApplication
 from requests.models import PreparedRequest
 
 from geocatbridge.utils.gui import loadUiType, getSvgIcon
-from geocatbridge.utils import meta
+from geocatbridge.utils import meta, feedback
 
 WIDGET, BASE = loadUiType(__file__)
 
@@ -22,24 +22,36 @@ class ErrorDialog(BASE, WIDGET):
 
         self.txtError.setMarkdown(md_error)
 
-        support_url = meta.getSupportUrl()
-        if not support_url:
+        github_url = meta.getTrackerUrl()
+        if not github_url or not github_url.startswith("https://github.com") or not github_url.endswith("/issues"):
+            feedback.logWarning(f"Issue tracker not set to a valid GitHub URL - please check metadata.txt")
             self.btnSendReport.setEnabled(False)
         else:
-            self.btnSendReport.clicked.connect(lambda: self.sendReport(md_error, support_url))
+            self.btnSendReport.clicked.connect(lambda: self.sendReport(md_error, github_url))
+        self.btnCopyToClipboard.clicked.connect(lambda: self.copyToClipboard)
         self.btnClose.clicked.connect(self.close)
 
-    def sendReport(self, error, support_url):
-        """ Copies the given stacktrace in a GeoCat support form. """
+    @staticmethod
+    def sendReport(md_error: str, github_url: str):
+        """ Copies the given Markdown error description into a GitHub issue form. """
 
-        error = f"[please add context here]  \n\n{error}"
-        payload = {
-            "subject": f"[Crash Report] {meta.getLongAppName()}",
-            "message": error
+        # GitHub issues can be created from URLs like:
+        # https://github.com/owner/repo/issues/new?title=...&body=...&labels=...,...,...
+        github_url += "/new"
+        q = {
+            "body": md_error,
+            "labels": "bug"
+            # NOTE: GitHub also allows "title" here, but we leave it out on purpose:
+            # As this is a required field, this forces users to provide a (hopefully) meaningful title.
         }
         req = PreparedRequest()
         try:
-            req.prepare("GET", support_url, params=parse.urlencode(payload, quote_via=parse.quote))
+            req.prepare("GET", github_url, params=parse.urlencode(q, quote_via=parse.quote))
             webbrowser.open_new_tab(req.url)
         except Exception as e:
-            QgsMessageLog().logMessage(f"Failed to send crash report: {e}", meta.getAppName())
+            feedback.logError(f"Failed to send crash report: {e}")
+
+    def copyToClipboard(self):
+        """ Copies the error message to the clipboard. """
+        clipboard = QgsApplication.clipboard()
+        clipboard.setText(self.txtError.toPlainText())
