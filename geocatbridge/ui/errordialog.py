@@ -36,7 +36,7 @@ class ErrorDialog(BASE, WIDGET):
         """ Retrieves and validates the GitHub issue tracker URL. """
         url = meta.getTrackerUrl()
         parsed_url = parse.urlparse(url)
-        if parsed_url.hostname.endswith("github.com") and parsed_url.path.endswith("/issues"):
+        if parsed_url.hostname == "github.com" and parsed_url.path.endswith("/issues"):
             return url
         return ""
 
