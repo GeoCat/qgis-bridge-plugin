@@ -22,14 +22,23 @@ class ErrorDialog(BASE, WIDGET):
 
         self.txtError.setMarkdown(md_error)
 
-        github_url = meta.getTrackerUrl()
-        if not github_url or not github_url.startswith("https://github.com") or not github_url.endswith("/issues"):
+        github_url = self.getGitHubIssueUrl()
+        if not github_url:
             feedback.logWarning(f"Issue tracker not set to a valid GitHub URL - please check metadata.txt")
             self.btnSendReport.setEnabled(False)
         else:
             self.btnSendReport.clicked.connect(lambda: self.sendReport(md_error, github_url))
         self.btnCopyToClipboard.clicked.connect(lambda: self.copyToClipboard)
         self.btnClose.clicked.connect(self.close)
+
+    @staticmethod
+    def getGitHubIssueUrl() -> str:
+        """ Retrieves and validates the GitHub issue tracker URL. """
+        url = meta.getTrackerUrl()
+        parsed_url = parse.urlparse(url)
+        if parsed_url.hostname.endswith("github.com") and parsed_url.path.endswith("/issues"):
+            return url
+        return ""
 
     @staticmethod
     def sendReport(md_error: str, github_url: str):
