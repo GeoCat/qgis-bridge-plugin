@@ -2,7 +2,7 @@ import json
 import webbrowser
 from collections import Counter
 from functools import partial
-from typing import FrozenSet, Optional
+from typing import Optional
 
 import requests
 from qgis.PyQt.QtCore import (
@@ -12,8 +12,11 @@ from qgis.PyQt.QtCore import (
     QPoint
 )
 from qgis.PyQt.QtGui import (
+    QIcon,
     QPixmap,
-    QShowEvent
+    QPalette,
+    QShowEvent,
+    QMouseEvent
 )
 from qgis.PyQt.QtWidgets import (
     QLabel,
@@ -25,7 +28,8 @@ from qgis.PyQt.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QTableWidgetItem,
-    QFileDialog
+    QFileDialog,
+    QPushButton
 )
 from qgis.core import (
     QgsCoordinateTransform,
@@ -39,8 +43,8 @@ from qgis.utils import iface
 from geocatbridge.publish.metadata import uuidForLayer, loadMetadataFromXml, MetadataDependencyError
 from geocatbridge.publish.tasks import PublishTask, ExportTask
 from geocatbridge.servers import manager
-from geocatbridge.ui.metadatadialog import MetadataDialog
-from geocatbridge.ui.progressdialog import ProgressDialog
+from geocatbridge.views.metadatadialog import MetadataDialog
+from geocatbridge.views.progressdialog import ProgressDialog
 from geocatbridge.utils import files, gui, meta, l10n
 from geocatbridge.utils.feedback import FeedbackMixin
 from geocatbridge.utils.layers import (
@@ -51,12 +55,12 @@ from geocatbridge.utils.layers import (
 PUBLISH_SETTING = f"{meta.PLUGIN_NAMESPACE}/BridgePublish"
 
 # Icons
-SELECT_ICON = gui.getSvgIcon("select")
-DESELECT_ICON = gui.getSvgIcon("deselect")
-PUBLISHED_ICON = gui.getSvgIcon("published")
-VALIDATE_ICON = gui.getSvgIcon("validate")
-PREVIEW_ICON = gui.getSvgIcon("preview")
-IMPORT_ICON = gui.getSvgIcon("import")
+SELECT_ICON = gui.getSvgIconByName("select")
+DESELECT_ICON = gui.getSvgIconByName("deselect")
+PUBLISHED_ICON = gui.getSvgIconByName("published")
+VALIDATE_ICON = gui.getSvgIconByName("validate")
+PREVIEW_ICON = gui.getSvgIconByName("preview")
+IMPORT_ICON = gui.getSvgIconByName("import")
 
 IDENTIFICATION, CATEGORIES, KEYWORDS, ACCESS, EXTENT, CONTACT = range(6)
 
@@ -71,7 +75,6 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.currentRow = None
         self.currentLayer = None
         self.parent = parent
 
@@ -127,6 +130,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         self.btnValidate.setIcon(VALIDATE_ICON)
         self.comboGeodataServer.currentIndexChanged.connect(self.geodataServerChanged)
         self.comboMetadataServer.currentIndexChanged.connect(self.metadataServerChanged)
+        self.listLayers.currentItemChanged.connect(self.currentItemChanged)
         self.listLayers.currentRowChanged.connect(self.currentRowChanged)
         self.listLayers.customContextMenuRequested.connect(self.showContextMenu)
         self.listLayers.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -273,15 +277,26 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         for i in range(self.listLayers.count()):
             widget = self.getPublishWidget(i)
             widget.setCheckbox(state)
+            widget.setSelected(False)
+            # widget.update()
+
+    def currentItemChanged(self, current: QListWidgetItem, previous: QListWidgetItem):
+        """ Called whenever the user selects another layer item - updates the styling of the custom widget. """
+        self.logInfo("current item changed")
+        for index, item in enumerate([previous, current]):
+            widget = self.listLayers.itemWidget(item)
+            if isinstance(widget, LayerItemWidget):
+                widget.setSelected(bool(index))
+                # widget.update()  # trigger paintEvent
 
     def currentRowChanged(self, current_row: int):
         """ Called whenever the user selects another layer item. """
-        if self.currentRow == current_row:
-            return
-        self.currentRow = current_row
+        self.logInfo("current row changed")
         self.storeFieldsToPublish()
         self.storeMetadata()
+
         layer = self.publishableLayers[current_row]
+
         self.currentLayer = layer
         self.populateLayerMetadata()
         self.populateLayerFields()
@@ -365,7 +380,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             return
         layer_id = widget.id
         menu = QMenu()
-        server = manager.getGeodataServer(self.comboGeodataServer.currentText())
+        # server = manager.getGeodataServer(self.comboGeodataServer.currentText())
         if any(self.isDataPublished.values()):
             menu.addAction(self.translate("View all WMS layers"), self.viewAllWms)
         if self.isDataPublished.get(layer_id):
@@ -380,11 +395,12 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
         for i, layer in enumerate(self.publishableLayers):
             fields = [f.name() for f in layer.fields()] if (hasattr(layer, 'fields') and layer.is_vector) else []
             self.fieldsToPublish[layer.id()] = {f: True for f in fields}
-            self._addLayerListItem(layer)
+            self._addLayerListItem(layer, i)
 
-    def _addLayerListItem(self, layer):
-        widget = LayerItemWidget(layer, self)
+    def _addLayerListItem(self, layer, position: int):
+        """ Add a layer widget item at the given position. """
         item = QListWidgetItem(self.listLayers)
+        widget = LayerItemWidget(layer, position, item)
         item.setSizeHint(widget.sizeHint())
         self.listLayers.addItem(item)
         self.listLayers.setItemWidget(item, widget)
@@ -449,7 +465,7 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
     def importMetadata(self):
         if self.currentLayer is None:
-            return
+            return None
 
         if not self.currentLayer.is_file_based:
             return self.showWarningBar(
@@ -473,24 +489,27 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                 metadata_file, _ = QFileDialog.getOpenFileName(self, self.translate("Metadata file"),
                                                                files.getDirectory(self.currentLayer.source()), '*.xml')  # noqa
 
-        if metadata_file:
-            try:
-                loadMetadataFromXml(self.currentLayer, metadata_file)
-            except MetadataDependencyError as err:
-                self.logError(err)
-                return self.showErrorBar(
-                    "Error importing metadata",
-                    f"Missing Bridge dependency: {err}"
-                )
-            except Exception as err:
-                self.logError(err)
-                return self.showWarningBar(
-                    "Error importing metadata",
-                    "Cannot convert metadata file. Does it have an ISO19139 or ESRI-ISO format?"
-                )
+        if not metadata_file:
+            return None
 
-            self.populateLayerMetadata()
-            self.showSuccessBar("", "Successfully imported metadata")
+        try:
+            loadMetadataFromXml(self.currentLayer, metadata_file)
+        except MetadataDependencyError as err:
+            self.logError(err)
+            return self.showErrorBar(
+                "Error importing metadata",
+                f"Missing Bridge dependency: {err}"
+            )
+        except Exception as err:
+            self.logError(err)
+            return self.showWarningBar(
+                "Error importing metadata",
+                "Cannot convert metadata file. Does it have an ISO19139 or ESRI-ISO format?"
+            )
+
+        self.populateLayerMetadata()
+        self.showSuccessBar("", "Successfully imported metadata")
+        return None
 
     def validateMetadata(self):
         if self.currentLayer is None:
@@ -953,26 +972,38 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
 
 class LayerItemWidget(QWidget):
-    def __init__(self, layer: BridgeLayer, publish_widget: PublishWidget = None):
-        super(LayerItemWidget, self).__init__()  # noqa
-        self._publish_widget = publish_widget
-        self._position = publish_widget.listLayers.count() if publish_widget else 0  # assumes widget is added
+    def __init__(self, layer: BridgeLayer, position: int, list_item: QListWidgetItem):
+        super(LayerItemWidget, self).__init__()
+        self._item = list_item
+        self._position = position
         self._name = layer.name()
         self._id = layer.id()
-        self._checkbox = QCheckBox(self._name, self)
+
+        # Checkbox with icon only
+        self._checkbox = QCheckBox(self)
         self._checkbox.clicked.connect(self._checkbox_clicked)
         if layer.is_vector:
             self._checkbox.setIcon(QgsApplication.getThemeIcon('mIconVector.svg'))
         elif layer.is_raster:
             self._checkbox.setIcon(QgsApplication.getThemeIcon('mIconRaster.svg'))
-        self._metalabel = QLabel()
-        self._metalabel.setFixedWidth(20)
-        self._datalabel = QLabel()
-        self._datalabel.setFixedWidth(20)
+
+        # Separate text label
+        self._textlabel = QLabel(self._name, self)
+        self._textlabel.setProperty("selected", False)
+
+        self._metabutton = QPushButton()
+        self._metabutton.setFixedWidth(20)
+
+        self._databutton = QPushButton()
+        self._databutton.setFixedWidth(20)
+
         layout = QHBoxLayout()
-        layout.addWidget(self._checkbox)  # noqa
-        layout.addWidget(self._datalabel)  # noqa
-        layout.addWidget(self._metalabel)  # noqa
+        layout.addWidget(self._checkbox)
+        layout.addSpacing(0)
+        layout.addWidget(self._textlabel)
+        layout.addStretch()
+        layout.addWidget(self._databutton)
+        layout.addWidget(self._metabutton)
         self.setLayout(layout)
 
     @property
@@ -986,43 +1017,46 @@ class LayerItemWidget(QWidget):
         return self._id
 
     @staticmethod
-    def _setIcon(label, server) -> bool:
+    def _setIcon(label: QLabel, server) -> bool:
         """ Sets the server icon on the layer item widget if it has been published to that server.
 
         :returns:   True if the icon was set, False if it was not (or removed).
         """
         if not isinstance(server, manager.bases.AbstractServer):
-            if label.pixmap():
+            if label.icon():
                 # Remove existing pixmap
-                label.pixmap().swap(QPixmap())
+                label.setIcon(QIcon())
             return False
+
         server_widget = server.__class__.getWidgetClass()
-        pixmap = server_widget.getIcon() if server_widget else QPixmap()  # noqa
-        if not pixmap.isNull():
-            pixmap = pixmap.scaled(label.width(), label.height(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        label.setPixmap(pixmap)
-        return not pixmap.isNull()
+        icon = server_widget.getIcon() if server_widget else QIcon()  # noqa
+        # if not icon.isNull():
+        #     pixmap = pixmap.scaled(label.width(), label.height(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        label.setIcon(icon)
+        return not icon.isNull()
 
     def setMetadataPublished(self, server):
-        if self._setIcon(self._metalabel, server):
-            self._metalabel.setToolTip(f"Metadata published to '{server.serverName}'")
+        if self._setIcon(self._metabutton, server):
+            self._metabutton.setToolTip(f"Metadata published to '{server.serverName}'")
         else:
-            self._metalabel.setToolTip('')
+            self._metabutton.setToolTip('')
         self.update()
 
     def setDataPublished(self, server):
-        if self._setIcon(self._datalabel, server):
-            self._datalabel.setToolTip(f"Geodata published to '{server.serverName}'")
+        if self._setIcon(self._databutton, server):
+            self._databutton.setToolTip(f"Geodata published to '{server.serverName}'")
         else:
-            self._datalabel.setToolTip('')
+            self._databutton.setToolTip('')
         self.update()
 
     def _checkbox_clicked(self, _):
-        """ Make sure that the list widget item is selected when the checkbox is clicked (toggled). """
-        if not isinstance(self._publish_widget, PublishWidget):
-            return
-        self._publish_widget.listLayers.item(self._position).setSelected(True)
-        self._publish_widget.currentRowChanged(self._position)
+        """ Make sure that the list widget item is also selected when the checkbox is clicked (toggled). """
+        self.setSelected(True)
+
+    def _refresh_style(self):
+        """ Force style refresh of the checkbox. """
+        self._textlabel.style().unpolish(self._textlabel)
+        self._textlabel.style().polish(self._textlabel)
 
     @property
     def checked(self) -> bool:
@@ -1030,4 +1064,17 @@ class LayerItemWidget(QWidget):
         return self._checkbox.isChecked()
 
     def setCheckbox(self, state: bool):
+        """ Toggles the checkbox state. """
         self._checkbox.setCheckState(Qt.CheckState.Checked if state else Qt.CheckState.Unchecked)
+
+    def setSelected(self, state: bool):
+        """ Sets the widget item as selected and updates the selected state of the text label (for CSS). """
+        if isinstance(self._item, QListWidgetItem):
+            self._item.setSelected(state)
+        self._textlabel.setProperty("selected", state)
+        self._refresh_style()
+    #
+    # def paintEvent(self, event):
+    #     """ Update text label style on paint. """
+    #     self._refresh_style()
+    #     super().paintEvent(event)

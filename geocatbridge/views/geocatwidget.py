@@ -15,16 +15,16 @@ class GeoCatWidget(WIDGET, BASE):
         self.setupUi(self)
 
         self.btnGeoCat.clicked.connect(partial(self.open_link, meta.getHomeUrl()))
-        self.btnGeoCat.setIcon(gui.getSvgIcon('geocat_logo'))
+        self.btnGeoCat.setIcon(gui.getSvgIconByName('geocat_logo'))
 
         self.btnDocs.clicked.connect(partial(self.open_link, meta.getDocsUrl()))
-        self.btnDocs.setIcon(gui.getSvgIcon('manual'))
+        self.btnDocs.setIcon(gui.getSvgIconByName('manual'))
 
         self.btnGitHub.clicked.connect(partial(self.open_link, meta.getRepoUrl()))
-        self.btnGitHub.setIcon(gui.getSvgIcon('github_logo'))
+        self.btnGitHub.setIcon(gui.getSvgIconByName('github_logo'))
 
         self.btnGitter.clicked.connect(partial(self.open_link, meta.getChatUrl()))
-        self.btnGitter.setIcon(gui.getSvgIcon('gitter_logo'))
+        self.btnGitter.setIcon(gui.getSvgIconByName('gitter_logo'))
 
         # Add version info
         info_txt = meta.getLongAppNameWithMinVersion()

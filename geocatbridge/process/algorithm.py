@@ -1,7 +1,7 @@
 from qgis.core import QgsProcessingAlgorithm
 
 from geocatbridge.utils import meta
-from geocatbridge.utils.gui import getSvgIcon
+from geocatbridge.utils.gui import getSvgIconByName
 from geocatbridge.utils.feedback import translate
 
 
@@ -25,7 +25,7 @@ class BridgeAlgorithm(QgsProcessingAlgorithm):
         return type(self)()
 
     def icon(self):
-        return getSvgIcon("bridge_icon")
+        return getSvgIconByName("bridge_icon")
 
     def group(self):
         return self.tr("Publish tools")

@@ -4,9 +4,9 @@ from qgis.PyQt.QtCore import QSettings, Qt
 from qgis.PyQt.QtGui import QKeyEvent
 from qgis.PyQt.QtWidgets import QListWidgetItem
 
-from geocatbridge.ui.geocatwidget import GeoCatWidget
-from geocatbridge.ui.publishwidget import PublishWidget
-from geocatbridge.ui.connectionswidget import ConnectionsWidget
+from geocatbridge.views.geocatwidget import GeoCatWidget
+from geocatbridge.views.publishwidget import PublishWidget
+from geocatbridge.views.connectionswidget import ConnectionsWidget
 from geocatbridge.utils import gui, meta
 from geocatbridge.utils.enum_ import LabeledIntEnum
 
@@ -29,7 +29,7 @@ class BridgeDialog(BASE, WIDGET):
         self.setupUi(self)
 
         self.setWindowTitle(meta.getLongAppName())
-        self.setWindowIcon(gui.getSvgIcon('bridge_icon'))
+        self.setWindowIcon(gui.getSvgIconByName('bridge_icon'))
 
         self.panel_widgets, self.keymap = self.addPanels()
         self.panel_widgets[Panels.PUBLISH].restoreConfig()  # noqa
@@ -55,7 +55,7 @@ class BridgeDialog(BASE, WIDGET):
             panels.append(widget)
             self.stackedWidget.addWidget(widget)
             name = panel.name.lower().title()
-            list_item = QListWidgetItem(gui.getSvgIcon(name.lower()), name)
+            list_item = QListWidgetItem(gui.getSvgIconByName(name.lower()), name)
             self.listWidget.insertItem(panel, list_item)
             keymap[name.lower()[0]] = i
         return panels, keymap

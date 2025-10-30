@@ -1,7 +1,7 @@
-FORMS = ui/publishreportdialog.ui \
-        ui/publishwidget.ui \
-        ui/connectionswidget.ui \
-        ui/errordialog.ui
+FORMS = views/publishreportdialog.ui \
+        views/publishwidget.ui \
+        views/connectionswidget.ui \
+        views/errordialog.ui
 
 SOURCES = plugin.py \
           process/algorithm.py \
@@ -14,11 +14,11 @@ SOURCES = plugin.py \
           servers/views/geoserver.py \
           servers/views/mapserver.py \
           servers/views/postgis.py \
-          ui/errordialog.py \
-          ui/publishwidget.py \
-          ui/progressdialog.py \
-          ui/publishreportdialog.py \
-          ui/connectionswidget.py \
+          views/errordialog.py \
+          views/publishwidget.py \
+          views/progressdialog.py \
+          views/publishreportdialog.py \
+          views/connectionswidget.py \
           utils/l10n.py
 
 TRANSLATIONS = i18n/bridge_de.ts \

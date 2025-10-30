@@ -26,7 +26,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
         txt_on = self.translate('on').upper()
         txt_off = self.translate('off').upper()
 
-        self.setWindowIcon(gui.getSvgIcon('bridge_icon'))
+        self.setWindowIcon(gui.getSvgIconByName('bridge_icon'))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         if isinstance(geodata_server, bases.DataCatalogServerBase):
             url = geodata_server.baseUrl
@@ -59,7 +59,7 @@ class PublishReportDialog(FeedbackMixin, BASE, WIDGET):
             status_widget = QWidget()  # noqa
             layout = QHBoxLayout(status_widget)
             button = QToolButton()
-            button.setIcon(gui.getSvgIcon("attention"))
+            button.setIcon(gui.getSvgIconByName("attention"))
             button.clicked.connect(partial(self.openDetails, name))  # noqa
             layout.addWidget(button)  # noqa
             status_lbl = QLabel()

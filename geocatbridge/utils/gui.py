@@ -3,14 +3,14 @@ from typing import Iterable, Any, Callable
 from inspect import isgenerator
 from pathlib import Path
 
-from qgis.PyQt import QtCore
-from qgis.PyQt import uic
-from qgis.PyQt.QtGui import QCursor, QIcon, QPixmap
+from qgis.PyQt import QtCore, QtGui, uic
 from qgis.PyQt.QtWidgets import QApplication, QWidget
 from qgis.gui import QgsAuthConfigSelect
 
 from geocatbridge.utils import files
 from geocatbridge.utils.feedback import logError
+
+COLOR_SCHEME = None
 
 
 def loadUiType(controller) -> tuple:
@@ -27,7 +27,7 @@ def loadUiType(controller) -> tuple:
 
 def execute(func, *args, **kwargs) -> Any:
     """ Sets a wait cursor while `func` is being executed. Runs on GUI thread if called from a UI view model. """
-    QApplication.setOverrideCursor(QCursor(QtCore.Qt.WaitCursor))
+    QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.CursorShape.WaitCursor))
     try:
         return func(*args, **kwargs)
     finally:
@@ -35,16 +35,47 @@ def execute(func, *args, **kwargs) -> Any:
         QtCore.QCoreApplication.processEvents()
 
 
-def getSvgIcon(name: str) -> QIcon:
+def isDarkMode() -> bool:
+    """ Returns True if the application is running in dark mode, or false otherwise. """
+    scheme = QApplication.styleHints().colorScheme()
+    return scheme == QtCore.Qt.ColorScheme.Dark
+
+
+def getDarkPath(file_path: str | Path) -> str:
+    """ Returns the path to the dark mode version of a given file path, if it exists.
+    If no dark mode version is found, returns the original file path.
+
+    :param file_path:   Full path to the image file.
+    :returns:           Full path to the dark mode image file (if available), or the original file path.
+    """
+    file_path = Path(file_path)
+    if isDarkMode():
+        dark_path = file_path.with_stem(file_path.stem + "_dark")
+        if dark_path.exists():
+            return str(dark_path)
+    return str(file_path)
+
+
+def getCustomIcon(file_path: Path) -> QtGui.QIcon:
+    """ Returns a QIcon object for a given image path. File should exist (no checks performed).
+
+    :param file_path:   Full path to the image file.
+    :returns:           A QIcon object.
+    """
+    return QtGui.QIcon(getDarkPath(file_path.resolve()))
+
+
+def getSvgIconByName(name: str) -> QtGui.QIcon:
     """ Returns a QIcon object for a given SVG image. File should exist in the ./images folder.
 
     :param name:    The SVG icon name (without extension).
     :returns:       A QIcon object.
     """
-    return QIcon(files.getIconPath(name))
+    file_path = files.getIconPath(name)
+    return getCustomIcon(Path(file_path))
 
 
-def getPixmap(file_path: Path, width: int, height: int) -> QPixmap:
+def getPixmap(file_path: Path, width: int, height: int) -> QtGui.QPixmap:
     """ Returns a QPixmap object for a given image path. File should exist (no checks performed).
     Uses QIcon to open the image and then scales it to the given width and height by calling its pixmap() method.
 
@@ -53,10 +84,10 @@ def getPixmap(file_path: Path, width: int, height: int) -> QPixmap:
     :param height:      The desired height of the pixmap (pixels).
     :returns:           A QPixmap object.
     """
-    return QIcon(str(file_path)).pixmap(QtCore.QSize(width, height))
+    return getCustomIcon(file_path).pixmap(QtCore.QSize(width, height))
 
 
-def getSvgPixmap(name: str, width: int, height: int) -> QPixmap:
+def getSvgPixmap(name: str, width: int, height: int) -> QtGui.QPixmap:
     """ Returns a QPixmap object for a given SVG image. File should exist in the ./images folder.
 
     :param name:    The SVG image name (without extension).
@@ -64,7 +95,7 @@ def getSvgPixmap(name: str, width: int, height: int) -> QPixmap:
     :param height:  The desired height of the pixmap (pixels).
     :returns:       A QPixmap object.
     """
-    return getSvgIcon(name).pixmap(QtCore.QSize(width, height))
+    return getSvgIconByName(name).pixmap(QtCore.QSize(width, height))
 
 
 def getBasicAuthSelectWidget(parent: QWidget) -> QgsAuthConfigSelect:

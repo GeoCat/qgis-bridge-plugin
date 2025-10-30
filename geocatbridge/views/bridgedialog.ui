@@ -22,21 +22,24 @@
   <property name="minimumSize">
    <size>
     <width>800</width>
-    <height>512</height>
+    <height>400</height>
    </size>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="spacing">
+    <number>9</number>
+   </property>
    <item>
     <widget class="QListWidget" name="listWidget">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+      <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
      <property name="minimumSize">
       <size>
-       <width>120</width>
+       <width>150</width>
        <height>200</height>
       </size>
      </property>
@@ -48,9 +51,8 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
+       <family>Segoe UI</family>
+       <pointsize>11</pointsize>
       </font>
      </property>
      <property name="focusPolicy">
@@ -60,25 +62,33 @@
       <enum>Qt::NoContextMenu</enum>
      </property>
      <property name="styleSheet">
-      <string notr="true">QListWidget{
-	background-color: rgb(69, 69, 69, 220);
+      <string notr="true">QListWidget {
    outline: 0;
+   background-color: palette(Window);
+   color: palette(Text);
+   border-right: 1px solid #0d97ce;
+   border-top-style: none;
+   border-left-style: none;
+   border-bottom-style: none;
 }
 
 QListWidget::item {
-	padding: 4px;
-   	border: 0px;
-   	color: white;
+   color: palette(Text);
+   padding: 6px;
+   border: 0px;
 }
 
-QListWidget::item::selected {
-	color: black;
-   background-color:palette(Window);
+QListWidget::item:selected {
+   color: palette(Dark);
+   background-color: #84C5E6;
 }
             </string>
      </property>
      <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
      </property>
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>

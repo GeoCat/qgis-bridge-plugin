@@ -7,7 +7,7 @@ from qgis.PyQt.QtCore import QDir
 
 from geocatbridge.utils import meta
 
-_DIR_NAME_WIDGETS = "ui"
+_DIR_NAME_WIDGETS = "views"
 _DIR_NAME_TRANSLATIONS = "i18n"
 _DIR_NAME_IMAGES = "images"
 _DIR_NAME_RESOURCES = "resources"
@@ -17,7 +17,7 @@ _ABOUT_SRCDIR = "geocat"
 _ABOUT_TEMPLATE = "template.html"
 
 #: GeoCat Bridge Python root directory
-BRIDGE_ROOT_DIR = Path(__file__).parent.parent
+BRIDGE_ROOT_DIR = Path(__file__).parent.parent.resolve()
 
 
 def _fix_ext(name, ext):

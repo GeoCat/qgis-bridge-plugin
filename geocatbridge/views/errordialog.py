@@ -4,10 +4,9 @@ from urllib import parse
 from qgis.core import QgsApplication
 from requests.models import PreparedRequest
 
-from geocatbridge.utils.gui import loadUiType, getSvgIcon
-from geocatbridge.utils import meta, feedback
+from geocatbridge.utils import meta, feedback, gui
 
-WIDGET, BASE = loadUiType(__file__)
+WIDGET, BASE = gui.loadUiType(__file__)
 
 
 class ErrorDialog(BASE, WIDGET):
@@ -17,7 +16,7 @@ class ErrorDialog(BASE, WIDGET):
         self.setupUi(self)
 
         self.setWindowTitle(meta.getLongAppName())
-        self.setWindowIcon(getSvgIcon('bridge_icon'))
+        self.setWindowIcon(gui.getSvgIconByName('bridge_icon'))
         self.label.setText(f"The {meta.getAppName()} plugin has caused the following exception:")
 
         self.txtError.setMarkdown(md_error)

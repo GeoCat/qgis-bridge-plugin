@@ -20,8 +20,8 @@ from geocatbridge.publish.export import GeoPackager
 from geocatbridge.publish.metadata import uuidForLayer, saveMetadata
 from geocatbridge.publish.style import saveLayerStyleAsZippedSld
 from geocatbridge.servers.bases import DataCatalogServerBase, MetaCatalogServerBase
-from geocatbridge.ui.progressdialog import DATA, METADATA, SYMBOLOGY, GROUPS
-from geocatbridge.ui.publishreportdialog import PublishReportDialog
+from geocatbridge.views.progressdialog import DATA, METADATA, SYMBOLOGY, GROUPS
+from geocatbridge.views.publishreportdialog import PublishReportDialog
 from geocatbridge.utils import feedback
 from geocatbridge.utils import strings
 from geocatbridge.utils.fields import fieldsForLayer, ShpFieldLookup, fieldNameEditor

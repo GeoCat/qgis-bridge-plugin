@@ -1,9 +1,10 @@
 from copy import deepcopy
 from functools import partial
 from typing import Union
+from pathlib import Path
 
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QKeyEvent, QShowEvent
+from qgis.PyQt.QtGui import QKeyEvent, QShowEvent, QBrush
 from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -28,22 +29,22 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self._server_widgets = {}
         self.setupUi(self)
 
-        self.buttonNew.setIcon(gui.getSvgIcon("add"))
+        self.buttonNew.setIcon(gui.getSvgIconByName("add"))
         self.addMenuToButtonNew()
-        self.buttonRemove.setIcon(gui.getSvgIcon("remove"))
+        self.buttonRemove.setIcon(gui.getSvgIconByName("remove"))
         self.buttonRemove.clicked.connect(self.removeButtonClicked)
         self.showServerWidget()
         self.buttonSave.clicked.connect(self.saveServer)
-        self.buttonImport.setIcon(gui.getSvgIcon("import"))
+        self.buttonImport.setIcon(gui.getSvgIconByName("import"))
         self.buttonImport.clicked.connect(self.importServers)
-        self.buttonExport.setIcon(gui.getSvgIcon("export"))
+        self.buttonExport.setIcon(gui.getSvgIconByName("export"))
         self.buttonExport.clicked.connect(self.exportServers)
-        self.buttonDuplicate.setIcon(gui.getSvgIcon("duplicate"))
+        self.buttonDuplicate.setIcon(gui.getSvgIconByName("duplicate"))
         self.buttonDuplicate.clicked.connect(self.duplicateServer)
         self.buttonClose.clicked.connect(parent.close)
         self.buttonTest.clicked.connect(self.testConnection)
         self.buttonTest.setVisible(False)
-        self.buttonTest.setIcon(gui.getSvgIcon("rocket"))
+        self.buttonTest.setIcon(gui.getSvgIconByName("rocket"))
 
         # Connect event handlers for server widget activation
         self.listServers.itemClicked.connect(partial(self.listItemClicked))
@@ -84,6 +85,9 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         if not filename:
             self.logWarning("No export filename specified")
             return
+
+        if not Path(filename).is_absolute():
+            filename = Path(QFileDialog.directory()).resolve() / filename
 
         config_str = manager.serializeServers()
         if not config_str:
@@ -169,13 +173,12 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         """ Finds the list item that matches the given server widget. """
         if not hasattr(server_widget, 'getId'):
             # The current widget likely is the empty widget
-            return
+            return None
         for i in range(self.listServers.count()):
             item = self.listServers.item(i)
-            widget = self.listServers.itemWidget(item)
-            if widget.serverName == server_widget.getId():
+            if item.serverName == server_widget.getId():
                 return item
-        return
+        return None
 
     def listKeyPressed(self, event: QKeyEvent):
         """ Activates the server widget matching a key press event if the QListWidget has focus.
@@ -218,10 +221,10 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             return self.showServerWidget(new_server)
         if not new_server and list_item == old_item:
             # User clicked the same list item again, but it was not saved yet: do nothing
-            return
+            return None
         if new_server.serverName == cur_widget.getId():
             # User clicked the same list item again: do nothing
-            return
+            return None
 
         if cur_widget.isDirty:
             # Current server has edits: ask user if we should save them
@@ -236,12 +239,12 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
                 self.cleanupServerItem(item)
 
         # Match server widget to selected server list item
-        self.showServerWidget(new_server)
+        return self.showServerWidget(new_server)
 
     def testConnection(self):
         """ Tests if the server instance can actually connect to it.
 
-        .. note::   Not all servers might support this. Servers that don't support it,
+        .. note::   Not all servers may support this. Servers that don't support it,
                     should still implement :func:`testConnection`, but in that case,
                     the method should simply always return `True`.
         """
@@ -294,26 +297,29 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
             return False
 
         # Update list view item if selected and server was successfully saved
-        list_widget = self.getListWidgetItem(list_item)
+        list_widget = self.ensureListWidgetItem(list_item)
         if result and list_widget:
             list_widget.serverName = server.serverName
         return result
 
-    def getListWidgetItem(self, item=None):
-        item = item or self.listServers.currentItem()
-        if item is None:
-            return
-        return self.listServers.itemWidget(item)
+    def ensureListWidgetItem(self, item=None):
+        """ Checks if the given item is a QListWidgetItem and returns it.
+        If not, returns the currently selected list item. """
+        if not isinstance(item, QListWidgetItem):
+            item = self.listServers.currentItem()
+        return item
 
     def getListWidgetItemName(self, item=None):
-        widget = self.getListWidgetItem(item)
+        """ Returns the server name from the given list widget item (or current item if not given). """
+        widget = self.ensureListWidgetItem(item)
         return widget.serverName if widget else None
 
-    def getServerFromItem(self, item):
+    @staticmethod
+    def getServerFromItem(item):
+        """ Returns the server instance for the given list widget item (or None if no item). """
         if not item:
-            return
-        list_widget = self.listServers.itemWidget(item)
-        return manager.getServer(list_widget.serverName)
+            return None
+        return manager.getServer(item.serverName)
 
     def duplicateServer(self):
         """ Duplicates (copies) the current selected server. """
@@ -423,14 +429,15 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
 
     def addServerListItem(self, server_class, server_name: str, set_active: bool = False):
         """ Adds a server item to the list widget. """
-        widget = ServerItemWidget(server_class, server_name)
-        item = QListWidgetItem(self.listServers)
-        item.setSizeHint(widget.sizeHint())
+        widget = ServerItemWidget(server_class, server_name, self.listServers)
+        # item = QListWidgetItem(, QListWidgetItem.ItemType.UserType + 1)
+        # item.setForeground(QBrush())
+        # item.setSizeHint(widget.sizeHint())
         self.listServers.blockSignals(True)
-        self.listServers.addItem(item)
-        self.listServers.setItemWidget(item, widget)
+        self.listServers.addItem(widget)
+        # self.listServers.setItemWidget(item, widget)
         if set_active:
-            self.listServers.setCurrentItem(item)
+            self.listServers.setCurrentItem(widget)
         self.listServers.blockSignals(False)
 
     def addNewServer(self, cls):
@@ -469,7 +476,7 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         if server is None:
             # If there's no current server, show empty widget
             self.stackedWidget.setCurrentWidget(self.widgetEmpty)
-            return
+            return None
 
         if isinstance(server, (manager.bases.ServerBase, manager.bases.CombiServerBase)):
             # 'server' argument is a model instance (existing servers)
@@ -483,7 +490,7 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         if not issubclass(cls, ServerWidgetBase):
             # All server widgets must implement the ServerWidgetBase class
             self.logError(f"Server widget {cls.__name__} does not implement {ServerWidgetBase.__name__}")
-            return
+            return None
 
         # Lookup existing widget instance (there should only be 1 widget instance for each server type)
         widget = self._server_widgets.get(cls.__name__, None)
@@ -497,7 +504,7 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         # Set as current widget and populate its form fields
         self.stackedWidget.setCurrentWidget(widget)
         if server_cls == server:
-            srv_name = manager.getUniqueName(server_cls.getLabel())
+            srv_name = manager.getUniqueName(server_cls.getLabel())  # noqa
             widget.newFromName(srv_name)
             widget.setId(srv_name)
             widget.setDirty()
@@ -554,25 +561,16 @@ class ConnectionsWidget(FeedbackMixin, BASE, WIDGET):
         self.populateServerList()
 
 
-class ServerItemWidget(QWidget):
+class ServerItemWidget(QListWidgetItem):
     def __init__(self, server_class, server_name, parent=None):
         """ Widget used by the list widget control to show all available server instances. """
-        super(ServerItemWidget, self).__init__(parent)
         icon = server_class.getWidgetClass().getIcon()
-        self.layout = QHBoxLayout()
-        self.label = QLabel()
-        self.serverName = server_name
-        self.iconLabel = QLabel()
-        self.iconLabel.setPixmap(icon)
-        self.iconLabel.setFixedWidth(32)
-        self.layout.addWidget(self.iconLabel)
-        self.layout.addWidget(self.label)
-        self.setLayout(self.layout)
+        super(ServerItemWidget, self).__init__(icon, f" {server_name}", parent)
 
     @property
     def serverName(self):
-        return self.label.text()
+        return self.text().strip()
 
     @serverName.setter
     def serverName(self, name):
-        self.label.setText(name)
+        self.setText(f" {name}")
