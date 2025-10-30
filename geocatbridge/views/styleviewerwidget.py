@@ -106,20 +106,19 @@ class EditorWidget(QsciScintilla):
         if isinstance(self, QFrame):
             self.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
 
-        font = QFont()
-        font.setFamily('Cascadia Mono, Roboto Mono, monospace')
-        font.setFixedPitch(True)
-        font.setPointSize(10)
-
-        self.setFont(font)
-        self.setMarginsFont(font)
-
-        font_metrics = QFontMetrics(font)
-        self.setMarginsFont(font)
-        # TODO:  WARNING: QFontMetrics.width() has been removed in Qt6. Use QFontMetrics.horizontalAdvance() if plugin can safely require Qt >= 5.11, or QFontMetrics.boundingRect().width() otherwise.
-        self.setMarginWidth(0, font_metrics.width("00000") + 6)
-        self.setMarginLineNumbers(0, True)
-        self.setMarginsBackgroundColor(QColor("#cccccc"))
+        # font = QFont()
+        # font.setFamily('Cascadia Mono, Roboto Mono, monospace')
+        # font.setFixedPitch(True)
+        # font.setPointSize(10)
+        #
+        # self.setFont(font)
+        # self.setMarginsFont(font)
+        #
+        # font_metrics = QFontMetrics(font)
+        # self.setMarginsFont(font)
+        # self.setMarginWidth(0, font_metrics.horizontalAdvance("00000") + 6)
+        # self.setMarginLineNumbers(0, True)
+        # self.setMarginsBackgroundColor(QColor("#cccccc"))
 
         self.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
 
@@ -129,7 +128,7 @@ class EditorWidget(QsciScintilla):
         self.setFolding(QsciScintilla.FoldStyle.CircledTreeFoldStyle)
 
         if lexer is not None:
-            lexer.setDefaultFont(font)
+            # lexer.setDefaultFont(font)
             self.setLexer(lexer)
 
         self.setReadOnly(True)

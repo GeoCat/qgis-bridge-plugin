@@ -86,11 +86,15 @@
        </property>
        <item>
         <widget class="QLabel" name="headerMain">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="styleSheet">
-          <string notr="true">color: #0d97ce;
-font-family: &quot;Segoe UI, sans-serif&quot;;
-font-weight: 600;
-font-size: 20px;</string>
+          <string notr="true">color: #0d97ce;</string>
          </property>
          <property name="text">
           <string>About Bridge</string>
@@ -115,10 +119,12 @@ font-size: 20px;</string>
        </item>
        <item>
         <widget class="QLabel" name="headerInfo">
-         <property name="styleSheet">
-          <string notr="true">font-weight: 500;
-font-family: &quot;Segoe UI, sans-serif&quot;;
-font-size: 15px;</string>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
          </property>
          <property name="text">
           <string>Product Information</string>
@@ -149,9 +155,6 @@ font-size: 15px;</string>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="styleSheet">
-          <string notr="true">font-family: &quot;Segoe UI, sans-serif&quot;;</string>
-         </property>
          <property name="text">
           <string>version</string>
          </property>
@@ -178,10 +181,12 @@ font-size: 15px;</string>
        </item>
        <item>
         <widget class="QLabel" name="headerSupport">
-         <property name="styleSheet">
-          <string notr="true">font-weight: 500;
-font-family: &quot;Segoe UI, sans-serif&quot;;
-font-size: 15px;</string>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
          </property>
          <property name="text">
           <string>Support</string>

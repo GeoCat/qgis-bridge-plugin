@@ -2,7 +2,7 @@ import sys
 import platform
 
 from geocatbridge.utils import meta, feedback
-from geocatbridge.ui.errordialog import ErrorDialog
+from geocatbridge.views.errordialog import ErrorDialog
 
 
 def handleError(errors):

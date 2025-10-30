@@ -4,7 +4,7 @@ from qgis.core import QgsProcessingProvider
 from geocatbridge.process.algorithm import BridgeAlgorithm
 from geocatbridge.servers.manager import getServerTypes
 from geocatbridge.utils import meta, feedback
-from geocatbridge.utils.gui import getSvgIcon
+from geocatbridge.utils.gui import getSvgIconByName
 
 
 class BridgeProvider(QgsProcessingProvider):
@@ -22,7 +22,7 @@ class BridgeProvider(QgsProcessingProvider):
         return meta.getAppName()
 
     def icon(self):
-        return getSvgIcon("bridge_icon")
+        return getSvgIconByName("bridge_icon")
 
     def load(self):
         try:

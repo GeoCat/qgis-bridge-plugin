@@ -9,11 +9,11 @@ WIDGET, BASE = gui.loadUiType(__file__)
 
 SYMBOLOGY, DATA, METADATA, GROUPS = range(4)
 
-DATA_ICON = gui.getSvgIcon("layer")
-METADATA_ICON = gui.getSvgIcon("metadata")
-SYMBOLOGY_ICON = gui.getSvgIcon("symbology")
-GROUPS_ICON = gui.getSvgIcon("group")
-CHECK_ICON = gui.getSvgIcon("checkmark")
+DATA_ICON = gui.getSvgIconByName("layer")
+METADATA_ICON = gui.getSvgIconByName("metadata")
+SYMBOLOGY_ICON = gui.getSvgIconByName("symbology")
+GROUPS_ICON = gui.getSvgIconByName("group")
+CHECK_ICON = gui.getSvgIconByName("checkmark")
 
 
 class ProgressDialog(BASE, WIDGET):
@@ -22,7 +22,7 @@ class ProgressDialog(BASE, WIDGET):
         super(ProgressDialog, self).__init__(parent)
         self.setupUi(self)
 
-        self.setWindowIcon(gui.getSvgIcon('bridge_icon'))
+        self.setWindowIcon(gui.getSvgIconByName('bridge_icon'))
 
         self.layer_ids = layer_ids
         self.populateTree()

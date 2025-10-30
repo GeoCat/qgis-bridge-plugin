@@ -512,12 +512,12 @@ class ServerWidgetBase:
         raise NotImplementedError(f"{self.__class__.__name__} must implement loadFromInstance()")
 
     @classmethod
-    def getIcon(cls) -> QPixmap:
+    def getIcon(cls) -> QIcon:
         """ Returns the Qt icon for the server list widget.
         Icons should be SVG files with the same path and name as the server widget controller.
         If a matching icon is not found, a default icon is returned.
 
-        :return:    A QPixmap object.
+        :return:    A QIcon object.
         """
         module_name = getattr(cls, '__module__', None)
         if module_name:
@@ -525,6 +525,6 @@ class ServerWidgetBase:
             module = import_module(module_name)
             icon = Path(module.__file__).with_suffix('.svg')
             if icon.exists():
-                return gui.getPixmap(icon, 24, 24)
+                return gui.getCustomIcon(icon)
         # Return the default unknown.svg if no matching icon was found
-        return gui.getSvgPixmap('unknown', 24, 24)
+        return gui.getSvgIconByName('unknown')
