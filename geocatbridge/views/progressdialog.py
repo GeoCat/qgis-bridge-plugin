@@ -80,8 +80,6 @@ class ProgressDialog(BASE, WIDGET):
         green.setNamedColor("#00851F")
         subitem.setForeground(1, QBrush(green))
         subitem.setText(1, "Finished")
-        subitem.setBackground(0, QBrush(Qt.GlobalColor.white))
-        subitem.setBackground(1, QBrush(Qt.GlobalColor.white))
         self.setMetadata(item, category)
         QCoreApplication.processEvents()
 
@@ -95,8 +93,4 @@ class ProgressDialog(BASE, WIDGET):
     def setInProgress(self, layer_id, category):
         item, subitem = self.getItem(layer_id, category, True)
         subitem.setText(1, "In progress...")
-        grey = QColor()
-        grey.setNamedColor("#cccccc")
-        subitem.setBackground(0, QBrush(grey))
-        subitem.setBackground(1, QBrush(grey))
         QCoreApplication.processEvents()

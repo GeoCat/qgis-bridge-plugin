@@ -9,6 +9,7 @@ from qgis.gui import QgsAuthConfigSelect
 
 from geocatbridge.utils import files
 from geocatbridge.utils.feedback import logError
+from geocatbridge.utils.meta import getCurrentQtVersion
 
 COLOR_SCHEME = None
 
@@ -37,8 +38,14 @@ def execute(func, *args, **kwargs) -> Any:
 
 def isDarkMode() -> bool:
     """ Returns True if the application is running in dark mode, or false otherwise. """
-    scheme = QApplication.styleHints().colorScheme()
-    return scheme == QtCore.Qt.ColorScheme.Dark
+    qt_version = getCurrentQtVersion()
+    if qt_version.major >= 6 and qt_version.minor >= 5:
+        # For Qt 6.5+, we can use the new color scheme API
+        scheme = QApplication.styleHints().colorScheme()
+        return scheme == QtCore.Qt.ColorScheme.Dark
+    else:
+        # For older Qt versions, resort to arbitrary methods
+        return QApplication.palette().window().color().lightness() < 128
 
 
 def getDarkPath(file_path: str | Path) -> str:
