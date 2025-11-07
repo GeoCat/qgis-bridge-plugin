@@ -14,7 +14,6 @@ from qgis.PyQt.QtCore import (
 from qgis.PyQt.QtGui import (
     QIcon,
     QPixmap,
-    QPalette,
     QShowEvent,
     QMouseEvent
 )
@@ -1024,14 +1023,12 @@ class LayerItemWidget(QWidget):
         """
         if not isinstance(server, manager.bases.AbstractServer):
             if label.icon():
-                # Remove existing pixmap
+                # Clear existing icon
                 label.setIcon(QIcon())
             return False
 
         server_widget = server.__class__.getWidgetClass()
         icon = server_widget.getIcon() if server_widget else QIcon()  # noqa
-        # if not icon.isNull():
-        #     pixmap = pixmap.scaled(label.width(), label.height(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         label.setIcon(icon)
         return not icon.isNull()
 
@@ -1073,8 +1070,3 @@ class LayerItemWidget(QWidget):
             self._item.setSelected(state)
         self._textlabel.setProperty("selected", state)
         self._refresh_style()
-    #
-    # def paintEvent(self, event):
-    #     """ Update text label style on paint. """
-    #     self._refresh_style()
-    #     super().paintEvent(event)

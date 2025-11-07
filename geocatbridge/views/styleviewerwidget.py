@@ -2,9 +2,9 @@ import json
 from traceback import format_exc
 from itertools import chain
 
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
-from qgis.PyQt.QtGui import QFont, QColor, QFontMetrics
-from qgis.PyQt.QtWidgets import QVBoxLayout, QDockWidget, QFrame
+from qgis.PyQt.QtWidgets import QApplication, QVBoxLayout, QDockWidget, QFrame
 from qgis.utils import iface
 
 from geocatbridge.publish.style import (
@@ -106,29 +106,18 @@ class EditorWidget(QsciScintilla):
         if isinstance(self, QFrame):
             self.setFrameStyle(QFrame.Shape.Panel | QFrame.Shadow.Sunken)
 
-        # font = QFont()
-        # font.setFamily('Cascadia Mono, Roboto Mono, monospace')
-        # font.setFixedPitch(True)
-        # font.setPointSize(10)
-        #
-        # self.setFont(font)
-        # self.setMarginsFont(font)
-        #
-        # font_metrics = QFontMetrics(font)
-        # self.setMarginsFont(font)
-        # self.setMarginWidth(0, font_metrics.horizontalAdvance("00000") + 6)
-        # self.setMarginLineNumbers(0, True)
-        # self.setMarginsBackgroundColor(QColor("#cccccc"))
-
         self.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
-
         self.setCaretLineVisible(True)
-        self.setCaretLineBackgroundColor(QColor("#ffe4e4"))
-
         self.setFolding(QsciScintilla.FoldStyle.CircledTreeFoldStyle)
 
         if lexer is not None:
-            # lexer.setDefaultFont(font)
+            # Lexer foreground colors are not suitable for dark mode,
+            # so we force a white background color as a workaround.
+            lexer.setDefaultPaper(Qt.GlobalColor.white)
             self.setLexer(lexer)
+        else:
+            # Reflect lexers (for Mapfile): dark text against white background.
+            self.setPaper(Qt.GlobalColor.white)
+            self.setColor(Qt.GlobalColor.black)
 
         self.setReadOnly(True)
