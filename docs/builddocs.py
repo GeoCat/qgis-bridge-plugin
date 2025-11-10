@@ -21,7 +21,15 @@ import traceback
 from pathlib import Path
 from typing import Tuple
 
-from scripts.shared import execute_subprocess
+# Import execute_subprocess function from scripts.shared
+root = str(Path(__file__).resolve().parent.parent)
+old_path = sys.path.copy()
+sys.path.insert(0, root)
+try:
+    from scripts.shared import execute_subprocess
+finally:
+    # Restore original sys.path
+    sys.path = old_path
 
 NAME = "GeoCat Bridge"
 DEFAULT_DIR = "../build/docs"
@@ -313,7 +321,7 @@ def main():
             sep = '\n\t'
             print(f"Python paths:{sep}{f'{sep}'.join(sys.path)}")
     finally:
-        if not result and not gh_ref and current and not has_edits:
+        if result == 0 and not gh_ref and current and not has_edits:
             # Restore Git repo if there were no errors, the script was not triggered by a GitHub Action,
             # the name of the working branch could be determined and the original working branch was clean.
             print(f"Restoring initially checked out '{current}' branch...")
