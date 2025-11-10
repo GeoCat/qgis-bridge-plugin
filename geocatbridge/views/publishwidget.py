@@ -256,20 +256,6 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
     def metadataServerChanged(self, update_status: bool = True):
         if update_status:
             self.updateOnlineLayerStatus(False, True)
-        md_combo = self.comboMetadataServer.currentText()
-        profile = 0
-        if md_combo and md_combo != self.COMBO_NOTSET_META:
-            profile = manager.getMetadataProfile(self.comboMetadataServer.currentText())
-        num_tabs = self.tabWidgetMetadata.count()
-        if profile == 0:  # Default profile should be equal to 0
-            if num_tabs > 1:
-                for i in range(num_tabs - 1, 0, -1):
-                    self.tabWidgetMetadata.removeTab(i)
-            return
-        # TODO: implement other profile tabs
-        if num_tabs == 1:
-            self.tabWidgetMetadata.addTab(self.tabInspire, profile)
-            self.tabWidgetMetadata.addTab(self.tabTemporal, self.translate("Temporal"))
 
     def toggleLayers(self, state: bool):
         """ Toggles the checkbox state of all layer items. """
@@ -277,20 +263,16 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
             widget = self.getPublishWidget(i)
             widget.setCheckbox(state)
             widget.setSelected(False)
-            # widget.update()
 
     def currentItemChanged(self, current: QListWidgetItem, previous: QListWidgetItem):
         """ Called whenever the user selects another layer item - updates the styling of the custom widget. """
-        self.logInfo("current item changed")
         for index, item in enumerate([previous, current]):
             widget = self.listLayers.itemWidget(item)
             if isinstance(widget, LayerItemWidget):
                 widget.setSelected(bool(index))
-                # widget.update()  # trigger paintEvent
 
     def currentRowChanged(self, current_row: int):
         """ Called whenever the user selects another layer item. """
-        self.logInfo("current row changed")
         self.storeFieldsToPublish()
         self.storeMetadata()
 
@@ -464,13 +446,14 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
     def importMetadata(self):
         if self.currentLayer is None:
-            return None
+            return
 
         if not self.currentLayer.is_file_based:
-            return self.showWarningBar(
+            self.showWarningBar(
                 "Error importing metadata",
                 "Can only import metadata for file-based layer sources"
             )
+            return
 
         layer_source = self.currentLayer.uri
         metadata_file = layer_source.with_suffix(".xml")
@@ -489,26 +472,27 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
                                                                files.getDirectory(self.currentLayer.source()), '*.xml')  # noqa
 
         if not metadata_file:
-            return None
+            return
 
         try:
             loadMetadataFromXml(self.currentLayer, metadata_file)
         except MetadataDependencyError as err:
             self.logError(err)
-            return self.showErrorBar(
+            self.showErrorBar(
                 "Error importing metadata",
                 f"Missing Bridge dependency: {err}"
             )
+            return
         except Exception as err:
             self.logError(err)
-            return self.showWarningBar(
+            self.showWarningBar(
                 "Error importing metadata",
                 "Cannot convert metadata file. Does it have an ISO19139 or ESRI-ISO format?"
             )
+            return
 
         self.populateLayerMetadata()
         self.showSuccessBar("", "Successfully imported metadata")
-        return None
 
     def validateMetadata(self):
         if self.currentLayer is None:
@@ -851,7 +835,8 @@ class PublishWidget(FeedbackMixin, BASE, WIDGET):
 
         if self.chkBackground.isChecked():
             # User wants to publish in the background: close dialog
-            return self.publishOnBackground(to_publish)
+            self.publishOnBackground(to_publish)
+            return
 
         progress_dialog = ProgressDialog(to_publish, self.parent)
         task = self.getPublishTask(self.parent, to_publish)

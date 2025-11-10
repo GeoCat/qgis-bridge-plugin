@@ -56,7 +56,7 @@ QListWidget::item {
 }
 
 QListWidget::item:selected {
-	color: palette(Dark);
+	color: black;
    	background-color: #84C5E6;
 }</string>
          </property>
