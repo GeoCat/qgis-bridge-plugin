@@ -175,13 +175,24 @@ class GeoPackager:
                 continue
             layer_id = item.id()
             self._id_gpk_out[layer_id] = None
-            uri_key = self._fix_uri(item)
+            uri_key = self._compute_uri_key(item)
             self._gpk_id_map.setdefault(uri_key, set()).add(layer_id)
+
+    def _compute_uri_key(self, layer: BridgeLayer) -> str:
+        """ Gets a hashable key to look up the layer by source (URI). """
+        if isinstance(layer.uri, QgsDataSourceUri):
+            # Database source: return the URI string
+            return layer.uri.uri()
+        return str(self._fix_uri(layer))
 
     @staticmethod
     def _fix_uri(layer: BridgeLayer) -> Union[QgsDataSourceUri, Path]:
         """ Returns the parent Path of layer.uri if layer.uri is not a GeoPackage path, or layer.uri otherwise. """
-        return layer.uri.parent if isinstance(layer.uri, Path) and layer.uri.suffix != EXT_GEOPACKAGE else layer.uri
+        source = layer.uri
+        if isinstance(source, Path) and source.suffix.lower() != EXT_GEOPACKAGE:
+            # Return containing folder
+            return source.parent
+        return source
 
     @staticmethod
     def _gpkg_out(uri: Union[QgsDataSourceUri, Path]):
@@ -190,9 +201,11 @@ class GeoPackager:
             # Layer source is a PostGIS database
             schema = f"_{uri.schema}" if uri.schema else ""
             gpkg = f"{uri.database}{schema}{EXT_GEOPACKAGE}"
-        else:
-            # Layer source is a GeoPackage or a directory (assumes _fix_uri() has been called already!)
+        elif isinstance(uri, Path):
+            # Layer source is a GeoPackage or a directory
             gpkg = uri.name
+        else:
+            raise ValueError(f"Unexpected input type: {uri}")
         return tempFileInSubFolder(gpkg)
 
     def export(self, layer: BridgeLayer) -> ExportResult:
@@ -223,10 +236,14 @@ class GeoPackager:
             return ExportResult(False, gpk_out)
 
         # Determine an output path based on the source URI
-        gpk_out = self._gpkg_out(lyr_src)
+        try:
+            gpk_out = self._gpkg_out(lyr_src)
+        except ValueError:
+            return ExportResult()
 
         # Combine all layers from the same source (db schema, folder, GeoPackage) into the same GeoPackage export
-        for lyr_id in self._gpk_id_map[lyr_src]:
+        src_key = self._compute_uri_key(layer)
+        for lyr_id in self._gpk_id_map[src_key]:
             lyr = layerById(lyr_id)
             fields = fieldsForLayer(lyr, self._field_map)
             result = _writeVector(lyr, fields, gpk_out)
