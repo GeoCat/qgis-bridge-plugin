@@ -1354,9 +1354,14 @@ class GeoserverServer(DataCatalogServerBase):
         s.setValue(f'qgis/connections-wfs/{self.serverName}/url', f'{self.baseUrl}/wfs')
         s.setValue(f'qgis/WFS/{self.serverName}/authcfg', self.authId)
 
-    def _getManifestInfo(self, key: str, value: str) -> List[dict]:
-        """ Retrieves objects from the GeoServer manifest using a key and value filter. """
-        url = f'{self.apiUrl}/about/manifest.json?key={key}&value={value}'
+    def _getManifestInfo(self, name_prefix_filter: str = None) -> List[dict]:
+        """ Retrieves objects from the GeoServer manifest.
+        If `name_prefix_filter` is provided, the returned list of objects will be filtered by '@name' using that prefix.
+        If no filter is provided, all objects are returned.
+
+        :param name_prefix_filter: Optional case-sensitive prefix for the object '@name' to filter on.
+        """
+        url = f'{self.apiUrl}/about/manifest.json'
         try:
             response = self.request(url)
             about = (response.json() or {}).get("about")
@@ -1364,17 +1369,19 @@ class GeoserverServer(DataCatalogServerBase):
                 return []
             resources = about.get("resource", [])
             if isinstance(resources, dict):
-                return [resources]
-            return resources
+                resources = [resources]
+            if not name_prefix_filter:
+                return resources
+            return [r for r in resources if isinstance(r, dict) and r.get('@name', '').startswith(name_prefix_filter)]
         except Exception as err:
             self.logError(f"Failed to read GeoServer manifest: {err}")
             return []
 
-    def setImporterVersion(self, force: bool = False):
+    def retrieveImporterVersion(self, force: bool = False):
         """ Retrieve version of the GeoServer Importer extension (if installed). """
         if self._importer and not force:
             return
-        resources = self._getManifestInfo("Implementation-Vendor-Id", "org.geoserver.importer")
+        resources = self._getManifestInfo('gs-importer')
         versions = list(set(v for v in
                             (obj.get('Implementation-Version') for obj in resources if isinstance(obj, dict))
                             if isinstance(v, str)))
@@ -1457,7 +1464,7 @@ class GeoserverServer(DataCatalogServerBase):
                            "Please assign a different QGIS project name or clear the workspace manually.")
 
         # Read the Importer extension info from the manifest (if not already done)
-        self.setImporterVersion()
+        self.retrieveImporterVersion()
 
     @classmethod
     def getAlgorithmInstance(cls):
