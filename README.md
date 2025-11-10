@@ -6,7 +6,7 @@ It allows QGIS users to share geospatial (meta)data to cloud-based platforms lik
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE) 
 [![Latest Documentation](https://img.shields.io/badge/Documentation-chocolate?logo=readthedocs&logoColor=white)](https://geocat.github.io/qgis-bridge-plugin/latest/) 
 [![Join the chat at https://gitter.im/GeoCat/Bridge](https://img.shields.io/badge/Gitter-Chat-gray?logo=gitter&labelColor=ED1965)](https://gitter.im/GeoCat/Bridge?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
-[![Minimal QGIS version](https://img.shields.io/badge/QGIS-3.16%2B-white?logo=qgis&logoColor=white&labelColor=589632)](#)
+[![Minimal QGIS version](https://img.shields.io/badge/QGIS-3.22%2B-white?logo=qgis&logoColor=white&labelColor=589632)](#)
 
 ## Installation
 
