@@ -2,8 +2,6 @@ import configparser
 from pathlib import Path
 from re import compile
 
-from qgis.PyQt.QtCore import qVersion
-
 #: GeoCat Bridge plugin namespace
 PLUGIN_NAMESPACE = "geocatbridge"
 
@@ -144,6 +142,12 @@ def getCurrentQgisVersion() -> str:
 
 
 def getCurrentQtVersion() -> SemanticVersion:
+    try:
+        # Lazy import to prevent crashes when running outside QGIS environment
+        from qgis.PyQt.QtCore import qVersion
+    except (ImportError, ModuleNotFoundError):
+        return SemanticVersion('')  # 0.0.0
+
     return SemanticVersion(qVersion())
 
 
