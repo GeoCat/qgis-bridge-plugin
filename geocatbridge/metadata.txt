@@ -15,7 +15,7 @@ experimental=False
 category=Web
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99.0
-version=4.6.0
+version=4.6.1
 email=support@geocat.org
 icon=icons/geocat.png
 tags=style, symbology, cartography, publishing, sharing, SDI, metadata, MapServer,
@@ -25,7 +25,12 @@ tracker=https://github.com/GeoCat/qgis-bridge-plugin/issues
 repository=https://github.com/GeoCat/qgis-bridge-plugin
 hasProcessingProvider=yes
 deprecated=False
-changelog=Version 4.6.0, November 2025
+changelog=Version 4.6.1, March 2026
+          - Update bridgestyle to 0.1.8:
+            > Fix SVG markers for GeoServer SLD [#127]
+            > Add support for LIKE, exp(), sqrt() and atan2() in MapLibre (thanks @ Ben van Basten)
+
+          Version 4.6.0, November 2025
           - Upgraded UI-related code for Qt6/QGIS 4 [#197]
           - Fixed Style Viewer font rendering [#192]
           - Fixed GeoPackage export for database layers [#194]
