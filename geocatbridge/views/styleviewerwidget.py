@@ -71,8 +71,8 @@ class StyleViewerWidget(FeedbackMixin, BASE, WIDGET):
                 sld_warnings = [f"Failed to convert to SLD: {e}"]
             # Try GeoStyler conversion
             try:
-                geostyler, _, _, geostyler_warnings = convertStyle(layer)
-                geostyler = json.dumps(geostyler, indent=4)
+                geostyler_dict, _, _, geostyler_warnings = convertStyle(layer)
+                geostyler = json.dumps(geostyler_dict, indent=4)
             except Exception as e:
                 self.logError(format_exc())
                 geostyler_warnings = [f"Failed to convert to GeoStyler: {e}"]
