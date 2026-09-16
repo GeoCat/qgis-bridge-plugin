@@ -24,4 +24,8 @@ def define_env(env):
     env.variables["publisher"] = "GeoCat"
     env.variables["app_url"] = meta.getHomeUrl()
     env.variables["min_qgis_ver"] = meta.getQqisMinimumVersion()
+    # Deliberately shadows the `extra.version` mapping (mkdocs-material's version-selector config,
+    # see mkdocs.yml) as a page-level {{ version }} macro variable. The theme itself reads
+    # `extra.version` straight from the raw MkDocs config, not through mkdocs-macros, so this only
+    # affects what {{ version }} resolves to inside Markdown content.
     env.variables["version"] = str(meta.getVersion())

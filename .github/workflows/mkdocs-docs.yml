@@ -43,7 +43,7 @@ jobs:
         run: |
           git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git --branch gh-pages --single-branch gh-pages
           cp -r build/docs/* gh-pages/
-      - name: Update index.html for GitHub Pages
+      - name: Update index.html and versions.json for GitHub Pages
         run: python .github/workflows/docs_index.py ./gh-pages
       - name: Stage and commit gh-pages changes
         run: |
