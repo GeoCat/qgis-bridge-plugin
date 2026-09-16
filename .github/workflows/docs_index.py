@@ -50,14 +50,7 @@ def sh(cmd: str) -> Tuple[int, str]:
 
 
 def write_versions_json(dir_path: Path, names: List[str]):
-    """ Writes a mike-formatted versions.json file for the Material for MkDocs version selector.
-
-    This does not use the `mike` CLI tool: each version folder is built independently by
-    builddocs.py, so this just hand-writes the same JSON schema that `mike` itself produces,
-    which is all the theme's version-selector JS actually depends on. The theme fetches this
-    file from one directory above the current version folder (i.e. the gh-pages root), so
-    `dir_path` here must be that same root directory that contains e.g. 'latest/' and 'v4.6/'.
-    """
+    """ Writes a mike-formatted versions.json file for the Material for MkDocs version selector. """
     versions_json = [{"version": name, "title": name, "aliases": []} for name in names]
     with open(dir_path / VERSIONS_JSON_OUTPUT, 'w+') as f:
         json.dump(versions_json, f, indent=2)
