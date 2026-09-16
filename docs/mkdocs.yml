@@ -1,13 +1,13 @@
 # Project information
 site_name: GeoCat Bridge for QGIS
 site_description: GeoCat Bridge publishes QGIS map layers, styles and metadata to GeoServer, MapServer and GeoNetwork.
-site_dir: build/docs/latest
+site_dir: ../build/docs/latest
 site_url: !ENV [SITE_URL, 'https://geocat.github.io/qgis-bridge-plugin/latest/']
 
 # Repository
 repo_name: GeoCat/qgis-bridge-plugin
 repo_url: https://github.com/GeoCat/qgis-bridge-plugin
-edit_uri: edit/master/docs/
+edit_uri: edit/master/docs/docs/
 
 # Copyright
 copyright: Copyright &copy; 2001 - 2026 GeoCat BV
@@ -112,10 +112,6 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
-
-# README.md is repo-facing (documents how to build these docs), not a published page
-exclude_docs: |
-  README.md
 
 validation:
   nav:
