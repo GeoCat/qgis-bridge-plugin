@@ -4,7 +4,7 @@ _GeoCat Bridge for QGIS_ is the light-weight open-source version of the propriet
 It allows QGIS users to share geospatial (meta)data to cloud-based platforms like GeoServer, GeoNetwork, and MapServer.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE) 
-[![Latest Documentation](https://img.shields.io/badge/Documentation-chocolate?logo=readthedocs&logoColor=white)](https://geocat.github.io/qgis-bridge-plugin/latest/) 
+[![Latest Documentation](https://img.shields.io/badge/Documentation-chocolate?logo=materialformkdocs&logoColor=white)](https://geocat.github.io/qgis-bridge-plugin/latest/) 
 [![Join the chat at https://gitter.im/GeoCat/Bridge](https://img.shields.io/badge/Gitter-Chat-gray?logo=gitter&labelColor=ED1965)](https://gitter.im/GeoCat/Bridge?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
 [![Minimal QGIS version](https://img.shields.io/badge/QGIS-3.22%2B-white?logo=qgis&logoColor=white&labelColor=589632)](#)
 
@@ -27,7 +27,7 @@ To find which QGIS version is compatible with Bridge, please have a look at the 
 
 The Bridge documentation is available for all releases at [GitHub Pages](https://geocat.github.io/qgis-bridge-plugin/).
 
-If you wish to build the documentation yourself or edit the source, please look for the [`docs`](/docs) folder. The documentation is written in reStructuredText (reST) and can be built using [Sphinx](https://www.sphinx-doc.org).
+If you wish to build the documentation yourself or edit the source, please look for the [`docs`](/docs) folder. The documentation is written in Markdown and built using [MkDocs](https://www.mkdocs.org) with the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. Install the dependencies with `pip install -r requirements.txt` and preview with `mkdocs serve`.
 
 A script named [`builddocs.py`](/docs/builddocs.py) allows to build the documentation for different versions of the plugin. See the comments at the top of the script to find out how to use it, or simply call `python builddocs.py` in your terminal to display the CLI help.
 

@@ -1,6 +1,23 @@
 # Building HTML documentation for GeoCat Bridge
 
+The documentation pages live in this folder as Markdown files and are built with [MkDocs](https://www.mkdocs.org)
+and the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme, configured in [`../mkdocs.yml`](../mkdocs.yml).
+
+Install the build dependencies once with:
+
+```
+pip install -r ../requirements.txt
+```
+
+While editing, preview the docs locally with live-reload:
+
+```
+mkdocs serve -f ../mkdocs.yml
+```
+
 The easiest way to build the HTML documentation for GeoCat Bridge, is by running the Python script ```builddocs.py```.
+This script wraps `mkdocs build` and also knows how to build documentation for older, tagged releases of the plugin
+(published side-by-side on GitHub Pages, e.g. `v4.5`, `v4.6`, ...).
 
 Please run ```python builddocs.py -h``` to get a description of all available parameters.
 
