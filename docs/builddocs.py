@@ -4,12 +4,16 @@ repo, for the current master HEAD (if run with '--version latest' argument or
 without arguments), all available tags (if run with the '--version all' argument),
 or the latest available tag (if the '--version stable' argument is used)
 
-The script file should be located in the documentation folder (with sphinx files
-under ./source folder)
+The script file should be located in the documentation folder (with MkDocs pages
+under this same folder, alongside the repo root ../mkdocs.yml file).
 
 You can specify the output folder in which docs are to be produced, by using the
 '--output [path]' argument. If not used, the documentation will be created under the
 ./build folder.
+
+Building docs for a tag created before the Sphinx-to-MkDocs migration will fail,
+since such a tag does not have a ../mkdocs.yml file to build from. Those older
+versions have already been published and do not need to be rebuilt.
 """
 
 import sys
@@ -33,10 +37,7 @@ finally:
 
 NAME = "GeoCat Bridge"
 DEFAULT_DIR = "../build/docs"
-THEMES_DIRNAME = "themes"
-THEMES_REPO = "https://github.com/GeoCat/geocat-themes.git"
-THEME_GEOCAT = "geocat_rtd"
-THEME_RTD = "sphinx_rtd_theme"
+MKDOCS_CONFIG_NAME = "mkdocs.yml"
 VERSION_PREFIX = "v"
 VERSION_REGEX = re.compile(rf"^{VERSION_PREFIX}(\d+)\.(\d+)\.(\d+)[-.]?(\w*)$")
 
@@ -59,17 +60,17 @@ def clear_target(folder: Path):
     shutil.rmtree(folder, ignore_errors=True)
 
 
-def build_docs(src_dir: Path, dst_dir: Path, version: str, html_theme: str = None, checkout_: bool = True) -> int:
+def build_docs(src_dir: Path, dst_dir: Path, version: str, checkout_: bool = True) -> int:
     """ Build HTML docs for the given version type in the given target folder. """
     results = []
     if VERSION_REGEX.match(version):
         # Just build the version we were told
-        results.append(build_tag(src_dir, dst_dir, version, html_theme, checkout_))
+        results.append(build_tag(src_dir, dst_dir, version, checkout_))
     else:
         # Figure out the version to build
         if version in (V_LATEST, V_ALLVER):
             # Also build latest if "all versions" was specified
-            result = build_tag(src_dir, dst_dir, V_LATEST, html_theme)
+            result = build_tag(src_dir, dst_dir, V_LATEST)
             if version == V_LATEST:
                 return result
             results.append(result)
@@ -81,10 +82,10 @@ def build_docs(src_dir: Path, dst_dir: Path, version: str, html_theme: str = Non
             latest_key = sorted(tags.keys(), reverse=True)[0]
             latest_tag = tags[latest_key]
             print(f"Latest stable tag is {latest_tag}")
-            results.append(build_tag(src_dir, dst_dir, latest_tag, html_theme))
+            results.append(build_tag(src_dir, dst_dir, latest_tag))
         elif version == V_ALLVER:
             for _, tag in sorted(tags.items(), reverse=True):
-                results.append(build_tag(src_dir, dst_dir, tag, html_theme))
+                results.append(build_tag(src_dir, dst_dir, tag))
     return 1 if any(results) else 0
 
 
@@ -160,16 +161,15 @@ def get_tags(retry: bool = True):
     return result
 
 
-def build_tag(src_root: Path, dst_root: Path, version: str, html_theme: str = None, checkout_: bool = True) -> int:
+def build_tag(src_root: Path, dst_root: Path, version: str, checkout_: bool = True) -> int:
     """
     Checks out a specific version tag on the current branch and builds the documentation.
 
-    :param src_root:    The root folder of the documentation source files.
-                        This usually is the same path as the directory that contains this builddocs.py script file.
+    :param src_root:    The documentation folder (this is the same directory that contains this
+                        builddocs.py script file). The MkDocs config file is expected at
+                        ``src_root.parent / mkdocs.yml``.
     :param dst_root:    The destination folder in which to build all documentation versions.
     :param version:     The version for which to build documentation ('latest' or a tag).
-    :param html_theme:  An optional override to apply to the Sphinx HTML theme.
-                        If omitted, the theme as configured in conf.py is used.
     :param checkout_:   If False, no checkout for the given version will take place.
                         This may be required when a specific version tag was checked out already,
                         e.g. by a GitHub Action.
@@ -186,19 +186,19 @@ def build_tag(src_root: Path, dst_root: Path, version: str, html_theme: str = No
             if exit_code:
                 print(f"Failed to check out tag '{version}'", file=sys.stderr, flush=True)
                 return exit_code
-    src_dir = src_root / "source"
+    config_file = src_root.parent / MKDOCS_CONFIG_NAME
     bld_dir = dst_root / version_dir
     print(src_root)
     print(dst_root)
+    if not config_file.exists():
+        print(f"'{config_file}' not found: this tag predates the MkDocs migration and cannot be built",
+              file=sys.stderr, flush=True)
+        return 1
     if os.path.exists(bld_dir):
         shutil.rmtree(bld_dir)
     os.makedirs(bld_dir)
-    override = ''
-    if html_theme:
-        print(f"HTML theme override '{html_theme}' will be applied")
-        override = f'-D html_theme={html_theme}'
     print(f"Building HTML documentation for {NAME} {version if version != V_LATEST else f'({V_LATEST})'}")
-    exit_code, result = execute_subprocess(f"sphinx-build -a {override} '{src_dir}' '{bld_dir}'")
+    exit_code, result = execute_subprocess(f"mkdocs build -f '{config_file}' -d '{bld_dir}'")
     printif(result)
     if exit_code:
         print("Failed to build docs", file=sys.stderr, flush=True)
@@ -212,14 +212,11 @@ def main():
     parser.add_argument('--version', help=f"Version to build: must be a tag (e.g. '{VERSION_PREFIX}1.2.3') or "
                                           f"'{V_LATEST}' (default if omitted), '{V_STABLE}' or '{V_ALLVER}')")
     parser.add_argument('--branch', help='Optional branch to check out (if not the default branch)')
-    parser.add_argument('--theme', help=f"Override the default ReadTheDocs ('{THEME_RTD}') HTML theme in conf.py.\n"
-                                        f"Choose between the '{THEME_GEOCAT}' theme or any of the Sphinx built-ins.")
     parser.set_defaults(clean=False)
 
     # Parse arguments
     args = parser.parse_args()
     version = (args.version or '').strip() or None
-    theme_override = (args.theme or '').strip() or None
 
     gh_ref = None
     checkout_version = True
@@ -256,10 +253,8 @@ def main():
         if docsrc_dir.parent != curdir:
             sys.path.insert(1, str(docsrc_dir.parent))
         print(f"Documentation source directory: {docsrc_dir}")
-        themes_dir = docsrc_dir / THEMES_DIRNAME
-        print(f"Themes directory: {themes_dir}")
 
-        # Try import something from geocatbridge (conf.py requires it)
+        # Try import something from geocatbridge (version.py macros module requires it)
         from geocatbridge.utils import meta
 
         folder = Path(args.output).resolve() if args.output else (docsrc_dir / DEFAULT_DIR).resolve()
@@ -293,24 +288,8 @@ def main():
                 else:
                     print(output)
 
-        # Clone themes from Git if not present and we are NOT using the Sphinx RTD theme in a GitHub action
-        if not (themes_dir / '.git').exists() and not (theme_override == THEME_RTD and gh_ref):
-            clear_target(themes_dir)
-            os.chdir(docsrc_dir)
-            print(f"Cloning from {THEMES_REPO} into '{THEMES_DIRNAME}' folder...")
-            exit_code, _ = execute_subprocess(f'git clone -q {THEMES_REPO} --single-branch {THEMES_DIRNAME}')
-            if exit_code:
-                print(f"Failed to clone {THEMES_REPO} into {docsrc_dir / THEMES_DIRNAME}", file=sys.stderr, flush=True)
-                sys.exit(exit_code)
-            else:
-                print(f"Successfully cloned {THEMES_DIRNAME}")
-            os.chdir(curdir)
-        else:
-            # Just create an empty themes dir so Sphinx won't complain
-            os.makedirs(themes_dir, exist_ok=True)
-
         # Build HTML docs
-        result = build_docs(docsrc_dir, folder, version, html_theme=theme_override, checkout_=checkout_version)
+        result = build_docs(docsrc_dir, folder, version, checkout_=checkout_version)
 
     except SystemExit as err:
         result = err.code

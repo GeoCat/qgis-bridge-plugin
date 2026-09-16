@@ -1,0 +1,141 @@
+# Project information
+site_name: GeoCat Bridge for QGIS
+site_description: GeoCat Bridge publishes QGIS map layers, styles and metadata to GeoServer, MapServer and GeoNetwork.
+site_dir: build/docs/latest
+site_url: !ENV [SITE_URL, 'https://geocat.github.io/qgis-bridge-plugin/latest/']
+
+# Repository
+repo_name: GeoCat/qgis-bridge-plugin
+repo_url: https://github.com/GeoCat/qgis-bridge-plugin
+edit_uri: edit/master/docs/
+
+# Copyright
+copyright: Copyright &copy; 2001 - 2026 GeoCat BV
+
+extra_css:
+  - stylesheets/extra.css
+
+strict: true
+
+# Configuration
+theme:
+  name: material
+  language: en
+  custom_dir: overrides
+  favicon: assets/gc_find.svg
+  icon:
+    repo: fontawesome/brands/github
+    logo: geocat/bridge
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - content.action.view
+    - content.action.edit
+    - content.code.copy
+    - content.tabs.link
+    - navigation.tabs
+    - navigation.tracking
+    - navigation.prune
+    - navigation.indexes
+    - toc.follow
+    - navigation.top
+    - navigation.footer
+    - announce.dismiss
+
+# Plugins - install using: pip3 install -r requirements.txt
+plugins:
+  - search
+  - macros:
+      module_name: version
+      render_by_default: true
+
+# Customizations
+extra:
+  homepage: https://www.geocat.net/bridge
+  social:
+    - icon: geocat/bridge
+      link: https://www.geocat.net/bridge
+      name: GeoCat Bridge
+    - icon: fontawesome/brands/facebook
+      link: https://www.facebook.com/geocatbv
+      name: GeoCat on Facebook
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/geocat-bv
+      name: GeoCat on LinkedIn
+
+# Extensions
+# - These are carefully chosen to work with pandoc markdown support for whole document translation
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      options:
+        custom_icons:
+          - overrides/.icons
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      check_paths: true
+      restrict_base_path: true
+      dedent_subsections: true
+      base_path:
+        - !relative $docs_dir
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - md_in_html
+  - toc:
+      permalink: true
+
+# README.md is repo-facing (documents how to build these docs), not a published page
+exclude_docs: |
+  README.md
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    absolute_links: info
+    unrecognized_links: info
+
+# Page tree
+nav:
+  - 'GeoCat Bridge': index.md
+  - 'Background': background.md
+  - 'Installation': installation.md
+  - 'Quickstart Tutorial': quickstart.md
+  - 'The Bridge Dialog': bridge_dialog.md
+  - 'Server Connections': server_configuration.md
+  - 'Publishing Data': publish.md
+  - 'Metadata Editing': metadata_editing.md
+  - 'Style Viewer Panel': styleviewer.md
+  - 'Supported Symbology': supported_symbology.md

@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies and run builddocs.py to build HTML docs using Sphinx.
+# This workflow will install Python dependencies and run builddocs.py to build HTML docs using MkDocs.
 
 name: Build HTML Docs
 
@@ -7,6 +7,7 @@ on:
     paths:
       # Trigger only when docs/ folder is updated
       - 'docs/**'
+      - 'mkdocs.yml'
     tags:
       - v[0-9]+.[0-9]+.[0-9]+**
     branches: [ master ]
@@ -22,28 +23,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: '3.x'
       - name: Install pip and dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -U sphinx
-          pip install -U sphinx-rtd-theme
           pip install -U Mako
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Make sure that the themes folder is empty so we get fresh stuff
-        run: rm -rf docs/themes/*
+          pip install -r requirements.txt
       - name: Run builddocs script
         run: |
           if [[ ! -z "${{github.event.inputs.version}}" ]]; then
-            python docs/builddocs.py --version ${{github.event.inputs.version}} --theme sphinx_rtd_theme
+            python docs/builddocs.py --version ${{github.event.inputs.version}}
           else
-            python docs/builddocs.py --theme sphinx_rtd_theme
+            python docs/builddocs.py
           fi
-          # Always apply the theme override (in case of older builds with a different theme in conf.py)
       - name: Clone gh-pages branch folder and copy HTML docs into it
         run: |
           git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git --branch gh-pages --single-branch gh-pages
