@@ -1,13 +1,14 @@
-""" Build index HTML page from directory listing
+""" Build index HTML page and versions.json from a gh-pages directory listing
 
 docs_index.py </path/to/directory>
 """
+import json
 import subprocess
 import sys
 import argparse
 from pathlib import Path
 from datetime import datetime
-from typing import Tuple
+from typing import List, Tuple
 
 from mako.template import Template
 
@@ -15,6 +16,7 @@ VERSION_PREFIX = 'v'
 VERSION_LATEST = 'latest'
 HTML_TEMPLATE = 'index_template.html'
 HTML_OUTPUT = 'index.html'
+VERSIONS_JSON_OUTPUT = 'versions.json'
 
 
 def is_version(value: str):
@@ -45,6 +47,21 @@ def sh(cmd: str) -> Tuple[int, str]:
     proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
     stdout, _ = proc.communicate()
     return proc.returncode, stdout.decode("utf-8")
+
+
+def write_versions_json(dir_path: Path, names: List[str]):
+    """ Writes a mike-formatted versions.json file for the Material for MkDocs version selector.
+
+    This does not use the `mike` CLI tool: each version folder is built independently by
+    builddocs.py, so this just hand-writes the same JSON schema that `mike` itself produces,
+    which is all the theme's version-selector JS actually depends on. The theme fetches this
+    file from one directory above the current version folder (i.e. the gh-pages root), so
+    `dir_path` here must be that same root directory that contains e.g. 'latest/' and 'v4.6/'.
+    """
+    versions_json = [{"version": name, "title": name, "aliases": []} for name in names]
+    with open(dir_path / VERSIONS_JSON_OUTPUT, 'w+') as f:
+        json.dump(versions_json, f, indent=2)
+        f.write('\n')
 
 
 def main():
@@ -80,6 +97,8 @@ def main():
         print(f"Updating {HTML_OUTPUT} file...")
         with open(dir_path / HTML_OUTPUT, 'w+') as f:
             f.write(html)
+        print(f"Updating {VERSIONS_JSON_OUTPUT} file...")
+        write_versions_json(dir_path, names)
     except Exception as err:
         print(f"Aborted script because of unhandled {type(err).__name__}: {err}", file=sys.stderr, flush=True)
         sys.exit(1)

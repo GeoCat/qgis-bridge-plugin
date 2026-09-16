@@ -115,3 +115,6 @@ venv.bak/
 .zip
 geocatbridge/libs/*/
 dependencies/*/
+
+# macos
+.DS_Store
