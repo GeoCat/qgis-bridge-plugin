@@ -7,7 +7,7 @@ geocatbridge/metadata.txt via geocatbridge.utils.meta.
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from geocatbridge.utils import meta  # noqa: E402
 

@@ -27,7 +27,7 @@ To find which QGIS version is compatible with Bridge, please have a look at the 
 
 The Bridge documentation is available for all releases at [GitHub Pages](https://geocat.github.io/qgis-bridge-plugin/).
 
-If you wish to build the documentation yourself or edit the source, please look for the [`docs`](/docs) folder. The documentation is written in Markdown and built using [MkDocs](https://www.mkdocs.org) with the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. Install the dependencies with `pip install -r requirements.txt` and preview with `mkdocs serve`.
+If you wish to build the documentation yourself or edit the source, please look for the [`docs`](/docs) folder, which is a standalone MkDocs project. The documentation is written in Markdown and built using [MkDocs](https://www.mkdocs.org) with the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. From the `docs` folder, install the dependencies with `pip install -r requirements.txt` and preview with `mkdocs serve`.
 
 A script named [`builddocs.py`](/docs/builddocs.py) allows to build the documentation for different versions of the plugin. See the comments at the top of the script to find out how to use it, or simply call `python builddocs.py` in your terminal to display the CLI help.
 

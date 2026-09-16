@@ -4,15 +4,15 @@ repo, for the current master HEAD (if run with '--version latest' argument or
 without arguments), all available tags (if run with the '--version all' argument),
 or the latest available tag (if the '--version stable' argument is used)
 
-The script file should be located in the documentation folder (with MkDocs pages
-under this same folder, alongside the repo root ../mkdocs.yml file).
+The script file should be located in the documentation folder, alongside the
+mkdocs.yml file and the docs/ subfolder that holds the MkDocs pages.
 
 You can specify the output folder in which docs are to be produced, by using the
 '--output [path]' argument. If not used, the documentation will be created under the
-./build folder.
+../build folder (i.e. the repo root's build/ folder).
 
 Building docs for a tag created before the Sphinx-to-MkDocs migration will fail,
-since such a tag does not have a ../mkdocs.yml file to build from. Those older
+since such a tag does not have a mkdocs.yml file to build from. Those older
 versions have already been published and do not need to be rebuilt.
 """
 
@@ -166,8 +166,7 @@ def build_tag(src_root: Path, dst_root: Path, version: str, checkout_: bool = Tr
     Checks out a specific version tag on the current branch and builds the documentation.
 
     :param src_root:    The documentation folder (this is the same directory that contains this
-                        builddocs.py script file). The MkDocs config file is expected at
-                        ``src_root.parent / mkdocs.yml``.
+                        builddocs.py script file, as well as the MkDocs config file).
     :param dst_root:    The destination folder in which to build all documentation versions.
     :param version:     The version for which to build documentation ('latest' or a tag).
     :param checkout_:   If False, no checkout for the given version will take place.
@@ -186,7 +185,7 @@ def build_tag(src_root: Path, dst_root: Path, version: str, checkout_: bool = Tr
             if exit_code:
                 print(f"Failed to check out tag '{version}'", file=sys.stderr, flush=True)
                 return exit_code
-    config_file = src_root.parent / MKDOCS_CONFIG_NAME
+    config_file = src_root / MKDOCS_CONFIG_NAME
     bld_dir = dst_root / version_dir
     print(src_root)
     print(dst_root)
