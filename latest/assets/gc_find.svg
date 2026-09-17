@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>gc_find</title>
+    <defs>
+        <linearGradient x1="15.9970149%" y1="49.9636364%" x2="99.9813433%" y2="49.9636364%" id="linearGradient-1">
+            <stop stop-color="#414B9A" offset="0%"></stop>
+            <stop stop-color="#005CA9" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="gc_find" stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+        <rect id="backdrop" fill="#FFFFFF" x="0" y="0" width="128" height="128" rx="28"></rect>
+        <g id="mark" transform="translate(6.1728, 53.1936)">
+            <ellipse id="Oval" fill="#005CA9" cx="96.9882938" cy="11.008" rx="9.01170618" ry="9.296"></ellipse>
+            <path d="M79.3216272,10.992 C79.3216272,6.816 80.7486099,2.992 83.1217442,0 L-8.63733142e-16,0 L-8.63733142e-16,22 L83.1372549,22 C80.7641206,18.992 79.3371378,15.168 79.3371378,10.992 L79.3216272,10.992 Z" id="Path" fill="url(#linearGradient-1)"></path>
+        </g>
+    </g>
+</svg>
